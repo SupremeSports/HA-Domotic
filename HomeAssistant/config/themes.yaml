@@ -58,6 +58,7 @@ Light - Navy Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Blue:
   ### Main Interface Colors ###
@@ -102,6 +103,7 @@ Dark - Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Blue:
   ### Main Interface Colors ###
@@ -146,6 +148,7 @@ Light - Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Orange:
   ### Main Interface Colors ###
@@ -190,6 +193,7 @@ Dark - Orange:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Orange:
   ### Main Interface Colors ###
@@ -234,6 +238,7 @@ Light - Orange:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Yellow:
   ### Main Interface Colors ###
@@ -278,6 +283,7 @@ Dark - Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Yellow:
   ### Main Interface Colors ###
@@ -322,6 +328,7 @@ Light - Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Navy Blue & Yellow:
   ### Main Interface Colors ###
@@ -366,6 +373,7 @@ Navy Blue & Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Green:
   ### Main Interface Colors ###
@@ -410,6 +418,7 @@ Dark - Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Green:
   ### Main Interface Colors ###
@@ -454,6 +463,7 @@ Light - Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Red:
   ### Main Interface Colors ###
@@ -498,6 +508,7 @@ Dark - Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Gray & Green:
   ### Main Interface Colors ###
@@ -543,6 +554,7 @@ Gray & Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Gray:
   ### Main Interface Colors ###
@@ -587,6 +599,7 @@ Dark - Gray:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Light Red:
   ### Main Interface Colors ###
@@ -631,6 +644,7 @@ Dark - Light Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Light Red:
   ### Main Interface Colors ###
@@ -675,6 +689,7 @@ Light - Light Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Blue/Purple:
   ### Main Interface Colors ###
@@ -719,6 +734,7 @@ Dark - Blue/Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Cyan:
   ### Main Interface Colors ###
@@ -763,6 +779,7 @@ Dark - Cyan:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Cyan:
   ### Main Interface Colors ###
@@ -807,6 +824,7 @@ Light - Cyan:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Purple:
   ### Main Interface Colors ###
@@ -851,6 +869,7 @@ Dark - Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
+  data-table-background-color: var(--sidebar-background-color)
   
 Light - Purple:
   ### Main Interface Colors ###
@@ -895,4 +914,4 @@ Light - Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  
+  data-table-background-color: var(--sidebar-background-color)
