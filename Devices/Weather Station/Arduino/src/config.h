@@ -27,6 +27,11 @@ const char* mqtt_sensorJson     = "Outside/WStation/Json";         //MQTT JSON s
 const char* json_uv             = "uv";
 const char* json_mq135          = "aq";
 
+const char* json_temp           = "temp";
+const char* json_hum            = "hum";
+const char* json_vin            = "Vin";
+const char* json_vcc            = "Vcc";
+
 //Others
 const char* json_parseFailed    = "parseObject() failed";
 const char* json_resetReq       = "Reset Requested...";
