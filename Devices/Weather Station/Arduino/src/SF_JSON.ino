@@ -97,17 +97,17 @@ void sendSensors()
 
   root[json_state] = mqtt_cmdOn;
 
-  JsonObject& dht = root.createNestedObject("dht");
   dtostrf(DHTTempIn, 5, 1, result);     // Leave room for too large numbers!
-  dht["t"] = result;
-  dtostrf(DHTHumIn, 5, 1, result);      // Leave room for too large numbers!
-  dht["h"] = result;
+  root[json_temp] = result;
 
-  JsonObject& volt = root.createNestedObject("volt");
+  dtostrf(DHTHumIn, 5, 1, result);     // Leave room for too large numbers!
+  root[json_hum] = result;
+  
   dtostrf(inputVoltOut, 4, 1, result);  // Leave room for too large numbers!
-  volt["i"] = result;
+  root[json_vin] = result;
+
   dtostrf(dcVoltOut, 4, 1, result);     // Leave room for too large numbers!
-  volt["o"] = result;
+  root[json_vcc] = result;
 
   char buffer[BUFFER_ARRAY_SIZE];
   root.printTo(buffer, root.measureLength() + 1);
