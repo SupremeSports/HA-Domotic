@@ -1,0 +1,10 @@
+##########################################
+# CUSTOMIZATIONS - SENSORS               #
+##########################################
+
+    automation.doorchime_tf_trigger:
+      friendly_name: Automation
+      
+    # automation.doorchime_bf_trigger:
+      # friendly_name: Automation
+      

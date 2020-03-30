@@ -1,0 +1,9 @@
+####################################################
+# SHELL COMMANDS                                   #
+####################################################
+
+  backup_snapshots: cp -r /usr/share/hassio/backup/*.tar /usr/share/hassio/share/ThumbDrive/Snapshots
+  backup_configs: cp -r /usr/share/hassio/homeassistant/ "/usr/share/hassio/share/ThumbDrive/Configs/$(date +"%Y-%m-%d")"
+
+  delete_oldbackups: find /usr/share/hassio/share/ThumbDrive/Snapshots/*.tar -type f -ctime +10 -exec rm -rf {} \;
+  delete_oldconfigs: find /usr/share/hassio/share/ThumbDrive/Configs/* -type d -ctime +10 -exec rm -rf {} \;

@@ -1,0 +1,87 @@
+sensor:
+  - platform: mqtt
+    name: "Master Bed Raw"
+    icon: mdi:scale
+    state_topic: "Home/Master/Bed/Stts"
+    availability_topic: "Home/Master/Bed/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.scale | round(1) }}"
+    json_attributes_topic: "Home/Master/Bed/Json"
+    #unit_of_measurement: 'lb'
+    
+  - platform: template
+    sensors:
+      master_bed_presence:
+        friendly_name: Master Bed Presence
+        entity_id:
+          - sensor.master_bed_raw
+          - switch.master_bed_tare
+        value_template: >
+          {% set weight = states('sensor.master_bed_raw') | float %}
+          {% set jean = is_state('person.jean_gauthier', 'home') %}
+          {% set cindy = is_state('person.cindy_fortin', 'home') %}
+          
+          {% if weight < 30 %}
+            Empty
+          {% elif weight < 200 %}
+            Mi-Loup
+          {% elif weight < 900 and cindy %}
+            Cindy
+          {% elif weight < 1200 and jean %}
+            Jean
+          {% elif cindy and jean %}
+            Cindy & Jean
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: "{{ not is_state('sensor.master_bed_raw', 'unavailable') }}"
+        attribute_templates:
+          raw_value: "{{ states('sensor.master_bed_raw') }}"
+          calib: "{{ state_attr('sensor.master_bed_raw', 'calib') }}"
+          wifi_rssi: "{{ state_attr('sensor.master_bed_raw', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('sensor.master_bed_raw', 'wifi_percent') }}"
+
+switch:
+  - platform: mqtt
+    name: "Master Bed Tare"
+    icon: mdi:scale
+    state_topic: "Home/Master/Bed/Stts"
+    command_topic: "Home/Master/Bed/Cmd"
+    availability_topic: "Home/Master/Bed/LWT"
+    value_template: "{{ value_json.tare }}"
+    payload_on: '{"tare":"ON"}'
+    payload_off: '{"tare":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+  
+customize:
+  sensor.master_bed_presence:
+    friendly_name: "Master Bed Presence"
+    templates:
+      icon: >
+        return 'mdi:bed-empty';
+      icon_color: >
+        if (state === 'Empty') return 'var(--state-icon-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-active-color)';
+
+views:
+  - title: Parameters
+    icon: mdi:wrench
+    # Unique path for direct access /lovelace/${path}
+    path: params
+    visible: true
+    cards:
+      - type: entities
+        title: Beds
+        show_header_toggle: false
+        entities:
+          - type: custom:fold-entity-row
+            head: sensor.master_bed_presence
+            entities:
+              - sensor.master_bed_raw
+              - switch.master_bed_tare

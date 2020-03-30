@@ -1,0 +1,63 @@
+####################################################
+# INPUT NUMBER                                     #
+####################################################
+
+  pool_drain_percent:
+    name: Pool Drain Percent (Drain / Skim)
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+  pool_heatpump_percent:
+    name: Pool Heat Pump Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+    
+  pool_clock_scroll_speed:
+    name: Pool Text Scroll Speed
+    mode: slider
+    initial: 80
+    min: 0
+    max: 100
+    step: 5
+    
+  milight_id_sync:
+    name: Milight ID to Sync (1-255)
+    icon: mdi:sync
+    mode: box
+    initial: 0
+    min: 0
+    max: 255
+    step: 1
+    
+  doorchime_tf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    
+  doorchime_bf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    
+  doorchime_gf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    

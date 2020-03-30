@@ -1,0 +1,129 @@
+binary_sensor:
+  - platform: mqtt
+    name: House FD Bell
+    state_topic: "Home/Door/Front/Stts"
+    availability_topic: "Home/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.bell }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+input_number:
+  doorchime_tf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    
+input_select:
+  doorchime_tf_sound:
+    name: Sound Selection
+    icon: mdi:music-note
+    options:
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+    
+automation:
+  - alias: Doorchime TF Trigger
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_bell
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: template
+        value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.doorchime_tf_trigger.attributes.last_triggered) > 2 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Chime/Top/Cmd"
+        #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume
+        payload: "{state:ON, sound:{{ state_attr('input_select.doorchime_tf_sound','options').index(states('input_select.doorchime_tf_sound'))|int }}, volume: {{ states.input_number.doorchime_tf_volume.state|int }} }"
+
+views:
+- title: Main
+  icon: mdi:home-outline
+  # Unique path for direct access /lovelace/${path}
+  path: main
+  visible: true
+  cards:
+    - type: entities
+      title: Doors & Locks
+      show_header_toggle: false
+      entities:
+        - input_text.doorlock_passcode
+        - type: "custom:button-entity-row"
+          buttons:
+            - entity: input_boolean.lock_all
+              name: LOCK ALL DOORS
+              state_icons:
+                "off": "mdi:lock-open"
+                "on": "mdi:lock"
+              state_styles:
+                "off":
+                  color: "var(--state-icon-color)"
+                  font-weight: bold
+                "on":
+                  color: "var(--state-icon-active-color)"
+                  font-weight: bold
+        - type: custom:fold-entity-row
+          head: sensor.house_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.house_fd_opened
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: binary_sensor.house_fd_bell
+                  state_icons:
+                    "on": "mdi:bell-ring"
+                    "off": "mdi:bell"
+                - entity: input_boolean.house_fd_lock
+                  state_icons:
+                    "on": "mdi:lock"
+                    "off": "mdi:lock"
+                - entity: input_boolean.house_fd_unlock
+                  state_icons:
+                    "on": "mdi:lock-open"
+                    "off": "mdi:lock-open"
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Hallway Doorbell Chime
+              entities:
+                - input_select.doorchime_tf_sound
+                - input_number.doorchime_tf_volume
+                - automation.doorchime_tf_trigger

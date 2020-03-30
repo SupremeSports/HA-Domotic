@@ -1,0 +1,70 @@
+####################################################
+# SENSORS - POOL                                   #
+####################################################
+  
+  #Modbus temp sensor
+  - platform: modbus
+    scan_interval: 5
+    registers:
+    - name: "Pool Temp Sensor"
+      hub: !secret modbus1_name
+      unit_of_measurement: '° F'
+      register: 0
+      register_type: input
+      data_type: uint
+      scale: 1
+      offset: 0
+      precision: 0
+      
+  - platform: template
+    sensors:
+      pool_temperature:
+          friendly_name: "Pool Temperature"
+          value_template: >
+            {% set RT = states('sensor.pool_temp_sensor')|int %}
+            {% set TF = ((0.1715*RT)-8.6401)+3.0|float(3) %}
+            {{ TF | round(1) }}
+          unit_of_measurement: '° F'
+          
+  - platform: modbus
+    scan_interval: 5
+    registers:
+    - name: "Pool Pressure Sensor"
+      hub: !secret modbus1_name
+      unit_of_measurement: 'psi'
+      register: 1
+      register_type: input
+      data_type: uint
+      scale: 1
+      offset: 0
+      precision: 0
+      
+  #sensor values range [0.5-4.5]V on a 10-bit ADC [0-1023]
+  - platform: template
+    sensors:
+      pool_pressure:
+          friendly_name: "Pool Pressure"
+          value_template: >
+            {% set RP = states('sensor.pool_pressure_sensor')|int %}
+            {% set min = 0.5|float %} 
+            {% set span = 4.0|float %}
+            {% set presmax = 60.0|float %}
+            
+            {% set ax = (presmax / span)|float(3) %}
+            {% set b = (ax * min * -1.0)|float(3) %}
+            {% set ax = ((ax * 5.0) / 1023.0)|float(3) %}
+            
+            {% set PO = ((ax*RP)+b)|float(3) %}
+            
+            {{ PO | round(1) }}
+          unit_of_measurement: 'psi'
+          
+  - platform: history_stats
+    name: Pool Filler Timer
+    entity_id: switch.pool_filler_valve
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+    

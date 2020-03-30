@@ -1,0 +1,48 @@
+####################################################
+# CLIMATE                                          #
+####################################################
+
+  - platform: mqtt
+    name: Living Room HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "cool"
+      - "dry"
+      - "fan_only"
+      - "heat"
+    swing_modes:
+      - "On"
+      - "Off"
+    fan_modes:
+      - "Auto"
+      - "High"
+      - "Medium"
+      - "Low"
+      - "Quiet"
+    min_temp: 16
+    max_temp: 30
+    temp_step: 1
+    power_command_topic: "Home/Living/Hvac/Power/Cmd"
+    mode_command_topic: "Home/Living/Hvac/Mode/Cmd"
+    temperature_command_topic: "Home/Living/Hvac/Temp/Cmd"
+    fan_mode_command_topic: "Home/Living/Hvac/Fan/Cmd"
+    swing_mode_command_topic: "Home/Living/Hvac/Swing/Cmd"
+    mode_state_topic: "Home/Living/Hvac/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/Living/Hvac/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    fan_mode_state_topic: "Home/Living/Hvac/Stts"
+    fan_mode_state_template: "{{ value_json.fan }}"
+    swing_mode_state_topic: "Home/Living/Hvac/Stts"
+    swing_mode_state_template: "{{ value_json.swing }}"
+    current_temperature_topic: "Home/Living/Hvac/Json"
+    current_temperature_template: "{{ value_json.air_temp }}"
+    availability_topic: "Home/Living/Hvac/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    precision: 1.0
+    send_if_off: true
+    retain: false
+    qos: 0
+    json_attributes_topic: "Home/Living/Hvac/Json"

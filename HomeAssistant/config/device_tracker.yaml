@@ -1,0 +1,25 @@
+####################################################
+# DEVICES TRACKER                                  #
+####################################################
+
+#   - platform: life360
+#     username: gauthier_j100@hotmail.com
+#     password: Eclipse1!
+#     interval_seconds: 10
+#     filename: life360.conf
+#     show_as_state: places, driving, moving
+#     max_update_wait:
+#       minutes: 30
+#     add_zones: true
+#     time_as: device_or_local
+#     zone_interval:
+#       minutes: 3
+
+  - platform: nmap_tracker
+    hosts: 192.168.1.0/24
+   
+  - platform: ping
+    count: 2
+    hosts:
+      jgau_pc_presence: !secret ip_jgau_pc
+      cfor_pc_presence: !secret ip_cfor_pc

@@ -1,0 +1,259 @@
+##########################################
+# CUSTOMIZATIONS - SENSORS               #
+##########################################
+
+# STANDARD COLORS
+#=========================================
+# Icon Online:  var(--state-icon-color) --> #007AFF
+# Icon Offline: var(--state-icon-unavailable-color) --> #4F5F78
+# Icon Active:  var(--state-icon-active-color) --> #FBCD41
+# Red:          FF0000
+# Yellow:       FFFF00
+# Orange:       FFA500
+# Lt Purple:    A500FF
+# Dk Purple:    5C005C
+# Lt Green:     00FF00
+# Gold:         A3852A
+
+  # sensor.postal_battery:
+    # custom_ui_state_card: state-card-custom-ui
+    # friendly_name: "Postal Battery"
+    # templates:
+      # icon_color: >
+        # if (state <= 0) return 'var(--state-icon-unavailable-color)';
+        # if (state < 30)
+        # {
+          # if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          # return 'var(--state-icon-unavailable-color)';
+        # }
+        # if (state < 50) return '#FFA500';
+        # if (state <= 100) return 'var(--state-icon-color)';
+        # return 'var(--state-icon-unavailable-color)';
+  sensor.postal_status:
+    custom_ui_state_card: state-card-custom-ui
+    friendly_name: "Postal Status"
+    templates:
+      icon: >
+        if (state === 'New Mail') return 'mdi:mailbox-up';
+        return 'mdi:mailbox';
+      icon_color: >
+        if (state === 'Unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state === 'No Mail') return 'var(--state-icon-color)';
+        if (state === 'New Mail') return 'var(--state-icon-active-color)';
+        
+  sensor.water_valve_status:
+    custom_ui_state_card: state-card-custom-ui
+    friendly_name: "Water Valve State"
+    templates:
+      icon_color: >
+        if (state === 'Unknown') return 'var(--state-icon-active-color)';
+        if (state === 'Opened') return 'var(--state-icon-active-color)';
+        return 'var(--state-icon-color)';
+    
+  sensor.ted5000_mtu1_power:
+    friendly_name: "Main Power"
+    icon: mdi:transmission-tower
+    templates:
+      icon_color: >
+        if (state >= 4500)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state >= 3500) return 'red';
+        if (state >= 2500) return '#FFA500';
+        if (state >= 1000) return '#FFFF00';
+        if (state > 0) return '#00FF00';
+        return 'var(--state-icon-unavailable-color)';
+  sensor.ted5000_mtu1_voltage:
+    friendly_name: "Main Voltage"
+    icon: mdi:flash
+    templates:
+      icon_color: >  
+        if (state > 250 || state < 230)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state > 245 || state < 235) return 'red';
+        if (state > 0) return '#00FF00'; 
+        return 'var(--state-icon-unavailable-color)';
+  
+  sensor.ted5000_mtu2_power:
+    friendly_name: "Garage Power"
+    icon: mdi:transmission-tower
+    templates:
+      icon_color: >
+        if (state >= 1250)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state >= 1000) return 'red';
+        if (state >= 750) return '#FFA500';
+        if (state >= 500) return '#FFFF00';
+        if (state > 0) return '#00FF00';
+        return 'var(--state-icon-unavailable-color)';
+  sensor.ted5000_mtu2_voltage:
+    friendly_name: "Garage Voltage"
+    icon: mdi:flash
+    templates:
+      icon_color: >  
+        if (state > 250 || state < 230)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state > 245 || state < 235) return 'red';
+        if (state > 0) return '#00FF00'; 
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.ted5000_mtu3_power:
+    friendly_name: "Pool Power"
+    icon: mdi:transmission-tower
+    templates:
+      icon_color: >
+        if (state >= 4500)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state >= 3500) return 'red';
+        if (state >= 2500) return '#FFA500';
+        if (state >= 1000) return '#FFFF00';
+        if (state > 0) return '#00FF00';
+        return 'var(--state-icon-unavailable-color)';
+  sensor.ted5000_mtu3_voltage:
+    friendly_name: "Pool Voltage"
+    icon: mdi:flash
+    templates:
+      icon_color: >  
+        if (state > 250 || state < 230)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state > 245 || state < 235) return 'red';
+        if (state > 0) return '#00FF00'; 
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.outdoor_temperature:
+    custom_ui_state_card: state-card-custom-ui
+    icon: mdi:thermometer 
+    templates:
+      icon_color: >
+        if (state >= 45) return 'red';
+        if (state >= 40) return '#FFA500';
+        if (state >= 30) return '#FFFF00';
+        if (state >= 20) return '#00FF00';
+        if (state >= 10) return '#00FF80';
+        if (state >= 0) return '#00FFC7';
+        if (state >= -10) return '#00FFFF';
+        if (state >= -20) return '#00A5FF';
+        if (state >= -30) return '#0010ff';
+        if (state >= -40) return '#A500FF';
+        if (state >= -80) return '#5C005C';
+        return 'var(--state-icon-unavailable-color)';
+
+  sensor.outdoor_humidity:
+    custom_ui_state_card: state-card-custom-ui
+    icon: mdi:water-percent
+    templates:
+      icon_color: >
+        if (state >= 80) return 'red';
+        if (state >= 70) return '#FFA500';
+        if (state >= 60) return '#FFFF00';
+        if (state >= 20) return '#00FF00';
+        if (state >= 0) return '#00FFC7';
+        return 'var(--state-icon-unavailable-color)';
+
+  sensor.outdoor_rain_sensor:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon_color: >
+        if (state === 'Not Raining') return 'var(--state-icon-color)';
+        if (state === 'Raining') return '#FFFF00';
+        if (state === 'Pouring') return '#FFA500';
+        return 'var(--state-icon-unavailable-color)';
+
+  # sensor.controlroom_heartbeat:
+    # icon: mdi:heart-pulse
+  # sensor.controlroom_box_humidity:
+    # icon: mdi:water-percent
+
+  sensor.collect_trash_week:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
+        if (attributes.tomorrow === 'on') return 'var(--state-icon-active-color)';
+        return '#046E00';
+
+  sensor.collect_recycle_week:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
+        if (attributes.tomorrow === 'on') return 'var(--state-icon-active-color)';
+        return '#007AFF';
+
+  sensor.flashing_test:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon_color: >
+        if (entities['sensor.flashing_1s'].state === 'on') return 'var(--state-icon-active-color)';
+        return 'var(--state-icon-color)';
+        
+  sensor.party_18_ans_cody:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon_color: >
+        if (entities['sensor.dates'].attributes['day'] === '11' ) 
+        {
+          if (entities['sensor.dates'].attributes['month'] === '01') 
+          {
+            if (entities['sensor.dates'].attributes['year'] === '2037' ) 
+            {
+              if (entities['sensor.flashing_1s'].state === 'off') return 'var(--state-icon-active-color)';
+              return 'var(--state-icon-unavailable-color)';
+            }
+            return 'var(--state-icon-active-color)';
+          }
+        }
+        return 'var(--state-icon-color)';
+        
+  sensor.stepper_wall_clock:
+    templates:
+      icon_color: >
+        if (state === 'Ok') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+        
+  sensor.nixie_clock:
+    friendly_name: "Nixie Clock"
+    templates:
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+
+  sensor.master_bed_presence:
+    friendly_name: "Master Bed Presence"
+    templates:
+      icon: >
+        return 'mdi:bed-empty';
+      icon_color: >
+        if (state === 'Empty') return 'var(--state-icon-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-active-color)';
+        
+  sensor.water_heater_status:
+    templates:
+      icon_color: >
+        if (state === 'Ready') return 'var(--state-icon-color)';
+        if (state === 'Off') return 'var(--state-icon-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-active-color)';
+        

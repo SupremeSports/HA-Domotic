@@ -1,0 +1,72 @@
+####################################################
+# LOCKS                                            #
+####################################################
+
+  - platform: mqtt
+    name: House FD Lock
+    state_topic: "Home/Door/Front/Stts"
+    command_topic: "Home/Door/Front/Cmd"
+    availability_topic: "Home/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Door/Front/Json"
+    
+  - platform: mqtt
+    name: House SD Lock
+    state_topic: "Home/Door/Side/Stts"
+    command_topic: "Home/Door/Side/Cmd"
+    availability_topic: "Home/Door/Side/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Door/Side/Json"
+    
+  - platform: mqtt
+    name: House BD Lock
+    state_topic: "Home/Door/Back/Stts"
+    command_topic: "Home/Door/Back/Cmd"
+    availability_topic: "Home/Door/Back/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Door/Back/Lock/Json"
+
+  - platform: mqtt
+    name: Garage FD Lock
+    state_topic: "Garage/Door/Front/Stts"
+    command_topic: "Garage/Door/Front/Cmd"
+    availability_topic: "Garage/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Garage/Door/Front/Json"
+    

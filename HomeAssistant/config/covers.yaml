@@ -1,0 +1,53 @@
+####################################################
+# COVERS                                           #
+####################################################
+
+  - platform: mqtt
+    name: "Garage CD Opener"
+    command_topic: "Garage/Door/Car/Opener/Cmd"
+    state_topic: "Garage/Door/Car/Opener/Stts"
+    availability_topic: "Garage/Door/Car/Opener/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    retain: false
+    payload_open: "open"
+    payload_close: "close"
+    payload_stop: "stop"
+    state_open: "opened"
+    state_closed: "closed"
+    optimistic: false
+    json_attributes_topic: "Garage/Door/Car/Opener/Json"
+
+#RGBW Milight Speed Up/Dn
+  - platform: template
+    covers:
+      master_bedroom_rgbw:
+        friendly_name: "Master Bedroom RGBW Speed"
+        entity_id: cover.master_bedroom_rgbw
+        position_template: "{{ 50 }}"
+        open_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/1"
+            command: "up"
+        close_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/1"
+            command: "down"
+            
+      under_bar_rgbw:
+        friendly_name: "Under Bar RGBW Speed"
+        entity_id: cover.under_bar_rgbw
+        position_template: "{{ 50 }}"
+        open_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/2"
+            command: "up"
+        close_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/2"
+            command: "down"

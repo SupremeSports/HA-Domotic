@@ -1,0 +1,375 @@
+// ----------------------------------------------------------------------------------------------------
+// -------------------------------------------- INIT JSON ---------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//NONE FOR THIS PROJECT
+
+// ----------------------------------------------------------------------------------------------------
+// ---------------------------------------- PROCESS NIXIE JSON ----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+bool processCommandJson(char* message)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success())
+  {
+    Sprintln(json_parseFailed);
+    return false;
+  }
+
+  if (root.containsKey(json_reset))
+  {
+    mqttClient.publish(mqtt_clockStts, "Reset Requested...", false);
+    
+    if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
+      return true;
+  
+    mqttClient.publish(mqtt_clockStts, "Rebooting...", false);
+      
+    Sprint("Reset Requested...");
+    local_delay(500);
+    Sprintln(" rebooting...");
+    ESP.restart();
+  }
+
+  if (root.containsKey(json_state))
+  {
+    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
+    {
+      if (configStateOn)
+        return false;
+      configStateOn = true;
+    }
+    else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
+    {
+      if (!configStateOn)
+        return false;
+      configStateOn = false;
+    }
+
+    setOnOffStates();
+
+    sendDataToI2C(I2C_SET_OPTION_BLANK_MODE, configBlankMode);
+    local_delay(10);
+    sendDataToI2C(I2C_SET_OPTION_DAY_BLANKING, configDayBlanking);
+    local_delay(10);
+  }
+  else if (root.containsKey(json_hourMode))
+    sendDataToI2C(I2C_SET_OPTION_12_24, (strcmp(root[json_hourMode], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_blankLead))
+    sendDataToI2C(I2C_SET_OPTION_BLANK_LEAD, (strcmp(root[json_blankLead], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_scrollback))
+    sendDataToI2C(I2C_SET_OPTION_SCROLLBACK, (strcmp(root[json_scrollback], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_suppressACP))
+    sendDataToI2C(I2C_SET_OPTION_SUPPRESS_ACP, (strcmp(root[json_suppressACP], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_useFade))
+    sendDataToI2C(I2C_SET_OPTION_FADE, (strcmp(root[json_useFade], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_useLDR))
+    sendDataToI2C(I2C_SET_OPTION_USE_LDR, (strcmp(root[json_useLDR], mqtt_cmdOn) == 0) ? 0 : 1);
+  else if (root.containsKey(json_slotsMode))
+    sendDataToI2C(I2C_SET_OPTION_SLOTS_MODE, (strcmp(root[json_slotsMode], mqtt_cmdOn) == 0) ? 1 : 0); //Reversed
+    
+  //Integers
+  else
+  {
+    uint16_t intValue = 0;
+    uint16_t intCmd   = 0;
+    if (root.containsKey(json_dateFormat))
+    {
+      intValue = atoi(root[json_dateFormat]);
+      if (intValue < DATE_FORMAT_MIN and intValue > DATE_FORMAT_MAX)
+        intValue = DATE_FORMAT_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_DATE_FORMAT;
+    }
+    else if (root.containsKey(json_dayBlanking))
+    {
+      intValue = atoi(root[json_dayBlanking]);
+      if (intValue < DAY_BLANKING_MIN and intValue > DAY_BLANKING_MAX)
+        intValue = DAY_BLANKING_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_DAY_BLANKING;
+    }
+    else if (root.containsKey(json_blankFrom))
+    {
+      intValue = atoi(root[json_blankFrom]);
+      if (intValue < BLANK_FROM_MIN and intValue > BLANK_FROM_MAX)
+        intValue = BLANK_FROM_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_BLANK_START;
+    }
+    else if (root.containsKey(json_blankTo))
+    {
+      intValue = atoi(root[json_blankTo]);
+      if (intValue < BLANK_TO_MIN and intValue > BLANK_TO_MAX)
+        intValue = BLANK_TO_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_BLANK_END;
+    }
+    else if (root.containsKey(json_fadeSteps))
+    {
+      intValue = atoi(root[json_fadeSteps]);
+      if (intValue < FADE_STEPS_MIN and intValue > FADE_STEPS_MAX)
+        intValue = FADE_STEPS_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_FADE_STEPS;
+    }
+    else if (root.containsKey(json_scrollSteps))
+    {
+      intValue = atoi(root[json_scrollSteps]);
+      if (intValue < SCROLL_STEPS_MIN and intValue > SCROLL_STEPS_MAX)
+        intValue = SCROLL_STEPS_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_SCROLL_STEPS;
+    }
+    else if (root.containsKey(json_blankMode))
+    {
+      intValue = atoi(root[json_blankMode]);
+      if (intValue < BLANK_MODE_MIN and intValue > BLANK_MODE_MAX)
+        intValue = BLANK_MODE_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_BLANK_MODE;
+    }
+    else if (root.containsKey(json_minDim))
+    {
+      intValue = atoi(root[json_minDim]);
+      if (intValue < MIN_DIM_MIN and intValue > MIN_DIM_MAX)
+        intValue = MIN_DIM_DEFAULT;
+
+      intCmd = I2C_SET_OPTION_MIN_DIM;
+    }   
+    else
+    {
+      Sprint("Invalid Command!");
+      return false;
+    }
+
+    sendDataToI2C(intCmd, intValue);
+  }
+
+  local_delay(10);
+  return true;
+}
+
+void setOnOffStates()
+{
+  if (!configStateOn && configBacklightOn)
+    configBlankMode = 0;      //Blank tubes only
+  else if (configStateOn && !configBacklightOn)
+    configBlankMode = 1;      //Blank LEDs only
+  else
+    configBlankMode = 2;      //Blank ALL
+
+  if (configStateOn && configBacklightOn)
+    configDayBlanking = 0;    //Don't blank
+  else
+    configDayBlanking = 3;    //Always blank
+}
+
+void getOnOffStates()
+{
+  if (configDayBlanking == 0) //Don't blank
+  {
+    configBacklightOn = true;
+    configStateOn = true;
+  }
+  else if (configDayBlanking == 3) //Always blank
+  {
+    configBacklightOn = false;
+    configStateOn = false;
+    
+    if (configBlankMode == 0) //Blank tubes only
+      configBacklightOn = true;
+    if (configBlankMode == 1) //Blank LEDs only
+      configStateOn = true;
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ----------------------------------------- PROCESS LED JSON -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+bool processLightColorsJson(char* message)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success())
+  {
+    Sprintln(json_parseFailed);
+    return false;
+  }
+
+  if (root.containsKey(json_state))
+  {
+    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
+      configBacklightOn = true;
+    else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
+      configBacklightOn = false;
+
+    setOnOffStates();
+
+    sendDataToI2C(I2C_SET_OPTION_BLANK_MODE, configBlankMode);
+    local_delay(10);
+    sendDataToI2C(I2C_SET_OPTION_DAY_BLANKING, configDayBlanking);
+    local_delay(10);
+
+    Sprint("State: ");
+    Sprintln(configBacklightOn ? mqtt_cmdOn : mqtt_cmdOff);
+  }
+
+  if (root.containsKey(json_effect))
+  {
+    for (int i = BACKLIGHT_MIN; i <= BACKLIGHT_MAX; i++)
+    {
+      if (strcmp(root[json_effect], effects[i]) == 0)
+      {
+        configBacklightMode = i;
+        sendDataToI2C(I2C_SET_OPTION_BACKLIGHT_MODE, configBacklightMode);
+        local_delay(10);
+        break;
+      }
+    }
+  }
+  
+  if (root.containsKey(json_color))
+  {
+    byte r = root[json_color]["r"];
+    byte g = root[json_color]["g"];
+    byte b = root[json_color]["b"];
+    
+    configRedCnl = constrain(map(r, 0, 255, 0, 15), 0, 15);
+    configGreenCnl = constrain(map(g, 0, 255, 0, 15), 0, 15);
+    configBlueCnl = constrain(map(b, 0, 255, 0, 15), 0, 15);
+
+    sendDataToI2C(I2C_SET_OPTION_RED_CHANNEL, configRedCnl);
+    local_delay(10);
+    sendDataToI2C(I2C_SET_OPTION_GREEN_CHANNEL, configGreenCnl);
+    local_delay(10);
+    sendDataToI2C(I2C_SET_OPTION_BLUE_CHANNEL, configBlueCnl);
+    local_delay(10);
+  }
+
+  if (root.containsKey(json_speed))
+  {
+    configCycleSpeed = constrain(root[json_speed], 4, 64);
+ 
+    sendDataToI2C(I2C_SET_OPTION_CYCLE_SPEED, configCycleSpeed);
+    local_delay(10);
+  }
+  
+  return true;
+}
+
+void sendLightColorsState()
+{
+  if (!getClockOptionsFromI2C())
+    return;
+
+  byte r = 0;
+  byte g = 0;
+  byte b = 0;
+
+  //Force color to fit with HA bulb color
+  if (configBacklightMode == 2 || configBacklightMode == 5)
+  {
+    r = 251;
+    g = 205;
+    b = 65;
+  }
+  else
+  {
+    r = constrain(map(configRedCnl, 0, 15, 0, 255), 0, 255);
+    g = constrain(map(configGreenCnl, 0, 15, 0, 255), 0, 255);
+    b = constrain(map(configBlueCnl, 0, 15, 0, 255), 0, 255);
+  }
+  
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  root[json_state] = configBacklightOn ? mqtt_cmdOn : mqtt_cmdOff;
+
+  JsonObject& color = root.createNestedObject(json_color);
+  color["r"] = r;
+  color["g"] = g;
+  color["b"] = b;
+
+  root[json_effect] = effects[configBacklightMode];
+
+  root[json_speed] = configCycleSpeed;
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  local_delay(10);
+  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
+  mqttClient.publish(mqtt_ledStts, buffer, false);
+  local_delay(10);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ---------------------------------------- SEND JSON SENSORS -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendNixieStates()
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  //State
+  root[json_state] = configStateOn ? mqtt_cmdOn : mqtt_cmdOff;
+  //Booleans
+  root[json_hourMode] = configHourMode==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_blankLead] = configBlankLead==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_scrollback] = configScrollback==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  local_delay(10);
+  root[json_suppressACP] = configSuppressACP==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_useFade] = configUseFade==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_useLDR] = configUseLDR==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_slotsMode] = configSlotsMode==1 ? mqtt_cmdOn : mqtt_cmdOff;
+  local_delay(10);
+  
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  local_delay(10);
+  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
+  mqttClient.publish(mqtt_clockStts, buffer, false);
+  local_delay(10);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ---------------------------------------- SEND JSON SENSORS -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendSensors()
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  //State
+  root[json_state] = configStateOn ? mqtt_cmdOn : mqtt_cmdOff;
+
+  uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
+  char result[chrLngt]; 
+  dtostrf(caseTemp, 6, 2, result); // Leave room for too large numbers!
+  root[json_casetemp] = result;
+
+  String str = String(rssi);
+  str.toCharArray(result,chrLngt);
+  root[json_rssi] = result;
+
+  str = String(rssiPercent);
+  str.toCharArray(result,chrLngt);
+  root[json_rssiPercent] = result;
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  Sprintln(buffer);
+
+  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
+  mqttClient.publish(mqtt_clockJson, buffer, false);
+}

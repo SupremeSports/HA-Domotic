@@ -1,0 +1,129 @@
+###################################################
+# AUTOMATIONS - NOTIFICATIONS                     #
+###################################################
+
+#   - alias: Publish Florida Days
+#     trigger:
+#       - platform: time
+#         at: '09:00:00'
+#     action:
+#       - service: notify.ios_notify_parents
+#         data:
+#           title: "Voyage en Floride :D"
+#           message: "Décollage dans: {{ states.sensor.voyage_floride_counter.attributes.days }} {% if states.sensor.voyage_floride_counter.attributes.days > 1 %}jours{% else %}jour{% endif %}!"
+#       - service: notify.ios_notify_parents
+#         data:
+#           message: clear_badge
+          
+  - alias: Publish Postal Arrival
+    trigger:
+      - entity_id: sensor.postal_status
+        platform: state
+        from: 'No Mail'
+        to: 'New Mail'
+        for: '00:00:30'
+    # condition:
+    #   - condition: template
+    #     value_template: "{{ is_state_attr('sensor.postal_status', 'source', 'sender') }}"
+    action:
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.last_postal_arrival
+          time: '{{ (as_timestamp(now()) | timestamp_custom("%H:%M:%S", true)) }}'
+          date: '{{ (as_timestamp(now()) | timestamp_custom("%Y-%m-%d", true)) }}'
+      - service: notify.ios_notify_parents
+        data:
+          title: "Postal Status Update"
+          message: |
+            New Mail has been delivered
+            id: {{ states.sensor.postal_status.attributes.id }}
+            {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
+          
+  - alias: Publish Postal Removal
+    trigger:
+      - entity_id: sensor.postal_status
+        platform: state
+        from: 'New Mail'
+        to: 'No Mail'
+        for: '00:00:30'
+    # condition:
+    #   - condition: template
+    #     value_template: "{{ is_state_attr('sensor.postal_status', 'source', 'sender') }}"
+    action:
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.last_postal_removal
+          time: '{{ (as_timestamp(now()) | timestamp_custom("%H:%M:%S", true)) }}'
+          date: '{{ (as_timestamp(now()) | timestamp_custom("%Y-%m-%d", true)) }}'
+      - service: notify.ios_notify_parents
+        data:
+          title: "Postal Status Update"
+          message: |
+            Mail has been removed
+            id: {{ states.sensor.postal_status.attributes.id }}
+            {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
+          
+  - alias: Lexus Office Start Reminder
+    trigger:
+      - platform: time
+        at: '11:45:00'
+      - platform: time
+        at: '16:45:00'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: device_tracker.life360_jean
+          state: 'DO2 Contrôle'
+        - condition: numeric_state
+          entity_id: sensor.outdoor_temperature
+          below: 2
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "Start the Lexus"
+
+  # - alias: Publish Persistent
+    # trigger:
+      # - platform: time_pattern
+        # minutes: '/59'         
+    # action:
+      # service: persistent_notification.create
+      # data:
+        # message: "Your message goes here"
+        # title: "Custom subject"
+
+  - alias: Publish Collect Notification
+    trigger:
+      platform: time
+      at: '7:00:00'
+    condition:
+      condition: or
+      conditions:
+        - condition: state
+          entity_id: sensor.collect_trash_week
+          state: 'Today'
+        - condition: state
+          entity_id: sensor.collect_recycle_week
+          state: 'Today'
+    action:
+      service_template: >
+        {% if is_state('device_tracker.life360_jean', 'home') and is_state('device_tracker.life360_cindy', 'home') %}
+          notify.sms_notify_all
+        {% elif is_state('device_tracker.life360_jean', 'home') %}
+          notify.sms_jean
+        {% elif is_state('device_tracker.life360_cindy', 'home') %}
+          notify.sms_cindy
+        {% else %}
+          notify.sms_jean
+        {% endif %}
+      data_template:
+        title: "Trash/Recycle day"
+        message: >
+          {% if is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') %}
+            Put trash AND recycle out for collection today
+          {% elif is_state('sensor.collect_trash_week', 'Today') %}
+            Put trash out for collection today
+          {% elif is_state('sensor.collect_recycle_week', 'Today') %}
+            Put recycle out for collection today
+          {% endif %}

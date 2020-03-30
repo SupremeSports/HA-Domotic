@@ -1,0 +1,113 @@
+####################################################
+# SENSORS                                          #
+####################################################
+   
+  - platform: ted5000
+    host: 192.168.1.3
+    port: 8081
+    name: TED5000
+    scan_interval: 5
+    
+  - platform: integration
+    name: Main Power Usage
+    source: sensor.ted5000_mtu1_power
+    unit_prefix: k
+    round: 2
+  - platform: integration
+    name: Garage Power Usage
+    source: sensor.ted5000_mtu2_power
+    unit_prefix: k
+    round: 2
+  - platform: integration
+    name: Pool Power Usage
+    source: sensor.ted5000_mtu3_power
+    unit_prefix: k
+    round: 2
+    
+  - platform: mqtt
+    name: "Postal Status"
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    availability_topic: "Home/Transmitter/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        New Mail
+      {% else %}
+        No Mail
+      {% endif %}
+    json_attributes_topic: "Home/Postal/Stts"
+    
+  - platform: mqtt
+    name: "Stepper Wall Clock"
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    availability_topic: "Home/WallClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        Ok
+      {% else %}
+        Homing
+      {% endif %}
+    json_attributes_topic: "Home/WallClock/Stts"
+    
+  - platform: mqtt
+    name: "Nixie Clock Status"
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Stts"
+    availability_topic: "Home/NixieClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        On
+      {% else %}
+        Off
+      {% endif %}
+    json_attributes_topic: "Home/NixieClock/Json"
+    
+  - platform: template
+    sensors:
+      nixie_clock:
+        entity_id:
+          - light.nixie_clock
+          - sensor.nixie_clock_status
+        value_template: "{{ states('sensor.nixie_clock_status') }}"
+        availability_template: "{{ not is_state('sensor.nixie_clock_status', 'unavailable') }}"
+        entity_picture_template: >
+          {% if is_state('sensor.nixie_clock_status','On') %}
+            /local/images/CustomMDI/nixietubes/dark_FBCD41.png
+          {% elif is_state('sensor.nixie_clock_status','Off') %}
+            /local/images/CustomMDI/nixietubes/dark_007AFF.png
+          {% else %}
+            /local/images/CustomMDI/nixietubes/dark_48485E.png
+          {% endif %}
+        attribute_templates:
+          state: "{{ state_attr('sensor.nixie_clock_status', 'state') }}"
+          case_temp: "{{ state_attr('sensor.nixie_clock_status', 'case_temp') }}"
+          wifi_rssi: "{{ state_attr('sensor.nixie_clock_status', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('sensor.nixie_clock_status', 'wifi_percent') }}"
+
+  - platform: template
+    sensors:
+      last_postal_arrival:
+        friendly_name: Last Postal Arrival Time
+        entity_id: input_datetime.last_postal_arrival
+        icon_template: >
+          mdi:clock-in
+        #device_class: timestamp  //Makes display on minutes since...
+        value_template: "{{ states('input_datetime.last_postal_arrival') }}"
+      last_postal_removal:
+        friendly_name: Last Postal Removal Time
+        entity_id: input_datetime.last_postal_removal
+        icon_template: >
+          mdi:clock-out
+        #device_class: timestamp  //Makes display on minutes since...
+        value_template: "{{ states('input_datetime.last_postal_removal') }}"
+        

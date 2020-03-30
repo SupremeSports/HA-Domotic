@@ -1,0 +1,93 @@
+####################################################
+# SENSORS - CONTROL ROOM                           #
+####################################################
+          
+  #Control Temperature/Hum (DHT22)
+  - platform: modbus
+    scan_interval: 1
+    registers:
+    - name: "ControlRoom Heartbeat"
+      hub: MB_ControlRoom
+      register: 0
+      register_type: holding
+      data_type: uint
+      scale: 1
+      offset: 0
+      precision: 0
+      
+  - platform: modbus
+    scan_interval: 5
+    registers:
+    - name: "ControlRoom Box Temperature"
+      hub: MB_ControlRoom
+      unit_of_measurement: '°C'
+      register: 0
+      register_type: input
+      data_type: uint
+      scale: 0.1
+      offset: 0
+      precision: 1
+    
+    - name: "ControlRoom Box Humidity"
+      hub: MB_ControlRoom
+      unit_of_measurement: '%'
+      register: 1
+      register_type: input
+      data_type: uint
+      scale: 0.1
+      offset: 0
+      precision: 1
+    
+    - name: "Cold Storage Temperature"
+      hub: MB_ControlRoom
+      unit_of_measurement: '°C'
+      register: 2
+      register_type: input
+      data_type: uint
+      scale: 0.1
+      offset: 0
+      precision: 1
+    
+    - name: "Cold Storage Humidity"
+      hub: MB_ControlRoom
+      unit_of_measurement: '%'
+      register: 3
+      register_type: input
+      data_type: uint
+      scale: 0.1
+      offset: 0
+      precision: 1
+
+  - platform: template
+    sensors:
+      water_valve_status:
+        friendly_name: "Water Valve Status"
+        value_template: >
+          {% if (states.binary_sensor.water_valve_opened.state == 'off') and (states.binary_sensor.water_valve_closed.state == 'on') %}
+            Open
+          {% elif (states.binary_sensor.water_valve_closed.state == 'off') and (states.binary_sensor.water_valve_opened.state == 'on') %}
+            Close
+          {% else %}
+            Unknown
+          {% endif %}
+        icon_template: >
+          {% if (states.binary_sensor.water_valve_opened.state == 'off') and (states.binary_sensor.water_valve_closed.state == 'on') %}
+            mdi:pipe
+          {% elif (states.binary_sensor.water_valve_closed.state == 'off') and (states.binary_sensor.water_valve_opened.state == 'on') %}
+            mdi:pipe-disconnected
+          {% else %}
+            mdi:help
+          {% endif %}
+        attribute_templates:
+          opened: >
+            {% if is_state('binary_sensor.water_valve_opened', "off") %}
+              on
+            {% else %}
+              off
+            {% endif %}
+          closed: >
+            {% if is_state('binary_sensor.water_valve_closed', "off") %}
+              on
+            {% else %}
+              off
+            {% endif %}

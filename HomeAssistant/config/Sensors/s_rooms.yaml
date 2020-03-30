@@ -1,0 +1,71 @@
+####################################################
+# SENSORS - ROOMS                                  #
+####################################################
+
+  - platform: mqtt
+    name: "Massage Room Temp"
+    icon: mdi:mailbox
+    state_topic: "Home/Massage/Clock/Stts"
+    availability_topic: "Home/Massage/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.temperature | round(1) }}"
+    json_attributes_topic: "Home/Massage/Clock/Stts"
+    unit_of_measurement: '°C'
+    
+  - platform: mqtt
+    name: "Massage Room Humidity"
+    icon: mdi:mailbox
+    state_topic: "Home/Master/Bed/Stts"
+    availability_topic: "Home/Massage/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.humidity | round(1) }}"
+    json_attributes_topic: "Home/Massage/Clock/Stts"
+    unit_of_measurement: '%'
+    
+  - platform: mqtt
+    name: "Master Bed Raw"
+    icon: mdi:scale
+    state_topic: "Home/Master/Bed/Stts"
+    availability_topic: "Home/Master/Bed/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.scale | round(1) }}"
+    json_attributes_topic: "Home/Master/Bed/Json"
+    #unit_of_measurement: 'lb'
+    
+  - platform: template
+    sensors:
+      master_bed_presence:
+        friendly_name: Master Bed Presence
+        entity_id:
+          - sensor.master_bed_raw
+          - switch.master_bed_tare
+        value_template: >
+          {% set weight = states('sensor.master_bed_raw') | float %}
+          {% set jean = is_state('person.jean_gauthier', 'home') %}
+          {% set cindy = is_state('person.cindy_fortin', 'home') %}
+          
+          {% if weight < 30 %}
+            Empty
+          {% elif weight < 200 %}
+            Mi-Loup
+          {% elif weight < 900 and cindy %}
+            Cindy
+          {% elif weight < 1200 and jean %}
+            Jean
+          {% elif cindy and jean %}
+            Cindy & Jean
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: "{{ not is_state('sensor.master_bed_raw', 'unavailable') }}"
+        attribute_templates:
+          raw_value: "{{ states('sensor.master_bed_raw') }}"
+          calib: "{{ state_attr('sensor.master_bed_raw', 'calib') }}"
+          wifi_rssi: "{{ state_attr('sensor.master_bed_raw', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('sensor.master_bed_raw', 'wifi_percent') }}"

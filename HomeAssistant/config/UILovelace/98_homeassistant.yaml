@@ -1,0 +1,135 @@
+####################################################
+# UILOVELACE - HA Server                           #
+####################################################
+
+- title: HA Server
+  icon: mdi:home-assistant
+  # Unique path for direct access /lovelace/${path}
+  path: settings
+  visible: true
+  badges:
+    - sensor.time
+    - input_boolean.restart_hass
+    - sensor.time_online
+    - sensor.server_cpu_temperature_temp
+    - sensor.server_used_percent
+  cards:
+    - type: entities
+      title: Health Data
+      show_header_toggle: false
+      entities:
+        # - sensor.rpi_power_description
+        - sensor.date_time
+        - sensor.last_boot
+        - sensor.time_online
+        - binary_sensor.remote_ui
+        
+    - type: entities
+      title: Resources
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.server_cpu_temperature_temp
+          entities:
+            - sensor.server_k8temp_1_temp
+            - sensor.server_k8temp_2_temp
+            - sensor.server_k8temp_3_temp
+            - sensor.server_k8temp_4_temp
+        - type: custom:fold-entity-row
+          head: sensor.server_mb_temperature_temp
+          entities:
+            - sensor.server_mb_temperature_temp
+        - type: custom:fold-entity-row
+          head: sensor.server_running
+          entities:
+            - sensor.server_sleeping
+            - sensor.server_total
+            - sensor.server_thread
+        - type: custom:fold-entity-row
+          head: sensor.server_ram_used_percent
+          entities:
+            - sensor.server_ram_used
+            - sensor.server_ram_free
+        - type: custom:fold-entity-row
+          head: sensor.server_swap_used_percent
+          entities:
+            - sensor.server_swap_used
+            - sensor.server_swap_free
+        - type: custom:fold-entity-row
+          head: sensor.server_cpu_used
+          entities:
+            - sensor.load_1m
+            - sensor.load_15m
+        
+    - type: entities
+      title: Storage
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.server_used_percent
+          entities:
+            - sensor.server_used
+            - sensor.server_free
+
+    - type: entities
+      title: Network
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_in_hassio
+          entities:
+            - sensor.network_in_hassio
+            - sensor.packets_in_hassio
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_out_hassio
+          entities:
+            - sensor.network_out_hassio
+            - sensor.packets_out_hassio
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_in_enp1s6
+          entities:
+            - sensor.network_in_enp1s6
+            - sensor.packets_in_enp1s6
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_out_enp1s6
+          entities:
+            - sensor.network_out_enp1s6
+            - sensor.packets_out_enp1s6
+        
+    - type: history-graph
+      title: Speed Tests
+      entities:
+        - entity: sensor.speedtest_ping
+          name: Ping Response
+        - entity: sensor.speedtest_download
+          name: Download Speed
+        - entity: sensor.speedtest_upload
+          name: Upload Speed
+
+    - type: horizontal-stack
+      title: Hardware
+      cards:
+      - type: gauge
+        name: CPU
+        unit: '%'
+        entity: sensor.server_cpu_used
+        severity:
+          green: 0
+          yellow: 45
+          red: 85
+      - type: gauge
+        name: Disk
+        unit: '%'
+        entity: sensor.server_used_percent
+        severity:
+          green: 0
+          yellow: 45
+          red: 85
+      - type: gauge
+        name: Memory
+        unit: '%'
+        entity: sensor.server_ram_used_percent
+        severity:
+          green: 0
+          yellow: 45
+          red: 85

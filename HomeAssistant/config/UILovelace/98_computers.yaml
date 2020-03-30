@@ -1,0 +1,206 @@
+####################################################
+# UILOVELACE - Computers                           #
+####################################################
+
+- title: Computers
+  icon: mdi:desktop-tower
+  # Unique path for direct access /lovelace/${path}
+  path: computers
+  visible: true
+  badges:
+    - sensor.time
+  cards:
+    - type: conditional
+      conditions:
+        - entity: binary_sensor.jgau_pc
+          state: "on"
+      card:
+        type: entities
+        entities:
+          - type: custom:fold-entity-row
+            head: binary_sensor.jgau_pc
+            entities:
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_package
+                entities:
+                  - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_1
+                  - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_2
+                  - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_3
+                  - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_4
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_cores
+                entities:
+                  - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_1
+                  - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_2
+                  - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_3
+                  - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_4
+                  - sensor.jgau_pc_intel_core_i7_3770_clocks_bus_speed
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_intel_core_i7_3770_load_cpu_total
+                entities:
+                  - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_1
+                  - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_2
+                  - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_3
+                  - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_4
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_intel_core_i7_3770_powers_cpu_cores
+                entities:
+                  - sensor.jgau_pc_intel_core_i7_3770_powers_cpu_cores
+                  - sensor.jgau_pc_intel_core_i7_3770_powers_cpu_package
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_generic_memory_load_memory
+                entities:
+                  - sensor.jgau_pc_generic_memory_data_used_memory
+                  - sensor.jgau_pc_generic_memory_data_available_memory
+                  
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_fans_fan_2
+                entities:
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_1
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_2
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_3
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_fans_fan_2
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_cpu_core
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_temperature_1
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_temperature_3
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_3vcc
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_3vsb
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_avcc
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_cpu_vcore
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_2
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_5
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_6
+                  - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_7
+                  
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_nvidia_geforce_gt_630_load_gpu_core
+                entities:
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_clocks_gpu_core
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_clocks_gpu_shader
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_controls_gpu_fan
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_temperatures_gpu_core
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_nvidia_geforce_gt_630_load_gpu_memory
+                entities:
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_data_gpu_memory_used
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_data_gpu_memory_free
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_data_gpu_memory_total
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_load_gpu_memory
+                  - sensor.jgau_pc_nvidia_geforce_gt_630_load_gpu_video_engine
+
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_kingston_sa400s37_240gb_load_used_space
+                entities:
+                  - sensor.jgau_pc_kingston_sa400s37_240gb_temperatures_temperature
+              - type: custom:fold-entity-row
+                head: sensor.jgau_pc_hgst_hts721010a9e630_load_used_space
+                entities:
+                  - sensor.jgau_pc_hgst_hts721010a9e630_temperatures_temperature
+            
+    - type: conditional
+      conditions:
+        - entity: binary_sensor.jgau_pc
+          state: "off"
+      card:
+        type: entities
+        entities:
+          - binary_sensor.jgau_pc
+            
+    - type: conditional
+      conditions:
+        - entity: binary_sensor.cfor_pc
+          state: "on"
+      card:
+        type: entities
+        entities:
+          - type: custom:fold-entity-row
+            head: binary_sensor.cfor_pc
+            entities:
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_package
+                entities:
+                  - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_1
+                  - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_2
+                  - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_3
+                  - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_4
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_cores
+                entities:
+                  - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_1
+                  - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_2
+                  - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_3
+                  - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_4
+                  - sensor.cfor_pc_intel_core_i7_3820_clocks_bus_speed
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_intel_core_i7_3820_load_cpu_total
+                entities:
+                  - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_1
+                  - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_2
+                  - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_3
+                  - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_4
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_intel_core_i7_3820_powers_cpu_cores
+                entities:
+                  - sensor.cfor_pc_intel_core_i7_3820_powers_cpu_cores
+                  - sensor.cfor_pc_intel_core_i7_3820_powers_cpu_package
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_generic_memory_load_memory
+                entities:
+                  - sensor.cfor_pc_generic_memory_data_used_memory
+                  - sensor.cfor_pc_generic_memory_data_available_memory
+                  
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_fans_fan_2
+                entities:
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_1
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_2
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_3
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_4
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_5
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_fans_fan_2
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_1
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_2
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_4
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_5
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_6
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_3vcc
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_3vsb
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_avcc
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_vtt
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_cpu_vcore
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_vbat
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_11
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_12
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_13
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_14
+                  - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_15
+                  
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_radeon_rx_580_series_temperatures_gpu_core
+                entities:
+                  - sensor.cfor_pc_radeon_rx_580_series_temperatures_gpu_core
+                  - sensor.cfor_pc_radeon_rx_580_series_controls_gpu_fan
+                  - sensor.cfor_pc_radeon_rx_580_series_load_gpu_core
+                  - sensor.cfor_pc_radeon_rx_580_series_clocks_gpu_core
+                  - sensor.cfor_pc_radeon_rx_580_series_clocks_gpu_memory
+                  - sensor.cfor_pc_radeon_rx_580_series_powers_gpu_total
+                  - sensor.cfor_pc_radeon_rx_580_series_voltages_gpu_core
+                  - sensor.cfor_pc_radeon_rx_580_series_fans_gpu_fan
+
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_kingston_sa400s37120g_load_used_space
+                entities:
+                  - sensor.cfor_pc_kingston_sa400s37120g_temperatures_temperature
+              - type: custom:fold-entity-row
+                head: sensor.cfor_pc_wdc_wd5000aads_11m2b2_load_used_space
+                entities:
+                  - sensor.cfor_pc_wdc_wd5000aads_11m2b2_temperatures_temperature
+
+    - type: conditional
+      conditions:
+        - entity: binary_sensor.cfor_pc
+          state: "off"
+      card:
+        type: entities
+        entities:
+          - binary_sensor.cfor_pc

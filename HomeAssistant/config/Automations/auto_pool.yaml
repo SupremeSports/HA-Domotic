@@ -1,0 +1,39 @@
+###################################################
+# AUTOMATIONS - POOL                              #
+###################################################
+        
+  #Input Text Changes Trigger
+  - alias: Pool Top Text Change
+    trigger:
+      platform: state
+      entity_id: input_text.pool_text_top
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Home/Pool/Clock/Cmd"
+        payload: '{"timetext":{{ trigger.to_state.state }}}'
+        qos: 0
+        retain: true
+        
+  - alias: Pool Bottom Text Change
+    trigger:
+      platform: state
+      entity_id: input_text.pool_text_bottom
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Home/Pool/Clock/Cmd"
+        payload: '{"temptext":{{ trigger.to_state.state }}}'
+        qos: 0
+        retain: true
+
+  - alias: "Pool Clock Scroll Speed"
+    initial_state: True
+    trigger:
+    - platform: state
+      entity_id: input_number.pool_clock_scroll_speed
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Home/Pool/Clock/LED/Cmd"
+        payload: '{"transition":{{ trigger.to_state.state | int }}}'

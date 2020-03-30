@@ -1,0 +1,110 @@
+####################################################
+# BINARY SENSORS - LOCKS and DOORS                 #
+####################################################
+
+  - platform: mqtt
+    name: House FD Bell
+    state_topic: "Home/Door/Front/Stts"
+    availability_topic: "Home/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.bell }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: House SD Bell
+    state_topic: "Home/Door/Side/Stts"
+    availability_topic: "Home/Door/Side/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.bell }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: House BD Bell
+    state_topic: "Home/Door/Back/Stts"
+    availability_topic: "Home/Door/Back/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.bell }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: Garage FD Bell
+    state_topic: "Garage/Door/Front/Stts"
+    availability_topic: "Garage/Door/Front/LWT"
+    value_template: '{{ value_json.bell }}'
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.bell }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: House FD Opened
+    state_topic: "Home/Door/Front/Stts"
+    availability_topic: "Home/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+
+  - platform: mqtt
+    name: House SD Opened
+    state_topic: "Home/Door/Side/Stts"
+    availability_topic: "Home/Door/Side/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+    
+  - platform: mqtt
+    name: House BD Opened
+    state_topic: "Home/Door/Back/Stts"
+    availability_topic: "Home/Door/Back/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+ 
+  - platform: mqtt
+    name: Garage FD Opened
+    state_topic: "Garage/Door/Front/Stts"
+    availability_topic: "Garage/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+
+  - platform: template
+    sensors:
+      garage_cd_opened:
+        entity_id:
+          - cover.garage_cd_opener
+          - sensor.garage_cd_status
+        friendly_name: "Garage CD Opened"
+        device_class: garage_door
+        value_template: >
+          {{ is_state('cover.garage_cd_opener', 'open') }}
+        availability_template: >
+          {{ not is_state('cover.garage_cd_opener', 'unavailable') }}
+          

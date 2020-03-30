@@ -1,0 +1,60 @@
+##########################################
+# CUSTOMIZATIONS - ALL OTHERS            #
+##########################################
+
+# STANDARD COLORS
+#=========================================
+# Icon Online:  var(--state-icon-color) --> #007AFF
+# Icon Offline: var(--state-icon-unavailable-color) --> #4F5F78
+# Icon Active:  var(--state-icon-active-color) --> #FBCD41
+# Red:          FF0000
+# Yellow:       FFFF00
+# Orange:       FFA500
+# Lt Purple:    A500FF
+# Dk Purple:    5C005C
+# Lt Green:     00FF00
+# Gold:         A3852A
+
+  cover.garage_cd_opener:
+    custom_ui_state_card: state-card-custom-ui
+    confirm_controls_show_lock: true
+    hide_control: false
+    show_last_changed: true
+        
+  device_tracker.life360_jean:
+    friendly_name: Jean
+    
+  device_tracker.life360_cindy:
+    friendly_name: Cindy
+    
+  # device_tracker.ipad_de_cindy:
+    # custom_ui_state_card: state-card-custom-ui
+    # icon: mdi:tablet
+        
+  vacuum.roomba_irobot:
+    custom_ui_state_card: state-card-custom-ui
+    icon: mdi:robot-vacuum
+    templates:
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (attributes.bin_full || !attributes.bin_present || attributes.battery_level < 10)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return '#FF0000';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (attributes.battery_level < 20)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return '#FFFF00';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        return 'var(--state-icon-color)';
+    
+  input_select.doorchime_tf_volume:
+    custom_ui_state_card: state-card-custom-ui
+    templates:
+      icon: >
+        if (state >= 6) return 'mdi:volume-high';
+        if (state >= 4) return 'mdi:volume-medium';
+        if (state >= 2) return 'mdi:volume-low';
+        return 'mdi:volume-variant-off';

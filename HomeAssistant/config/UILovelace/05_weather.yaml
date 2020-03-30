@@ -1,0 +1,90 @@
+####################################################
+# UILOVELACE - WEATHER & FORECASTS                 #
+####################################################
+
+- title: Local Weather Station
+  icon: mdi:weather-sunset
+  # Unique path for direct access /lovelace/${path}
+  path: local_weather
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+    - sensor.moon_phases
+  cards:
+    - type: weather-forecast
+      entity: weather.home
+    
+    - type: weather-forecast
+      entity: weather.dolbeau
+      
+    - type: entities
+      title: Moon
+      show_header_toggle: false
+      entities:
+        - sensor.moon_phases
+        # - sensor.moon_distance
+
+    - type: entities
+      title: Sun
+      show_header_toggle: false
+      entities:
+        - sensor.forecast
+        - sun.sun
+        - weather.dolbeau
+        - sensor.visibility
+        - sensor.outdoor_uv_sensor
+    
+    - type: entities
+      title: Wind
+      show_header_toggle: false
+      entities:
+        - sensor.wind_compass
+        - sensor.wind_speed
+        - sensor.wind_gust
+        
+    - type: entities
+      title: Rain
+      show_header_toggle: false
+      entities:
+        - sensor.outdoor_rain_sensor
+        - sensor.outdoor_rain_level
+        - sensor.chance_of_precip
+        - sensor.precipitation_yesterday
+        - camera.dolbeau
+        
+    - type: entities
+      title: Weather
+      show_header_toggle: false
+      entities:
+        - sensor.outdoor_temperature
+        - sensor.outdoor_feelslike
+        - sensor.low_temperature
+        - sensor.high_temperature
+        
+    - type: entities
+      title: Atmospheric
+      show_header_toggle: false
+      entities:
+        - sensor.outdoor_humidity
+        - sensor.outdoor_dewpoint
+        - sensor.outdoor_pressure
+        - sensor.tendency
+        #- sensor.aqi_sensor
+        
+    - type: entities
+      title: Messages
+      show_header_toggle: false
+      entities:
+        - sensor.warnings
+        - sensor.watches
+        - sensor.advisories
+        - sensor.statements
+        - sensor.endings        
+    
+    - type: entities
+      title: Weather Control Box
+      show_header_toggle: false
+      entities:
+        - sensor.weather_control_box_temperature
+        - sensor.weather_control_box_humidity

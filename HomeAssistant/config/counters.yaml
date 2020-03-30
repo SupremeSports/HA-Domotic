@@ -1,0 +1,13 @@
+####################################################
+# COUNTERS                                         #
+####################################################
+
+  heartbeat_counter:
+    name: Heartbeat Counter
+    restore: true
+    minimum: 1
+    maximum: 9999
+    initial: 1
+    step: 1
+
+  

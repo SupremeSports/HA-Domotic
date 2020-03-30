@@ -1,0 +1,27 @@
+####################################################
+# SWITCHES - POOL                                  #
+####################################################
+
+#Pool control arduino
+  - platform: modbus
+    scan_interval: 1
+    coils:
+    - name: "Pool Pump"
+      hub: MB_PoolArea
+      slave: 1
+      coil: 0
+      
+    - name: "Pool Heat Pump"
+      hub: MB_PoolArea
+      slave: 1
+      coil: 1
+      
+    - name: "Pool Filler Valve"
+      hub: MB_PoolArea
+      slave: 1
+      coil: 2
+     
+    - name: "Pond Pump"
+      hub: MB_PoolArea
+      slave: 1
+      coil: 5

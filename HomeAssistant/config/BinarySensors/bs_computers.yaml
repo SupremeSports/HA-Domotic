@@ -1,0 +1,15 @@
+####################################################
+# BINARY SENSORS - COMPUTERS                       #
+####################################################
+
+  - platform: ping
+    name: JGAU-PC
+    host: !secret ip_jgau_pc
+    count: 2
+    scan_interval: 30
+    
+  - platform: ping
+    name: CFOR-PC
+    host: !secret ip_cfor_pc
+    count: 2
+    scan_interval: 30

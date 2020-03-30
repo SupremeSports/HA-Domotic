@@ -1,0 +1,121 @@
+      
+#   - platform: template
+#     sensors:
+#       dates_year:
+#         friendly_name: Year
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%Y")|int }}
+#       dates_month:
+#         friendly_name: Month
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%m")|int }}
+#       dates_day:
+#         friendly_name: Day
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%d")|int }}
+#       dates_hour:
+#         friendly_name: Hour
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%H")|int }}
+#       dates_minute:
+#         friendly_name: Minute
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%M")|int }}
+#       dates_second:
+#         friendly_name: Second
+#         entity_id: counter.heartbeat_counter
+#         value_template: >
+#           {{ now().strftime("%S")|int }}
+#       dates_dayofyear:
+#         friendly_name: Day Number
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%j")|int }}
+#       dates_weekofyear:
+#         friendly_name: Week Number
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%W")|int + 1 }}
+#       #Monday=0, sunday=6
+#       dates_weekdaynumber:
+#         friendly_name: Week Day Number
+#         entity_id: sensor.time
+#         value_template: >
+#           {% set days = ["6", "0", "1", "2", "3", "4", "5"] %}
+#           {% set day = days[now().strftime('%w')|int] %}
+#           {{ day }}
+#       dates_weekdayname_en:
+#         friendly_name: Week Day Name
+#         entity_id: sensor.time
+#         value_template: >
+#           {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+#           {% set day = days[states('sensor.dates_weekdaynumber')|int] %}
+#           {{ day }}
+#       dates_weekdayname_fr:
+#         friendly_name: Week Day Name
+#         entity_id: sensor.time
+#         value_template: >
+#           {% set days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] %}
+#           {% set day = days[states('sensor.dates_weekdaynumber')|int] %}
+#           {{ day }}
+#       dates_long_en: 
+#         friendly_name: 'Date Long'
+#         entity_id: sensor.time
+#         value_template: >
+#           {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+#           {% set month = months[now().strftime('%m')|int -1] %}
+#           {% set day = now().strftime('%d') %}
+#           {% set year = now().strftime('%Y') %}
+#           {% if day == "1" or day == "21" or day == "31" %}
+#             {% set num = "st, " %}
+#           {% elif day == "2" or day == "22" %}
+#             {% set num = "nd, " %}
+#           {% else %}
+#             {% set num = "th, " %}
+#           {% endif %}
+#           {{ month + ' ' + day + num + year }}
+#       dates_long_fr: 
+#         friendly_name: 'Date Long'
+#         entity_id: sensor.time
+#         value_template: >
+#           {% set months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] %}
+#           {% set month = months[now().strftime('%m')|int -1] %}
+#           {% set day = now().strftime('%d') %}
+#           {% set year = now().strftime('%Y') %}
+#           {% if day == "1" %}
+#             {% set num = "er " %}
+#           {% else %}
+#             {% set num = " " %}
+#           {% endif %}
+#           {{ day + num + month + ' ' + year }}
+#       dates_full_en:
+#         friendly_name: 'Date Full'
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ states('sensor.dates_weekdayname_en')|string + ', ' + states('sensor.dates_long_en')|string }}
+#       dates_full_fr:
+#         friendly_name: 'Date Full'
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ states('sensor.dates_weekdayname_fr')|string + ', ' + states('sensor.dates_long_fr')|string }}
+#       dates_yyyymmdd:
+#         friendly_name: 'Date YYYYMMDD'
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%Y") + '/' + now().strftime("%m") + '/' + now().strftime("%d") }}
+#       dates_yyyyddmm:
+#         friendly_name: 'Date YYYYDDMM'
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%Y") + '/' + now().strftime("%d") + '/' + now().strftime("%m") }}
+#       dates_ddmmyyyy:
+#         friendly_name: 'Date DDMMYYYY'
+#         entity_id: sensor.time
+#         value_template: >
+#           {{ now().strftime("%d") + '/' + now().strftime("%m") + '/' + now().strftime("%Y") }}
+          

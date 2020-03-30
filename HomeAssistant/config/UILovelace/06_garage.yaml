@@ -1,0 +1,11 @@
+####################################################
+# UILOVELACE - GARAGE                              #
+####################################################
+
+- title: Garage
+  icon: mdi:garage
+  # Unique path for direct access /lovelace/${path}
+  path: garage
+  visible: true
+  badges:
+    - sensor.time

@@ -1,0 +1,56 @@
+####################################################
+# UILOVELACE - POOL                                #
+####################################################
+
+- title: Pool Controls
+  icon: mdi:pool
+  # Unique path for direct access /lovelace/${path}
+  path: pool
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.pool_temperature
+    - sensor.pool_pressure
+    - binary_sensor.pool_level_low
+    - binary_sensor.pool_level_high
+  cards:
+    - type: entities
+      title: Pool pump and heater
+      show_header_toggle: false
+      entities:
+        # - switch.pool_pump
+        # - switch.pool_heat_pump
+        - input_select.poolpump_mode
+        - binary_sensor.poolpump_status
+        - switch.pool_heat_pump
+    
+    - type: entities
+      title: Pool Filling
+      show_header_toggle: false
+      entities:
+        - switch.pool_filler_valve
+        - binary_sensor.pool_level_low
+        - binary_sensor.pool_level_high
+    
+    - type: entities
+      title: Pool Valves
+      show_header_toggle: false
+      entities:
+        - input_number.pool_drain_percent
+        - input_number.pool_heatpump_percent
+    
+    - type: entities
+      title: Pool Clock Display
+      show_header_toggle: false
+      entities:
+        - light.pool_clock
+        - input_text.pool_text_top
+        - input_text.pool_text_bottom
+        - input_number.pool_clock_scroll_speed
+    
+    - type: entities
+      title: Pond
+      show_header_toggle: false
+      entities:
+        - switch.pond_pump
+    

@@ -1,0 +1,439 @@
+####################################################
+# UILOVELACE - MAIN                                #
+####################################################
+
+- title: Main
+  icon: mdi:home-outline
+  # Unique path for direct access /lovelace/${path}
+  path: main
+  visible: true
+  badges:
+    - sensor.time
+    - device_tracker.life360_jean
+    - device_tracker.life360_cindy
+    - sun.sun
+    - sensor.moon_phases
+  cards:
+  # Entities card will take a list of entities and show their state.
+  # The entities here will be shown in the same order as specified.
+  # Each entry is an entity ID or a map with extra options.
+    - type: custom:bignumber-card
+      entity: sensor.dates
+      scale: 25px
+      
+    - type: entities
+      title: "Party 18 ans de Cody"
+      show_header_toggle: false
+      entities:
+        - sensor.party_18_ans_cody
+
+    - type: entities
+      title: Front Lawn
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.lamppost_status
+          entities:
+            - input_select.lamppost_mode
+        - type: custom:fold-entity-row
+          head: binary_sensor.poweroutlet_status
+          entities:
+            - input_select.poweroutlet_mode
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontlight_status
+          entities:
+            - input_select.garagefrontlight_mode
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontpower_status
+          entities:
+            - input_select.garagefrontpower_mode
+        
+    - type: entities
+      title: Power usage
+      show_header_toggle: false
+      entities: 
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu1_power
+          entities:
+            - sensor.ted5000_mtu1_power
+            - sensor.ted5000_mtu1_voltage
+            - sensor.main_power_usage
+            - sensor.main_daily_energy
+            - sensor.main_monthly_energy
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu2_power
+          entities:
+            - sensor.ted5000_mtu2_power
+            - sensor.ted5000_mtu2_voltage
+            - sensor.garage_power_usage
+            - sensor.garage_daily_energy
+            - sensor.garage_monthly_energy
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu3_power
+          entities:
+            - sensor.ted5000_mtu3_power
+            - sensor.ted5000_mtu3_voltage
+            - sensor.pool_power_usage
+            - sensor.pool_daily_energy
+            - sensor.pool_monthly_energy
+
+    - type: entities
+      title: Home Presences
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: device_tracker.life360_jean
+          entities:
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Device Status
+              entities:
+                - sensor.iphone_de_jean_battery_state
+                - sensor.iphone_de_jean_battery_level
+                - sensor.iphone_de_jean_connection_type
+                - sensor.iphone_de_jean_activity
+                - sensor.iphone_de_jean_ssid
+                - sensor.iphone_de_jean_sim
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Device Position
+              entities:
+                - sensor.iphone_de_jean_last_update
+                - sensor.iphone_de_jean_distance_home
+                - sensor.iphone_de_jean_geocoded_location
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Owner's Health
+              entities:
+                - sensor.iphone_de_jean_distance
+                - sensor.iphone_de_jean_steps
+                - sensor.iphone_de_jean_average_active_pace
+                - sensor.iphone_de_jean_floors_ascended
+                - sensor.iphone_de_jean_floors_descended
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Others
+              entities:
+                - binary_sensor.workday_jean
+                - sensor.jean_s_birthday
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.lexus_morning_start
+                - automation.lexus_lock_at_home
+                - automation.lexus_office_start_reminder
+        - type: custom:fold-entity-row
+          head: device_tracker.life360_cindy
+          entities:
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Device Status
+              entities:
+                - sensor.iphone_de_cindy_battery_state
+                - sensor.iphone_de_cindy_battery_level
+                - sensor.iphone_de_cindy_connection_type
+                - sensor.iphone_de_cindy_activity
+                - sensor.iphone_de_cindy_ssid
+                - sensor.iphone_de_cindy_sim
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Device Position
+              entities:
+                - sensor.iphone_de_cindy_last_update
+                - sensor.iphone_de_cindy_distance_home
+                - sensor.iphone_de_cindy_geocoded_location
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Owner's Health
+              entities:
+                - sensor.iphone_de_cindy_distance
+                - sensor.iphone_de_cindy_steps
+                - sensor.iphone_de_cindy_average_active_pace
+                - sensor.iphone_de_cindy_floors_ascended
+                - sensor.iphone_de_cindy_floors_descended
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Others
+              entities:
+                - binary_sensor.workday_cindy
+                - sensor.cindy_s_birthday
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.journey_lock_at_home
+        # - type: custom:fold-entity-row
+          # head: device_tracker.ipad_de_cindy
+          # entities:
+            # - type: custom:fold-entity-row
+              # head:
+                # type: section
+                # label: Device Status
+              # entities:
+                # - sensor.ipad_de_cindy_battery_state
+                # - sensor.ipad_de_cindy_battery_level
+                # - sensor.ipad_de_cindy_connection_type
+                # - sensor.ipad_de_cindy_activity
+                # - sensor.ipad_de_cindy_ssid
+            # - type: custom:fold-entity-row
+              # head:
+                # type: section
+                # label: Device Position
+              # entities:
+                # - device_tracker.ipad_de_cindy
+                # - sensor.ipad_de_cindy_last_update
+                # - sensor.ipad_de_cindy_geocoded_location
+        - sensor.distance_jean_cindy
+        
+    - type: entities
+      title: Postal Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.postal_status
+          entities:
+            - entity: switch.postal_status
+              type: "custom:secondaryinfo-entity-row"
+              secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
+            - entity: sensor.last_postal_arrival
+            - entity: sensor.last_postal_removal
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.publish_postal_arrival
+                - automation.publish_postal_removal
+      
+    - type: entities
+      title: Vacuums
+      show_header_toggle: false
+      entities:
+        - vacuum.roomba_irobot
+        # - type: custom:entity-attributes-card
+        #   entity: vacuum.roomba_irobot
+        #   filter:
+        #     include:
+        #       - vacuum.roomba_irobot.status
+        #       - vacuum.roomba_irobot.bin_full
+        #       - vacuum.roomba_irobot.battery_level
+        
+    - type: entities
+      title: Trash/Recycle
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.collect_trash_week
+          entities:
+            - input_select.collect_trash
+            - type: custom:fold-entity-row
+              head: sensor.collect_trash_summer_mode
+              entities:
+                - type: "custom:button-entity-row"
+                  buttons:
+                    - entity: input_datetime.collect_trash_start
+                    - entity: input_datetime.collect_trash_end
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.publish_collect_notification
+        - type: custom:fold-entity-row
+          head: sensor.collect_recycle_week
+          entities:
+            - input_select.collect_recycle
+            - type: custom:fold-entity-row
+              head: sensor.collect_recycle_summer_mode
+              entities:
+                - type: "custom:button-entity-row"
+                  buttons:
+                    - entity: input_datetime.collect_recycle_start
+                    - entity: input_datetime.collect_recycle_end
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.publish_collect_notification
+
+    - type: entities
+      title: Doors & Locks
+      show_header_toggle: false
+      entities:
+        - input_text.doorlock_passcode
+        - type: "custom:button-entity-row"
+          buttons:
+            - entity: input_boolean.lock_all
+              name: LOCK ALL DOORS
+              state_icons:
+                "off": "mdi:lock-open"
+                "on": "mdi:lock"
+              state_styles:
+                "off":
+                  color: "var(--state-icon-color)"
+                  font-weight: bold
+                "on":
+                  color: "var(--state-icon-active-color)"
+                  font-weight: bold
+        - type: custom:fold-entity-row
+          head: sensor.house_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.house_fd_opened
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: binary_sensor.house_fd_bell
+                  state_icons:
+                    "on": "mdi:bell-ring"
+                    "off": "mdi:bell"
+                - entity: input_boolean.house_fd_lock
+                  state_icons:
+                    "on": "mdi:lock"
+                    "off": "mdi:lock"
+                - entity: input_boolean.house_fd_unlock
+                  state_icons:
+                    "on": "mdi:lock-open"
+                    "off": "mdi:lock-open"
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Hallway Doorbell Chime
+              entities:
+                - input_select.doorchime_tf_sound
+                - input_number.doorchime_tf_volume
+                - automation.doorchime_tf_trigger
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Bottom Floor Door Chime
+              entities:
+                - input_select.doorchime_bf_sound
+                - input_number.doorchime_bf_volume
+                - automation.doorchime_bf_trigger
+        - type: custom:fold-entity-row
+          head: sensor.garage_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_fd_opened
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: binary_sensor.house_fd_bell
+                  state_icons:
+                    "on": "mdi:bell-ring"
+                    "off": "mdi:bell"
+                - entity: input_boolean.garage_fd_lock
+                  state_icons:
+                    "on": "mdi:lock"
+                    "off": "mdi:lock"
+                - entity: input_boolean.garage_fd_unlock
+                  state_icons:
+                    "on": "mdi:lock-open"
+                    "off": "mdi:lock-open"
+        - type: custom:fold-entity-row
+          head: sensor.garage_cd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_cd_opened
+                  state_icons:
+                    "on": "mdi:garage-open"
+                    "off": "mdi:garage"
+                - entity: input_boolean.garage_cd_trigger
+                  state_icons:
+                    "on": "mdi:arrow-up-down-bold-outline"
+                    "off": "mdi:arrow-up-down-bold-outline"
+                    
+    # - type: entities
+      # title: COVID-19 - Quarantine
+      # show_header_toggle: false
+      # entities:
+        # - sensor.jean
+        # - type: custom:fold-entity-row
+          # head: sensor.worldwide_coronavirus_current
+          # entities:
+            # - sensor.worldwide_coronavirus_confirmed
+            # - sensor.worldwide_coronavirus_deaths
+            # - sensor.worldwide_coronavirus_recovered
+        # - type: custom:fold-entity-row
+          # head: sensor.canada_coronavirus_current
+          # entities:
+            # - sensor.canada_coronavirus_confirmed
+            # - sensor.canada_coronavirus_deaths
+            # - sensor.canada_coronavirus_recovered
+            
+    # - type: history-graph
+      # title: COVID-19 - Worldwide
+      # hours_to_show: 80
+      # entities:
+        # - entity: sensor.worldwide_coronavirus_current
+          # name: Current
+        # - entity: sensor.worldwide_coronavirus_confirmed
+          # name: Confirmed
+        # - entity: sensor.worldwide_coronavirus_deaths
+          # name: Deaths
+        # - entity: sensor.worldwide_coronavirus_recovered
+          # name: Recovered
+
+    # - type: history-graph
+      # title: COVID-19 - Canada
+      # hours_to_show: 80
+      # entities:
+        # - entity: sensor.canada_coronavirus_current
+          # name: Current
+        # - entity: sensor.canada_coronavirus_confirmed
+          # name: Confirmed
+        # - entity: sensor.canada_coronavirus_deaths
+          # name: Deaths
+        # - entity: sensor.canada_coronavirus_recovered
+          # name: Recovered
+          
+    - type: glance
+      show_icon: true
+      show_name: true
+      show_state: true
+      title: COVID-19
+      columns: 4
+      entities:
+        - entity: sensor.worldwide_coronavirus_confirmed
+          icon: 'mdi:emoticon-neutral-outline'
+          name: W - Confirmed
+        - entity: sensor.worldwide_coronavirus_current
+          icon: 'mdi:emoticon-frown-outline'
+          name: W - Current
+        - entity: sensor.worldwide_coronavirus_recovered
+          icon: 'mdi:emoticon-happy-outline'
+          name: W - Recovered
+        - entity: sensor.worldwide_coronavirus_deaths
+          icon: 'mdi:emoticon-dead-outline'
+          name: W - Deaths
+        - entity: sensor.canada_coronavirus_confirmed
+          icon: 'mdi:emoticon-neutral-outline'
+          name: C - Confirmed
+        - entity: sensor.canada_coronavirus_current
+          icon: 'mdi:emoticon-frown-outline'
+          name: C - Current
+        - entity: sensor.canada_coronavirus_recovered
+          icon: 'mdi:emoticon-happy-outline'
+          name: C - Recovered
+        - entity: sensor.canada_coronavirus_deaths
+          icon: 'mdi:emoticon-dead-outline'
+          name: C - Deaths
+        - entity: sensor.jean
+          

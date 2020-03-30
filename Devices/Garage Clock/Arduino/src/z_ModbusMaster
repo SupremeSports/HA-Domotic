@@ -1,0 +1,124 @@
+// ----------------------------------------------------------------------------------------------------
+// ----------------------------------------- MODBUS FUNCTIONS -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+
+//Read Holding Registers
+boolean readModbusServerHreg(int Start, int Length)
+{
+  uint8_t result = node.readHoldingRegisters(Start, Length);
+  if(result != 0 || Length > sizeof(receivedData))
+    return false;
+    
+  int len = node.getResponseBufferLength();
+  for (byte j = 0; j < len; j++)
+    receivedData[j] = node.getResponseBuffer(j);
+
+  node.clearResponseBuffer();
+  delay(50);
+  return true;
+}
+
+//Read Input Registers
+boolean readModbusServerIreg(int Start, int Length)
+{
+  uint8_t result = node.readInputRegisters(Start, Length);
+  if(result != 0 || Length > sizeof(receivedData))
+    return false;
+    
+  int len = node.getResponseBufferLength();
+  for (byte j = 0; j < len; j++)
+    receivedData[j] = node.getResponseBuffer(j);
+
+  node.clearResponseBuffer();
+  delay(50);
+  return true;
+}
+
+//Read Coils
+boolean readModbusServerCoils(int Start, int Length)
+{
+  uint8_t result = node.readCoils(Start, Length);
+  if(result != 0 || Length > sizeof(receivedData))
+    return false;
+    
+  int len = node.getResponseBufferLength();
+  for (byte j = 0; j < len; j++)
+    receivedData[j] = node.getResponseBuffer(j);
+
+  node.clearResponseBuffer();
+  delay(50);
+  return true;
+}
+
+//Read Discrete Inputs
+boolean readModbusServerInputs(int Start, int Length)
+{
+  uint8_t result = node.readDiscreteInputs(Start, Length);
+  if(result != 0 || Length > sizeof(receivedData))
+    return false;
+
+  int len = node.getResponseBufferLength();
+  for (byte j = 0; j < len; j++)
+    receivedData[j] = node.getResponseBuffer(j);
+
+  node.clearResponseBuffer();
+  delay(50);
+  return true;
+}
+
+//Write Single Coil
+boolean writeModbusServerCoil(int Start, bool Value)
+{
+  int OnOff = Value ? 1 : 0;
+  node.writeSingleCoil(Start, OnOff);
+  delay(50);
+  return true;
+}
+
+//Write Multiple Coil
+boolean writeModbusServerCoils(int Start, int Length, bool Value[])
+{
+  if (Length > 2000)
+    return false;
+
+  int registers = Length / 16;
+
+  for (byte i = 0; i < registers; i++)
+  {
+    uint16_t bufferData = 0;
+    for (int j = 0; j < 16; j++)
+      bitWrite(bufferData, j, Value[j + (i*16)]);
+
+    node.setTransmitBuffer(i, bufferData);
+  }
+
+  node.writeMultipleCoils(Start, Length);
+
+  delay(50);
+  return true;
+}
+
+//Write Single Register
+boolean writeModbusServerHreg(int Start, int Value)
+{
+  node.writeSingleRegister(Start, Value);
+  delay(50);
+  return true;
+}
+
+//Write Multiple Register
+boolean writeModbusServerHregs(int Start, int Length, uint16_t Value[])
+{
+  for (byte i = 0; i < Length; i++)
+    node.setTransmitBuffer(i, Value[i]);
+
+  node.writeMultipleRegisters(Start, Length);
+  delay(50);
+  return true;
+}
+
+//Validate that modbus connection is stilla ctive
+boolean checkModbusConnection()
+{  
+  return (node.MBconnectionFlag != 0); //Return true if connection is up and running
+}

@@ -1,0 +1,37 @@
+**************************************
+ARDUINO Digital Pins (2-13)
+**************************************
+2  Ethernet SPI Interrupt
+3  Analog MUX S0
+4  Analog MUX S1
+5  Analog MUX S2
+6  Analog MUX S3
+7  
+8  
+9  
+10 Ethernet SPI CS
+12 Ethernet SPI MOSI
+13 Ethernet SPI MISO
+
+**************************************
+ARDUINO Analog Pins (14-21)
+**************************************
+A0 MUX
+A1
+A2
+A3
+A4 I2C SDA (3x OLEDs, 3x Servos)	(4pin, 3pin)
+A5 I2C SCL (3x OLEDs, 3x Servos)
+A6
+A7
+
+**************************************
+ETHERNET EXTERNAL SIGNALS INPUTS
+**************************************
+datetime : date and time signal from domotic
+ext_temp : outside temperature
+ext_wind : outside wind speed
+
+**************************************
+ETHERNET EXTERNAL SIGNALS OUTPUTS
+**************************************

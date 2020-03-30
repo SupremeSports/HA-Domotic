@@ -1,0 +1,80 @@
+####################################################
+# UILOVELACE - DEV (INVISIBLE ICON)                #
+####################################################
+
+- title: Dev
+  icon: mdi:hidden
+  # Unique path for direct access /lovelace/${path}
+  path: dev
+  visible: true
+  badges:
+    - sensor.time
+  cards:
+    - type: custom:state-element
+      tap_action:
+      action: toggle
+      entity: sensor.dates
+      style:
+        font-size: 60px
+        color: white
+        top: 10%
+        left: 10%
+    # The markdown card will render markdown text.
+    - type: markdown
+      title: Lovelace
+      content: >
+        Welcome to your **Lovelace UI**.
+        
+    - type: entities
+      title: Doorbells
+      show_header_toggle: false
+      entities:
+        - binary_sensor.house_fd_bell
+        - binary_sensor.house_sd_bell
+        - binary_sensor.house_bd_bell
+        - binary_sensor.garage_fd_bell
+
+    - type: entities
+      title: Milight RGBW Controller
+      show_header_toggle: false
+      entities:     
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: Milight Sync Function
+          entities:
+            - input_number.milight_id_sync
+            - type: entity-button
+              name: Generate Help Notification
+              entity: script.milightsynchelp
+              tap_action:
+                action: call-service
+                service: script.turn_on
+                service_data:
+                  entity_id: script.milightsynchelp
+        - type: custom:fold-entity-row
+          head: light.master_bedroom_rgbw
+          entities:
+            - cover.master_bedroom_rgbw
+        - type: custom:fold-entity-row
+          head: light.under_bar_rgbw
+          entities:
+            - cover.under_bar_rgbw
+            
+    - type: entities
+      title: Massage Room
+      show_header_toggle: false
+      entities:
+        - sensor.massage_room_temp
+        - sensor.massage_room_humidity
+        - light.massage_clock_rgb
+    - type: light
+      entity: light.massage_clock_rgb
+        
+    # - type: picture
+      # name: Doorbell Camera
+      # tap_action:
+        # action: none
+      # hold_action:
+        # action: none
+      # image: 'http://192.168.1.20/'

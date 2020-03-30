@@ -1,0 +1,64 @@
+switch:
+  #Homed status of the hands
+  - platform: mqtt
+    name: Stepper Wall Clock Homed
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    command_topic: "Home/WallClock/Cmd"
+    value_template: '{{ value_json.state }}'
+    availability_topic: "Home/WallClock/LWT"
+    payload_on: '{"state":"ON"}'
+    payload_off: '{"state":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+sensor:
+  - platform: mqtt
+    name: "Stepper Wall Clock"
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    availability_topic: "Home/WallClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        Ok
+      {% else %}
+        Homing
+      {% endif %}
+    json_attributes_topic: "Home/WallClock/Stts"
+
+automation:
+  #Publish time to all devices every 5 minutes or when a device requests an update (boot up or invalid time detected (by the device))
+    - alias: Publish Time
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: mqtt
+        topic: "Home/Global/Time/Request"
+        payload: 'ON'
+        encoding: 'utf-8'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Global/Time"
+        #IMPORTANT - Always send a delimiter at the end of the string for parsing to succeed
+        payload: "{{ '{:04}:{:02}:{:02}:{:02}:{:02}:{:02}:'.format(now().year, now().month, now().day, now().hour, now().minute, now().second) }}"
+        
+customize:
+  sensor.stepper_wall_clock:
+    templates:
+      icon_color: >
+        if (state === 'Ok') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+  switch.stepper_wall_clock_homed:
+    templates:
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';

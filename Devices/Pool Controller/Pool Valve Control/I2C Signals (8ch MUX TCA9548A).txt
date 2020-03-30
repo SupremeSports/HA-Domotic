@@ -1,0 +1,12 @@
+**************************************
+I2C Signals (8ch MUX TCA9548A)
+**************************************
+
+0  PWM Motor #1 - Solar system
+1  PWM Motor #2 - Heatpump system
+2  PWM Motor #3 - Inlet system
+3  
+4  
+5  OLED #1 - Solar system
+6  OLED #2 - Heatpump system
+7  OLED #3 - Inlet system

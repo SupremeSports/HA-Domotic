@@ -1,0 +1,89 @@
+####################################################
+# UILOVELACE - PARAMETERS                          #
+####################################################
+
+- title: Parameters
+  icon: mdi:wrench
+  # Unique path for direct access /lovelace/${path}
+  path: params
+  visible: true
+  badges:
+    - sensor.time
+  cards:
+    - type: entities
+      title: TED5000
+      show_header_toggle: false
+      entities: 
+        - sensor.ted5000_mtu1_power
+        - sensor.ted5000_mtu2_power
+        - sensor.ted5000_mtu3_power
+
+    - type: entities
+      title: Water Entrance
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.water_valve_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: switch.water_valve_open
+                  name: Turn ON
+                - entity: switch.water_valve_close
+                  name: Turn OFF
+            - automation.water_valve_force_off
+            - automation.water_valve_off
+            - automation.water_valve_on
+        - type: custom:fold-entity-row
+          head: sensor.water_heater_status
+          entities:
+            - switch.water_heater
+            - sensor.water_heater_temperature
+            - sensor.water_heater_flow
+
+    - type: entities
+      title: Control Room Box
+      show_header_toggle: false
+      entities:
+        #- sensor.controlroom_heartbeat
+        - sensor.controlroom_box_temperature
+        - sensor.controlroom_box_humidity
+        
+    - type: entities
+      title: Weather Station Box
+      show_header_toggle: false
+      entities:
+        #- sensor.weatherstation_heartbeat
+        - sensor.weatherstation_box_temperature
+        - sensor.weatherstation_box_humidity
+
+    - type: entities
+      title: Clocks
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.nixie_clock
+          entities:
+            - light.nixie_clock
+            - light.nixie_clock_rgb
+            - switch.nixie_hour_mode
+            - switch.nixie_blank_leading_zero
+            - switch.nixie_enable_scroll_back
+            - switch.nixie_slots_mode
+            - switch.nixie_use_fading
+            - switch.nixie_use_ldr
+            - switch.nixie_suppress_acp
+        - type: custom:fold-entity-row
+          head: sensor.stepper_wall_clock
+          entities:
+            - switch.stepper_wall_clock_homed
+
+    - type: entities
+      title: Beds
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.master_bed_presence
+          entities:
+            - sensor.master_bed_raw
+            - switch.master_bed_tare

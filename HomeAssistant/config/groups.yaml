@@ -1,0 +1,70 @@
+####################################################
+# GROUPS                                           #
+####################################################
+
+  date_and_time:
+     icon: mdi:home 
+     entities:
+       - group.time
+  date_time:
+    name: Date and Time
+    entities:
+      - sensor.time
+      - sensor.date
+      - sensor.time_utc
+  admin:
+    name: Restart HASS
+    entities:
+      - input_boolean.restart_hass
+       
+  energySensor:
+    name: EnergyMonitor
+    entities:
+      - sensor.ted5000_mtu1_power
+      - sensor.ted5000_mtu1_voltage
+      - sensor.ted5000_mtu2_power
+      - sensor.ted5000_mtu2_voltage
+      - sensor.ted5000_mtu3_power
+      - sensor.ted5000_mtu3_voltage
+      
+  tempFeelsLike:
+    name: Feels Like
+    entities:
+      - sensor.outdoor_feelslike
+      
+  pool_clock_settings:
+    name: Pool Clock Settings
+    entities:
+      - input_text.pool_text_top
+      - input_text.pool_text_bottom
+      - input_number.pool_clock_scroll_speed
+  
+  locks:
+    name: Locks
+    entities:
+      - input_boolean.house_fd_lock
+      - input_boolean.house_fd_unlock
+      - input_boolean.house_sd_lock
+      - input_boolean.house_sd_unlock
+      - input_boolean.house_bd_lock
+      - input_boolean.house_bd_unlock
+      - input_boolean.garage_fd_lock
+      - input_boolean.garage_fd_unlock
+      - input_boolean.lock_all
+      
+  garagedoors:
+    name: Garage Doors
+    entities:
+      - input_boolean.garage_cd_trigger
+      
+  cars:
+    name: Cars
+    entities:
+      - input_boolean.cars_lexus_lock
+      - input_boolean.cars_lexus_unlock
+      - input_boolean.cars_lexus_start
+      - input_boolean.cars_lexus_other1
+      - input_boolean.cars_journey_lock
+      - input_boolean.cars_journey_unlock
+      - input_boolean.cars_journey_start
+      

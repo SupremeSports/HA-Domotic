@@ -1,0 +1,67 @@
+####################################################
+# SENSORS - RPi and HA                             #
+####################################################
+
+  #https://www.home-assistant.io/integrations/glances/
+
+  #CPU Temperature     
+  # - platform: command_line
+    # name: CPU Temperature
+    # scan_interval: 10
+    # command: "sensors | grep 'CPU Temperature' | awk '{ print $3 }' | rev | cut -c 6- | rev | cut -c 2-"
+    # # If errors occur, remove degree symbol below
+    # unit_of_measurement: "°C"
+    # value_template: '{{ value | int | round(1) }}'
+  
+  # #Raspberry Pi Voltage
+  # - platform: rpi_power
+  
+  # - platform: template
+    # sensors:
+      # rpi_power_description:
+        # friendly_name: "RPi Status"
+        # value_template: '{{states.sensor.rpi_power_status.attributes.description}}'
+        # icon_template: mdi:raspberry-pi
+  
+  #Home Assistant uptime
+  - platform: uptime
+    name: Time Online
+    unit_of_measurement: hours
+    
+  #Terminal command for network card name: ifconfig
+  - platform: systemmonitor
+    resources:
+    # - type: processor_use
+    # - type: disk_use_percent
+      # arg: /
+    # - type: memory_use_percent
+    #- type: swap_use_percent
+    - type: last_boot
+    - type: load_1m
+    - type: load_15m
+    #IoT card
+    - type: packets_in
+      arg: hassio
+    - type: packets_out
+      arg: hassio
+    - type: throughput_network_in
+      arg: hassio
+    - type: throughput_network_out
+      arg: hassio
+    - type: network_in
+      arg: hassio
+    - type: network_out
+      arg: hassio
+    #Internet card
+    - type: packets_in
+      arg: enp1s6
+    - type: packets_out
+      arg: enp1s6
+    - type: throughput_network_in
+      arg: enp1s6
+    - type: throughput_network_out
+      arg: enp1s6
+    - type: network_in
+      arg: enp1s6
+    - type: network_out
+      arg: enp1s6

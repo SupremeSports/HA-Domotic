@@ -1,0 +1,13 @@
+####################################################
+# INPUTS BOOLEAN                                   #
+####################################################
+
+  restart_hass:
+    name: Restart HASS
+    initial: off
+    icon: mdi:autorenew
+    
+  request_position:
+    name: Request IOS positions
+    initial: off
+    icon: mdi:map-marker-radius

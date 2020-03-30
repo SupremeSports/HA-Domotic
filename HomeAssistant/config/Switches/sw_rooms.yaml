@@ -1,0 +1,17 @@
+####################################################
+# SWITCHES - ROOMS                                 #
+####################################################
+
+  - platform: mqtt
+    name: "Master Bed Tare"
+    icon: mdi:scale
+    state_topic: "Home/Master/Bed/Stts"
+    command_topic: "Home/Master/Bed/Cmd"
+    availability_topic: "Home/Master/Bed/LWT"
+    value_template: "{{ value_json.tare }}"
+    payload_on: '{"tare":"ON"}'
+    payload_off: '{"tare":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"

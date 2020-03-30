@@ -1,0 +1,50 @@
+####################################################
+# Notification groups                              #
+####################################################
+
+  - name: sms_test
+    platform: smtp
+    server: !secret notify_smtp
+    sender: !secret email_jean
+    recipient:
+      - !secret sms_jean
+      - !secret email_jean
+    sender_name: My Home Assistant
+    
+  - name: sms_jean
+    platform: smtp
+    server: !secret notify_smtp
+    sender: !secret email_jean
+    recipient:
+      - !secret sms_jean
+    sender_name: My Home Assistant
+    
+  - name: sms_cindy
+    platform: smtp
+    server: !secret notify_smtp
+    sender: !secret email_jean
+    recipient:
+      - !secret sms_cindy
+    sender_name: My Home Assistant
+    
+  - name: SMS Notify All
+    platform: smtp
+    server: !secret notify_smtp
+    sender: !secret email_jean
+    recipient:
+       - !secret sms_jean
+       - !secret sms_cindy
+    sender_name: My Home Assistant
+
+  - name: iOS Notify All
+    platform: group
+    services:
+      - service: mobile_app_iphone_de_jean
+      - service: mobile_app_iphone_de_cindy
+      - service: mobile_app_ipad_de_cindy
+
+  - name: iOS Notify Parents
+    platform: group
+    services:
+      - service: mobile_app_iphone_de_jean
+      - service: mobile_app_iphone_de_cindy

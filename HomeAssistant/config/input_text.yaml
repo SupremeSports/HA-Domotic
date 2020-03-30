@@ -1,0 +1,28 @@
+####################################################
+# INPUT TEXT                                       #
+####################################################
+  
+  pool_text_top:
+    name: Pool Text Display Top
+    pattern: '[a-fA-F0-9]*'
+    min: 0
+    max: 80
+    mode: text
+  pool_text_bottom:
+    name: Pool Text Display Bottom
+    pattern: '[a-fA-F0-9]*'
+    min: 0
+    max: 80
+    mode: text
+    
+  doorlock_passcode:
+    name: Unlock Passcode
+    mode: password
+    initial: ""
+    min: 0
+    max: 6
+  doorlock_passcode_list:
+    mode: password
+    initial: !secret doorlock_passcode_list
+    min: 0
+    max: 255

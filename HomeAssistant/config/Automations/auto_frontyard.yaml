@@ -1,0 +1,136 @@
+###################################################
+# AUTOMATIONS - FRONT YARD                        #
+###################################################
+
+  - alias: Lamp Post Control
+    trigger:
+      - platform: time_pattern
+        seconds: '/1'
+      - platform: state
+        entity_id: input_select.lamppost_mode
+    action:
+      entity_id: switch.lamp_post
+      service_template: >
+        {% set time = now().hour %}
+        {% set LP = false %}
+        {% if is_state('input_select.lamppost_mode', '24/7') %}
+          {% set LP = true %}
+        {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h')  %}
+          {% set LP = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+        {% elif is_state('input_select.lamppost_mode', 'COVID-19') %}
+          {% if now().hour == 20 and now().minute == 30 %}
+            {% set LP = is_state('sensor.flashing_1s', 'on') %}
+          {% else %}
+            {% set LP = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+          {% endif %}
+        {% endif %}
+        
+        {% if LP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+      
+  - alias: Power Outlet Control
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.poweroutlet_mode
+    action:
+      entity_id: switch.power_outlet
+      service_template: >
+        {% set time = now().hour %}
+        {% set date = now().strftime("%m-%d") %}
+        {% set sunset_hour = as_timestamp(states.sun.sun.attributes.next_setting)|int %}
+        {% set sunset_hour = sunset_hour - 60*60 %}
+        {% set sunset_early = (sunset_hour | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
+        {% set PO = false %}
+        {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+          {% set PO = true %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+          {% if is_state('sun.sun', 'below_horizon') and time < 22 %}
+            {% set PO = true %}
+          {% elif states.sensor.outdoor_temperature.state|float < 5.0 %}
+            {% set PO = true %}
+          {% endif %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set PO = true %}
+          {% elif date == "10-31" and time >= 7 %}
+            {% set PO = true %}
+          {% endif %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set PO = true %}
+          {% elif (date == "12-24" and time >= 7) or date == "12-25" %}
+            {% set PO = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if PO == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  - alias: Garage Front Light Control
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.garagefrontlight_mode
+    action:
+      entity_id: switch.garage_front_light
+      service_template: >
+        {% set time = now().hour %}
+        {% set GFL = false %}
+        {% set GFP = is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') and is_state('switch.garage_front_power', 'on') %}
+        {% if is_state('input_select.garagefrontlight_mode', '24/7') %}
+          {% set GFL = true %}
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to 23h') and not GFP %}
+          {% set GFL = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to Sunrise') and not GFP %}
+          {% set GFL = is_state('sun.sun', 'below_horizon') %}
+        {% endif %}
+        
+        {% if GFL == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Garage Front Power Control
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.garagefrontpower_mode
+    action:
+      entity_id: switch.garage_front_power
+      service_template: >
+        {% set time = now().hour %}
+        {% set date = now().strftime("%m-%d") %}
+        {% set sunset_hour = as_timestamp(states.sun.sun.attributes.next_setting)|int %}
+        {% set sunset_hour = sunset_hour - 60*60 %}
+        {% set sunset_early = (sunset_hour | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
+        {% set GFP = false %}
+        {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
+          {% set GFP = true %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Sunset to 23h') %}
+          {% set GFP = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Sunset to Sunrise') %}
+          {% set GFP = is_state('sun.sun', 'below_horizon') %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set GFP = true %}
+          {% elif (date == "12-24" and time >= 7) or date == "12-25" %}
+            {% set GFP = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if GFP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}

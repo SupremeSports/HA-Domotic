@@ -1,0 +1,233 @@
+####################################################
+# ZONES                                            #
+####################################################
+
+######### FAMILY #########
+  - name: Home
+    latitude: 48.9013
+    longitude: -72.2155
+    radius: 125
+    icon: mdi:home
+    
+  - name: Mailbox
+    latitude: 48.902082
+    longitude: -72.213713
+    radius: 30
+    icon: mdi:mailbox
+    
+  - name: Michel&Suzanne
+    latitude: 48.402319
+    longitude: -71.074516
+    radius: 100
+    icon: mdi:account-star
+    
+  - name: Benoit
+    latitude: 48.385671
+    longitude: -70.972159
+    radius: 100
+    icon: mdi:account-star
+    
+  - name: Gisèle
+    latitude: 48.342916
+    longitude: -70.879539
+    radius: 100
+    icon: mdi:account-star
+    
+  - name: Roxanne
+    latitude: 48.336188
+    longitude: -70.888591
+    radius: 100
+    icon: mdi:account-star
+
+#Friends
+  - name: Marc-André Boulay
+    latitude: 48.453651
+    longitude: -71.019146
+    radius: 100
+    icon: mdi:account
+    
+  - name: Dadou & Meril
+    latitude: 48.298885
+    longitude: -71.153159
+    radius: 100
+    icon: mdi:account
+
+#Work
+  - name: DO2 Contrôle
+    latitude: 48.867998
+    longitude: -72.233793
+    radius: 75
+    icon: mdi:factory
+    
+  - name: Dolbeau Oxygène
+    latitude: 48.88088
+    longitude: -72.23668
+    radius: 100
+    icon: mdi:factory
+
+#Others
+  - name: IUCPQ
+    latitude: 46.778188
+    longitude: -71.296388
+    radius: 1000
+    icon: mdi:hospital-building
+    
+  - name: CHUL
+    latitude: 46.768702
+    longitude: -71.282332
+    radius: 1000
+    icon: mdi:hospital-buiding
+    
+  - name: Hopital Dolbeau
+    latitude: 48.886428
+    longitude: -72.239940
+    radius: 250
+    icon: mdi:hospital-buiding
+    
+#Airports in Canada
+  - name: YBG - Bagotville
+    latitude: 48.337109
+    longitude: -70.999348
+    radius: 750
+    icon: mdi:airplane
+
+  - name: YQB - Québec
+    latitude: 46.791455
+    longitude: -71.384157
+    radius: 1000
+    icon: mdi:airplane
+
+  - name: YUL - Montréal
+    latitude: 45.468635
+    longitude: -73.743668
+    radius: 3500
+    icon: mdi:airplane
+    
+  - name: YYZ - Toronto
+    latitude: 43.677624
+    longitude: -79.625002
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: YVR - Vancouver
+    latitude: 49.196187
+    longitude: -123.176899
+    radius: 3500
+    icon: mdi:airplane
+    
+  - name: YEG - Edmonton
+    latitude: 53.307761
+    longitude: -113.582115
+    radius: 3500
+    icon: mdi:airplane
+    
+  - name: YYC - Calgary
+    latitude: 51.122703
+    longitude: -114.007259
+    radius: 4000
+    icon: mdi:airplane
+    
+  - name: YXE - Saskatoon
+    latitude: 52.174547
+    longitude: -106.698656
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: YQU - Grande Prairie
+    latitude: 55.181141
+    longitude: -118.882086
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: YXS - Prince-George
+    latitude: 53.887970
+    longitude: -122.675883
+    radius: 1800
+    icon: mdi:airplane
+    
+#Airports in US
+  - name: ORD - Chicago
+    latitude: 41.976699
+    longitude: -87.905798
+    radius: 5000
+    icon: mdi:airplane
+
+  - name: SEA - Seattle-Tacoma
+    latitude: 47.449226
+    longitude: -122.309736
+    radius: 2000
+    icon: mdi:airplane
+    
+  - name: RNO - Reno-Tahoe
+    latitude: 39.501048
+    longitude: -119.768438
+    radius: 2000
+    icon: mdi:airplane
+    
+  - name: SFO - San-Francisco
+    latitude: 37.620850
+    longitude: -122.385259
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: DEN - Denver
+    latitude: 39.861108
+    longitude: -104.677520
+    radius: 8000
+    icon: mdi:airplane
+    
+  - name: RDU - Raleigh-Durham
+    latitude: 35.879839
+    longitude: -78.788321
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: EWR - Newark-Liberty
+    latitude: 40.690349
+    longitude: -74.174854
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: PDX - Portland
+    latitude: 45.5868
+    longitude: -122.5784
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: MCO - Orlando
+    latitude: 28.431027
+    longitude: -81.316091
+    radius: 2500
+    icon: mdi:airplane
+
+  - name: MIA - Miami
+    latitude: 25.796229
+    longitude: -80.288189
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: JAX - Jacksonville
+    latitude: 30.493377
+    longitude: -81.684839
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: GSO - Greensboro
+    latitude: 36.105806
+    longitude: -79.936963
+    radius: 2500
+    icon: mdi:airplane
+    
+  - name: MSY - New-Orleans
+    latitude: 29.992630599867837
+    longitude: -90.26787757873537
+    radius: 2000
+    icon: mdi:airplane
+    
+  - name: IAD - Washington
+    latitude: 38.949067
+    longitude: -77.456964
+    radius: 2000
+    icon: mdi:airplane
+    
+#Airports Others

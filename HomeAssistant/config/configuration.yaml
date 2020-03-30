@@ -1,0 +1,206 @@
+####################################################
+# CONFIGURATION                                    #
+####################################################
+
+homeassistant:
+  # Customization file
+  customize: !include_dir_merge_named Customizations
+  packages: !include_dir_named packages
+  auth_providers:
+    - type: homeassistant
+
+#Activate iOS devices
+#ios:
+mobile_app:
+    
+#Lovelace personalized interface
+lovelace:
+  mode: yaml
+
+# Enables the frontend
+frontend:
+  themes: !include themes.yaml
+  extra_html_url:
+    - /local/custom_ui/state-card-custom-ui.html
+  extra_html_url_es5:
+    - /local/custom_ui/state-card-custom-ui-es5.html
+  javascript_version: latest
+
+# Custom iframe panels
+panel_iframe:
+  chicoutimi:
+    title: Chicoutimi
+    icon: mdi:account-supervisor-circle
+    url: !secret ha_chicout_url
+
+# Enables configuration UI
+config:
+
+# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+http:
+  base_url: !secret ha_base_url
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+# Track the sun
+sun:
+
+# Text to speech
+tts:
+  - platform: google_translate
+    service_name: google_say
+    
+# google:
+  # # client_id: 203193263929-2qoftcb7mq0k9tvhgmgi98p9h1kf8tfm.apps.googleusercontent.com
+  # # client_secret: iiORyYSvuwrDCdMXAgTg9PGU
+  
+  # client_id: 1056160143124-emgfqkspihb31akkhqk9ql11funjpt60.apps.googleusercontent.com
+  # client_secret: RrV2Km-tZPY0yEB2DvN6n5B4
+
+# Cloud
+cloud:
+
+#Sensors and others  
+shell_command: !include shell_commands.yaml
+group: !include groups.yaml
+automation: !include_dir_merge_list Automations
+script: !include scripts.yaml
+zone: !include zones.yaml
+sensor: !include_dir_merge_list Sensors
+switch: !include_dir_merge_list Switches
+device_tracker: !include device_tracker.yaml
+input_boolean: !include_dir_merge_named InputBool
+binary_sensor: !include_dir_merge_list BinarySensors
+light: !include lights.yaml
+fan: !include fans.yaml
+#hello_state:
+cover: !include covers.yaml
+alert: !include alerts.yaml
+input_text: !include input_text.yaml
+input_select: !include_dir_merge_named InputSelects
+input_number: !include input_number.yaml
+lock: !include locks.yaml
+counter: !include counters.yaml
+input_datetime: !include input_datetime.yaml
+alarm_control_panel: !include alarm.yaml
+notify: !include notifications.yaml
+utility_meter: !include utilities.yaml
+climate: !include climates.yaml
+
+#Weather Forecasts from Environement Canada
+weather:
+  - platform: environment_canada
+    name: !secret ha_city
+    forecast: hourly
+    # language: english
+camera:
+  - platform: environment_canada
+    name: !secret ha_city
+
+#Health
+system_health:
+
+speedtestdotnet:
+  scan_interval:
+    minutes: 10
+    
+#Devices and integrations
+vacuum:
+  - platform: roomba
+    name: Roomba iRobot
+    host: !secret roomba_ip
+    username: !secret roomba_username
+    password: !secret roomba_password
+    entity_id: sensor.dates_second
+
+iaqualink:
+  username: !secret iaqualink_username
+  password: !secret iaqualink_password
+  
+media_player:
+- platform: kodi
+  host: 192.168.0.199
+
+#Communication protocols
+mqtt:
+  broker: !secret mqtt_broker
+  port: !secret mqtt_port
+  username: !secret mqtt_login
+  password: !secret mqtt_pass
+  
+# modbus:
+  # - type: tcp
+    # name: MB_ControlRoom
+    # host: !secret modbus0_ip
+    # port: !secret modbus_port
+
+  # - type: tcp
+    # name: MB_PoolArea
+    # host: !secret modbus1_ip
+    # port: !secret modbus_port
+
+duckdns:
+  domain: !secret duckdns_domain
+  access_token: !secret duckdns_token
+
+#Database recorder
+recorder: !include recorder.yaml
+#recorder:
+
+clean_up_snapshots_service:
+  host: !secret ha_base_url
+  token: !secret ha_cleanup_token
+  number_of_snapshots_to_keep: 10
+
+life360:
+  # MPH, assuming imperial units.
+  # If using metric (KPH), the equivalent would be 29.
+  driving_speed: 20
+  interval_seconds: 10
+  max_gps_accuracy: 200
+  max_update_wait:
+    minutes: 45
+  show_as_state:
+    - driving
+    - moving
+  # Set comm error thresholds so first is not logged,
+  # second is logged as a WARNING, and third and fourth
+  # are logged as ERRORs.
+  warning_threshold: 2
+  error_threshold: 3
+
+glances:
+  - host: localhost
+    version: 2
+    name: Server
+    
+# influxdb:
+  # host: a0d7b954-influxdb
+  # port: 8086
+  # database: homeassistant
+  # username: homeassistant
+  # password: Eclipse1!
+  # max_retries: 3
+  # default_measurement: state

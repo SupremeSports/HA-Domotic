@@ -1,0 +1,30 @@
+####################################################
+# INPUT DATETIME                                   #
+####################################################
+
+  collect_trash_start:
+    name: Trash Last Normal Day
+    has_date: true
+    has_time: false
+  collect_trash_end:
+    name: Trash Last Summer Day
+    has_date: true
+    has_time: false
+    
+  collect_recycle_start:
+    name: Recycle Last Normal Day
+    has_date: true
+    has_time: false
+  collect_recycle_end:
+    name: Recycle Last Summer Day
+    has_date: true
+    has_time: false
+    
+  last_postal_arrival:
+    name: Last Postal Arrival
+    has_date: true
+    has_time: true
+  last_postal_removal:
+    name: Last Postal Removal
+    has_date: true
+    has_time: true

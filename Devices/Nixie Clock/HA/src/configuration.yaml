@@ -1,0 +1,173 @@
+switch:
+  - platform: mqtt
+    name: Nixie Hour Mode
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.hrm }}"
+    payload_on: '{"hrm":"ON"}'
+    payload_off: '{"hrm":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Blank Leading Zero
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.bkl }}"
+    payload_on: '{"bkl":"ON"}'
+    payload_off: '{"bkl":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Enable Scroll Back
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.scb }}"
+    payload_on: '{"scb":"ON"}'
+    payload_off: '{"scb":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Suppress ACP
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.acp }}"
+    payload_on: '{"acp":"ON"}'
+    payload_off: '{"acp":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Use Fading
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.fde }}"
+    payload_on: '{"fde":"ON"}'
+    payload_off: '{"fde":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Use LDR
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.ldr }}"
+    payload_on: '{"ldr":"ON"}'
+    payload_off: '{"ldr":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Nixie Slots Mode
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    value_template: "{{ value_json.slt }}"
+    payload_on: '{"slt":"ON"}'
+    payload_off: '{"slt":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+
+sensor:
+  - platform: mqtt
+    name: "Nixie Clock Status"
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Stts"
+    availability_topic: "Home/NixieClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        On
+      {% else %}
+        Off
+      {% endif %}
+    json_attributes_topic: "Home/NixieClock/Json"
+    
+  - platform: template
+    sensors:
+      nixie_clock:
+        entity_id:
+          - light.nixie_clock
+          - sensor.nixie_clock_status
+        value_template: "{{ states('sensor.nixie_clock_status') }}"
+        availability_template: "{{ not is_state('sensor.nixie_clock_status', 'unavailable') }}"
+        entity_picture_template: >
+          {% if is_state('sensor.nixie_clock_status','On') %}
+            /local/images/CustomMDI/nixietubes/dark_FBCD41.png
+          {% elif is_state('sensor.nixie_clock_status','Off') %}
+            /local/images/CustomMDI/nixietubes/dark_007AFF.png
+          {% else %}
+            /local/images/CustomMDI/nixietubes/dark_48485E.png
+          {% endif %}
+        attribute_templates:
+          state: "{{ state_attr('sensor.nixie_clock_status', 'state') }}"
+          case_temp: "{{ state_attr('sensor.nixie_clock_status', 'case_temp') }}"
+          wifi_rssi: "{{ state_attr('sensor.nixie_clock_status', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('sensor.nixie_clock_status', 'wifi_percent') }}"
+
+automation:
+  - alias: Nixie Clock
+    trigger:
+      platform: time_pattern
+      seconds: '/5'
+    action:
+      - entity_id: light.nixie_clock
+        service_template: >
+          {% set curHour = state_attr('sensor.times', 'hour')|int %}
+          {% set presence = is_state('device_tracker.life360_xxxx', 'home') or is_state('device_tracker.life360_yyyy', 'home') %}
+          
+          {% if curHour >= 7 and curHour < 23 and presence %}
+            light.turn_on
+          {% else %}
+            light.turn_off
+          {% endif %}
+      - entity_id: light.nixie_clock_rgb
+        service_template: >
+          {% set Sun = is_state('sun.sun','below_horizon') %}
+          {% set presence = is_state('device_tracker.life360_jean', 'home') or is_state('device_tracker.life360_cindy', 'home') %}
+          
+          {% if Sun == true and presence %}
+            light.turn_on
+          {% else %}
+            light.turn_off
+          {% endif %}
+
+customize:
+  sensor.nixie_clock:
+    friendly_name: "Nixie Clock"
+    templates:
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';

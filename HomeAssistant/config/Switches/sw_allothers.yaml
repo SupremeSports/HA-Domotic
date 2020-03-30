@@ -1,0 +1,51 @@
+####################################################
+# SWITCHES                                         #
+####################################################
+
+  # - platform: mqtt
+    # name: Postal Status
+    # icon: mdi:mailbox
+    # state_topic: "Home/Postal/Stts"
+    # command_topic: "Home/Postal/Cmd"
+    # availability_topic: "Home/Postal/LWT"
+    # state_on: "1"
+    # state_off: "0"
+    # payload_on: "1"
+    # payload_off: "0"
+    # payload_available: "online"
+    # payload_not_available: "offline"
+    # qos: 0
+    
+  - platform: mqtt
+    name: Postal Status
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    command_topic: "Home/Postal/Cmd"
+    availability_topic: "Home/Transmitter/LWT"
+    value_template: '{{ value_json.state }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  #Homed status of the hands
+  - platform: mqtt
+    name: Stepper Wall Clock Homed
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    command_topic: "Home/WallClock/Cmd"
+    availability_topic: "Home/WallClock/LWT"
+    value_template: '{{ value_json.state }}'
+    payload_on: '{"state":"ON"}'
+    payload_off: '{"state":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+
+    
+    

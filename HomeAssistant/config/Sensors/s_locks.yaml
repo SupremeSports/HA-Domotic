@@ -1,0 +1,289 @@
+####################################################
+# SENSORS - DOORS & LOCKS                          #
+####################################################
+
+  - platform: mqtt
+    name: Garage CD Raw
+    state_topic: "Garage/Door/Car/Position/Stts"
+    availability_topic: "Garage/Door/Car/Opener/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: template
+    sensors:
+      lock_passcode_ok:
+        entity_id:
+          - sensor.refresh_1s
+          - input_text.doorlock_passcode
+        friendly_name: "Lock Passcode OK"
+        value_template: >
+          {% set string = states('input_text.doorlock_passcode_list') %}
+          {% set passcode = states('input_text.doorlock_passcode') %}
+          {% set ok = namespace(found=False) %}
+          {% for word in string.split() %}
+            {% if passcode == word %}
+              {% set ok.found = True %}
+            {% endif %}
+          {% endfor %}
+          
+          {% if ok.found == true %}
+            on
+          {% else %}
+            off
+          {% endif %}
+          
+  - platform: template
+    sensors:
+      house_fd_status:
+        entity_id:
+          - sensor.refresh_1s
+          - lock.house_fd_lock
+          - binary_sensor.house_fd_opened
+        friendly_name: "House Front Door"
+        value_template: >
+          {% set locked = is_state('lock.house_fd_lock', 'locked') %}
+          {% set closed = is_state('binary_sensor.house_fd_opened', 'off') %}
+          {% set unavailable = is_state('lock.house_fd_lock', 'unavailable') %}
+
+          {% if unavailable %}
+            Unavailable
+          {% elif closed and locked %}
+            Ok
+          {% elif closed and not locked %}
+            Unlocked
+          {% elif not closed and not locked %}
+            Opened
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: >
+          {{ not is_state('lock.house_fd_lock', 'unavailable') }}
+        attribute_templates:
+          locked: >
+            {% if is_state('lock.house_fd_lock', 'locked') %}
+              True
+            {% elif is_state('lock.house_fd_lock', 'unlocked') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          closed: >
+            {% if is_state('binary_sensor.house_fd_opened', 'off') %}
+              True
+            {% elif is_state('binary_sensor.house_fd_opened', 'on') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          bell: >
+            {% if is_state('binary_sensor.house_fd_bell', 'on') %}
+              True
+            {% elif is_state('binary_sensor.house_fd_bell', 'off') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          battery:  "{{ state_attr('lock.house_fd_lock', 'battery') }}"
+          rssi: "{{ state_attr('lock.house_fd_lock', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('lock.house_fd_lock', 'wifi_percent') }}"
+      house_sd_status:
+        entity_id:
+          - sensor.refresh_1s
+          - lock.house_sd_lock
+          - binary_sensor.house_sd_opened
+        friendly_name: "House Side Door"
+        value_template: >
+          {% set locked = is_state('lock.house_sd_lock', 'locked') %}
+          {% set closed = is_state('binary_sensor.house_sd_opened', 'off') %}
+          {% set unavailable = is_state('lock.house_sd_lock', 'unavailable') %}
+
+          {% if unavailable %}
+            Unavailable
+          {% elif closed and locked %}
+            Ok
+          {% elif closed and not locked %}
+            Unlocked
+          {% elif not closed and not locked %}
+            Opened
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: >
+            {{ not is_state('lock.house_sd_lock', 'unavailable') }}
+        attribute_templates:
+          locked: >
+            {% if is_state('lock.house_sd_lock', 'locked') %}
+              True
+            {% elif is_state('lock.house_sd_lock', 'unlocked') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          closed: >
+            {% if is_state('binary_sensor.house_sd_opened', 'off') %}
+              True
+            {% elif is_state('binary_sensor.house_sd_opened', 'on') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          bell: >
+            {% if is_state('binary_sensor.house_sd_bell', 'on') %}
+              True
+            {% elif is_state('binary_sensor.house_sd_bell', 'off') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          battery:  "{{ state_attr('lock.house_sd_lock', 'battery') }}"
+          rssi: "{{ state_attr('lock.house_sd_lock', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('lock.house_sd_lock', 'wifi_percent') }}"
+      house_bd_status:
+        entity_id:
+          - sensor.refresh_1s
+          - lock.house_bd_lock
+          - binary_sensor.house_bd_opened
+        friendly_name: "House Back Door"
+        value_template: >
+          {% set locked = is_state('lock.house_bd_lock', 'locked') %}
+          {% set closed = is_state('binary_sensor.house_bd_opened', 'off') %}
+          {% set unavailable = is_state('lock.house_bd_lock', 'unavailable') %}
+
+          {% if unavailable %}
+            Unavailable
+          {% elif closed and locked %}
+            Ok
+          {% elif closed and not locked %}
+            Unlocked
+          {% elif not closed and not locked %}
+            Opened
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: >
+          {{ not is_state('lock.house_bd_lock', 'unavailable') }}
+        attribute_templates:
+          locked: >
+            {% if is_state('lock.house_bd_lock', 'locked') %}
+              True
+            {% elif is_state('lock.house_bd_lock', 'unlocked') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          closed: >
+            {% if is_state('binary_sensor.house_bd_opened', 'off') %}
+              True
+            {% elif is_state('binary_sensor.house_bd_opened', 'on') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          bell: >
+            {% if is_state('binary_sensor.house_bd_bell', 'on') %}
+              True
+            {% elif is_state('binary_sensor.house_bd_bell', 'off') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          battery:  "{{ state_attr('lock.house_bd_lock', 'battery') }}"
+          rssi: "{{ state_attr('lock.house_bd_lock', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('lock.house_bd_lock', 'wifi_percent') }}"
+      garage_fd_status:
+        entity_id:
+          - sensor.refresh_1s
+          - lock.garage_fd_lock
+          - binary_sensor.garage_fd_opened
+        friendly_name: "Garage Front Door"
+        value_template: >
+          {% set locked = is_state('lock.garage_fd_lock', 'locked') %}
+          {% set closed = is_state('binary_sensor.garage_fd_opened', 'off') %}
+          {% set unavailable = is_state('lock.garage_fd_lock', 'unavailable') %}
+
+          {% if unavailable %}
+            Unavailable
+          {% elif closed and locked %}
+            Ok
+          {% elif closed and not locked %}
+            Unlocked
+          {% elif not closed and not locked %}
+            Opened
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: >
+          {{ not is_state('lock.garage_fd_lock', 'unavailable') }}
+        attribute_templates:
+          locked: >
+            {% if is_state('lock.garage_fd_lock', 'locked') %}
+              True
+            {% elif is_state('lock.garage_fd_lock', 'unlocked') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          closed: >
+            {% if is_state('binary_sensor.garage_fd_opened', 'off') %}
+              True
+            {% elif is_state('binary_sensor.garage_fd_opened', 'on') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          bell: >
+            {% if is_state('binary_sensor.garage_fd_bell', 'on') %}
+              True
+            {% elif is_state('binary_sensor.garage_fd_bell', 'off') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          battery:  "{{ state_attr('lock.garage_fd_lock', 'battery') }}"
+          rssi: "{{ state_attr('lock.garage_fd_lock', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('lock.garage_fd_lock', 'wifi_percent') }}"
+      garage_cd_status:
+        entity_id:
+          - sensor.refresh_1s
+          - sensor.garage_cd_raw
+          - sensor.garage_cd_status
+        friendly_name: "Garage Car Door"
+        value_template: >
+          {% set fullOpen = is_state('sensor.garage_cd_raw', 'opened') %}
+          {% set closed = is_state('sensor.garage_cd_raw', 'closed') %}
+          {% set unavailable = is_state('cover.garage_cd_opener', 'unavailable') or is_state('sensor.garage_cd_raw', 'unavailable') %}
+
+          {% if unavailable %}
+            Unavailable
+          {% elif closed %}
+            Ok
+          {% elif not closed and not fullOpen %}
+            Opened
+          {% elif not closed and fullOpen %}
+            Fully Opened
+          {% else %}
+            ERROR
+          {% endif %}
+        availability_template: >
+          {{ not is_state('cover.garage_cd_opener', 'unavailable') and not is_state('sensor.garage_cd_raw', 'unavailable') }}
+        attribute_templates:
+          closed: >
+            {% if is_state('binary_sensor.garage_cd_opened', 'off') %}
+              True
+            {% elif is_state('binary_sensor.garage_cd_opened', 'on') %}
+              False
+            {% else %}
+              NA
+            {% endif %}
+          position: >
+            {% if is_state('sensor.garage_cd_raw', 'opened') %}
+              100
+            {% elif is_state('sensor.garage_cd_raw', 'closed') %}
+              0
+            {% else %}
+              50
+            {% endif %}
+          rssi: "{{ state_attr('cover.garage_cd_opener', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('cover.garage_cd_opener', 'wifi_percent') }}"
+          

@@ -1,0 +1,113 @@
+####################################################
+# SCRIPTS                                          #
+####################################################
+
+#   group_visibility:
+#     sequence:
+#       - service: group.set_visibility
+#         data_template:
+#           entity_id: '{{ entity_id }}'
+#           visible: '{{ is_state(cond, visible_state) }}'
+
+#   group_invisibility:
+#     sequence:
+#       - service: group.set_visibility
+#         data_template:
+#           entity_id: '{{ entity_id }}'
+#           visible: '{{ not is_state(cond, visible_state) }}'
+          
+  clear_lock:
+    alias: Clear Lock Script
+    sequence:
+      - service: input_text.set_value
+        data_template:
+          entity_id: input_text.doorlock_passcode
+          value: ""
+      - delay: 00:00:01
+      - service: input_boolean.turn_off
+        entity_id: group.locks
+
+  lock:
+    alias: Lock Script
+    sequence:
+      - service: lock.lock
+        data_template:
+          entity_id: lock.{{ entity_id }}_lock
+      - service: script.turn_on
+        entity_id: script.clear_lock
+          
+  unlock:
+    alias: Unlock Script
+    sequence:
+      - service: lock.unlock
+        data_template:
+          entity_id: lock.{{ entity_id }}_lock
+      - service: script.turn_on
+        entity_id: script.clear_lock
+           
+  lockall:
+    alias: Lock ALL Script
+    sequence:
+      - service: lock.lock
+        entity_id: group.all_locks
+      - delay: 00:00:01
+      - service: script.turn_on
+        entity_id: script.clear_lock
+           
+  clear_garagedoor:
+    alias: Clear Garage Door Script
+    sequence:
+      - service: input_text.set_value
+        data_template:
+          entity_id: input_text.doorlock_passcode
+          value: ""
+      - delay: 00:00:01
+      - service: input_boolean.turn_off
+        entity_id: group.garagedoors
+  
+  garagedoor:
+    alias: Garage Door Script
+    sequence:
+      - service: cover.open_cover
+        data_template:
+          entity_id: cover.{{ entity_id }}_opener
+      - service: script.turn_on
+        entity_id: script.clear_garagedoor
+
+  cars:
+    alias: Cars Script
+    sequence:
+      - service: mqtt.publish
+        data_template: {"topic": "Home/Cars/Cmd/{{ id }}", "payload": "{\"{{ command }}\": \"ON\"}"}
+      - delay: 00:00:01
+      - service: input_boolean.turn_off
+        entity_id: group.cars
+          
+  milightspeed:
+    alias: Milight Speed
+    sequence:
+      - service: mqtt.publish
+        data_template: {"topic": "{{ topic }}", "payload": "{\"speed\": \"{{ command }}\"}"}
+
+  milightsynchelp:
+    alias: Milight Sync Help Notification
+    sequence:
+      - service: persistent_notification.create
+        data:
+          title: "Milight Sync Help"
+          message: |
+            ## Prerequisites
+            
+            Your mqtt json light device should be created with topics setup with last topic level being the *ID* you wish to sync as follow:
+            - command_topic: Home/Milight/Cmd/*ID*
+            - state_topic: Home/Milight/Stts/*ID*
+            
+            ## Instructions to sync
+            
+            1. Turn power off to light to sync
+            2. Enter the *ID* to sync into the box but don't press enter
+            3. Turn on power to light to sync
+            4. Press enter in the box as soon the light turns on
+            5. Light will blink
+            6. Done!
+          

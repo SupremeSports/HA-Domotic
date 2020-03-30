@@ -1,0 +1,28 @@
+####################################################
+# SWITCHES - GARAGE                                #
+####################################################
+
+  - platform: mqtt
+    name: Garage Front Light
+    state_topic: "Garage/Light/Front/Stts"
+    command_topic: "Garage/Light/Front/Cmd"
+    availability_topic: "Garage/Light/Front/LWT"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    
+  - platform: mqtt
+    name: Garage Front Power
+    state_topic: "Garage/Power/Front/Stts"
+    command_topic: "Garage/Power/Front/Cmd"
+    availability_topic: "Garage/Light/Front/LWT"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    

@@ -1,0 +1,82 @@
+####################################################
+# UILOVELACE - YAML                                #
+####################################################
+
+## IMPORTANT - You need to edit and resave THIS file 
+## after making a change in the Lovelace folder in
+## order to changes to be refelected after a refresh
+
+title: Cindy & Jean
+views: !include_dir_merge_list UILovelace
+
+resources:
+  - url: /local/community/lovelace-card-tools/card-tools.js
+    type: module
+    
+  - url: /local/alarm_control_panel-card.js?v=1
+    type: js
+
+#   - url: /local/card-modder.js?v=1
+#     type: js
+
+  #https://github.com/thomasloven/lovelace-color-picker
+  - url: /local/plugins/color_picker.js?v=1
+    type: js
+
+  #https://github.com/ciotlosm/custom-lovelace
+  - url: /local/monster-card.js?v=1
+    type: js
+  - url: /local/group-card.js?v=1
+    type: js
+
+  #https://github.com/custom-cards/button-entity-row
+  - url: /local/button-entity-row.js?v=1
+    type: module
+
+  #https://github.com/custom-cards/state-element
+  - url: /local/state-element.js?v=1
+    type: js
+
+  #https://github.com/custom-cards/radial-menu
+#   - url: /local/radial-menu.js
+#     type: module
+
+  #https://github.com/custom-cards/circle-sensor-card
+#   - url: /local/circle-sensor-card.js?v=0
+#     type: module
+
+  #https://github.com/custom-cards/bignumber-card
+  - url: /local/bignumber-card.js?v=1
+    type: js
+
+  #https://github.com/custom-cards/bar-card
+  - url: /local/bar-card.js?v=1.0.0
+    type: js
+
+  #https://github.com/thomasloven/lovelace-auto-entities
+  - url: /local/auto-entities.js
+    type: js
+
+  #https://github.com/custom-cards/entity-attributes-card
+  - url: /local/entity-attributes-card.js
+    type: js
+
+  #https://github.com/thomasloven/lovelace-fold-entity-row
+  - url: /local/community/lovelace-fold-entity-row/fold-entity-row.js
+    type: module
+
+  #https://github.com/custom-cards/gauge-card
+  - url: /local/gauge-card.js?v=2
+    type: js
+
+  #https://github.com/custom-cards/secondaryinfo-entity-row
+  - url: /local/secondaryinfo-entity-row.js?v=0.4
+    type: module
+
+#   #https://github.com/iantrich/restriction-card
+#   - url: /local/community/restriction-card/restriction-card.js?v=1
+#     type: module
+
+#   #https://github.com/CyrisXD/love-lock-card  
+#   - url: /local/love-lock-card.js
+#     type: js

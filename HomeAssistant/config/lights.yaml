@@ -1,0 +1,101 @@
+####################################################
+# LIGHTS                                           #
+####################################################
+
+# MQTT WHITE, RGB or RGBW analog led strips (MiLight ESP hack)
+# https://github.com/corbanmailloux/esp-mqtt-rgb-led
+# RGBW:
+  - platform: mqtt
+    schema: json
+    name: Master Bedroom RGBW
+    state_topic: "Home/Milight/Stts/1"
+    command_topic: "Home/Milight/Cmd/1"
+    availability_topic: "Home/Transmitter/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: true
+    rgb: true
+    white_value: true
+    effect: true
+    effect_list: [Smooth, WhiteFade, FadeRGBW, JumpRainbow, RandomColor, RedEffect, GrnEffect, BluEffect, CycleAll]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Under Bar RGBW
+    state_topic: "Home/Milight/Stts/2"
+    command_topic: "Home/Milight/Cmd/2"
+    availability_topic: "Home/Transmitter/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: true
+    rgb: true
+    white_value: true
+    effect: true
+    effect_list: [Smooth, WhiteFade, FadeRGBW, JumpRainbow, RandomColor, RedEffect, GrnEffect, BluEffect, CycleAll]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Pool Clock
+    state_topic: "Home/Pool/Clock/LED/Stts"
+    command_topic: "Home/Pool/Clock/LED/Cmd"
+    availability_topic: "Home/Pool/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: true
+    rgb: true
+    white_value: false
+    effect: true
+    effect_list: [Default, RainbowCycle, TextColor, Spoon, VertRainbowCycle, HorizRainbowCycle, TextChaser, AllEffectsRolling]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Nixie Clock RGB
+    state_topic: "Home/NixieClock/LED/Stts"
+    command_topic: "Home/NixieClock/LED/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: false
+    rgb: true
+    white_value: false
+    effect: true
+    effect_list: [Fixed, Pulse, Cycle, FixedDim, PulseDim, CycleDim]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Nixie Clock
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    availability_topic: "Home/NixieClock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: false
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Massage Clock RGB
+    state_topic: "Home/Massage/Clock/LED/Stts"
+    command_topic: "Home/Massage/Clock/LED/Cmd"
+    availability_topic: "Home/Massage/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    brightness: true
+    rgb: true
+    white_value: false
+    effect: true
+    effect_list: [Default, RainbowCycle, Red/Green, Orange/Purple, Yellow/Purple, Red/White, Red/Green Cycle, Orange/Purple Cycle, Yellow/Purple Cycle, Red/White Cycle]
+    optimistic: false
+    qos: 0

@@ -1,0 +1,816 @@
+####################################################
+# SENSORS - WEATHER STATION                        #
+####################################################
+
+  #Environnement Canada
+  - platform: environment_canada
+    scan_interval: 300
+    
+  # Weather prediction
+  - platform: yr
+
+######### UV SENSOR - VEML6070 #########
+
+  - platform: mqtt
+    name: "UV Sensor"
+    icon: mdi:sunglasses
+    unit_of_measurement: 'uW/cm2'
+    state_topic: "Home/Weather/Solar/UV"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: template
+    sensors:
+      uv_index:
+        friendly_name: UV index
+        value_template: >
+          {% set IT = 4|int %}
+          {% set mult = (0.0053/IT) | float %}
+          
+          {% if is_state('sun.sun','above_horizon') %}
+            {% if not is_state('sensor.uv_sensor','unavailable') %}
+              {% set uvindex = (states('sensor.uv_sensor')|int * mult) | float %}
+              {% set ok = true %}
+            {% elif not is_state('sensor.uv_index_2','unknown') %}
+              {% set uvindex = states('sensor.uv_index_2')|float %}
+              {% set ok = true %}
+            {% else %}
+              {% set ok = false %}
+            {% endif %}
+          {% else %}
+            {% set uvindex = -99|float %}
+            {% set ok = true %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- (uvindex|float) | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+    
+  - platform: template
+    sensors:
+      uv_level:
+        value_template: >
+          {% if is_state('sun.sun','above_horizon') %}
+            {% if is_state('sensor.uv_index','unavailable') %}
+              {% set uv = -99|int %}
+            {% else %}
+              {% set uv = states('sensor.uv_sensor')|int %}
+            {% endif %}
+            {% set IT = 4|int %}
+            {% set Low = 0|int * IT %}
+            {% set Med = 561|int * IT %}
+            {% set Hi = 1121|int * IT %}
+            {% set VHi = 1495|int * IT %}
+            {% set Ext = 2055|int * IT %}
+            {% set Lim = 3000|int * IT %}
+            {% if Low <= uv < Med %}
+              Low
+            {% elif Med <= uv < Hi %}
+              Moderate
+            {% elif Hi <= uv < VHi %}
+              High
+            {% elif VHi <= uv < Ext %}
+              Very High
+            {% elif Ext <= uv < Lim %}
+              Extreme
+            {% else %}
+              unavailable
+            {% endif %}
+          {% else %}
+            Sun down for maintenance
+          {% endif %}
+        
+  - platform: template
+    sensors:
+      outdoor_uv_sensor:
+        friendly_name_template: >
+          {% if (0.0 <= states('sensor.uv_index')|float <= 25.0) %}
+            UV Level - Index: {{ states.sensor.uv_index.state }}
+          {% else %}
+            UV Level
+          {% endif %}
+        value_template: >
+          {% if not is_state('sensor.uv_level','unavailable') %}
+            {{ states.sensor.uv_level.state }}
+          {% else %}
+            unavailable
+          {% endif %}
+        entity_picture_template: >
+          {% if is_state('sun.sun','above_horizon') %}
+            {% set uvLvl = states('sensor.uv_level') %}
+            {% if is_state('sensor.uv_level','Low') %}
+              /local/images/CustomMDI/uvindexes/00FF00.png
+            {% elif is_state('sensor.uv_level','Moderate') %}
+              /local/images/CustomMDI/uvindexes/FFFF00.png
+            {% elif is_state('sensor.uv_level','High') %}
+              /local/images/CustomMDI/uvindexes/FFA500.png
+            {% elif is_state('sensor.uv_level','Very High') %}
+              /local/images/CustomMDI/uvindexes/FF0000.png
+            {% elif is_state('sensor.uv_level','Extreme') %}
+              /local/images/CustomMDI/uvindexes/A500FF.png
+            {% else %}
+              /local/images/CustomMDI/uvindexes/48485E.png
+            {% endif %}
+          {% else %}
+            {% if is_state('sensor.uv_sensor','unavailable') and is_state('sensor.uv_index_2','unknown') %}
+              /local/images/CustomMDI/uvindexes/48485E.png
+            {% else %}
+              /local/images/CustomMDI/uvindexes/2F7EFD.png
+            {% endif %}
+          {% endif %}
+        
+######### AIR QUALITY INDEX SENSOR - MQ135 #########
+
+  - platform: mqtt
+    name: "AQI Sensor"
+    icon: mdi:air-filter
+    unit_of_measurement: 'ppm'
+    state_topic: "Home/Weather/AQS/Lvl"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+
+######### RAIN SENSOR/RATE #########
+    
+  - platform: mqtt
+    name: "Rain Sensor"
+    icon: mdi:weather-pouring
+    state_topic: "Home/Weather/Rain/Snsr"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Rain Level"
+    icon: mdi:cup
+    unit_of_measurement: 'mm/h'
+    state_topic: "Home/Weather/Rain/Lvl"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: template
+    sensors:
+      outdoor_rain_sensor:
+        friendly_name: "Outdoor Rain Sensor"
+        value_template: >
+          {% if is_state('sensor.rain_sensor','unavailable') %}
+            {% set rain = -99|int %}
+          {% else %}
+            {% set rain = states('sensor.rain_sensor')|int %}
+          {% endif %}
+          {% if 1024 > rain >= 1020 %}
+            Not Raining
+          {% elif 1020 > rain >= 1000 %}
+            Raining
+          {% elif 1000 > rain >= 0 %}
+            Pouring
+          {% else %}
+            unavailable
+          {% endif %}
+        icon_template: >
+          {% set rain = states('sensor.rain_sensor')|int %}
+          {% if rain >= 1000 %}
+            mdi:weather-partlycloudy
+          {% elif 1000 > rain >= 850 %}
+            mdi:weather-rainy
+          {% else %}
+            mdi:weather-pouring
+          {% endif %}
+
+######### TEMP/HUM INSIDE SENSORS - AM2320 #########
+
+  - platform: mqtt
+    name: "Weather Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Home/Weather/DHT/TempIn"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set Temp = value|float %}
+      {{ Temp | round(1) }}
+    
+    
+  - platform: mqtt
+    name: "Weather Control Box Humidity"
+    unit_of_measurement: '%'
+    state_topic: "Home/Weather/DHT/HumIn"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set Hum = value|float %}
+      {{ Hum | round(1) }}
+    
+######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
+
+  - platform: mqtt
+    name: "Outdoor Temperature DHT"
+    unit_of_measurement: '°C'
+    state_topic: "Home/Weather/DHT/Temp"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Humidity DHT"
+    unit_of_measurement: '%'
+    state_topic: "Home/Weather/DHT/Hum"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Temperature BME"
+    unit_of_measurement: '°C'
+    state_topic: "Home/Weather/BME/Temp"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Humidity BME"
+    unit_of_measurement: '%'
+    state_topic: "Home/Weather/BME/Hum"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Pressure Raw"
+    icon: mdi:altimeter
+    unit_of_measurement: 'kPa'
+    state_topic: "Home/Weather/BME/Baro"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+      
+  - platform: template
+    sensors:
+      outdoor_pressure:
+        friendly_name: "Outdoor Pressure"
+        unit_of_measurement: 'kPa'
+        icon_template: mdi:altimeter
+        value_template: >
+          {% if not is_state('sensor.outdoor_pressure_raw','unavailable') %}
+            {% set P = states('sensor.outdoor_pressure_raw')|float + 1.75 %}
+            {% set ok = true %}
+          {% elif not is_state('weather.dolbeau','unknown') %}
+            {% set P = state_attr('weather.dolbeau', 'pressure')|float / 10.0 %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- P | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+    
+  - platform: template
+    sensors:
+      outdoor_temperature:
+        friendly_name: "Outdoor Temperature"
+        unit_of_measurement: '°C'
+        value_template: >
+          {% if (-99.0 < states('sensor.outdoor_temperature_dht')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_dht','unavailable') %}
+            {% set T = states('sensor.outdoor_temperature_dht') | float %}
+            {% set ok = true %}
+          {% elif (-99.0 < states('sensor.outdoor_temperature_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_bme','unavailable') %}
+            {% set T = states('sensor.outdoor_temperature_bme') | float %}
+            {% set ok = true %}
+          {% elif is_state('sensor.outdoor_temperature_dht','unavailable') and is_state('sensor.outdoor_temperature_bme','unavailable') %}
+            {% set T = state_attr('weather.dolbeau', 'temperature')|float %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- T | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+
+      outdoor_humidity:
+        friendly_name: "Outdoor Humidity"
+        unit_of_measurement: '%'
+        value_template: >
+          {% if (0.0 < states('sensor.outdoor_humidity_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_bme','unavailable') %}
+            {% set H = states('sensor.outdoor_humidity_bme') | float %}
+            {% set ok = true %}
+          {% elif (0.0 < states('sensor.outdoor_humidity_dht')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_dht','unavailable') %}
+            {% set H = states('sensor.outdoor_humidity_dht') | float %}
+            {% set ok = true %}
+          {% elif is_state('sensor.outdoor_humidity_dht','unavailable') and is_state('sensor.outdoor_humidity_bme','unavailable') %}
+            {% set H = state_attr('weather.dolbeau', 'humidity')|float %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- H | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+
+      outdoor_dewpoint:
+        friendly_name: "Outdoor Dew Point"
+        unit_of_measurement: '°C'
+        value_template: >
+          {% set T = (states('sensor.outdoor_temperature') | float * 1) %}
+          {% set RH = (((100 - (states('sensor.outdoor_humidity') | float * 1)) / 5) | round(1)) %}
+          {% set DP = T-RH %}
+          {% if is_state('sensor.outdoor_temperature','unavailable') or is_state('sensor.outdoor_humidity','unavailable') %}
+            unavailable
+          {% elif (-99.0 >= states('sensor.outdoor_temperature')|float >= 100.0) or (0.0 > states('sensor.outdoor_humidity')|float > 100.0) %}
+            unavailable
+          {% else %}
+            {{- DP | round(1) -}}
+          {% endif %}
+        entity_picture_template: >
+          {% if is_state('sensor.outdoor_temperature','unavailable') 
+             or is_state('sensor.outdoor_humidity','unavailable')
+             or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0)
+             or (0.0 > states('sensor.outdoor_humidity')|float > 100.0) %}
+            /local/images/CustomMDI/dewpoint/48485E.png
+          {% else %}
+            /local/images/CustomMDI/dewpoint/2F7EFD.png
+          {% endif %}
+      
+      #US Heat Index Calculation
+      outdoor_heatindex:
+        unit_of_measurement: '°C'
+        value_template: >
+          {% set T = ((states('sensor.outdoor_temperature') | float)*1.8+32) %}
+          {% set RH = states('sensor.outdoor_humidity') | float %}
+          {% set STEADMAN_HI = 0.5 * (T + 61.0 + ((T-68.0)*1.2) + (RH*0.094)) %}
+          {% if STEADMAN_HI >= 80 %}
+            {% set ROTHFUSZ_HI = -42.379 + 2.04901523*T + 10.14333127*RH - 0.22475541*T*RH - 0.00683783*T*T - 0.05481717*RH*RH + 0.00122874*T*T*RH + 0.00085282*T*RH*RH - 0.00000199*T*T*RH*RH %}
+            {% set HI = ROTHFUSZ_HI %}
+            {% if RH < 13 and 80 < T < 112 %}
+              {% set ADJUSTMENT = ((13-RH)/4)*((17-(T-95)|abs)/17)**0.5 %}
+              {% set HI = HI - ADJUSTMENT %}
+            {% elif RH > 85 and 80 < T < 87 %}
+              {% set ADJUSTMENT = ((RH-85)/10) * ((87-T)/5) %}
+              {% set HI = HI + ADJUSTMENT %}
+            {% endif %}
+          {% else %}
+            {% set HI = STEADMAN_HI %}
+          {% endif %}
+          {% set HI_C = (HI-32)/1.8 %}
+          
+          {% if is_state('sensor.outdoor_temperature','unavailable') or is_state('sensor.outdoor_humidity','unavailable') %}
+            unavailable
+          {% elif (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0) or (0.0 > states('sensor.outdoor_humidity')|float > 100.0) %}
+            unavailable
+          {% else %}
+            {{- HI_C | round(1) -}}
+          {% endif %}
+          
+      #Canadian Humidex Calculation
+      outdoor_humidex:
+        unit_of_measurement: '°C'
+        value_template: >
+          {% set T = states('sensor.outdoor_temperature')|float %}
+          {% set Td = states('sensor.outdoor_dewpoint')|float %}
+          {% set exponent = ((5417.7530*((1/273.16) - (1/(273.15+Td)))) | float) %}
+          {% set exp = (((6.11*(e**exponent))-10) | float) %}
+          {% set H = ((T + (0.5555*exp)) | float) %}
+          
+          {% if is_state('sensor.outdoor_temperature','unavailable')
+             or is_state('sensor.outdoor_dewpoint','unavailable') 
+             or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0)
+             or (-99.0 > states('sensor.outdoor_dewpoint')|float > 100.0) %}
+            unavailable
+          {% else %}
+            {{- H | round(1) -}}
+          {% endif %}
+
+      outdoor_windchill:
+        unit_of_measurement: '°C'
+        value_template: >
+          {% set T = states('sensor.outdoor_temperature')|float %}
+          {% set WS = states('sensor.wind_speed')|float %}
+          {% set WSexp = WS**0.16 %}
+          {% if WSexp == 0 %}
+            {% set CF = T | float %}
+          {% else %}
+            {% set CF = (13.12 + (0.6215*T) - (11.37*WSexp) + (0.3965*T*WSexp) | float) %}
+          {% endif %}
+          
+          {% if is_state('sensor.outdoor_temperature','unavailable')
+             or is_state('sensor.wind_speed','unavailable') 
+             or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0) 
+             or (0.0 > states('sensor.wind_speed')|float > 1000.0) %}
+            unavailable
+          {% else %}
+            {{- CF | round(1) -}}
+          {% endif %}
+          
+      outdoor_feelslike:
+        friendly_name: "Feels Like"
+        unit_of_measurement: '°C'
+        value_template: >
+          {% set T = states('sensor.outdoor_temperature')|float %}
+          {% if T < 10.0 %}
+            {% set FL = states('sensor.outdoor_windchill')|float %}
+          {% elif T >= 26.7 %}
+            {% set FL = states('sensor.outdoor_humidex')|float %}
+          {% else %}
+            {% set FL = T %}
+          {% endif %}
+          
+          {% if is_state('sensor.outdoor_temperature','unavailable') 
+             or is_state('sensor.outdoor_windchill','unavailable') 
+             or is_state('sensor.outdoor_humidex','unavailable') 
+             or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0)
+             or (-99.0 > states('sensor.outdoor_windchill')|float > 100.0)
+             or (-99.0 > states('sensor.outdoor_humidex')|float > 100.0) %}
+            unavailable
+          {% else %}
+            {{- FL | round(1) -}}
+          {% endif %}
+        entity_picture_template: >
+          {% if is_state('sensor.outdoor_feelslike','unavailable') %}
+            {% set BI = -99.0 %}
+          {% else %}
+            {% set BI = states('sensor.outdoor_feelslike') | float %}
+          {% endif %}
+          
+          {% if BI >= 45.0 %}
+            /local/images/CustomMDI/bioindexes/FF0000.png
+          {% elif BI >= 40.0 %}
+            /local/images/CustomMDI/bioindexes/FFA500.png
+          {% elif BI >= 30.0 %}
+            /local/images/CustomMDI/bioindexes/FFFF00.png
+          {% elif BI >= 20.0 %}
+            /local/images/CustomMDI/bioindexes/00FF00.png
+          {% elif BI >= 10.0 %}
+            /local/images/CustomMDI/bioindexes/00FF80.png
+          {% elif BI >= 0.0 %}
+            /local/images/CustomMDI/bioindexes/00FFC7.png
+          {% elif BI >= -10.0 %}
+            /local/images/CustomMDI/bioindexes/00FFFF.png
+          {% elif BI >= -20.0 %}
+            /local/images/CustomMDI/bioindexes/00A5FF.png
+          {% elif BI >= -30.0 %}
+            /local/images/CustomMDI/bioindexes/0010FF.png
+          {% elif BI >= -40.0 %}
+            /local/images/CustomMDI/bioindexes/A500FF.png
+          {% elif BI >= -80.0 %}
+            /local/images/CustomMDI/bioindexes/5C005C.png
+          {% else %}
+            /local/images/CustomMDI/bioindexes/48485E.png
+          {% endif %}
+          
+######### WIND SPEED #########
+
+  - platform: mqtt
+    name: "Wind Speed Raw"
+    icon: mdi:weather-windy
+    unit_of_measurement: 'km/h'
+    state_topic: "Home/Weather/Wind/Spd"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set WSraw = value|float %}
+      {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float %}
+      {% if WS <= 0 or WS > 300 %}
+        {% set WS = 0.5 %}
+      {% endif %}
+      
+      {% if WSraw < 0 %}
+        unavailable
+      {% else %}
+        {{ WS | round(3) }}
+      {% endif %}      
+        
+  - platform: filter
+    name: "Wind Speed Filter"
+    entity_id: sensor.wind_speed_raw
+    filters:
+      - filter: range
+        lower_bound: 0.0
+        upper_bound: 300.0
+      - filter: outlier
+        window_size: 2
+        radius: 2.0
+      - filter: lowpass
+        time_constant: 2
+        
+  - platform: template
+    sensors:
+      wind_speed:
+        friendly_name: "Wind Speed" 
+        unit_of_measurement: 'km/h'
+        icon_template: mdi:weather-windy
+        value_template: >
+          {% if not is_state('sensor.wind_speed_raw','unavailable') %}
+            {% if states('sensor.wind_speed_filter')|float <= 0.5 %}
+              {% set WS = states('sensor.wind_speed_filter')|float %}
+            {% else %}
+              {% set WS = states('sensor.wind_speed_raw')|float %}
+            {% endif %}
+            
+            {% set ok = true %}
+          {% elif not is_state('weather.dolbeau','unknown') %}
+            {% set WS = state_attr('weather.dolbeau', 'wind_speed')|float %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- WS | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+      
+######### WIND COMPASS #########
+
+  - platform: mqtt
+    name: "Wind Direction Raw"
+    icon: mdi:arrow-all
+    unit_of_measurement: '°'
+    state_topic: "Home/Weather/Wind/Dir"
+    availability_topic: "Home/Weather/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+      
+  - platform: template
+    sensors:
+      wind_direction:
+        friendly_name: "Wind Direction" 
+        unit_of_measurement: '°'
+        icon_template: mdi:arrow-all
+        value_template: >
+          {% if not is_state('sensor.wind_direction_raw','unavailable') %}
+            {% set WD = states('sensor.wind_speed_filter')|float %}
+            {% set ok = true %}
+          {% elif not is_state('sensor.wind_bearing','unknown') %}
+            {% set WD = states('sensor.wind_bearing')|float %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- WD | round(1) -}}
+          {% else %}
+            unavailable
+          {% endif %}
+
+  - platform: template
+    sensors: 
+      wind_compass_abbreviation:
+        value_template: >
+          {% set WCA = states('sensor.wind_direction')|float %}
+          {% if 354.38 <= WCA <= 360.0 or 0.0 <= WCA <= 5.62 %}
+            N
+          {% elif 5.63 <= WCA <= 16.87 %}
+            NbE
+          {% elif 16.88 <= WCA <= 28.12 %}
+            NNE
+          {% elif 28.13 <= WCA <= 39.37 %}
+            NEbN
+          {% elif 39.38 <= WCA <= 50.62 %}
+            NE
+          {% elif 50.63 <= WCA <= 61.87 %}
+            NEbE
+          {% elif 61.88 <= WCA <= 73.12 %}
+            ENE
+          {% elif 73.13 <= WCA <= 84.37 %}
+            EbN
+          {% elif 84.38 <= WCA <= 95.62 %}
+            E
+          {% elif 95.63 <= WCA <= 106.87 %}
+            EbS
+          {% elif 106.88 <= WCA <= 118.12 %}
+            ESE
+          {% elif 118.13 <= WCA <= 129.37 %}
+            SEbE
+          {% elif 129.38 <= WCA <= 140.62 %}
+            SE
+          {% elif 140.63 <= WCA <= 151.87 %}
+            SEbS
+          {% elif 151.88 <= WCA <= 163.12 %}
+            SSE
+          {% elif 163.13 <= WCA <= 174.37 %}
+            SbE
+          {% elif 174.38 <= WCA <= 185.62 %}
+            S
+          {% elif 185.63 <= WCA <= 196.87 %}
+            SbW
+          {% elif 196.88 <= WCA <= 208.12 %}
+            SSW
+          {% elif 208.13 <= WCA <= 219.37 %}
+            SWbS
+          {% elif 219.38 <= WCA <= 230.62 %}
+            SW
+          {% elif 230.63 <= WCA <= 241.87 %}
+            SWbW
+          {% elif 241.88 <= WCA <= 253.12 %}
+            WSW
+          {% elif 253.13 <= WCA <= 264.37 %}
+            WbS
+          {% elif 264.38 <= WCA <= 275.62 %}
+            W
+          {% elif 275.63 <= WCA <= 286.87 %}
+            WbN
+          {% elif 286.88 <= WCA <= 298.12 %}
+            WNW
+          {% elif 298.13 <= WCA <= 309.37 %}
+            NWbW
+          {% elif 309.38 <= WCA <= 320.62 %}
+            NW
+          {% elif 320.63 <= WCA <= 331.87 %}
+            NWbN
+          {% elif 331.88 <= WCA <= 343.12 %}
+            NNW
+          {% elif 343.13 <= WCA <= 354.37 %}
+            NbW
+          {% else %}
+            Error
+          {% endif %}
+
+  - platform: template
+    sensors: 
+      wind_compass_name:
+        value_template: >
+          {% set WCN = states('sensor.wind_direction')|float %}
+          {% if 354.38 <= WCN <= 360.0 or 0.0 <= WCN <= 5.62 %}
+            North 
+          {% elif 5.63 <= WCN <= 16.87 %}
+            North by East 
+          {% elif 16.88 <= WCN <= 28.12 %}
+            North-Northeast
+          {% elif 28.13 <= WCN <= 39.37 %}
+            Northeast by North
+          {% elif 39.38 <= WCN <= 50.62 %}
+            Northeast
+          {% elif 50.63 <= WCN <= 61.87 %}
+            Northeast by East 
+          {% elif 61.88 <= WCN <= 73.12 %}
+            East-Northeast 
+          {% elif 73.13 <= WCN <= 84.37 %}
+            East by North 
+          {% elif 84.38 <= WCN <= 95.62 %}
+            East 
+          {% elif 95.63 <= WCN <= 106.87 %}
+            East by South
+          {% elif 106.88 <= WCN <= 118.12 %}
+            East-Southeast 
+          {% elif 118.13 <= WCN <= 129.37 %}
+            Southeast by East
+          {% elif 129.38 <= WCN <= 140.62 %}
+            Southeast
+          {% elif 140.63 <= WCN <= 151.87 %}
+            Southeast by South
+          {% elif 151.88 <= WCN <= 163.12 %}
+            South-Southeast 
+          {% elif 163.13 <= WCN <= 174.37 %}
+            South by East
+          {% elif 174.38 <= WCN <= 185.62 %}
+            South
+          {% elif 185.63 <= WCN <= 196.87 %}
+            South by West 
+          {% elif 196.88 <= WCN <= 208.12 %}
+            South-Southwest
+          {% elif 208.13 <= WCN <= 219.37 %}
+            Southwest by South
+          {% elif 219.38 <= WCN <= 230.62 %}
+            Southwest
+          {% elif 230.63 <= WCN <= 241.87 %}
+            Southwest by West
+          {% elif 241.88 <= WCN <= 253.12 %}
+            West-Southwest 
+          {% elif 253.13 <= WCN <= 264.37 %}
+            West by South 
+          {% elif 264.38 <= WCN <= 275.62 %}
+            West
+          {% elif 275.63 <= WCN <= 286.87 %}
+            West by North
+          {% elif 286.88 <= WCN <= 298.12 %}
+            West-Northwest
+          {% elif 298.13 <= WCN <= 309.37 %}
+            Northwest by West
+          {% elif 309.38 <= WCN <= 320.62 %}
+            Northwest 
+          {% elif 320.63 <= WCN <= 331.87 %}
+            Northwest by North
+          {% elif 331.88 <= WCN <= 343.12 %}
+            North-Northwest
+          {% elif 343.13 <= WCN <= 354.37 %}
+            North by West
+          {% else %}
+            Invalid value
+          {% endif %}
+
+      wind_compass: 
+        value_template: >
+          {% if is_state('sensor.wind_direction','unavailable') %}
+            unavailable
+          {% else %}
+            {{ states.sensor.wind_compass_abbreviation.state }}
+          {% endif %}
+        friendly_name_template: >
+          {% if is_state('sensor.wind_direction','unavailable') %}
+            Wind Direction
+          {% else %}
+            Wind Direction - {{ states.sensor.wind_compass_name.state }}
+          {% endif %}
+        entity_picture_template: >
+          {% if is_state('sensor.wind_direction','unavailable') %}
+            {% set WD = -99|float %}
+          {% else %}
+            {% set WD = states('sensor.wind_direction')|float %}
+          {% endif %}
+          
+          {% if 354.38 <= WD <= 360.0 or 0.0 <= WD <= 5.62 %}
+            /local/images/WindCompass/0.png
+          {% elif 5.63 <= WD <= 16.87 %}
+            /local/images/WindCompass/11.png
+          {% elif 16.88 <= WD <= 28.12 %}
+            /local/images/WindCompass/22.png
+          {% elif 28.13 <= WD <= 39.37 %}
+            /local/images/WindCompass/33.png
+          {% elif 39.38 <= WD <= 50.62 %}
+            /local/images/WindCompass/45.png
+          {% elif 50.63 <= WD <= 61.87 %}
+            /local/images/WindCompass/56.png
+          {% elif 61.88 <= WD <= 73.12 %}
+            /local/images/WindCompass/67.png
+          {% elif 73.13 <= WD <= 84.37 %}
+            /local/images/WindCompass/78.png
+          {% elif 84.38 <= WD <= 95.62 %}
+            /local/images/WindCompass/90.png
+          {% elif 95.63 <= WD <= 106.87 %}
+            /local/images/WindCompass/101.png
+          {% elif 106.88 <= WD <= 118.12 %}
+            /local/images/WindCompass/112.png
+          {% elif 118.13 <= WD <= 129.37 %}
+            /local/images/WindCompass/123.png
+          {% elif 129.38 <= WD <= 140.62 %}
+            /local/images/WindCompass/135.png
+          {% elif 140.63 <= WD <= 151.87 %}
+            /local/images/WindCompass/146.png
+          {% elif 151.88 <= WD <= 163.12 %}
+            /local/images/WindCompass/157.png
+          {% elif 163.13 <= WD <= 174.37 %}
+            /local/images/WindCompass/168.png
+          {% elif 174.38 <= WD <= 185.62 %}
+            /local/images/WindCompass/180.png
+          {% elif 185.63 <= WD <= 196.87 %}
+            /local/images/WindCompass/191.png
+          {% elif 196.88 <= WD <= 208.12 %}
+            /local/images/WindCompass/202.png
+          {% elif 208.13 <= WD <= 219.37 %}
+            /local/images/WindCompass/213.png
+          {% elif 219.38 <= WD <= 230.62 %}
+            /local/images/WindCompass/225.png
+          {% elif 230.63 <= WD <= 241.87 %}
+            /local/images/WindCompass/236.png
+          {% elif 241.88 <= WD <= 253.12 %}
+            /local/images/WindCompass/247.png
+          {% elif 253.13 <= WD <= 264.37 %}
+            /local/images/WindCompass/258.png
+          {% elif 264.38 <= WD <= 275.62 %}
+            /local/images/WindCompass/270.png
+          {% elif 275.63 <= WD <= 286.87 %}
+            /local/images/WindCompass/281.png
+          {% elif 286.88 <= WD <= 298.12 %}
+            /local/images/WindCompass/292.png
+          {% elif 298.13 <= WD <= 309.37 %}
+            /local/images/WindCompass/303.png
+          {% elif 309.38 <= WD <= 320.62 %}
+            /local/images/WindCompass/315.png
+          {% elif 320.63 <= WD <= 331.87 %}
+            /local/images/WindCompass/326.png
+          {% elif 331.88 <= WD <= 343.12 %}
+            /local/images/WindCompass/337.png
+          {% elif 343.13 <= WD <= 354.37 %}
+            /local/images/WindCompass/348.png
+          {% else %}
+            /local/images/WindCompass/offline.png
+          {% endif %}

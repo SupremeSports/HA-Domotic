@@ -1,0 +1,143 @@
+####################################################
+# SENSORS - DATE & TIME                            #
+####################################################
+
+  #Time display
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'time_date'
+      - 'time_utc'
+      - 'beat'
+
+  - platform: template
+    sensors:
+      dates:
+        friendly_name: 'Dates'
+        entity_id: 
+          - sensor.refresh_1m
+          - sensor.dates
+        value_template: >
+          {{ state_attr('sensor.dates', 'full_en') }}
+        attribute_templates:
+          year: >
+            {{ now().strftime("%Y")|int }}
+          month: >
+            {{ now().strftime("%m")|int }}
+          day: >
+            {{ now().strftime("%d")|int }}
+          dayofyear: >
+            {{ now().strftime("%j")|int }}
+          weekofyear: >
+            {{ now().strftime("%W")|int + 1 }}
+          weekdaynumber: >
+            {% set days = ["6", "0", "1", "2", "3", "4", "5"] %}
+            {% set day = days[now().strftime('%w')|int] %}
+            {{ day }}
+          weekdayname_en: >
+            {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+            {% set day = days[state_attr('sensor.dates', 'weekdaynumber')|int] %}
+            {{ day }}
+          weekdayname_fr: >
+            {% set days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] %}
+            {% set day = days[state_attr('sensor.dates', 'weekdaynumber')|int] %}
+            {{ day }}
+          yyyymmdd: >
+            {{ now().strftime("%Y") + '/' + now().strftime("%m") + '/' + now().strftime("%d") }}
+          yyyyddmm: >
+            {{ now().strftime("%Y") + '/' + now().strftime("%d") + '/' + now().strftime("%m") }}
+          ddmmyyyy: >
+            {{ now().strftime("%d") + '/' + now().strftime("%m") + '/' + now().strftime("%Y") }}
+          long_en: >
+            {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+            {% set month = months[now().strftime('%m')|int -1] %}
+            {% set day = now().strftime('%d')|int %}
+            {% set year = now().strftime('%Y') %}
+            {% if day == 1 or day == 21 or day == 31 %}
+              {% set num = "st, " %}
+            {% elif day == 2 or day == 22 %}
+              {% set num = "nd, " %}
+            {% elif day == 3 or day == 23 %}
+              {% set num = "rd, " %}
+            {% else %}
+              {% set num = "th, " %}
+            {% endif %}
+            {{ month + ' ' + day|string + num + year }}
+          long_fr: >
+            {% set months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] %}
+            {% set month = months[now().strftime('%m')|int -1] %}
+            {% set day = now().strftime('%d')|int %}
+            {% set year = now().strftime('%Y') %}
+            {% if day == 1 %}
+              {% set num = "er " %}
+            {% else %}
+              {% set num = " " %}
+            {% endif %}
+            {{ day|string + num + month + ' ' + year }}
+          full_en: >
+            {{ state_attr('sensor.dates', 'weekdayname_en')|string + ', ' + state_attr('sensor.dates', 'long_en')|string }}
+          full_fr: >
+            {{ state_attr('sensor.dates', 'weekdayname_fr')|string + ', ' + state_attr('sensor.dates', 'long_fr')|string }}
+      times:
+        friendly_name: 'Times'
+        entity_id: counter.heartbeat_counter
+        value_template: >
+          {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' +now().strftime("%S")|string }}
+        attribute_templates:
+          hour: >
+            {{ now().strftime("%H")|int }}
+          minute: >
+            {{ now().strftime("%M")|int }}
+          second: >
+            {{ now().strftime("%S")|int }}
+          long: >
+            {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' +now().strftime("%S")|string }}
+          short: >
+            {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string }}
+          internet: >
+            {{ states('sensor.internet_time') }}
+          utc: >
+            {{ states('sensor.time_utc') }}
+
+  #refresh
+  - platform: template
+    sensors:
+      refresh_1s:
+        friendly_name: 'Refresh 1s'
+        entity_id: sensor.times
+        value_template: >
+          {{ state_attr('sensor.times', 'second') }}
+      refresh_1m:
+        friendly_name: 'Refresh 1m'
+        entity_id: sensor.times
+        value_template: >
+          {{ state_attr('sensor.times', 'minute') }}
+          
+  #Flashing code
+  - platform: template
+    sensors:
+      flashing_1s:
+        entity_id: sensor.refresh_1s
+        value_template: >
+          {% if state_attr('sensor.times', 'second')|int % 2 == 0 %}
+            on
+          {% else %}
+            off
+          {% endif %}
+      flashing_test:
+        entity_id: sensor.refresh_1s
+        value_template: >
+          {{ states('sensor.flashing_1s') }}
+      toggling_test:
+        entity_id: sensor.refresh_1s
+        value_template: >
+          {{ states('sensor.flashing_1s') }}
+        icon_template: >
+          {% if state_attr('sensor.times', 'second')|int % 2 == 0 %}
+            mdi:recycle
+          {% else %}
+            mdi:trash-can
+          {% endif %}
+          

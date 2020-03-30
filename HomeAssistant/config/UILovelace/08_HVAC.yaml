@@ -1,0 +1,16 @@
+####################################################
+# UILOVELACE - MAIN                                #
+####################################################
+
+- title: HVACs
+  icon: mdi:thermostat
+  # Unique path for direct access /lovelace/${path}
+  path: hvacs
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+  cards:
+    - type: thermostat
+      entity: climate.living_room_hvac
+      name: Living Room HVAC

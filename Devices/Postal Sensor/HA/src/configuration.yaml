@@ -1,0 +1,155 @@
+switch:
+  - platform: mqtt
+    name: Postal Status
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    command_topic: "Home/Postal/Cmd"
+    value_template: '{{ value_json.state }}'
+    availability_topic: "Home/Postal/LWT"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+       
+sensor:
+  - platform: mqtt
+    name: "Postal Status"
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    availability_topic: "Home/Postal/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        New Mail
+      {% else %}
+        No Mail
+      {% endif %}
+    json_attributes:
+      - state
+      - id
+      - rssi
+      - battery
+      - voltage
+      
+  - platform: template
+    sensors:
+      last_postal_arrival:
+        friendly_name: Last Postal Arrival Time
+        entity_id: input_datetime.last_postal_arrival
+        icon_template: >
+          mdi:clock-in
+        #device_class: timestamp  //Makes display on minutes since...
+        value_template: "{{ states('input_datetime.last_postal_arrival') }}"
+      last_postal_removal:
+        friendly_name: Last Postal Removal Time
+        entity_id: input_datetime.last_postal_removal
+        icon_template: >
+          mdi:clock-out
+        #device_class: timestamp  //Makes display on minutes since...
+        value_template: "{{ states('input_datetime.last_postal_removal') }}"
+input_datetime:
+  last_postal_arrival:
+    name: Last Postal Arrival
+    has_date: true
+    has_time: true
+  last_postal_removal:
+    name: Last Postal Removal
+    has_date: true
+    has_time: true
+    
+customize:
+  sensor.postal_battery:
+    custom_ui_state_card: state-card-custom-ui
+    friendly_name: "Postal Battery"
+    templates:
+      icon_color: >
+        if (state <= 0) return 'var(--state-icon-unavailable-color)';
+        if (state < 30)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state < 50) return '#FFA500';
+        if (state <= 100) return 'var(--state-icon-color)';
+        return 'var(--state-icon-unavailable-color)';
+  sensor.postal_status:
+    custom_ui_state_card: state-card-custom-ui
+    friendly_name: "Postal Status"
+    templates:
+      icon: >
+        if (state === 'New Mail') return 'mdi:mailbox-up';
+        return 'mdi:mailbox';
+      icon_color: >
+        if (state === 'Unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state === 'No Mail') return 'var(--state-icon-color)';
+        if (state === 'New Mail') return 'var(--state-icon-active-color)';
+  switch.postal_status:
+    custom_ui_state_card: state-card-custom-ui
+    friendly_name: "Postal Status"
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:mailbox-up';
+        return 'mdi:mailbox';
+
+automation:
+  - alias: Publish Postal Arrival
+    trigger:
+      - entity_id: sensor.postal_status
+        platform: state
+        from: 'No Mail'
+        to: 'New Mail'
+        for: '00:00:30'
+    action:
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.last_postal_arrival
+          time: '{{ (as_timestamp(now()) | timestamp_custom("%H:%M:%S", true)) }}'
+          date: '{{ (as_timestamp(now()) | timestamp_custom("%Y-%m-%d", true)) }}'
+      - service: notify.ios_notify_parents
+        data:
+          title: "Postal Status Update"
+          message: "New Mail has been delivered"
+          
+  - alias: Publish Postal Removal
+    trigger:
+      - entity_id: sensor.postal_status
+        platform: state
+        from: 'New Mail'
+        to: 'No Mail'
+        for: '00:00:30'
+    action:
+      - service: input_datetime.set_datetime
+        data_template:
+          entity_id: input_datetime.last_postal_removal
+          time: '{{ (as_timestamp(now()) | timestamp_custom("%H:%M:%S", true)) }}'
+          date: '{{ (as_timestamp(now()) | timestamp_custom("%Y-%m-%d", true)) }}'
+      - service: notify.ios_notify_parents
+        data:
+          title: "Postal Status Update"
+          message: "Mail has been removed"
+
+views:
+  - title: Main
+    icon: mdi:home-outline
+    path: main
+    visible: true
+    badges:
+      - sensor.time
+    cards:
+      - type: entities
+        title: Postal Status
+        show_header_toggle: false
+        entities:
+          - type: custom:fold-entity-row
+            head: sensor.postal_status
+            entities:
+              - entity: switch.postal_status
+                type: "custom:secondaryinfo-entity-row"
+                secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
+              - entity: sensor.last_postal_arrival
+              - entity: sensor.last_postal_removal

@@ -1,0 +1,26 @@
+**************************************
+Analog Inputs (16ch MUX CD74HC4067)
+All connected on A0 (pin 14)
+**************************************
+
+Temp sensors
+0  Water inlet temp			(2pin)
+1  Solar return temp			(2pin)
+2  Between solar and heat pump temp	(2pin)
+3  Heatpump return temp			(2pin)
+4  Water outlet temp			(2pin)
+5  Roof temperature			(2pin)
+
+Potentiometers
+6  Solar panel control POT & SW		(5pin)
+7  Heat pump control POT & SW		(5pin)
+8  Inlet control POT & SW 		(5pin)
+
+Others
+9  Sun sensor 				(2pin)
+10 Rain sensor 				(3pin) - digital
+11 Filter pressure sensor 		(3pin)
+12 
+13 
+14 
+15 

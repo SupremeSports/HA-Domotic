@@ -1,0 +1,23 @@
+####################################################
+# SENSORS - MOON                                   #
+####################################################
+
+  - platform: moon
+  
+  - platform: template
+    sensors:
+      moon_phases:
+        friendly_name: 'Moon phases'
+        value_template: >
+          {{ states('sensor.moon')}}
+        entity_picture_template: >
+          {% set state = states('sensor.moon').title().replace('_','').replace(' ','') %}
+          {{ '/local/images/MoonPhases/N{}.jpg'.format(state) }}
+          
+  # - platform: scrape
+    # resource: http://time.unitarium.com/moon/where.html
+    # name: Moon Distance
+    # select: 'tr:nth-of-type(3)'
+    # #value_template: '{{ value | truncate(255) }}'
+    # # Request every hour
+    # scan_interval: 3600

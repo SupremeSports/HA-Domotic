@@ -1,0 +1,42 @@
+####################################################
+# BINARY SENSORS - GARAGE                          #
+####################################################
+
+  - platform: template
+    sensors:
+      garagefrontlight_status:
+        friendly_name: Garage Front Light
+        entity_id: 
+          - switch.garage_front_light
+          - input_select.garagefrontlight_mode
+        value_template: >
+          {{ is_state('switch.garage_front_light', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.garage_front_light', 'unavailable') }}
+        icon_template: >
+          {% if is_state('input_select.garagefrontlight_mode', 'Force Off') %}
+            mdi:lightbulb-off
+          {% else %}
+            mdi:lightbulb
+          {% endif %}
+  
+  - platform: template
+    sensors:
+      garagefrontpower_status:
+        friendly_name: Garage Front Power
+        entity_id: 
+          - switch.garage_front_power
+          - input_select.garagefrontpower_mode
+        value_template: >
+          {{ is_state('switch.garage_front_power', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.garage_front_power', 'unavailable') }}
+        icon_template: >
+          {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
+            mdi:power-plug
+          {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+            mdi:pine-tree
+          {% else %}
+            mdi:power-plug-off
+          {% endif %}
+          
