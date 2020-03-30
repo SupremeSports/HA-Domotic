@@ -16,6 +16,7 @@ mobile_app:
 #Lovelace personalized interface
 lovelace:
   mode: yaml
+  resources: !include resources.yaml
 
 # Enables the frontend
 frontend:
