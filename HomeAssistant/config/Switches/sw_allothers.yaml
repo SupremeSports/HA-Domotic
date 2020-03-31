@@ -1,20 +1,6 @@
 ####################################################
 # SWITCHES                                         #
 ####################################################
-
-  # - platform: mqtt
-    # name: Postal Status
-    # icon: mdi:mailbox
-    # state_topic: "Home/Postal/Stts"
-    # command_topic: "Home/Postal/Cmd"
-    # availability_topic: "Home/Postal/LWT"
-    # state_on: "1"
-    # state_off: "0"
-    # payload_on: "1"
-    # payload_off: "0"
-    # payload_available: "online"
-    # payload_not_available: "offline"
-    # qos: 0
     
   - platform: mqtt
     name: Postal Status
@@ -23,8 +9,24 @@
     command_topic: "Home/Postal/Cmd"
     availability_topic: "Home/Transmitter/LWT"
     value_template: '{{ value_json.state }}'
-    payload_on: "ON"
-    payload_off: "OFF"
+    payload_on: '{"state":"ON"}'
+    payload_off: '{"state":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Home/Transmitter/Json"
+    
+  - platform: mqtt
+    name: Postal Status Activate Delay
+    icon: mdi:lock-clock
+    state_topic: "Home/Postal/Stts"
+    command_topic: "Home/Postal/Cmd"
+    availability_topic: "Home/Transmitter/LWT"
+    value_template: '{{ value_json.delay }}'
+    payload_on: '{"delay":"ON"}'
+    payload_off: '{"delay":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
     payload_available: "online"
@@ -46,6 +48,3 @@
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-
-    
-    
