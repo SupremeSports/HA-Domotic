@@ -25,20 +25,40 @@
     round: 2
     
   - platform: mqtt
-    name: "Postal Status"
+    name: "Postal Status JSON"
     icon: mdi:mailbox
     state_topic: "Home/Postal/Stts"
+    value_template: '{{ value_json.state }}'
     availability_topic: "Home/Transmitter/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    value_template: >
-      {% if value_json.state == "ON" %}
-        New Mail
-      {% else %}
-        No Mail
-      {% endif %}
     json_attributes_topic: "Home/Postal/Stts"
+    
+  - platform: template
+    sensors:
+      postal_status:
+        friendly_name: Postal Status
+        entity_id:
+          - switch.postal_status
+        icon_template: >
+          mdi:mailbox
+        value_template: >
+          {% if is_state('switch.postal_status', 'on') %}
+            New Mail
+          {% else %}
+            No Mail
+          {% endif %}
+        availability_template: "{{ not is_state('switch.postal_status', 'unavailable') }}"
+        attribute_templates:
+          state: "{{ state_attr('sensor.postal_status_json', 'state') }}"
+          voltage: "{{ state_attr('sensor.postal_status_json', 'voltage') }}"
+          battery: "{{ state_attr('sensor.postal_status_json', 'battery') }}"
+          id: "{{ state_attr('sensor.postal_status_json', 'id') }}"
+          lora_rssi: "{{ state_attr('sensor.postal_status_json', 'rssi') }}"
+          source: "{{ state_attr('sensor.postal_status_json', 'source') }}"
+          wifi_rssi: "{{ state_attr('switch.postal_status', 'rssi') }}"
+          wifi_percent: "{{ state_attr('switch.postal_status', 'percent') }}"
     
   - platform: mqtt
     name: "Stepper Wall Clock"
