@@ -21,9 +21,9 @@ void initWifi()
 
   Sprintln("Connected!");
 
-  networkActive = true;
+  networkActive = checkNetwork();
   
-  lastMillis = millis()-10000;
+  lastSecond = millis()-10000;
 }
 
 bool checkNetwork()
@@ -32,7 +32,34 @@ bool checkNetwork()
   if (!networkActive)
     initWifi();
 
+  getQuality();
+
   return networkActive;
+}
+
+/*
+   Return the quality (Received Signal Strength Indicator)
+   of the WiFi network.
+   Returns a number between 0 and 100 if WiFi is connected.
+   Returns -1 if WiFi is disconnected.
+*/
+void getQuality()
+{
+  if (!networkActive)
+  {
+    rssi = -120;
+    rssiPercent -1;
+    return;
+  }
+  int dBm = WiFi.RSSI();
+  if (dBm <= -100)
+    rssiPercent = 0;
+  else if (dBm >= -50)
+    rssiPercent = 100;
+  else
+    rssiPercent = 2 * (dBm + 100);
+  
+  rssi = dBm;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -90,7 +117,7 @@ void runOTA()
 void interruptReboot()
 {
   writeEEPROM(); //Save latest data before reboot
-  Sprintln("Rebooting...");
+  Sprintln(json_resetReboot);
   ESP.restart();
 }
 
