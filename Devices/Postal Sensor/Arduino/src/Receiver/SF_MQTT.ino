@@ -85,7 +85,7 @@ void reconnect()
   }
 }
 
-void mqttReceive(char* topic, String data, char* message)
+void mqttReceive(char* topic, char* message)
 {
   if (strcmp(topic,mqtt_controlCmd)==0)
   {
