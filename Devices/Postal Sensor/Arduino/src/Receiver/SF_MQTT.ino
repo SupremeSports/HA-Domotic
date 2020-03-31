@@ -6,9 +6,6 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
-
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 }
 
 bool runMQTT()
@@ -27,23 +24,22 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
-  String data = "";
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
 
-  char message[length + 1];
+  if (length >= BUFFER_ARRAY_SIZE)
+    length = BUFFER_ARRAY_SIZE-1;
+
   for (int i = 0; i < length; i++)
-  {
-    Sprint((char)payload[i]);
-    data += (char)payload[i];
     message[i] = (char)payload[i];
-  }
+
   message[length] = '\0';
+  Sprint(message);
 
   Sprintln();
 
-  mqttReceive(topic, data, message);
+  mqttReceive(topic, message);
 }
 
 void reconnect()
@@ -62,7 +58,6 @@ void reconnect()
     {
       Sprintln("Connected!");
       // Once connected, publish an announcement...
-      readEEPROM();
       updatePublish = true;
       mqttPublish();
       // ... and resubscribe
@@ -92,27 +87,21 @@ void reconnect()
 
 void mqttReceive(char* topic, String data, char* message)
 {
-  //Postal
+  if (strcmp(topic,mqtt_controlCmd)==0)
+  {
+    //flashBoardLed(100, 2);
+
+    processCommandJson(message);
+  }
+  
   if (strcmp(topic,mqtt_postalCmd)==0)
   {
-    if (strcmp(message, mqtt_cmdOn) == 0)
-      mailPresent = true;
-    else if (strcmp(message, mqtt_cmdOff) == 0)
-      mailPresent = false;
+    processPostalJson(message);
 
-    //Clear delay timer
-    if (millis()-(2*mailPresentOff) >= 0)
-      delayMailPresent = millis()-(2*mailPresentOff);
-    else
-      delayMailPresent = 0;
-
-    writeEEPROM();
     oledMillis = millis() + OledDelayOff;
+    
     updatePublish = true;
-
-    sendPostalState();
-
-    flashBoardLed(100, 3);
+    newPostalStatus = true;
   }
 }
 
@@ -123,24 +112,22 @@ void mqttKeepRunning()
   
   runOTA();
   
-  readSensors();            //Read sensors (buttons, etc.)
+  flashEvery5sec();
   
-  loraRead();
-  oledUpdate();
-
-  writeOutputs();           //Set OUTPUTS devices
-
-  //Short flash every 5 seconds when everything is ok
-  if (millis()-ledFlashDelay >= 5000)
-  {
-    if (networkActive)
-      flashBoardLed(100, 1);
-    ledFlashDelay = millis();
-  }
+//Remainder not used on this project (called elsewhere)
+//  readSensors();            //Read sensors (buttons, etc.)
+//
+//  loraRead();
+//  oledUpdate();
+//
+//  writeOutputs();           //Set OUTPUTS devices
+//
+//  flashEvery5sec();
 }
 
 void mqttSubscribe()
 {
+  mqttClient.subscribe(mqtt_controlCmd);
   mqttClient.subscribe(mqtt_postalCmd);
   mqttClient.loop();
 }
@@ -151,8 +138,9 @@ void mqttPublish()
   if (!updatePublish || !networkActive)
     return;
 
-  sendPostalState();
-
+  if (newPostalStatus)
+    sendPostalState();
+  
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 
   mqttClient.loop();
