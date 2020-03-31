@@ -45,6 +45,8 @@ void initLora()
   LoRa.setSpreadingFactor(12);           // Ranges from 6-12,default 7 see API docs
 
   LoRa.receive();
+
+  blockNoMailTrigger = false;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -64,12 +66,12 @@ void oledUpdate()
     
       display.setTextAlignment(TEXT_ALIGN_LEFT);
       display.setFont(ArialMT_Plain_10);
-      display.drawString(0 ,  0 , rssi); 
+      display.drawString(0 ,  0 , rssiStr); 
       display.drawString(0 , 15 , "Received " + packSize + " bytes");
       display.drawStringMaxWidth(0 , 26 , 128, oledString);
       display.drawString(0 , 40, "IP: " + WiFi.localIP().toString());
   
-      Sprintln(rssi);
+      Sprintln(rssiStr);
       Sprintln(WiFi.localIP());
     }
     display.display();
@@ -84,6 +86,9 @@ boolean loraRead()
   #ifndef ENABLELORA
     return false;
   #endif
+
+  if (millis() >= delayMailPresent)
+    blockNoMailTrigger = false;
   
   int packetSize = LoRa.parsePacket();
   if (packetSize)
@@ -103,14 +108,15 @@ void loraCallback(int packetSize)
   for (int i = 0; i < packetSize; i++)
     packet += (char) LoRa.read();
 
-  rssiValue = String(LoRa.packetRssi(), DEC);
+  newStatusForced = false;
+
+  Rssi = String(LoRa.packetRssi(), DEC);
     
-  rssi = "RSSI " + rssiValue;
+  rssiStr = "RSSI " + Rssi;
 
   packet = EncryptDecrypt(packet, encryptKey);
 
   parseData(packet);
-
   Sprintln(packet);
 
   oledMillis = millis() + OledDelayOff;
@@ -118,7 +124,7 @@ void loraCallback(int packetSize)
 
 void parseData(String data)
 {
-  int indexDelim[3]; // ALWAYS END WITH A DLEIMITER
+  int indexDelim[3]; //ALWAYS END WITH A DELIMITER ==> ID:1 or 0:Vcc:
 
   indexDelim[0] = data.indexOf(DELIMITER_LORA);
   indexDelim[1] = data.indexOf(DELIMITER_LORA, indexDelim[0]+1);
@@ -128,35 +134,49 @@ void parseData(String data)
   String Stts = data.substring(indexDelim[0]+1, indexDelim[1]);
   Vcc = data.substring(indexDelim[1]+1, indexDelim[2]);
 
-  //mailPresent = Stts.equals("1");
-
-  if (Stts.equals("1"))
-  {
-    delayMailPresent = millis();
-    mailPresent = true;
-  }
+  if (!enableFiveMinuteDelay)
+    mailPresent = Stts.equals("1");
   else
   {
-    if (millis()-delayMailPresent < mailPresentOff)
-      return;
-      
-    mailPresent = false;
+    if (Stts.equals("1"))
+    {
+      delayMailPresent = millis()+mailPresentOff;
+      blockNoMailTrigger = true;
+      mailPresent = true;
+  
+      Sprintln("NEW MAIL");
+    }
+    else if (!blockNoMailTrigger)
+    {
+      delayMailPresent = 0;
+      blockNoMailTrigger = false;
+      mailPresent = false;
+  
+      Sprintln("NO MAIL");
+    }
+    else
+    {
+      int timeLeft = delayMailPresent - millis();
+      Sprint("Delay not expired: ");
+      Sprint(timeLeft);
+      Sprintln("ms left!!!");
+    }
   }
 
   Bat = convertBat(Vcc);
-  Sprintln(Bat);
 
   writeEEPROM();
+
+  newPostalStatus = true;
 }
 
 //Convert battery voltage in 0-100%
 String convertBat(String Voltage)
 {
-  float vccFloat = Vcc.toFloat() * 100.0;
-  Sprintln(vccFloat);
+  float vccInt = Vcc.toFloat() * 100.0;
 
-  //3.15V = 0% / 3.28V = 100%
-  return (String(constrain(map(int(vccFloat), 315, 328, 0, 100), 0, 100)));
+  //3.18V = 0% / 3.32V = 100%
+  return (String(constrain(map(int(vccInt), 318, 332, 0, 100), 0, 100)));
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -175,60 +195,4 @@ String EncryptDecrypt(String szPlainText, int szEncryptionKey)
   }  
   
   return szOutStringBuild;
-}
-
-// ----------------------------------------------------------------------------------------------------
-// ---------------------------------------- EEPROM FUNCTIONS ------------------------------------------
-// ----------------------------------------------------------------------------------------------------
-void initEEPROM()
-{
-  EEPROM.begin(EEPROM_SIZE);
-}
-
-void readEEPROM()
-{
-  byte value_IDH  = EEPROM.read(address_IDH); 
-  byte value_IDL  = EEPROM.read(address_IDL); 
-  byte value_Stts = EEPROM.read(address_Stts);
-  byte value_VccH = EEPROM.read(address_VccH);
-  byte value_VccL = EEPROM.read(address_VccL);
-
-  int value_ID = value_IDH * 256 + value_IDL;
-  
-  Id = String(value_ID);
-  mailPresent = (value_Stts == 1) ? true : false;
-  Vcc = String(float(value_VccH) + (float(value_VccL)/100.0));
-  
-  Sprintln("Read EEPROM: ");
-  Sprintln(Id);
-  Sprintln(mailPresent);
-  Sprintln(Vcc);
-
-  Bat = convertBat(Vcc);
-}
-
-void writeEEPROM()
-{
-  byte value_IDH  = highByte(Id.toInt());
-  byte value_IDL  = lowByte(Id.toInt());
-  byte value_Stts = mailPresent ? 1 : 0;
-  byte value_VccH = int(Vcc.toFloat());
-  byte value_VccL = String((Vcc.toFloat()-value_VccH)*100.0, 0).toInt();
-  
-  Sprintln("Write EEPROM: ");
-  Sprintln(value_IDH);
-  Sprintln(value_IDL);
-  Sprintln(value_Stts);
-  Sprintln(value_VccH);
-  Sprintln(value_VccL);
-  
-  EEPROM.put(address_IDH, value_IDH);
-  EEPROM.put(address_IDL, value_IDL);
-  EEPROM.put(address_Stts, value_Stts);
-  EEPROM.put(address_VccH, value_VccH);
-  EEPROM.put(address_VccL, value_VccL);
-
-  EEPROM.commit();
-
-  readEEPROM();
 }
