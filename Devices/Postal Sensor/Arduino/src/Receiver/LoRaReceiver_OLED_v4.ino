@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
   Name:     LoRa Receiver with OLED display - Postal
   Created:  2019/06/05
-  Modified: 2020/03/14
+  Modified: 2020/03/30
   Author:   gauthier_j100@hotmail.com / SupremeSports
   GitHub:   https://github.com/SupremeSports/HA-Domotic/edit/master/Devices/Postal%20Sensor
 */
