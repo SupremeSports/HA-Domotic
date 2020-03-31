@@ -22,6 +22,7 @@ const char* mqtt_postalCmd      = "Home/Postal/Cmd";
 //Sensors
 const char* mqtt_sensorJson     = "Home/Postal/Json";         //MQTT JSON status data
 
+const char* json_state          = "state";
 const char* json_postalId       = "id";
 const char* json_postalBat      = "battery";
 const char* json_postalVcc      = "voltage";
