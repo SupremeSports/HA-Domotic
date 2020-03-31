@@ -32,42 +32,41 @@ switch:
     
 sensor:
   - platform: mqtt
-    name: "Postal Status"
+    name: "Postal Status JSON"
     icon: mdi:mailbox
     state_topic: "Home/Postal/Stts"
-    availability_topic: "Home/Postal/LWT"
+    value_template: '{{ value_json.state }}'
+    availability_topic: "Home/Transmitter/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    value_template: >
-      {% if value_json.state == "ON" %}
-        New Mail
-      {% else %}
-        No Mail
-      {% endif %}
-    json_attributes:
-      - state
-      - id
-      - rssi
-      - battery
-      - voltage
-      
+    json_attributes_topic: "Home/Postal/Stts"
+    
   - platform: template
     sensors:
-      last_postal_arrival:
-        friendly_name: Last Postal Arrival Time
-        entity_id: input_datetime.last_postal_arrival
+      postal_status:
+        friendly_name: Postal Status
+        entity_id:
+          - switch.postal_status
         icon_template: >
-          mdi:clock-in
-        #device_class: timestamp  //Makes display on minutes since...
-        value_template: "{{ states('input_datetime.last_postal_arrival') }}"
-      last_postal_removal:
-        friendly_name: Last Postal Removal Time
-        entity_id: input_datetime.last_postal_removal
-        icon_template: >
-          mdi:clock-out
-        #device_class: timestamp  //Makes display on minutes since...
-        value_template: "{{ states('input_datetime.last_postal_removal') }}"
+          mdi:mailbox
+        value_template: >
+          {% if is_state('switch.postal_status', 'on') %}
+            New Mail
+          {% else %}
+            No Mail
+          {% endif %}
+        availability_template: "{{ not is_state('switch.postal_status', 'unavailable') }}"
+        attribute_templates:
+          state: "{{ state_attr('sensor.postal_status_json', 'state') }}"
+          voltage: "{{ state_attr('sensor.postal_status_json', 'voltage') }}"
+          battery: "{{ state_attr('sensor.postal_status_json', 'battery') }}"
+          id: "{{ state_attr('sensor.postal_status_json', 'id') }}"
+          lora_rssi: "{{ state_attr('sensor.postal_status_json', 'rssi') }}"
+          source: "{{ state_attr('sensor.postal_status_json', 'source') }}"
+          wifi_rssi: "{{ state_attr('switch.postal_status', 'rssi') }}"
+          wifi_percent: "{{ state_attr('switch.postal_status', 'percent') }}"
+        
 input_datetime:
   last_postal_arrival:
     name: Last Postal Arrival
@@ -167,5 +166,6 @@ views:
               - entity: switch.postal_status
                 type: "custom:secondaryinfo-entity-row"
                 secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
+              - entity: switch.postal_status_activate_delay
               - entity: sensor.last_postal_arrival
               - entity: sensor.last_postal_removal
