@@ -27,9 +27,9 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
   Name:     LoRa Receiver with OLED display - Postal
   Created:  2019/06/05
-  Modified: 2019/11/16
+  Modified: 2020/03/14
   Author:   gauthier_j100@hotmail.com / SupremeSports
-  GitHub:  
+  GitHub:   https://github.com/SupremeSports/HA-Domotic/edit/master/Devices/Postal%20Sensor
 */
 
 // ----------------------------------------------------------------------------------------------------
@@ -37,7 +37,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 // ----------------------------------------------------------------------------------------------------
 #include <WiFi.h>
 
-#define ESP32_TTGO             1
+#define ESP32_TTGO                32
 //ADC_MODE(ADC_VCC);                              //Read Vcc on ADC input
 
 //Network settings - PLEASE, define those values in a config.h file
@@ -48,6 +48,8 @@ IPAddress gw(GW1, GW2, GW3, GW4);                 //Put your gateway IP address 
 IPAddress sn(SN1, SN2, SN3, SN4);                 //Put your subnetmask here
 
 bool networkActive              = false;          //WiFi connectivity status
+int rssiPercent                 = 0;              //WiFi signal strength in percent
+int rssi                        = 0;              //WiFi signal strength in dBm
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- WDT DEFINES --------------------------------------------
@@ -89,7 +91,7 @@ const bool boardLedPinRevert    = false;          //If true, LED is on when outp
 const bool enableBoardLED       = true;           //If true, LED will flash to indicate status
 
 //Variables
-#define initValue                 -99             //Initialization value to insure values updates
+#define initValue                 -1              //Initialization value to insure values updates
 
 bool newStart                   = false;          //New start detection
 
@@ -99,19 +101,27 @@ long ledFlashDelay              = 0;              //Led flashing delay
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 #include <PubSubClient.h>
-#include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
-const int BUFFER_SIZE           = JSON_OBJECT_SIZE(40);
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
-
 long lastMsg                    = 0;
 char msg[50];
 
 bool updatePublish              = false;
 bool mqttActive                 = false;
 
-long lastMillis                 = 0;
+long lastSecond                 = 0;
+long lastMinute                 = 0;
+
+// ----------------------------------------------------------------------------------------------------
+// ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
+
+const int BUFFER_SIZE           = JSON_OBJECT_SIZE(100);
+const int BUFFER_ARRAY_SIZE     = 255;
+
+char message[BUFFER_ARRAY_SIZE];
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ EEPROM DEFINES ------------------------------------------
@@ -125,6 +135,9 @@ int address_IDL                 = 1;
 int address_Stts                = 2;
 int address_VccH                = 3;
 int address_VccL                = 4;
+int address_Rssi                = 5;
+int address_Frcd                = 6;
+int address_Dlay                = 7;
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- LoRa DEFINES -------------------------------------------
@@ -145,8 +158,7 @@ int address_VccL                = 4;
 #define DI0                       26   // GPIO26 -- SX1278's IRQ(Interrupt Request)
 #define BAND                      915E6
 
-String rssi                     = "RSSI --";
-String rssiValue                = "";
+String rssiStr                  = "RSSI --";
 String packSize                 = "--";
 String packet                   = "";
 String packetID                 = "0";
@@ -155,11 +167,18 @@ bool mailPresent                = false;
 String Id                       = "0";
 String Vcc                      = "0.00";
 String Bat                      = "0";
+String Rssi                     = "0";
 
 int encryptKey                  = 200;
 
-long delayMailPresent           = 0;
-const long mailPresentOff       = 300000;
+bool blockNoMailTrigger         = false;
+bool enableFiveMinuteDelay      = false;
+unsigned long delayMailPresent  = 0;
+const unsigned long mailPresentOff       
+                                = 300000;
+
+bool newPostalStatus            = false;
+bool newStatusForced            = false;
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- OLED DEFINES -------------------------------------------
@@ -170,7 +189,10 @@ const long mailPresentOff       = 300000;
 #define SDA                       4
 #define SCL                       15
 
-SSD1306 display(0x3c, SDA, SCL); //0x3c for 128*32 OLED
+#define ENABLEOLED
+#ifdef ENABLEOLED
+  SSD1306 display(0x3c, SDA, SCL); //0x3c for 128*32 OLED
+#endif
 
 const uint8_t resetOledPin      = 16;
 const uint8_t powerOledPin      = 17;
@@ -201,12 +223,14 @@ void setup()
   
   initPostal();
 
-  lastMillis = millis();
+  lastSecond = millis();
+  lastMinute = millis();
   
   local_delay(50);
 
   //Initialize data
   newStart = true;
+  
   oledMillis = millis() + OledDelayOff;
   
   Sprintln("Init completed...");
@@ -221,6 +245,8 @@ void loop()
 
   runEverySecond();
 
+  runEveryMinute();
+
   newStart = false;                                  //First scan bit
 }
 
@@ -233,16 +259,16 @@ void runEveryScan()
   mqttActive = runMQTT();
   networkActive = checkNetwork();
 
-  //mqttKeepRunning();                              //Not on this project
+  mqttKeepRunning();
 
   mqttPublish();                                    //Run to check nothing has been received and needs to republish
   
-  local_delay(10);
+  local_delay(5);
 }
 
 void runEverySecond()
 {
-  if (millis()-lastMillis < 1000 && !loraRead())
+  if (millis()-lastSecond < 1000 && !loraRead())
     return;
 
   unsigned long loopTime = millis();
@@ -252,10 +278,27 @@ void runEverySecond()
 
   oledUpdate();
 
-  lastMillis = millis();
+  lastSecond = millis();
 
   loopTime = millis() - loopTime;
   Sprint("Process time: ");
+  Sprint(loopTime);
+  Sprintln("ms");
+}
+
+void runEveryMinute()
+{
+  if (millis()-lastMinute < 60000)
+    return;
+
+  unsigned long loopTime = millis();
+
+  newPostalStatus = true;
+
+  lastMinute = millis();
+
+  loopTime = millis() - loopTime;
+  Sprint("Process time (minute): ");
   Sprint(loopTime);
   Sprintln("ms");
 }
