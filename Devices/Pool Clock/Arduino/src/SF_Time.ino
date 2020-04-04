@@ -2,7 +2,7 @@
 // ----------------------------------------- TIME FUNCTIONS -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //IMPORTANT - Always send a delimiter at the of string for parsing to succeed
-//Expected payload: "YYYY:MM:DD:hh:mm:ss:"
+//Expected payload: YYYY:MM:DD:hh:mm:ss:
 void parseTime(char* message)
 {
   int dataSize = 6;
