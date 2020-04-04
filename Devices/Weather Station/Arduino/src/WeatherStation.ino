@@ -56,7 +56,7 @@ bool networkActive                = false;        //WiFi connectivity status
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
   #define Sprintln(a) (Serial.println(a))
@@ -127,20 +127,14 @@ const uint8_t sda             = 20;             //I2C Data pin
 const uint8_t scl             = 21;             //I2C Clock pin
 
 // ---------------------------------------- WIND SPEED DEFINES ----------------------------------------
-//#define FREQLIBRARIES
-
-#ifdef FREQLIBRARIES
-  #include <FreqCount.h>                           //Best for 1 kHz to 8 MHz
-  #include <FreqMeasure.h>                         //Best for 0.1 Hz to 1 kHz
-#endif
-
 const uint8_t windSpdPin      = 49;                //Wind speed sensor (pin 49 for FreqMeasure / 47 for FreqCount)
-float windSpdOut              = initValue;         //Wind speed frequency output to MQTT
 
-long lastWindSpeed            = 0;
+long lastWindSpeed            = 0;                 //Delay between readings
 
-uint16_t windSpeedBuffer      = 0;
-byte windSpeedPrev            = 0;
+uint16_t windSpeedBuffer      = 0;                 //Wind pulse counter
+byte windSpeedPrev            = 0;                 //Last status of wind sensor
+
+uint16_t windSpdOut           = 0;                 //Wind speed frequency output to MQTT
 
 // -------------------------------------- WIND DIRECTION DEFINES --------------------------------------
 #define WindDirOffset           1                  //Offset angle in degrees
@@ -157,14 +151,13 @@ int16_t windDirOut            = initValue;         //Wind speed frequency output
 const uint8_t rainSensorPin   = A0;                //Rain sensor
 const uint8_t rainLevelPin    = 43;                //Rain level sensor
 
-int16_t rainLvlCounter        = 0;                 //Rain level counter
-bool rainLvlMemory            = 0;                 //Last value of rain bucket
-bool RainLvlStts              = false;             //Rain level sensor on/off
+unsigned long lastRainLvl     = 0;                 //Delay between readings
 
-unsigned long rainLvlMillis   = 0;                 //Delay between readings
+int16_t rainLvlBuffer         = 0;                 //Rain level counter
+byte rainLvlPrev              = 0;                 //Last status of rain bucket
 
 int16_t RainSnsrOut           = initValue;         //Rain sensor output to MQTT
-int16_t RainLvlOut            = initValue;         //Rain sensor output to MQTT
+int16_t RainLvlOut            = 0;                 //Rain sensor output to MQTT
 
 // ---------------------------------------- DHT SENSOR DEFINES ----------------------------------------
 //#include <Wire.h>
@@ -189,6 +182,8 @@ float DHTTempIn               = initValue;         //DHT temperature output to M
 float DHTHumIn                = initValue;         //DHT humidity output to MQTT
 
 DHT dhtInternal(DHTInternalPin, DHTTYPE);          //Create DHT object
+
+
 
 // ---------------------------------------- BME SENSOR DEFINES ----------------------------------------
 //#include <Wire.h>
@@ -231,11 +226,8 @@ float inputVoltRatio          = 2.5;               //Voltage divider ratio [0 =>
 float dcVoltRatio             = 1.36;              //Voltage divider ratio [0 => 5.5]Vdc
 
 // ---------------------------------------- SELF-RESET DEFINES ----------------------------------------
-const uint8_t selfResetPin    = 7;                 //MQ135 sensor (analog)
-
 unsigned long resetDelay      = 0;
 bool resetONS                 = false;
-bool forceResetCmd            = false;
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- SETUP ------------------------------------------------
@@ -299,6 +291,8 @@ void runEverySecond()
     return;  
 
   unsigned long loopTime = millis();
+
+  readSensors(newStart ? 5 : 1);                  //Read sensors (buttons, etc.)
 
   updatePublish = true;
   mqttPublish();                                  //Publish MQTT data
