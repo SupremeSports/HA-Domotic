@@ -3,14 +3,18 @@ void initSensors()
   Sprintln("Init Sensors...");
   
   //INPUTS
-
+  //None
+  
   //OUTPUTS
-  pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
+  if (enableBoardLED)
+    pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
 }
 
 //INPUTS
 void readSensors()
 {
+  caseTemp = getI2CTemp();
+  
   return;
 }
 
@@ -27,8 +31,9 @@ void setBoardLED(bool newState)
 {
   if (!enableBoardLED)
     newState = boardLedPinRevert;
-  
-  digitalWrite(boardLedPin, newState);
+
+  if (enableBoardLED)
+    digitalWrite(boardLedPin, newState);
 }
 
 void flashBoardLed(int delayFlash, int qtyFlash)
@@ -53,6 +58,7 @@ void flashEvery5sec()
     
   ledFlashDelay = millis();
 
+  readSensors();
   sendSensors();
 }
 
