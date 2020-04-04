@@ -11,16 +11,20 @@ void initFujitsuIR()
 
   ac.setModel(MODEL);
   
-  char tempChar[5];
-  itoa(configTempSetpoint, tempChar, 4);
+  //char tempChar[5];
+  //itoa(configTempSetpoint, tempChar, 4);
+
+  uint8_t chrLngt = 5;  // Buffer big enough for 7-character float
+  char result[chrLngt];
+  dtostrf(configTempSetpoint, 4, 0, result); // Leave room for too large numbers!
 
   setSwingMQTT(configSwingMode==1 ? (char*)"On" : (char*)"Off");
   setModeMQTT((char*)runModes[configRunMode]);
   setFanMQTT((char*)fanModes[configFanMode]);
-  setTempMQTT(tempChar);
-  setStateMQTTbool(configStateOn ? true : false);
+  setTempMQTT(result);
+  setStateMQTTbool(configStateOn ? true : false, false);
 
-  sendDataToHvac = true;
+  //sendDataToHvac = true;
 }
 
 //Integrated POWER ON/OFF into other commands
@@ -32,13 +36,20 @@ void initFujitsuIR()
     setStateMQTTbool(false);
 }*/
 
-void setStateMQTTbool(bool state)
+void setStateMQTTbool(bool state, bool sendHVAC)
 {
-  configStateOn = (state ? true : false);
+  configStateOn = (state && configRunMode!=0 ? true : false);
   ac.setCmd(configStateOn ? kFujitsuAcCmdTurnOn : kFujitsuAcCmdTurnOff);
 
   Sprint("State set to: ");
   Sprintln(state);
+
+  if (sendHVAC)
+  {
+    sendDataToHvac = true;
+    sendIRsignal();
+    local_delay(1000);
+  }
 }
 
 void setModeMQTT(char* message)
@@ -52,16 +63,13 @@ void setModeMQTT(char* message)
     }
   }
 
-  if (!configStateOn && configRunMode >= RUNMODES_MIN && configRunMode <= RUNMODES_MAX)
-  {
-    setStateMQTTbool(true);
-    local_delay(1000);
-  }
+  if (!configStateOn && configRunMode > RUNMODES_MIN && configRunMode <= RUNMODES_MAX)
+    setStateMQTTbool(true, true);
   
   switch(configRunMode)
   {
     case 0:       //Off
-      setStateMQTTbool(false);
+      setStateMQTTbool(false, false);
       break;
     case 1:       //Auto
       ac.setMode(kFujitsuAcModeAuto);
@@ -96,10 +104,7 @@ void setFanMQTT(char* message)
   }
 
   if (!configStateOn && configFanMode >= FANMODES_MIN && configFanMode <= FANMODES_MAX)
-  {
-    setStateMQTTbool(true);
-    local_delay(1000);
-  }
+    setStateMQTTbool(true, true);
   
   switch(configFanMode)
   {
@@ -141,20 +146,14 @@ void setSwingMQTT(char* message)
 {
   bool state = false;
   if (strcmp(message,"On")==0)
-  {
     state = true;
-    //setStateMQTTbool(true);
-  }
   else if (strcmp(message,"Off")==0)
     state = false;
   else
     return;
 
   /*if (!configStateOn && state)
-  {
-    setStateMQTTbool(true);
-    local_delay(1000);
-  }*/
+    setStateMQTTbool(true, true);*/
     
   ac.setSwing(state ? kFujitsuAcSwingVert : kFujitsuAcSwingOff);
   configSwingMode = (state ? true : false);
@@ -168,11 +167,16 @@ void setSwingMQTT(char* message)
 // ----------------------------------------------------------------------------------------------------
 void sendIRsignal()
 {
-  Sprintln("Sending IR command to A/C ...");
+  if (!sendDataToHvac)
+    return;
+
+  sendDataToHvac = false;
+  
+  Sprintln("Sending IR command to A/C...");
   #if SEND_FUJITSU_AC
     ac.send();
   #else
-    Sprintln("Can't send because SEND_FUJITSU_AC has been disabled.");
+    Sprintln("Can't send because SEND_FUJITSU_AC has been disabled!");
   #endif
 
   printState();
