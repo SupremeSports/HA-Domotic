@@ -54,6 +54,7 @@ const byte  mqtt_willQoS        = 0;
 #define SIP4  xxx
 
 //Current device IP address
+//Serves also as DNS address
 #define IP1  192
 #define IP2  168
 #define IP3  0
