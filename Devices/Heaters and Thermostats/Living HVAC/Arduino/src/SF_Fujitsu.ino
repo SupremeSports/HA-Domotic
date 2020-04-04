@@ -10,9 +10,6 @@ void initFujitsuIR()
   readEEPROM();
 
   ac.setModel(MODEL);
-  
-  //char tempChar[5];
-  //itoa(configTempSetpoint, tempChar, 4);
 
   uint8_t chrLngt = 5;  // Buffer big enough for 7-character float
   char result[chrLngt];
@@ -23,8 +20,6 @@ void initFujitsuIR()
   setFanMQTT((char*)fanModes[configFanMode]);
   setTempMQTT(result);
   setStateMQTTbool(configStateOn ? true : false, false);
-
-  //sendDataToHvac = true;
 }
 
 //Integrated POWER ON/OFF into other commands
