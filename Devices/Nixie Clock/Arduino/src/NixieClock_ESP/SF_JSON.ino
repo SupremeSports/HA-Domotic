@@ -4,7 +4,7 @@
 //NONE FOR THIS PROJECT
 
 // ----------------------------------------------------------------------------------------------------
-// ---------------------------------------- PROCESS NIXIE JSON ----------------------------------------
+// ----------------------------------------- PROCESS CMD JSON -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 bool processCommandJson(char* message)
 {
@@ -18,18 +18,20 @@ bool processCommandJson(char* message)
     return false;
   }
 
+  bool ok = true;
+
   if (root.containsKey(json_reset))
   {
-    mqttClient.publish(mqtt_clockStts, "Reset Requested...", false);
+    mqttClient.publish(mqtt_controlStts, json_resetReq);
     
     if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
       return true;
   
-    mqttClient.publish(mqtt_clockStts, "Rebooting...", false);
+    mqttClient.publish(mqtt_controlStts, json_resetReboot);
       
-    Sprint("Reset Requested...");
+    Sprint(json_resetReq);
     local_delay(500);
-    Sprintln(" rebooting...");
+    Sprintln(json_resetReboot);
     ESP.restart();
   }
 
@@ -38,22 +40,20 @@ bool processCommandJson(char* message)
     if (strcmp(root[json_state], mqtt_cmdOn) == 0)
     {
       if (configStateOn)
-        return false;
+        ok = false;
       configStateOn = true;
     }
     else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
     {
       if (!configStateOn)
-        return false;
+        ok = false;
       configStateOn = false;
     }
 
     setOnOffStates();
 
     sendDataToI2C(I2C_SET_OPTION_BLANK_MODE, configBlankMode);
-    local_delay(10);
     sendDataToI2C(I2C_SET_OPTION_DAY_BLANKING, configDayBlanking);
-    local_delay(10);
   }
   else if (root.containsKey(json_hourMode))
     sendDataToI2C(I2C_SET_OPTION_12_24, (strcmp(root[json_hourMode], mqtt_cmdOn) == 0) ? 0 : 1);
@@ -148,8 +148,7 @@ bool processCommandJson(char* message)
     sendDataToI2C(intCmd, intValue);
   }
 
-  local_delay(10);
-  return true;
+  return ok;
 }
 
 void setOnOffStates()
@@ -201,22 +200,27 @@ bool processLightColorsJson(char* message)
     return false;
   }
 
+  bool ok = true;
+
   if (root.containsKey(json_state))
   {
     if (strcmp(root[json_state], mqtt_cmdOn) == 0)
+    {
+      if (configBacklightOn)
+        ok = false;
       configBacklightOn = true;
+    }
     else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
+    {
+      if (!configBacklightOn)
+        ok = false;
       configBacklightOn = false;
+    }
 
     setOnOffStates();
 
     sendDataToI2C(I2C_SET_OPTION_BLANK_MODE, configBlankMode);
-    local_delay(10);
     sendDataToI2C(I2C_SET_OPTION_DAY_BLANKING, configDayBlanking);
-    local_delay(10);
-
-    Sprint("State: ");
-    Sprintln(configBacklightOn ? mqtt_cmdOn : mqtt_cmdOff);
   }
 
   if (root.containsKey(json_effect))
@@ -227,10 +231,10 @@ bool processLightColorsJson(char* message)
       {
         configBacklightMode = i;
         sendDataToI2C(I2C_SET_OPTION_BACKLIGHT_MODE, configBacklightMode);
-        local_delay(10);
         break;
       }
     }
+    ok = true;
   }
   
   if (root.containsKey(json_color))
@@ -244,11 +248,10 @@ bool processLightColorsJson(char* message)
     configBlueCnl = constrain(map(b, 0, 255, 0, 15), 0, 15);
 
     sendDataToI2C(I2C_SET_OPTION_RED_CHANNEL, configRedCnl);
-    local_delay(10);
     sendDataToI2C(I2C_SET_OPTION_GREEN_CHANNEL, configGreenCnl);
-    local_delay(10);
     sendDataToI2C(I2C_SET_OPTION_BLUE_CHANNEL, configBlueCnl);
-    local_delay(10);
+
+    ok = true;
   }
 
   if (root.containsKey(json_speed))
@@ -256,17 +259,15 @@ bool processLightColorsJson(char* message)
     configCycleSpeed = constrain(root[json_speed], 4, 64);
  
     sendDataToI2C(I2C_SET_OPTION_CYCLE_SPEED, configCycleSpeed);
-    local_delay(10);
+
+    ok = true;
   }
-  
-  return true;
+
+  return ok;
 }
 
 void sendLightColorsState()
 {
-  if (!getClockOptionsFromI2C())
-    return;
-
   byte r = 0;
   byte g = 0;
   byte b = 0;
@@ -300,13 +301,10 @@ void sendLightColorsState()
 
   root[json_speed] = configCycleSpeed;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  char buffer[BUFFER_ARRAY_SIZE];
+  root.printTo(buffer, root.measureLength() + 1);
 
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-  mqttClient.publish(mqtt_ledStts, buffer, false);
-  local_delay(10);
+  mqttClient.publish(mqtt_ledStts, buffer);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -324,20 +322,15 @@ void sendNixieStates()
   root[json_hourMode] = configHourMode==1 ? mqtt_cmdOn : mqtt_cmdOff;
   root[json_blankLead] = configBlankLead==1 ? mqtt_cmdOn : mqtt_cmdOff;
   root[json_scrollback] = configScrollback==1 ? mqtt_cmdOn : mqtt_cmdOff;
-  local_delay(10);
   root[json_suppressACP] = configSuppressACP==1 ? mqtt_cmdOn : mqtt_cmdOff;
   root[json_useFade] = configUseFade==1 ? mqtt_cmdOn : mqtt_cmdOff;
   root[json_useLDR] = configUseLDR==1 ? mqtt_cmdOn : mqtt_cmdOff;
   root[json_slotsMode] = configSlotsMode==1 ? mqtt_cmdOn : mqtt_cmdOff;
-  local_delay(10);
   
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  char buffer[BUFFER_ARRAY_SIZE];
+  root.printTo(buffer, root.measureLength() + 1);
 
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-  mqttClient.publish(mqtt_clockStts, buffer, false);
-  local_delay(10);
+  mqttClient.publish(mqtt_controlStts, buffer);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -349,27 +342,22 @@ void sendSensors()
 
   JsonObject& root = jsonBuffer.createObject();
 
-  //State
   root[json_state] = configStateOn ? mqtt_cmdOn : mqtt_cmdOff;
 
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
-  char result[chrLngt]; 
+  char result[chrLngt];
+
   dtostrf(caseTemp, 6, 2, result); // Leave room for too large numbers!
   root[json_casetemp] = result;
 
-  String str = String(rssi);
-  str.toCharArray(result,chrLngt);
+  dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
   root[json_rssi] = result;
 
-  str = String(rssiPercent);
-  str.toCharArray(result,chrLngt);
+  dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
   root[json_rssiPercent] = result;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  char buffer[BUFFER_ARRAY_SIZE];
+  root.printTo(buffer, root.measureLength() + 1);
 
-  Sprintln(buffer);
-
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-  mqttClient.publish(mqtt_clockJson, buffer, false);
+  mqttClient.publish(mqtt_clockJson, buffer);
 }
