@@ -59,7 +59,7 @@ void reconnect()
     {
       Sprintln("connected");
       // Once connected, publish an announcement...
-      readEEPROM();
+      //readEEPROM();
       updatePublish = true;
       mqttPublish();
       // ... and resubscribe
