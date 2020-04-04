@@ -23,7 +23,7 @@ void initWifi()
 
   networkActive = true;
   
-  lastMillis = millis()-10000;
+  lastSecond = millis()-10000;
 }
 
 bool checkNetwork()
@@ -54,10 +54,11 @@ void getQuality()
   int dBm = WiFi.RSSI();
   if (dBm <= -100)
     rssiPercent = 0;
-  if (dBm >= -50)
+  else if (dBm >= -50)
     rssiPercent = 100;
+  else
+    rssiPercent = 2 * (dBm + 100);
   
-  rssiPercent = 2 * (dBm + 100);
   rssi = dBm;
 }
 
@@ -117,7 +118,7 @@ void ICACHE_RAM_ATTR interruptReboot(void)
 {
   if (millis()-lwdTime >= LWD_TIMEOUT)
   {
-    Sprintln("Rebooting...");
+    Sprintln(json_resetReboot);
     flashBoardLed(1, 1000);
     ESP.restart();  
   }
