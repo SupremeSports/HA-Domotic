@@ -69,7 +69,7 @@ void sendCommandStatus()
   rain["s"] = result;
   dtostrf(RainLvlOut, 3, 0, result);    // Leave room for too large numbers!
   rain["l"] = result;
-  rain["t"] = RainLvlStts ? mqtt_cmdOff : mqtt_cmdOn; //Is bucket ON or OFF
+  rain["t"] = rainLvlPrev==0 ? mqtt_cmdOff : mqtt_cmdOn; //Is bucket ON or OFF
 
   dtostrf(VEMLUVOut, 4, 0, result);     // Leave room for too large numbers!
   root[json_uv] = result;                 //Raw value [0 => 9999]mW/m2
