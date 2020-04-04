@@ -3,12 +3,12 @@
 // ----------------------------------------------------------------------------------------------------
 //You must put your own settings in here
 
-const char* ssid                = "Gauthier";
-const char* password            = "E485A180BC";
+const char* ssid                = "yourSSID";
+const char* password            = "yourPassword";
 
-const char* mqtt_server         = "192.168.1.10";
-const char* mqtt_user           = "devices";
-const char* mqtt_password       = "devices";
+const char* mqtt_server         = "192.168.0.xxx";
+const char* mqtt_user           = "yourMQTTcredentials";
+const char* mqtt_password       = "yourMQTTcredentials";
 
 const char* mqtt_deviceName     = "PoolClock-";
 
@@ -62,23 +62,23 @@ const byte  mqtt_willQoS        = 0;
 //MQTT Server IP Address
 #define SIP1  192
 #define SIP2  168
-#define SIP3  1
-#define SIP4  10
+#define SIP3  0
+#define SIP4  xxx
 
 //Current device IP address
 #define IP1  192
 #define IP2  168
-#define IP3  1
-#define IP4  81
+#define IP3  0
+#define IP4  xxx
 
 //Your gateway settings
 #define GW1  192
 #define GW2  168
 #define GW3  0
-#define GW4  2
+#define GW4  1
 
 //Your subnet settings
 #define SN1  255
 #define SN2  255
-#define SN3  254
+#define SN3  255
 #define SN4  0
