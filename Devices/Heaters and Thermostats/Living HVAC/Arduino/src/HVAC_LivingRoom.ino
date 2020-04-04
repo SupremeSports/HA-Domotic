@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
  Name:    HVAC Control - Living Room Fujitsu (ARRAH2E)
  Created: 2020/01/19
- Created: 2020/03/28
+ Created: 2020/04/04
  Author:  gauthier_j100@hotmail.com / SupremeSports
  GitHub:  https://github.com/SupremeSports/
 */
@@ -78,7 +78,7 @@ unsigned long lwdTime             = 0;
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
   #define Sprintln(a) (Serial.println(a))
@@ -203,7 +203,7 @@ bool sendDataToHvac               = false;
 // ----------------------------------------------------------------------------------------------------
 const uint8_t tempPin             = A0;           //Temperature voltage pin
 
-float outputAirTemp               = 0;            //Temperature voltage reading
+float outputAirTemp               = 0.0;          //Temperature voltage reading
 
 //Constants
 float temp_ax2                    =  -0.00004;
