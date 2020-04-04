@@ -19,10 +19,7 @@ void initI2C()
 
   // Find I2C slave device address
   while (!scanI2CBus())
-  {
     flashBoardLed(250, 2);
-    //local_delay(500);
-  }
 
   local_delay(50);                  //Wait for all data to be ready
 
@@ -338,8 +335,6 @@ boolean getClockOptionsFromI2C()
   if (error == 0)
     getOnOffStates();
 
-  local_delay(10);
-
   return (error == 0);
 }
 
@@ -353,7 +348,7 @@ boolean sendIPAddressToI2C(IPAddress ip)
   Wire.write(ip[2]);
   Wire.write(ip[3]);
   int error = Wire.endTransmission();
-  local_delay(10);
+
   return (error == 0);
 }
 
@@ -366,7 +361,7 @@ boolean setClockOptionBoolean(byte option, boolean newMode)
   newOption = newMode ? 0 : 1;
   Wire.write(newOption);
   int error = Wire.endTransmission();
-  local_delay(10);
+
   return (error == 0);
 }
 
@@ -377,7 +372,7 @@ boolean setClockOptionByte(byte option, byte newMode)
   Wire.write(option);
   Wire.write(newMode);
   int error = Wire.endTransmission();
-  local_delay(10);
+
   return (error == 0);
 }
 
@@ -386,13 +381,13 @@ boolean setClockOptionInt(byte option, int newMode)
 {
   byte loByte = newMode % 256;
   byte hiByte = newMode / 256; 
-
+  
   Wire.beginTransmission(preferredI2CSlaveAddress);
   Wire.write(option);
   Wire.write(hiByte);
   Wire.write(loByte);
   int error = Wire.endTransmission();
-  local_delay(10);
+
   return (error == 0);
 }
 
@@ -402,30 +397,14 @@ boolean scanI2CBus()
   byte pingAnsweredFrom = 0xff;
 
   //Check prefered I2C address
-  Wire.beginTransmission(0x69);
+  Wire.beginTransmission(preferredI2CSlaveAddress);
   int error1 = Wire.endTransmission();
   if (error1 == 0)
   {
     preferredI2CSlaveAddress = 0x69;
     preferredAddressFoundBy = 1;
     if (getClockOptionsFromI2C()) 
-      pingAnsweredFrom = 0x69;
-  }
-  //Scroll all addresses to find I2C
-  else
-  {
-    /*for (int idx = 0 ; idx < 128 ; idx++)
-    {
-      Wire.beginTransmission(idx);
-      int error = Wire.endTransmission();
-      if (error == 0)
-      {
-        preferredI2CSlaveAddress = idx;
-        preferredAddressFoundBy = 1;
-        if (getClockOptionsFromI2C()) 
-          pingAnsweredFrom = idx;
-      }
-    }*/
+      pingAnsweredFrom = preferredI2CSlaveAddress;
   }
 
   // if we got a ping answer, then we must use that
@@ -435,6 +414,50 @@ boolean scanI2CBus()
     preferredAddressFoundBy = 2;
     return true;
   }
-  else
-    return false;
+
+  return false;
+}
+
+// ----------------------------------------------------------------------------------------------------
+// --------------------------------------------- TEMP I2C ---------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+float getI2CTemp()
+{
+  return(int(getI2CTempReg(temp_reg)) / 256.0F);
+}
+
+unsigned getI2CTempReg(byte reg)
+{
+  unsigned Result=0xFFFF;
+
+  Sprint("getReg "); 
+  Sprintln(reg);
+
+  Wire.beginTransmission(preferredI2CTempAddress);
+  Wire.write(reg); // pointer reg
+  Wire.endTransmission();
+
+  uint8_t c;
+
+  Wire.requestFrom(preferredI2CTempAddress, uint8_t(2));
+  if(Wire.available())
+  {
+    c = Wire.read();
+    Result = c;
+    if(reg != config_reg)
+    {
+      Result = (unsigned(c))<<8;
+      if(Wire.available())
+      {
+          c = Wire.read();
+          Result |= (unsigned(c));
+      }
+      else
+        Result = 0xFFFF;
+    }
+  }
+
+  Wire.endTransmission();
+
+  return(Result);
 }
