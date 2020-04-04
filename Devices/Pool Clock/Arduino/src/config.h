@@ -3,60 +3,82 @@
 // ----------------------------------------------------------------------------------------------------
 //You must put your own settings in here
 
-const char* ssid                = "yourSSID";
-const char* password            = "yourPassword";
+const char* ssid                = "Gauthier";
+const char* password            = "E485A180BC";
 
-const char* mqtt_server         = "192.168.0.xxx";
-const char* mqtt_user           = "yourMQTTcredentials";
-const char* mqtt_password       = "yourMQTTcredentials";
+const char* mqtt_server         = "192.168.1.10";
+const char* mqtt_user           = "devices";
+const char* mqtt_password       = "devices";
 
-const char* mqtt_deviceName   = "PoolClock-";
+const char* mqtt_deviceName     = "PoolClock-";
 
-//Time
-const char* mqtt_timeValue    = "Home/Global/Time";             //Receive time in format YYYY:MM:DD:HH:MM:SS:
-const char* mqtt_timeRequest  = "Home/Global/Time/Request";     //Request time update
+const char* mqtt_timeCmd        = "Home/Global/Time";             //Receive time in format YYYY:MM:DD:HH:MM:SS:
+const char* mqtt_timeRequest    = "Home/Global/Time/Request";     //Request time update
 
-const char* mqtt_waterTemp    = "Home/Pool/Clock/Water/Temp";
-const char* mqtt_waterPH      = "Home/Pool/Clock/Water/PH";
+//Control
+const char* mqtt_controlStts    = "Home/Pool/Clock/Stts";         //MQTT JSON CLOCK status data
+const char* mqtt_controlCmd     = "Home/Pool/Clock/Cmd";          //MQTT JSON CLOCK command data
 
-const char* mqtt_outTemp      = "Home/Weather/Out/Temp";
-const char* mqtt_outHum       = "Home/Weather/Out/Hum";
+const char* json_waterTemp      = "wtemp";
+const char* json_waterPH        = "wph";
+const char* json_outTemp        = "otemp";
+const char* json_outHum         = "ohum";
+const char* json_timeText       = "uptxt";
+const char* json_tempText       = "dntxt";
 
-const char* mqtt_text_time    = "Home/Pool/Clock/Text/Time";
-const char* mqtt_text_temp    = "Home/Pool/Clock/Text/Temp";
+//LEDs
+const char* mqtt_ledStts        = "Home/Pool/Clock/LED/Stts";     //MQTT JSON LIGHT status data
+const char* mqtt_ledCmd         = "Home/Pool/Clock/LED/Cmd";      //MQTT JSON LIGHT command data
 
-const char* mqtt_statusTopic  = "Home/Pool/Clock/Stts";         //MQTT JSON LIGHT status data
-const char* mqtt_cmdTopic     = "Home/Pool/Clock/Cmd";          //MQTT JSON LIGHT command data
-const char* mqtt_cmdOn        = "ON";
-const char* mqtt_cmdOff       = "OFF";
+const char* json_state          = "state";
+const char* json_effect         = "effect";
+const char* json_brightness     = "brightness";
+const char* json_color          = "color";
+const char* json_transition     = "transition";
 
-const char* mqtt_willTopic    = "Home/Pool/Clock/LWT";
-const char* mqtt_willOffline  = "offline";
-const char* mqtt_willOnline   = "online";
-const bool  mqtt_willRetain   = true;
-const byte  mqtt_willQoS      = 0;
+//Sensors
+const char* mqtt_sensorJson     = "Home/Pool/Clock/Json";         //MQTT JSON status data
+
+const char* json_reset          = "reset";
+const char* json_rssi           = "rssi";
+const char* json_rssiPercent    = "percent";
+
+//Others
+const char* json_parseID        = "Parse command ID failed";
+const char* json_parseFailed    = "parseObject() failed";
+const char* json_resetReq       = "Reset Requested...";
+const char* json_resetReboot    = "Rebooting...";
+
+const char* mqtt_cmdOn          = "ON";
+const char* mqtt_cmdOff         = "OFF";
+
+const char* mqtt_willTopic      = "Home/Pool/Clock/LWT";
+const char* mqtt_willOffline    = "offline";
+const char* mqtt_willOnline     = "online";
+const bool  mqtt_willRetain     = false;
+const byte  mqtt_willQoS        = 0;
 
 //Network settings
 //MQTT Server IP Address
 #define SIP1  192
 #define SIP2  168
-#define SIP3  0
-#define SIP4  YYY
+#define SIP3  1
+#define SIP4  10
 
 //Current device IP address
 #define IP1  192
 #define IP2  168
-#define IP3  0
-#define IP4  XXX
+#define IP3  1
+#define IP4  81
 
 //Your gateway settings
 #define GW1  192
 #define GW2  168
 #define GW3  0
-#define GW4  XXX
+#define GW4  2
 
 //Your subnet settings
 #define SN1  255
 #define SN2  255
-#define SN3  255
+#define SN3  254
 #define SN4  0
