@@ -139,12 +139,6 @@ void setTempMQTT(char* message)
 
 void setSwingMQTT(char* message)
 {
-  /*if (!configStateOn)
-  {
-    setStateMQTTbool(true);
-    local_delay(1000);
-  }*/
-
   bool state = false;
   if (strcmp(message,"On")==0)
   {
