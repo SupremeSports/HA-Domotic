@@ -25,11 +25,11 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 */
 
 /*
-  Name:     Nixie Clock - time provider
+  Name:     Nixie Clock - Time provider
   Created:  2019/01/02
-  Modified: 2020/03/11
+  Modified: 2020/04/02
   Author:   gauthier_j100@hotmail.com / SupremeSports
-  GitHub:   https://github.com/SupremeSports/
+  GitHub:   https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Nixie%20Clock/Arduino/src/NixieClock_ESP
 
  All-In-One Rev 3 - WiFi Time Provider
   Firmware V1 Wifi
@@ -44,10 +44,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
     Flash: 40MHz, 
     CPU: 80MHz, 
     Flash Mode: DOUT, 
-    Upload speed: 115200, 
     Flash size: 1M (OTA: 470k), 
-    Reset method: ck, Disabled, none,
-    Erase Flash: All flash contents,
     Builtin LED: 1
 
     Need the Esp.zip patch from here for some ESP-01 modules:
@@ -59,7 +56,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 // ----------------------------------------------------------------------------------------------------
 #include <ESP8266WiFi.h>
 
-#define ESP8266                   1
+#define ESP8266                     1
 ADC_MODE(ADC_VCC);                                //Read Vcc on ADC input
 
 //Network settings - PLEASE, define those values in a config.h file
@@ -69,9 +66,9 @@ IPAddress ip(IP1, IP2, IP3, IP4);                 //Put the current device IP ad
 IPAddress gw(GW1, GW2, GW3, GW4);                 //Put your gateway IP address here
 IPAddress sn(SN1, SN2, SN3, SN4);                 //Put your subnetmask here
 
-bool networkActive              = false;          //WiFi connectivity status
-int rssiPercent                 = 0;              //WiFi signal strength in percent
-int rssi                        = 0;              //WiFi signal strength in dBm
+bool networkActive                = false;        //WiFi connectivity status
+int rssiPercent                   = 0;            //WiFi signal strength in percent
+int rssi                          = 0;            //WiFi signal strength in dBm
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- WDT DEFINES --------------------------------------------
@@ -79,9 +76,9 @@ int rssi                        = 0;              //WiFi signal strength in dBm
 #include <Ticker.h>
 Ticker lwdTicker;
 
-#define LWD_TIMEOUT               5000            //WDT Value (ms)
+#define LWD_TIMEOUT                 5000          //WDT Value (ms)
 
-unsigned long lwdTime           = 0;
+unsigned long lwdTime             = 0;
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- OTA DEFINES --------------------------------------------
@@ -93,7 +90,7 @@ unsigned long lwdTime           = 0;
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
   #define Sprintln(a) (Serial.println(a))
@@ -111,16 +108,21 @@ unsigned long lwdTime           = 0;
 // ------------------------------------------ OTHER DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //Used Pins
-const uint8_t boardLedPin       = 1;//LED_BUILTIN;//Pin 1 on ESP-01, pin 2 on ESP-12E/ESP32
-const bool boardLedPinRevert    = true;           //If true, LED is on when output is low
-const bool enableBoardLED       = true;           //If true, LED will flash to indicate status
+#ifndef DEBUG //ESP01 uses pin #1 for LED and Tx, so disable LED when in debug mode
+  const uint8_t boardLedPin       = 1;            //Pin 1 on ESP-01, pin 2 on ESP-07/12 and ESP32
+#else
+  const uint8_t boardLedPin       = -1;           //Disable pin that is also used for LED
+#endif
+
+const bool boardLedPinRevert      = true;         //If true, LED is on when output is low
+const bool enableBoardLED         = true;         //If true, LED will flash to indicate status
 
 //Variables
-#define initValue                 -1              //Initialization value to insure values updates
+#define initValue                   -1            //Initialization value to insure values updates
 
-bool newStart                   = false;          //New start detection
+bool newStart                     = false;        //New start detection
 
-long ledFlashDelay              = 0;              //Led flashing delay
+long ledFlashDelay                = 0;            //Led flashing delay
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
@@ -129,33 +131,37 @@ long ledFlashDelay              = 0;              //Led flashing delay
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
-long lastMsg                    = 0;
+long lastMsg                      = 0;
 char msg[50];
 
-bool updatePublish              = false;
-bool mqttActive                 = false;
+bool updatePublish                = false;
+bool mqttActive                   = false;
 
-long lastMillis                 = 0;
+long lastSecond                   = 0;
+long lastMinute                   = 0;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#include <ArduinoJson.h>
+#include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
 
-const int BUFFER_SIZE           = JSON_OBJECT_SIZE(100);
+const int BUFFER_SIZE             = JSON_OBJECT_SIZE(100);
+const int BUFFER_ARRAY_SIZE       = 255;
+
+char message[BUFFER_ARRAY_SIZE];
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- LED DATA ---------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //Options “0”, “1” and “2”, do not dim with the bulbs. Options “3”, “4” and “5” do dim
-const char *effects[]           = {
-                                  "Fixed",
-                                  "Pulse",
-                                  "Cycle",
-                                  "FixedDim",
-                                  "PulseDim",
-                                  "CycleDim",
-                                  };
+const char *effects[]             = {
+                                    "Fixed",
+                                    "Pulse",
+                                    "Cycle",
+                                    "FixedDim",
+                                    "PulseDim",
+                                    "CycleDim"
+                                    };
 
 byte configBacklightOn;
 byte configBacklightMode;
@@ -171,8 +177,8 @@ byte configCycleSpeed;
 
 #include "I2CDefs.h"                              //Other parts of the code, broken out for clarity
 
-#define I2C_SDA                   0
-#define I2C_SCL                   2
+#define I2C_SDA                     0
+#define I2C_SCL                     2
 
 byte preferredI2CSlaveAddress     = 0x69;
 byte preferredAddressFoundBy      = 0;            // 0 = not found, 1 = found by default, 2 = found by ping
@@ -198,9 +204,9 @@ uint16_t configMinDim;
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ TIME CONTROL --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#include <TimeLib.h>            // TimeLib library is needed https://github.com/PaulStoffregen/Time
-                                // http://playground.arduino.cc/code/time (Margolis 1.5.0)
-                                
+#include <TimeLib.h>              // TimeLib library is needed https://github.com/PaulStoffregen/Time
+                                  // http://playground.arduino.cc/code/time (Margolis 1.5.0)
+
 #define DELIMITER_TIME              ":"
 
 //Variables
@@ -218,9 +224,25 @@ uint8_t prevSecond                = initValue;
 
 bool localTimeValid               = false;        //Detect that local time is valid
 
+long lastTimeRequestMillis        = millis();
+
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- CASE TEMP DEFINES -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
+//LM75 used without library
+
+//#define VERSION "1.1"
+//#include <lm75.h>
+//#include <Wire.h> //Already declared
+
+byte preferredI2CTempAddress      = 0x48;
+
+//LM75 Registers
+byte temp_reg                     = 0x00;
+byte config_reg                   = 0x01;
+byte THyst_reg                    = 0x02;
+byte TOS_reg                      = 0x03;
+
 float caseTemp                    = 0.0;
 
 // ----------------------------------------------------------------------------------------------------
@@ -245,7 +267,8 @@ void setup()
   initI2C();
   initNixie();
 
-  lastMillis = millis();
+  lastSecond = millis();
+  lastMinute = millis();
 
   local_delay(50);                                //Wait for all data to be ready
 
@@ -282,12 +305,12 @@ void runEveryScan()
 
   mqttPublish();                                  //Run to check nothing has been received and needs to republish
 
-  local_delay(10);
+  local_delay(5);
 }
 
 void runEverySecond()
 {
-  if (millis()-lastMillis < 1000)
+  if (millis()-lastSecond < 1000)
     return;
 
   unsigned long loopTime = millis();
@@ -295,7 +318,7 @@ void runEverySecond()
   updatePublish = true;
   mqttPublish();                                  //Publish MQTT data
 
-  lastMillis = millis();
+  lastSecond = millis();
 
   loopTime = millis() - loopTime;
   Sprint("Process time: ");
@@ -305,16 +328,21 @@ void runEverySecond()
 
 void runEveryMinute()
 {
+//  if (millis()-lastMinute < 60000)
+//    return;
   if ((Minute == prevMinute) || !localTimeValid)
     return;
 
   unsigned long loopTime = millis();
 
-  getClockOptionsFromI2C();                       //Read data from I2C
-  sendNixieStates();
-  sendLightColorsState();
+  if (getClockOptionsFromI2C())
+  {
+    sendLightColorsState();
+    sendNixieStates();
+  }
 
   prevMinute = Minute;
+  lastMinute = millis();
 
   loopTime = millis() - loopTime;
   Sprint("Process time (minute): ");
