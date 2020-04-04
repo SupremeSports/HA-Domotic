@@ -104,7 +104,9 @@ void mqttKeepRunning()
 {
   wdt_reset();
 
-  readSensors(false);       //Read sensors (buttons, etc.)
+  readSensors(0);           //Read sensors (buttons, etc.)
+
+  //TODO
   
   writeOutputs();           //Write outputs (valves, relays, etc.)
   
