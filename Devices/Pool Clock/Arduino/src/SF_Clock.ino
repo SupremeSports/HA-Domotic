@@ -1,101 +1,45 @@
 // ----------------------------------------------------------------------------------------------------
-// ------------------------------------ STRING DISPLAY FUNCTIONS --------------------------------------
+// -------------------------------------- CLOCK DISPLAY FUNCTIONS -------------------------------------
 // ----------------------------------------------------------------------------------------------------
-//This function gets the text scrolling
-void updateTimeText()
+void initDisplay()
 {
-  if ((millis()-timeTextScrollLast) < timeTextScrollSpeed || newStart)
-    return;
+  timeDisplay.Begin(0);   // Start the display with a brightness level of 0%
+  tempDisplay.Begin(0);   // Start the display with a brightness level of 0%
 
-  timeTextScrollLast = millis();
-
-  timeTextString = timeTextStringBuffer;
-  int len = timeTextString.length() - timeDigits;
-  
-  if (len <= 0)
-    return;
-  
-  if (len < timeDigits)
-    rollingTimeTextIndex = 0;
-
-  timeTextString = timeTextString.substring(rollingTimeTextIndex, rollingTimeTextIndex+timeDigits);
-
-  Sprint("TextTime: ");
-  Sprintln(timeTextString);
-
-  rollingTimeTextIndex++;
-  if (rollingTimeTextIndex >= len)
-    rollingTimeTextIndex = 0;
-}
-
-//This function gets the text scrolling
-void updateTempText()
-{
-  if ((millis()-tempTextScrollLast) < tempTextScrollSpeed || newStart)
-    return;
-
-  tempTextScrollLast = millis();
-
-  tempTextString = tempTextStringBuffer;
-  int len = tempTextString.length() - tempDigits;
-
-  if (len <= 0)
-    return;
-
-  if (len < tempDigits)
-    rollingTempTextIndex = 0;
-
-  tempTextString = tempTextString.substring(rollingTempTextIndex, rollingTempTextIndex+tempDigits);
-
-  Sprint("TextTemp: ");
-  Sprintln(tempTextString);
-
-  rollingTempTextIndex++;
-  if (rollingTempTextIndex >= len)
-    rollingTempTextIndex = 0;
-}
-
-//Set string from PLC and fill with blank spaces
-String padString(String received, uint8_t digits)
-{
-  String data = "";
-
-  if (received == "null")
-    return data;
-    
-  data += received;
-  int len = data.length();
-
-  //If string shorter than number of digits
-  //Add trailing blanks
-  if (len <= digits)
+  //Wait until the display is initialised before we try to show anything
+  while (!timeDisplay.IsReady() || !tempDisplay.IsReady())
   {
-    for (int i=len; i<digits; i++)
-      data += " ";
-      
-    return data;
+    flashBoardLed(50, 1);
+    local_delay(10);
   }
 
-  //If string longer than number of digits
-  String rollingText = "";
-  
-  //Add leading blanks
-  for (int i=0; i<digits; i++)
-    rollingText += " ";
-
-  rollingText += data; //Add text string
-
-  //Add trailing blanks
-  for (int i=0; i<digits; i++)
-    rollingText += " ";
-
-  return rollingText;
+  //Init displays values for initial start
+  initDisplays = true;
+  displayFeature = 96;
+  rainbowIndex = 0;
+  nextSwitch = millis();
 }
 
 // ----------------------------------------------------------------------------------------------------
-// ------------------------------------- TEMP DISPLAY FUNCTIONS ---------------------------------------
+// -------------------------------------- TIME DISPLAY FUNCTIONS --------------------------------------
 // ----------------------------------------------------------------------------------------------------
-void updateTemp()
+//This function gets the text scrolling
+void updateTimeString()
+{
+  //update once per second
+  if (Second == prevSecond && !newStart)
+    return;
+    
+  timeDisplay.ForceUppercase(true);
+  timeString = setTimeValues();
+
+  Sprintln(timeString);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// -------------------------------------- TEMP DISPLAY FUNCTIONS --------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void updateTempString()
 { 
   //update once per second
   if (Second == prevSecond && !newStart)
@@ -145,9 +89,9 @@ void getOutHum(String received)
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------ WATER DISPLAY FUNCTIONS ---------------------------------------
 // ----------------------------------------------------------------------------------------------------
-void updateWater()
+void updateWaterString()
 { 
-   //Update once per second
+  //Update once per second
   if (Second == prevSecond && !newStart)
     return;
 
@@ -198,8 +142,8 @@ void getWaterPH(String received)
 //Send the time to the display
 String setTimeValues()
 {    
-  int len = 2 * timeDigits;
-  //Set displays data
+  //Set display data
+  int len = 2 * timeDigits; //Account for decimal points
   String digitTime[len];
   digitTime[0] = (Hour<10) ? " " : String(Hour/10);
   digitTime[2] = String(Hour%10);
@@ -212,8 +156,8 @@ String setTimeValues()
   digitTime[3] = ((Second % 2)==0) ? "." : "";
   digitTime[5] = ((Second % 2)==0) ? "." : "";
   digitTime[7] = ((Second % 2)==0) ? "." : "";
-  digitTime[9] = ((Second % 2)==0) ? "" : "";  //Always off on time display
-  digitTime[11] = ((Second % 2)==0) ? "" : ""; //Always off on time display
+  digitTime[9] = "";  //Always off on time display
+  digitTime[11] = ""; //Always off on time display
 
   String stringOutput;
   for (int i=0; i<len; i++)
@@ -244,9 +188,10 @@ String set4DigitsValues(float value, String units)
     }
     else
       newValue = abs(value*10);
-  
-    //Set displays data
-    String digitValue[8];
+
+    //Set display data
+    int len = tempDigits; //Account for decimal points
+    String digitValue[len];
     if (value < 10)
     {
       digitValue[0] = (value < 0) ? "-" : " ";
@@ -262,9 +207,9 @@ String set4DigitsValues(float value, String units)
     digitValue[6] = units;
   
     //Set decimal point if necessary
-    digitValue[1] = "";
-    digitValue[5] = "";
-    digitValue[7] = "";
+    digitValue[1] = ""; //Never used
+    digitValue[5] = ""; //Never used
+    digitValue[7] = ""; //Never used
   
     //Decimal point
     if (value > 99.9 || value < -9.9)
@@ -278,14 +223,111 @@ String set4DigitsValues(float value, String units)
       decimalPoint = true;
     }
 
-    for (int i=0; i<8; i++)
+    for (int i=0; i<len; i++)
       stringOutput += digitValue[i];
   }
   
-  int len = stringOutput.length();
-  len -= decimalPoint ? 1 : 0; //remove decimal point from length
-  if (len > 4)
-    stringOutput.remove(0, len-4);
+  int outLen = stringOutput.length();
+  outLen -= decimalPoint ? 1 : 0; //remove decimal point from length
+  if (outLen > 4)
+    stringOutput.remove(0, outLen-4);
 
   return stringOutput;
+}
+
+// ----------------------------------------------------------------------------------------------------
+// --------------------------------------- TEXT DISPLAY FUNCTIONS -------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//This function gets the text scrolling
+void updateTimeText()
+{
+  if ((millis()-timeTextScrollLast) < configCycleSpeed || newStart)
+    return;
+
+  timeTextScrollLast = millis();
+
+  timeTextString = timeTextStringBuffer;
+  int len = timeTextString.length() - timeDigits;
+  
+  if (len <= 0)
+    return;
+  
+  if (len < timeDigits)
+    rollingTimeTextIndex = 0;
+
+  timeTextString = timeTextString.substring(rollingTimeTextIndex, rollingTimeTextIndex+timeDigits);
+
+  Sprint("TextTime: ");
+  Sprintln(timeTextString);
+
+  rollingTimeTextIndex++;
+  if (rollingTimeTextIndex >= len)
+    rollingTimeTextIndex = 0;
+}
+
+//This function gets the text scrolling
+void updateTempText()
+{
+  if ((millis()-tempTextScrollLast) < configCycleSpeed || newStart)
+    return;
+
+  tempTextScrollLast = millis();
+
+  tempTextString = tempTextStringBuffer;
+  int len = tempTextString.length() - tempDigits;
+
+  if (len <= 0)
+    return;
+
+  if (len < tempDigits)
+    rollingTempTextIndex = 0;
+
+  tempTextString = tempTextString.substring(rollingTempTextIndex, rollingTempTextIndex+tempDigits);
+
+  Sprint("TextTemp: ");
+  Sprintln(tempTextString);
+
+  rollingTempTextIndex++;
+  if (rollingTempTextIndex >= len)
+    rollingTempTextIndex = 0;
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------- STRING PADDING FUNCTIONS -------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//Set string from PLC and fill with blank spaces
+String padString(String received, uint8_t digits)
+{
+  String data = "";
+
+  if (received == "null" || received == "")
+    return data;
+    
+  data += received;
+  int len = data.length();
+
+  //If string shorter than number of digits
+  //Add trailing blanks
+  if (len <= digits)
+  {
+    for (int i=len; i<digits; i++)
+      data += " ";
+      
+    return data;
+  }
+
+  //If string longer than number of digits
+  String rollingText = "";
+  
+  //Add leading blanks
+  for (int i=0; i<digits; i++)
+    rollingText += " ";
+
+  rollingText += data; //Add text string
+
+  //Add trailing blanks
+  for (int i=0; i<digits; i++)
+    rollingText += " ";
+
+  return rollingText;
 }
