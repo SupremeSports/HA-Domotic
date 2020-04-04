@@ -6,9 +6,6 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
-
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 }
 
 bool runMQTT()
@@ -27,23 +24,22 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
-  String data = "";
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
 
-  char message[length + 1];
+  if (length >= BUFFER_ARRAY_SIZE)
+    length = BUFFER_ARRAY_SIZE-1;
+
   for (int i = 0; i < length; i++)
-  {
-    Sprint((char)payload[i]);
-    data += (char)payload[i];
     message[i] = (char)payload[i];
-  }
+
   message[length] = '\0';
+  Sprint(message);
 
   Sprintln();
 
-  mqttReceive(topic, data, message);
+  mqttReceive(topic, message);
 }
 
 void reconnect()
@@ -77,12 +73,12 @@ void reconnect()
       long lastReading = millis();
 
       // Wait 5 seconds before retrying
-      while (millis()-lastReading < 5000)
+      while (millis()-lastReading < 10000)
       {
         //Keep reading data even if MQTT is down
-        if (count < 5) //Max 5 tries
+        if (count < 5) //Max 5 tries or more if time is valid
           mqttKeepRunning();
-                 
+  
         local_delay(50);
       }
       count++;
@@ -90,89 +86,104 @@ void reconnect()
   }
 }
 
-void mqttReceive(char* topic, String data, char* message)
+void mqttReceive(char* topic, char* message)
 {
-  if (strcmp(topic,mqtt_timeValue)==0)
-    parseTime(data);
-  else if (strcmp(topic,mqtt_waterTemp)==0)
-    getWaterTemp(data);
-  else if (strcmp(topic,mqtt_waterPH)==0)
-    getWaterPH(data);
-  else if (strcmp(topic,mqtt_outTemp)==0)
-    getOutTemp(data);
-  else if (strcmp(topic,mqtt_outHum)==0)
-    getOutHum(data);
-  else if (strcmp(topic,mqtt_text_time)==0)
-    timeTextStringBuffer = padString(data, timeDigits);
-  else if (strcmp(topic,mqtt_text_temp)==0)
-    tempTextStringBuffer = padString(data, tempDigits);
-  else
-    receiveJSON(message);
+  //Time update received
+  if (strcmp(topic,mqtt_timeCmd)==0)
+  {
+    parseTime(message);
+    
+    //flashBoardLed(100, 3);
 
-  updatePublish = true;
+    updatePublish = true;    //Force data update
+  }
+
+  //Pool Clock settings
+  if (strcmp(topic,mqtt_controlCmd)==0)
+  {
+    processCommandJson(message);
+
+    //flashBoardLed(100, 2);
+  }
+
+  //Backlights RGB settings
+  if (strcmp(topic,mqtt_ledCmd)==0)
+  {
+    if (processLightColorsJson(message))
+    {
+      writeEEPROM();
+      sendLightColorsState();
+    }
+
+    //flashBoardLed(100, 1);
+  }
+
+  local_delay(5);
 }
 
 //Functions to run while trying to reconnect
 void mqttKeepRunning()
 {
+  wdtReset();
+
+  runOTA();
+  
   //Keep updating data even if MQTT is down
   if (localTimeValid)
   {
     readSensors();            //Read sensors (buttons, etc.)
 
-    updateTime();             //Display current time
-    updateTemp();             //Display outdoor temperature/humidity
-    updateWater();            //Display water temperature
+    updateTime();             //Update current time
+    updateTimeString();       //Display current time
+    updateTempString();       //Display outdoor temperature/humidity
+    updateWaterString();      //Display water temperature
+
+    local_delay(5);           //Give time to receive
   
     updateTimeText();         //Scroll text display (if in scroll mode)
     updateTempText();         //Scroll text display (if in scroll mode)
+
+    local_delay(5);           //Give time to receive
   
     autoColorChanging();      //Control colors and string output
+    
+    local_delay(5);           //Give time to receive
 
-    //Short flash every 5 seconds when everything is ok
-    if (prevSecond != Second && (Second%5) == 0)
-      flashBoardLed(2, 1);
-
-    if (second() != Second)
-      updatePublish = true;
+    flashEvery5sec();
   
     prevSecond = Second;
     prevMinute = Minute;
-    //prevHour = Hour;        //Not needed
+    prevHour = Hour;
+
+    writeOutputs();           //Set OUTPUTS devices
   }  
 }
 
 void mqttSubscribe()
 {
-  mqttClient.subscribe(mqtt_timeValue);
+  mqttClient.subscribe(mqtt_timeCmd);
+  mqttClient.subscribe(mqtt_controlCmd);
+  mqttClient.subscribe(mqtt_ledCmd);
   mqttClient.loop();
-  mqttClient.subscribe(mqtt_waterTemp);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_waterPH);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_outTemp);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_outHum);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_text_time);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_text_temp);
-  mqttClient.loop();
-  mqttClient.subscribe(mqtt_cmdTopic);
-  mqttClient.loop();
-
-  sendState();
 }
 
 void mqttPublish()
 {
   //Update on request when network available
-  if (!updatePublish || !networkActive)
+  if ((!updatePublish and localTimeValid) || !networkActive)
     return;
 
+  if (!localTimeValid && (lastTimeRequestMillis==0 || millis()-lastTimeRequestMillis>5000))
+  {
+    Sprintln("Time Request...");
+    mqttClient.publish(mqtt_timeRequest, mqtt_cmdOn);
+
+    lastTimeRequestMillis = millis();
+  }
+    
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 
-  mqttClient.publish(mqtt_timeRequest, localTimeValid ? mqtt_cmdOff : mqtt_cmdOn);
+  mqttClient.loop();
 
   updatePublish = false;
 }
