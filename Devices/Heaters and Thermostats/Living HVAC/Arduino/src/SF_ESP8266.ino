@@ -92,6 +92,7 @@ void initOTA()
   {
     Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
     wdtReset();  //Keep feeding the dog while uploading data, otherwise it will reboot
+    flashBoardLed(1,1); //Flash led during upload (slows down a little bit, but at least you know it works)
   });
   ArduinoOTA.onError([](ota_error_t error)
   {
