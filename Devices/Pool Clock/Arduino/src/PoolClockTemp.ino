@@ -308,6 +308,7 @@ void setup()
   initMQTT();
   
   lastSecond = millis();
+  lastMinute = millis();
 
   local_delay(5);                                //Wait for all data to be ready
   
