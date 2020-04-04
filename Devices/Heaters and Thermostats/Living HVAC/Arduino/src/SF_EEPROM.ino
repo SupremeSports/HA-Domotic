@@ -5,7 +5,7 @@ void initEEPROM()
 {
   EEPROM.begin(EEPROM_SIZE);
   //local_delay(5);
-  readEEPROM();
+  //readEEPROM(); //Wait to let time to initialize
 }
 
 // ----------------------------------------------------------------------------------------------------
