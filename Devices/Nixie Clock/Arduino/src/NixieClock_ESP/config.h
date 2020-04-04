@@ -12,12 +12,13 @@ const char* mqtt_password       = "yourMQTTcredentials";
 
 const char* mqtt_deviceName     = "NixieClock-";
 
+//Time
 const char* mqtt_timeCmd        = "Home/Global/Time";             //Receive time in format YYYY:MM:DD:HH:MM:SS:
 const char* mqtt_timeRequest    = "Home/Global/Time/Request";     //Request time update
 
 //Clock
-const char* mqtt_clockStts      = "Home/NixieClock/Stts";         //MQTT Clock status data
-const char* mqtt_clockCmd       = "Home/NixieClock/Cmd";          //MQTT Clock command data
+const char* mqtt_controlStts    = "Home/NixieClock/Stts";         //MQTT Clock status data
+const char* mqtt_controlCmd     = "Home/NixieClock/Cmd";          //MQTT Clock command data
 
 //Booleans
 const char* json_hourMode       = "hrm";
@@ -38,7 +39,7 @@ const char* json_blankMode      = "bkm";
 const char* json_minDim         = "dim";
 
 //Sensors
-const char* mqtt_clockJson      = "Home/NixieClock/Json";         //MQTT Clock status data
+const char* mqtt_clockJson      = "Home/NixieClock/Json";         //MQTT JSON status data
 
 const char* json_casetemp       = "case_temp";
 const char* json_reset          = "reset";
@@ -52,11 +53,12 @@ const char* mqtt_ledCmd         = "Home/NixieClock/LED/Cmd";      //MQTT JSON LI
 const char* json_state          = "state";
 const char* json_effect         = "effect";
 const char* json_speed          = "speed";
-const char* json_brightness     = "brightness";
 const char* json_color          = "color";
 
 //Others
 const char* json_parseFailed    = "parseObject() failed";
+const char* json_resetReq       = "Reset Requested...";
+const char* json_resetReboot    = "Rebooting...";
 
 const char* mqtt_cmdOn          = "ON";
 const char* mqtt_cmdOff         = "OFF";
