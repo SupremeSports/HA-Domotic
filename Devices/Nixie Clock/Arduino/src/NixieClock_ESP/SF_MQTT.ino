@@ -6,9 +6,6 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
-
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 }
 
 bool runMQTT()
@@ -27,23 +24,22 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
-  String data = "";
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
 
-  char message[length + 1];
+  if (length >= BUFFER_ARRAY_SIZE)
+    length = BUFFER_ARRAY_SIZE-1;
+
   for (int i = 0; i < length; i++)
-  {
-    Sprint((char)payload[i]);
-    data += (char)payload[i];
     message[i] = (char)payload[i];
-  }
+
   message[length] = '\0';
+  Sprint(message);
 
   Sprintln();
 
-  mqttReceive(topic, data, message);
+  mqttReceive(topic, message);
 }
 
 void reconnect()
@@ -91,39 +87,37 @@ void reconnect()
   }
 }
 
-void mqttReceive(char* topic, String data, char* message)
+void mqttReceive(char* topic, char* message)
 {
   //Time update received
   if (strcmp(topic,mqtt_timeCmd)==0)
   {
-    parseTime(data);
+    parseTime(message);
     
-    flashBoardLed(100, 3);
+    //flashBoardLed(100, 3);
 
     updatePublish = true;    //Force data update
   }
     
   //Nixie Clock settings
-  if (strcmp(topic,mqtt_clockCmd)==0)
+  if (strcmp(topic,mqtt_controlCmd)==0)
   {
-    bool dataOk = processCommandJson(message);
+    if (processCommandJson(message))
+      prevMinute = 100; //Force data update
 
     //flashBoardLed(100, 2);
-
-    if (dataOk)
-      prevMinute = 100; //Force data update
   }
 
   //Backlights RGB settings
   if (strcmp(topic,mqtt_ledCmd)==0)
   {
-    bool dataOk = processLightColorsJson(message);
+    if (processLightColorsJson(message))
+      prevMinute = 100; //Force data update
 
     //flashBoardLed(100, 1);
-
-    if (dataOk)
-      prevMinute = 100; //Force data update
   }
+
+  local_delay(5);
 }
 
 //Functions to run while trying to reconnect
@@ -133,7 +127,7 @@ void mqttKeepRunning()
 
   runOTA();
 
-  readSensors();
+  //readSensors();            //Read sensors (buttons, etc.)
 
   updateTime();
 
@@ -144,9 +138,9 @@ void mqttKeepRunning()
 
 void mqttSubscribe()
 {
-  mqttClient.subscribe(mqtt_clockCmd);
-  mqttClient.subscribe(mqtt_ledCmd);
   mqttClient.subscribe(mqtt_timeCmd);
+  mqttClient.subscribe(mqtt_controlCmd);
+  mqttClient.subscribe(mqtt_ledCmd);
   mqttClient.loop();
 }
 
@@ -156,12 +150,17 @@ void mqttPublish()
   if ((!updatePublish and localTimeValid) || !networkActive)
     return;
 
-  if (!localTimeValid)
+  if (!localTimeValid && (lastTimeRequestMillis==0 || millis()-lastTimeRequestMillis>5000))
+  {
+    Sprintln("Time Request...");
     mqttClient.publish(mqtt_timeRequest, mqtt_cmdOn);
+
+    lastTimeRequestMillis = millis();
+  }
     
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 
-  //mqttClient.loop();
+  mqttClient.loop();
 
   updatePublish = false;
 }
