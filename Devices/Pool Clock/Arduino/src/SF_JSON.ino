@@ -1,15 +1,12 @@
 // ----------------------------------------------------------------------------------------------------
-// ---------------------------------------- MQTT JSON CONTROLS ----------------------------------------
+// -------------------------------------------- INIT JSON ---------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-void receiveJSON(char* message)
-{
-  if (!processJson(message) || initDisplays)
-    return;
-    
-  sendState();
-}
+//NONE FOR THIS PROJECT
 
-bool processJson(char* message)
+// ----------------------------------------------------------------------------------------------------
+// --------------------------------------- PROCESS COMMAND JSON ---------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void processCommandJson(char* message)
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
@@ -17,133 +14,190 @@ bool processJson(char* message)
 
   if (!root.success())
   {
-    Sprintln("parseObject() failed");
+    Sprintln(json_parseFailed);
+    return;
+  }
+
+  if (root.containsKey(json_reset))
+  {
+    mqttClient.publish(mqtt_controlStts, json_resetReq);
+    
+    if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
+      return;
+  
+    mqttClient.publish(mqtt_controlStts, json_resetReboot);
+      
+    Sprint(json_resetReq);
+    local_delay(500);
+    Sprintln(json_resetReboot);
+    ESP.restart();
+  }
+
+  if (root.containsKey(json_waterTemp))
+    getWaterTemp(root[json_waterTemp]);
+  if (root.containsKey(json_waterPH))
+    getWaterPH(root[json_waterPH]);
+  if (root.containsKey(json_outTemp))
+    getOutTemp(root[json_outTemp]);
+  if (root.containsKey(json_outHum))
+    getOutHum(root[json_outHum]);
+  if (root.containsKey(json_timeText))
+  {
+    timeTextStringBuffer = padString(root[json_timeText], timeDigits);
+    rollingTimeTextIndex = 1;
+  }
+  if (root.containsKey(json_tempText))
+  {
+    tempTextStringBuffer = padString(root[json_tempText], tempDigits);
+    rollingTempTextIndex = 1;
+  }
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ----------------------------------------- PROCESS LED JSON -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+bool processLightColorsJson(char* message)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success())
+  {
+    Sprintln(json_parseFailed);
     return false;
   }
 
-  if (root.containsKey("state"))
+  if (root.containsKey(json_state))
   {
-    if (strcmp(root["state"], mqtt_cmdOn) == 0)
+    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
       stateOn = true;
-    else if (strcmp(root["state"], mqtt_cmdOff) == 0)
+    else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
       stateOn = false;
 
     Sprint("State: ");
     Sprintln(stateOn ? mqtt_cmdOn : mqtt_cmdOff);
   }
 
-  if (root.containsKey("transition"))
+  if (root.containsKey(json_transition))
   {
-    timeTextScrollSpeed = map(root["transition"], 0, 100, 1000, 0);
-    tempTextScrollSpeed = map(root["transition"], 0, 100, 1000, 0);
+    configCycleSpeed = map(root[json_transition], 0, 100, 1000, 0);
 
     Sprint("Transition: ");
-    Sprintln(timeTextScrollSpeed);
+    Sprintln(configCycleSpeed);
   }
 
-  if (root.containsKey("effect") && !initDisplays)
+  if (root.containsKey(json_effect) && !initDisplays)
   {
     colorAutoSwitch = false;
-    colorfade = true;
+    displayFeature = 0;
     changeColor = false;
     
-    if (strcmp(root["effect"], "RainbowCycle") == 0)
-      displayFeature = 1;
-    else if (strcmp(root["effect"], "TextColor") == 0)
-      displayFeature = 2;
-    else if (strcmp(root["effect"], "Spoon") == 0)
-      displayFeature = 3;
-    else if (strcmp(root["effect"], "VertRainbowCycle") == 0)
-      displayFeature = 4;
-    else if (strcmp(root["effect"], "TextChaser") == 0)
-      displayFeature = 5;
-    else if (strcmp(root["effect"], "HorizRainbowCycle") == 0)
-      displayFeature = 6;
-    else
+    for (int i = EFFECT_MIN; i <= EFFECT_MAX; i++)
     {
-      displayFeature = 0;
-      colorfade = false;
+      if (strcmp(root[json_effect], effects[i]) == 0)
+      {
+        displayFeature = i;
+        local_delay(10);
+        break;
+      }
     }
 
-    if (strcmp(root["effect"], "AllEffectsRolling") == 0)
+    //AllEffectsRolling
+    if (displayFeature == EFFECT_MAX) 
     {
       colorAutoSwitch = true;
       displayFeature = 1;
       rainbowIndex = 0;
-      initDisplays = false;
     }
 
     Sprint("Display feature: ");
     Sprintln(displayFeature);
   }
   
-  if (root.containsKey("brightness"))
+  if (root.containsKey(json_brightness))
   {
-    brightness = root["brightness"];
+    brightness = root[json_brightness];
     Sprint("Brightness: ");
     Sprintln(brightness);
   }
   
-  if (root.containsKey("color"))
+  if (root.containsKey(json_color))
   {
     colorAutoSwitch = false;
-    colorfade = false;
     changeColor = true;
     displayFeature = 0;
     
-    red = root["color"]["r"];
-    green = root["color"]["g"];
-    blue = root["color"]["b"];
+    configRedCnl = root[json_color]["r"];
+    configGreenCnl = root[json_color]["g"];
+    configBlueCnl = root[json_color]["b"];
 
     Sprint("RGB: ");
-    Sprint(red);
+    Sprint(configRedCnl);
     Sprint(", ");
-    Sprint(green);
+    Sprint(configGreenCnl);
     Sprint(", ");
-    Sprintln(blue);
+    Sprintln(configBlueCnl);
   }
 
   return true;
 }
 
-void sendState()
+void sendLightColorsState()
+{
+  //Force color to fit with HA bulb color
+  byte r = (!changeColor || displayFeature != 0 || colorAutoSwitch) ? 251 : configRedCnl;
+  byte g = (!changeColor || displayFeature != 0 || colorAutoSwitch) ? 205 : configGreenCnl;
+  byte b = (!changeColor || displayFeature != 0 || colorAutoSwitch) ? 65 : configBlueCnl;
+
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  root[json_state] = stateOn ? mqtt_cmdOn : mqtt_cmdOff;
+  
+  JsonObject& color = root.createNestedObject(json_color);
+  color["r"] = r;
+  color["g"] = g;
+  color["b"] = b;
+
+  root[json_brightness] = brightness;
+
+  if (displayFeature == 0 || changeColor)
+    root[json_effect] = "null";//effects[EFFECT_MIN];   //"Default"
+  else if (colorAutoSwitch)
+    root[json_effect] = effects[EFFECT_MAX];   //AllEffectsRolling
+  else
+    root[json_effect] = effects[displayFeature];
+
+  root[json_transition] = map(configCycleSpeed, 1000, 0, 0, 100);
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  mqttClient.publish(mqtt_ledStts, buffer);//, true);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ---------------------------------------- SEND JSON SENSORS -----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendSensors()
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
   JsonObject& root = jsonBuffer.createObject();
 
-  root["state"] = (stateOn) ? mqtt_cmdOn : mqtt_cmdOff;
-  
-  JsonObject& color = root.createNestedObject("color");
-  color["r"] = red;
-  color["g"] = green;
-  color["b"] = blue;
+  uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
+  char result[chrLngt];
 
-  root["brightness"] = brightness;
-  root["transition"] = map(timeTextScrollSpeed, 1000, 0, 0, 100);
-  
-  if (colorfade)
-  {
-    if (colorAutoSwitch)
-      root["effect"] = "AllEffectsRolling";
-    else if (displayFeature == 1)
-      root["effect"] = "RainbowCycle";
-    else if (displayFeature == 2)
-      root["effect"] = "TextColor";
-    else if (displayFeature == 3)
-      root["effect"] = "Spoon";
-    else if (displayFeature == 4)
-      root["effect"] = "VertRainbowCycle";
-    else if (displayFeature == 5)
-      root["effect"] = "TextChaser";
-    else if (displayFeature == 6)
-      root["effect"] = "HorizRainbowCycle";
-  }
-  else
-    root["effect"] = "null"; //"Default"
+  dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
+  root[json_rssi] = result;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
+  root[json_rssiPercent] = result;
 
-  mqttClient.publish(mqtt_statusTopic, buffer, true);
+  char buffer[BUFFER_ARRAY_SIZE];
+  root.printTo(buffer, root.measureLength() + 1);
+
+  mqttClient.publish(mqtt_sensorJson, buffer);
 }
