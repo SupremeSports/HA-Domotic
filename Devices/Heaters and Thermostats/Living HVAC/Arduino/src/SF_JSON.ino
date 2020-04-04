@@ -78,5 +78,5 @@ void sendSensors()
   char buffer[BUFFER_ARRAY_SIZE];
   root.printTo(buffer, root.measureLength() + 1);
 
-  mqttClient.publish(mqtt_hvacJson, buffer);
+  mqttClient.publish(mqtt_sensorJson, buffer);
 }
