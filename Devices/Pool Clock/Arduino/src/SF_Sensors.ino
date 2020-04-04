@@ -6,7 +6,8 @@ void initSensors()
   Sprintln("Init Sensors...");
   
   //INPUTS
-
+  pinMode(buttonPin, INPUT_PULLUP);
+  
   //OUTPUTS
   pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
 }
@@ -14,8 +15,8 @@ void initSensors()
 //INPUTS
 void readSensors()
 {
-  getLightLevel();
-
+  setLightLevel();
+  
   return;
 }
 
@@ -25,13 +26,12 @@ void writeOutputs()
   return;
 }
 
-void getLightLevel()
+void setLightLevel()
 {
-  int level = map(initDisplays ? defaultBrightness : brightness, 0, 255, 0, 100);
+  int level = defaultBrightness;
+  if (!initDisplays)
+    level = map(brightness, 0, 255, 0, 100);
   level = constrain(level, 0, 100);
-
-  if (initDisplays)
-    level = defaultBrightness;
 
   timeDisplay.SetBrightness(level);
   tempDisplay.SetBrightness(level);
@@ -57,6 +57,21 @@ void flashBoardLed(int delayFlash, int qtyFlash)
     setBoardLED(boardLedPinRevert);
     local_delay(delayFlash);
   }
+}
+
+//Short flash every 5 seconds when everything is ok
+void flashEvery5sec()
+{
+  if (millis()-ledFlashDelay < 5000)
+    return;
+
+  if (networkActive)
+    flashBoardLed(2, 1);
+    
+  ledFlashDelay = millis();
+
+  //readSensors();
+  sendSensors();
 }
 
 float kelvinToFahrenheit(float kelvin)
