@@ -34,8 +34,8 @@ void initFujitsuIR()
 
 void setStateMQTTbool(bool state)
 {
-  ac.setCmd(state ? kFujitsuAcCmdTurnOn : kFujitsuAcCmdTurnOff);
   configStateOn = (state ? true : false);
+  ac.setCmd(configStateOn ? kFujitsuAcCmdTurnOn : kFujitsuAcCmdTurnOff);
 
   Sprint("State set to: ");
   Sprintln(state);
@@ -51,6 +51,12 @@ void setModeMQTT(char* message)
       break;
     }
   }
+
+  if (!configStateOn && configRunMode >= RUNMODES_MIN && configRunMode <= RUNMODES_MAX)
+  {
+    setStateMQTTbool(true);
+    local_delay(1000);
+  }
   
   switch(configRunMode)
   {
@@ -59,23 +65,18 @@ void setModeMQTT(char* message)
       break;
     case 1:       //Auto
       ac.setMode(kFujitsuAcModeAuto);
-      setStateMQTTbool(true);
       break;
     case 2:       //Cool
       ac.setMode(kFujitsuAcModeCool);
-      setStateMQTTbool(true);
       break;
     case 3:       //Dry
       ac.setMode(kFujitsuAcModeDry);
-      setStateMQTTbool(true);
       break;
     case 4:       //Fan
       ac.setMode(kFujitsuAcModeFan);
-      setStateMQTTbool(true);
       break;
     case 5:       //Heat
       ac.setMode(kFujitsuAcModeHeat);
-      setStateMQTTbool(true);
       break;
   }
 
@@ -93,28 +94,29 @@ void setFanMQTT(char* message)
       break;
     }
   }
+
+  if (!configStateOn && configFanMode >= FANMODES_MIN && configFanMode <= FANMODES_MAX)
+  {
+    setStateMQTTbool(true);
+    local_delay(1000);
+  }
   
   switch(configFanMode)
   {
     case 0:       //Auto
       ac.setFanSpeed(kFujitsuAcFanAuto);
-      setStateMQTTbool(true);
       break;
     case 1:       //High
       ac.setFanSpeed(kFujitsuAcFanHigh);
-      setStateMQTTbool(true);
       break;
     case 2:       //Medium
       ac.setFanSpeed(kFujitsuAcFanMed);
-      setStateMQTTbool(true);
       break;
     case 3:       //Low
       ac.setFanSpeed(kFujitsuAcFanLow);
-      setStateMQTTbool(true);
       break;
     case 4:       //Quiet
       ac.setFanSpeed(kFujitsuAcFanQuiet);
-      setStateMQTTbool(true);
       break;
   }
 
@@ -137,16 +139,28 @@ void setTempMQTT(char* message)
 
 void setSwingMQTT(char* message)
 {
+  /*if (!configStateOn)
+  {
+    setStateMQTTbool(true);
+    local_delay(1000);
+  }*/
+
   bool state = false;
   if (strcmp(message,"On")==0)
   {
     state = true;
-    setStateMQTTbool(true);
+    //setStateMQTTbool(true);
   }
   else if (strcmp(message,"Off")==0)
     state = false;
   else
     return;
+
+  /*if (!configStateOn && state)
+  {
+    setStateMQTTbool(true);
+    local_delay(1000);
+  }*/
     
   ac.setSwing(state ? kFujitsuAcSwingVert : kFujitsuAcSwingOff);
   configSwingMode = (state ? true : false);
@@ -183,81 +197,4 @@ void printState()
   for (uint8_t i = 0; i < ac.getStateLength(); i++)
     Sprintf("%02X", ir_code[i]);
   Sprintln();
-}
-
-// ----------------------------------------------------------------------------------------------------
-// ---------------------------------------- EEPROM FUNCTIONS ------------------------------------------
-// ----------------------------------------------------------------------------------------------------
-void initEEPROM()
-{
-  EEPROM.begin(EEPROM_SIZE);
-  //local_delay(5);
-  readEEPROM();
-}
-
-void readEEPROM()
-{
-  configStateOn       = EEPROM.read(address_state)==1 ? true : false; 
-  configFanMode       = EEPROM.read(address_fan); 
-  configSwingMode     = EEPROM.read(address_swing)==1 ? true : false;
-  configRunMode       = EEPROM.read(address_run);
-  configTempSetpoint  = EEPROM.read(address_temp);
-
-  if (configStateOn > 1)
-    configStateOn = false;
-
-  if (configFanMode < FANMODES_MIN || configFanMode > FANMODES_MAX)
-    configFanMode = FANMODES_DEF;
-
-  if (configSwingMode > 1)
-    configSwingMode = false;
-
-  if (configRunMode < RUNMODES_MIN || configRunMode > RUNMODES_MAX)
-    configRunMode = RUNMODES_DEF;
-
-  if (configTempSetpoint < minTemp || configTempSetpoint > maxTemp)
-    configTempSetpoint = defTemp;
-
-  Sprint("Read EEPROM=> State: ");
-  Sprint(configStateOn ? "ON" : "OFF");
-  Sprint(" / Swing: ");
-  Sprint(configSwingMode ? "ON" : "OFF");
-  Sprint(" / Fan: ");
-  Sprint(fanModes[configFanMode]);
-  Sprint(" / Run: ");
-  Sprint(runModes[configRunMode]);
-  Sprint(" / Temperature: ");
-  Sprint(configTempSetpoint);
-  Sprintln("C");
-}
-
-void writeEEPROM()
-{
-  byte value_State = configStateOn ? 1 : 0;
-  byte value_Fan   = configFanMode;
-  byte value_Swing = configSwingMode ? 1 : 0;
-  byte value_Run   = configRunMode;
-  byte value_Temp  = configTempSetpoint;
-  
-  EEPROM.put(address_state, value_State);
-  EEPROM.put(address_fan, value_Fan);
-  EEPROM.put(address_swing, value_Swing);
-  EEPROM.put(address_run, value_Run);
-  EEPROM.put(address_temp, value_Temp);
-
-  EEPROM.commit();
-
-  Sprint("Write EEPROM=> State: ");
-  Sprint(value_State==1 ? "ON" : "OFF");
-  Sprint(" / Swing: ");
-  Sprint(value_Swing==1 ? "ON" : "OFF");
-  Sprint(" / Fan: ");
-  Sprint(fanModes[value_Fan]);
-  Sprint(" / Run: ");
-  Sprint(runModes[value_Run]);
-  Sprint(" / Temperature: ");
-  Sprint(value_Temp);
-  Sprintln("C");
-
-  readEEPROM();
 }
