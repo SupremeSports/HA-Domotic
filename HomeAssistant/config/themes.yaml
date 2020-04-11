@@ -50,6 +50,9 @@ Light - Navy Blue:
   ### Cards ###
   paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FF6262"
   paper-toggle-button-checked-bar-color: "#FFA3A3"
@@ -58,7 +61,6 @@ Light - Navy Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Blue:
   ### Main Interface Colors ###
@@ -95,6 +97,9 @@ Dark - Blue:
   ### Cards ###
   paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#2F7EFD"
   paper-toggle-button-checked-bar-color: "#6FA6FE"
@@ -103,7 +108,6 @@ Dark - Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Blue:
   ### Main Interface Colors ###
@@ -140,6 +144,9 @@ Light - Blue:
   ### Cards ###
   paper-card-background-color: "#FCFCFC"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#2F7EFD"
   paper-toggle-button-checked-bar-color: "#6FA6FE"
@@ -148,7 +155,6 @@ Light - Blue:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Orange:
   ### Main Interface Colors ###
@@ -185,6 +191,9 @@ Dark - Orange:
   ### Cards ###
   paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FF8300"
   paper-toggle-button-checked-bar-color: "#FFA23F"
@@ -193,7 +202,6 @@ Dark - Orange:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Orange:
   ### Main Interface Colors ###
@@ -230,6 +238,9 @@ Light - Orange:
   ### Cards ###
   paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FF8300"
   paper-toggle-button-checked-bar-color: "#FFA23F"
@@ -238,7 +249,6 @@ Light - Orange:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Yellow:
   ### Main Interface Colors ###
@@ -275,6 +285,9 @@ Dark - Yellow:
   ### Cards ###
   paper-card-background-color: "#1A1A1A"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FCB800"
   paper-toggle-button-checked-bar-color: "#FFD45D"
@@ -283,7 +296,6 @@ Dark - Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Yellow:
   ### Main Interface Colors ###
@@ -320,6 +332,9 @@ Light - Yellow:
   ### Cards ###
   paper-card-background-color: "#FBFBFB"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FCB800"
   paper-toggle-button-checked-bar-color: "#FFD45D"
@@ -328,7 +343,6 @@ Light - Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Navy Blue & Yellow:
   ### Main Interface Colors ###
@@ -365,6 +379,9 @@ Navy Blue & Yellow:
   ### Cards ###
   paper-card-background-color: "#252D40"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FEB221"
   paper-toggle-button-checked-bar-color: "#FECA67"
@@ -373,7 +390,6 @@ Navy Blue & Yellow:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Green:
   ### Main Interface Colors ###
@@ -410,6 +426,9 @@ Dark - Green:
   ### Cards ###
   paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#04E762"
   paper-toggle-button-checked-bar-color: "#47FC92"
@@ -418,7 +437,6 @@ Dark - Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Green:
   ### Main Interface Colors ###
@@ -455,6 +473,9 @@ Light - Green:
   ### Cards ###
   paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#03B14B"
   paper-toggle-button-checked-bar-color: "#12D289"
@@ -463,7 +484,6 @@ Light - Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Red:
   ### Main Interface Colors ###
@@ -500,6 +520,9 @@ Dark - Red:
   ### Cards ###
   paper-card-background-color: "#1A1A1A"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#EA1111"
   paper-toggle-button-checked-bar-color: "#F36060"
@@ -508,8 +531,7 @@ Dark - Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
-  
+
 Gray & Green:
   ### Main Interface Colors ###
   primary-color: "#24E081"
@@ -546,6 +568,9 @@ Gray & Green:
   ### Cards ###
   paper-card-background-color: "#555766"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#24E081"
   paper-toggle-button-checked-bar-color: "#6BEAAA"
@@ -554,7 +579,6 @@ Gray & Green:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Gray:
   ### Main Interface Colors ###
@@ -591,6 +615,9 @@ Dark - Gray:
   ### Cards ###
   paper-card-background-color: "#2D2D2D"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#87BF50"
   paper-toggle-button-checked-bar-color: "#598330"
@@ -599,7 +626,6 @@ Dark - Gray:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Light Red:
   ### Main Interface Colors ###
@@ -636,6 +662,9 @@ Dark - Light Red:
   ### Cards ###
   paper-card-background-color: "#252B36"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FF6262"
   paper-toggle-button-checked-bar-color: "#FFA3A3"
@@ -644,7 +673,6 @@ Dark - Light Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Light Red:
   ### Main Interface Colors ###
@@ -681,6 +709,9 @@ Light - Light Red:
   ### Cards ###
   paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FF6262"
   paper-toggle-button-checked-bar-color: "#FFA3A3"
@@ -689,7 +720,6 @@ Light - Light Red:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Blue/Purple:
   ### Main Interface Colors ###
@@ -726,6 +756,9 @@ Dark - Blue/Purple:
   ### Cards ###
   paper-card-background-color: "#1E2747"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#FCFCFC"
   paper-toggle-button-checked-bar-color: "#4DA3FF"
@@ -734,7 +767,6 @@ Dark - Blue/Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Cyan:
   ### Main Interface Colors ###
@@ -771,6 +803,9 @@ Dark - Cyan:
   ### Cards ###
   paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#00E2D8"
   paper-toggle-button-checked-bar-color: "#00EDE0"
@@ -779,7 +814,6 @@ Dark - Cyan:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Cyan:
   ### Main Interface Colors ###
@@ -816,6 +850,9 @@ Light - Cyan:
   ### Cards ###
   paper-card-background-color: "#FBFBFD"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#00E2D8"
   paper-toggle-button-checked-bar-color: "#00EDE0"
@@ -824,7 +861,6 @@ Light - Cyan:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Dark - Purple:
   ### Main Interface Colors ###
@@ -861,6 +897,9 @@ Dark - Purple:
   ### Cards ###
   paper-card-background-color: "#2E2F40"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#4C3FF9"
   paper-toggle-button-checked-bar-color: "#262938"
@@ -869,7 +908,6 @@ Dark - Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
   
 Light - Purple:
   ### Main Interface Colors ###
@@ -906,6 +944,9 @@ Light - Purple:
   ### Cards ###
   paper-card-background-color: "#FBFBFD"
   paper-listbox-background-color: var(--primary-background-color)
+  data-table-background-color: var(--primary-background-color)
+  material-background-color: var(--primary-background-color)
+  card-background-color: var(--primary-background-color)
   ### Toggles ###
   paper-toggle-button-checked-button-color: "#4C3FF9"
   paper-toggle-button-checked-bar-color: "#262938"
@@ -914,4 +955,4 @@ Light - Purple:
   ### Table row ###
   table-row-background-color: var(--primary-background-color)
   table-row-alternative-background-color: var(--secondary-background-color)
-  data-table-background-color: var(--sidebar-background-color)
+  
