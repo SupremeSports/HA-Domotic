@@ -204,3 +204,11 @@
         type: entities
         entities:
           - binary_sensor.cfor_pc
+          
+    - type: entities
+      title: "Routers"
+      show_header_toggle: false
+      entities:
+        - binary_sensor.main_router
+        - binary_sensor.garage_router
+        - binary_sensor.pool_router
