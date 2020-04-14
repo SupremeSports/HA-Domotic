@@ -5,25 +5,25 @@
   - platform: mqtt
     name: "Massage Room Temp"
     icon: mdi:mailbox
-    state_topic: "Home/Massage/Clock/Stts"
+    state_topic: "Home/Massage/Clock/Json"
     availability_topic: "Home/Massage/Clock/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     value_template: "{{ value_json.temperature | round(1) }}"
-    json_attributes_topic: "Home/Massage/Clock/Stts"
+    json_attributes_topic: "Home/Massage/Clock/Json"
     unit_of_measurement: '°C'
     
   - platform: mqtt
     name: "Massage Room Humidity"
     icon: mdi:mailbox
-    state_topic: "Home/Master/Bed/Stts"
+    state_topic: "Home/Massage/Clock/Json"
     availability_topic: "Home/Massage/Clock/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     value_template: "{{ value_json.humidity | round(1) }}"
-    json_attributes_topic: "Home/Massage/Clock/Stts"
+    json_attributes_topic: "Home/Massage/Clock/Json"
     unit_of_measurement: '%'
     
   - platform: mqtt
