@@ -48,14 +48,6 @@
         #- sensor.controlroom_heartbeat
         - sensor.controlroom_box_temperature
         - sensor.controlroom_box_humidity
-        
-    - type: entities
-      title: Weather Station Box
-      show_header_toggle: false
-      entities:
-        #- sensor.weatherstation_heartbeat
-        - sensor.weatherstation_box_temperature
-        - sensor.weatherstation_box_humidity
 
     - type: entities
       title: Clocks
