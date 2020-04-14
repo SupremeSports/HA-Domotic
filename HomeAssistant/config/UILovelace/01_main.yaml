@@ -204,10 +204,12 @@
         - type: custom:fold-entity-row
           head: sensor.postal_status
           entities:
-            - entity: switch.postal_status
-              type: "custom:secondaryinfo-entity-row"
+            - type: "custom:secondaryinfo-entity-row"
+              entity: switch.postal_status
               secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
-            - entity: switch.postal_status_activate_delay
+            - type: "custom:secondaryinfo-entity-row"
+              entity: switch.postal_status_activate_delay
+              secondary_info: "Time Left: [[ switch.postal_status.attributes.delay ]]"
             - entity: sensor.last_postal_arrival
             - entity: sensor.last_postal_removal
             - type: custom:fold-entity-row
