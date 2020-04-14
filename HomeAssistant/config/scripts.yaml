@@ -1,20 +1,6 @@
 ####################################################
 # SCRIPTS                                          #
 ####################################################
-
-#   group_visibility:
-#     sequence:
-#       - service: group.set_visibility
-#         data_template:
-#           entity_id: '{{ entity_id }}'
-#           visible: '{{ is_state(cond, visible_state) }}'
-
-#   group_invisibility:
-#     sequence:
-#       - service: group.set_visibility
-#         data_template:
-#           entity_id: '{{ entity_id }}'
-#           visible: '{{ not is_state(cond, visible_state) }}'
           
   clear_lock:
     alias: Clear Lock Script
@@ -111,3 +97,12 @@
             5. Light will blink
             6. Done!
           
+  rain_count:
+    alias: Rain Count
+    sequence:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.outdoor_rain_trigger
+      - delay: 00:00:01
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.outdoor_rain_trigger
+        
