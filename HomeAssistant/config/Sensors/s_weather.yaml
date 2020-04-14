@@ -8,6 +8,67 @@
     
   # Weather prediction
   - platform: yr
+  
+######### WEATHER STATION - BASIC DATA #########
+  - platform: mqtt
+    name: "Weather Station Status"
+    icon: mdi:wind-turbine
+    state_topic: "Outside/WStation/Json"
+    availability_topic: "Outside/WStation/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Outside/WStation/Json"
+
+  - platform: mqtt
+    name: "Weather Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Outside/WStation/Json"
+    value_template: "{{ value_json.temp | float | round(1) }}"
+    availability_topic: "Outside/WStation/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Weather Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Outside/WStation/Json"
+    value_template: "{{ value_json.hum | float | round(1) }}"
+    availability_topic: "Outside/WStation/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+      
+  - platform: mqtt
+    name: "Weather Control Input Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash
+    state_topic: "Outside/WStation/Json"
+    value_template: "{{ value_json.Vin | float | round(1) }}"
+    availability_topic: "Outside/WStation/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+      
+  - platform: mqtt
+    name: "Weather Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Outside/WStation/Json"
+    value_template: "{{ value_json.Vcc | float | round(1) }}"
+    availability_topic: "Outside/WStation/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
 
 ######### UV SENSOR - VEML6070 #########
 
@@ -15,8 +76,9 @@
     name: "UV Sensor"
     icon: mdi:sunglasses
     unit_of_measurement: 'uW/cm2'
-    state_topic: "Home/Weather/Solar/UV"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.uv }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -40,7 +102,7 @@
               {% set ok = false %}
             {% endif %}
           {% else %}
-            {% set uvindex = -99|float %}
+            {% set uvindex = 0|float %}
             {% set ok = true %}
           {% endif %}
           
@@ -56,7 +118,7 @@
         value_template: >
           {% if is_state('sun.sun','above_horizon') %}
             {% if is_state('sensor.uv_index','unavailable') %}
-              {% set uv = -99|int %}
+              {% set uv = -1|int %}
             {% else %}
               {% set uv = states('sensor.uv_sensor')|int %}
             {% endif %}
@@ -88,7 +150,7 @@
     sensors:
       outdoor_uv_sensor:
         friendly_name_template: >
-          {% if (0.0 <= states('sensor.uv_index')|float <= 25.0) %}
+          {% if (0.1 <= states('sensor.uv_index')|float <= 25.0) %}
             UV Level - Index: {{ states.sensor.uv_index.state }}
           {% else %}
             UV Level
@@ -129,8 +191,9 @@
     name: "AQI Sensor"
     icon: mdi:air-filter
     unit_of_measurement: 'ppm'
-    state_topic: "Home/Weather/AQS/Lvl"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.aq }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -140,18 +203,19 @@
   - platform: mqtt
     name: "Rain Sensor"
     icon: mdi:weather-pouring
-    state_topic: "Home/Weather/Rain/Snsr"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.rain.s }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     
   - platform: mqtt
-    name: "Outdoor Rain Level"
-    icon: mdi:cup
-    unit_of_measurement: 'mm/h'
-    state_topic: "Home/Weather/Rain/Lvl"
-    availability_topic: "Home/Weather/LWT"
+    name: "Rain Level Toggle"
+    icon: mdi:weather-pouring
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.rain.t }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -177,48 +241,41 @@
           {% endif %}
         icon_template: >
           {% set rain = states('sensor.rain_sensor')|int %}
-          {% if rain >= 1000 %}
-            mdi:weather-partlycloudy
-          {% elif 1000 > rain >= 850 %}
+          {% if rain >= 1020 %}
+            mdi:weather-sunny
+          {% elif 1020 > rain >= 850 %}
             mdi:weather-rainy
           {% else %}
             mdi:weather-pouring
           {% endif %}
+          
+      outdoor_rain_level:
+        friendly_name: "Outdoor Rain Level"
+        icon_template: mdi:cup
+        unit_of_measurement: 'mm/h'
+        value_template: >
+          {% set rain = states('sensor.rain_count')|float * 0.13 %}
 
-######### TEMP/HUM INSIDE SENSORS - AM2320 #########
-
-  - platform: mqtt
-    name: "Weather Control Box Temperature"
-    unit_of_measurement: '°C'
-    state_topic: "Home/Weather/DHT/TempIn"
-    availability_topic: "Home/Weather/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
-    qos: 0
-    value_template: >
-      {% set Temp = value|float %}
-      {{ Temp | round(1) }}
+          {{- (rain|float) | round(2) -}}
     
-    
-  - platform: mqtt
-    name: "Weather Control Box Humidity"
-    unit_of_measurement: '%'
-    state_topic: "Home/Weather/DHT/HumIn"
-    availability_topic: "Home/Weather/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
-    qos: 0
-    value_template: >
-      {% set Hum = value|float %}
-      {{ Hum | round(1) }}
+  - platform: history_stats
+    name: Rain Count
+    entity_id: input_boolean.outdoor_rain_trigger
+    state: 'on'
+    type: count
+    #start: '{{ as_timestamp( now() ) - 3600 }}'
+    end: '{{ now() }}'
+    duration:
+      hours: 1
     
 ######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
 
   - platform: mqtt
     name: "Outdoor Temperature DHT"
     unit_of_measurement: '°C'
-    state_topic: "Home/Weather/DHT/Temp"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.dht.t }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -226,8 +283,9 @@
   - platform: mqtt
     name: "Outdoor Humidity DHT"
     unit_of_measurement: '%'
-    state_topic: "Home/Weather/DHT/Hum"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.dht.h }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -235,8 +293,9 @@
   - platform: mqtt
     name: "Outdoor Temperature BME"
     unit_of_measurement: '°C'
-    state_topic: "Home/Weather/BME/Temp"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.bme.t }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -244,8 +303,9 @@
   - platform: mqtt
     name: "Outdoor Humidity BME"
     unit_of_measurement: '%'
-    state_topic: "Home/Weather/BME/Hum"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.bme.h }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -254,8 +314,9 @@
     name: "Outdoor Pressure Raw"
     icon: mdi:altimeter
     unit_of_measurement: 'kPa'
-    state_topic: "Home/Weather/BME/Baro"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    value_template: "{{ value_json.bme.p | float + 1.5 }}"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
@@ -268,7 +329,7 @@
         icon_template: mdi:altimeter
         value_template: >
           {% if not is_state('sensor.outdoor_pressure_raw','unavailable') %}
-            {% set P = states('sensor.outdoor_pressure_raw')|float + 1.75 %}
+            {% set P = states('sensor.outdoor_pressure_raw')|float %}
             {% set ok = true %}
           {% elif not is_state('weather.dolbeau','unknown') %}
             {% set P = state_attr('weather.dolbeau', 'pressure')|float / 10.0 %}
@@ -487,37 +548,43 @@
     name: "Wind Speed Raw"
     icon: mdi:weather-windy
     unit_of_measurement: 'km/h'
-    state_topic: "Home/Weather/Wind/Spd"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     value_template: >
-      {% set WSraw = value|float %}
-      {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float %}
-      {% if WS <= 0 or WS > 300 %}
-        {% set WS = 0.5 %}
+      {% set WSraw = value_json.wind.s|float %}
+      {% if WSraw < 0 or WSraw > 300 %}
+        {% set WS = 0 %}
+      {% else %}
+        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float * 4.0 %}
       {% endif %}
       
-      {% if WSraw < 0 %}
-        unavailable
-      {% else %}
-        {{ WS | round(3) }}
-      {% endif %}      
-        
+      {{ WS | round(3) }}
+      
+  - platform: average
+    name: "Wind Speed Average"
+    duration:
+      minutes: 1
+    entities:
+      - sensor.wind_speed_raw
+      
+  - platform: statistics
+    name: "Wind Speed Stats"
+    entity_id: sensor.wind_speed_raw
+    sampling_size: 60
+    # max_age:
+      # minutes: 1
+      
   - platform: filter
     name: "Wind Speed Filter"
     entity_id: sensor.wind_speed_raw
     filters:
-      - filter: range
-        lower_bound: 0.0
-        upper_bound: 300.0
-      - filter: outlier
-        window_size: 2
-        radius: 2.0
-      - filter: lowpass
-        time_constant: 2
-        
+      - filter: time_simple_moving_average
+        window_size: "00:01"
+        precision: 2
+
   - platform: template
     sensors:
       wind_speed:
@@ -526,12 +593,7 @@
         icon_template: mdi:weather-windy
         value_template: >
           {% if not is_state('sensor.wind_speed_raw','unavailable') %}
-            {% if states('sensor.wind_speed_filter')|float <= 0.5 %}
-              {% set WS = states('sensor.wind_speed_filter')|float %}
-            {% else %}
-              {% set WS = states('sensor.wind_speed_raw')|float %}
-            {% endif %}
-            
+            {% set WS = states('sensor.wind_speed_average')|float %}
             {% set ok = true %}
           {% elif not is_state('weather.dolbeau','unknown') %}
             {% set WS = state_attr('weather.dolbeau', 'wind_speed')|float %}
@@ -543,7 +605,32 @@
           {% if ok == true %}
             {{- WS | round(1) -}}
           {% else %}
-            unavailable
+            unknown
+          {% endif %}
+        attribute_templates:
+          raw_value: "{{ states('sensor.wind_speed_raw') }}"
+
+  - platform: template
+    sensors:
+      wind_speed_gust:
+        friendly_name: "Wind Gust" 
+        unit_of_measurement: 'km/h'
+        icon_template: mdi:weather-windy
+        value_template: >
+          {% if not is_state('sensor.wind_speed_raw','unavailable') %}
+            {% set WG = state_attr('sensor.wind_speed_stats', 'max_value')|float %}
+            {% set ok = true %}
+          {% elif not is_state('sensor.wind_gust','unknown') %}
+            {% set WG = states('sensor.wind_gust')|float %}
+            {% set ok = true %}
+          {% else %}
+            {% set ok = false %}
+          {% endif %}
+          
+          {% if ok == true %}
+            {{- WG | round(1) -}}
+          {% else %}
+            unknown
           {% endif %}
       
 ######### WIND COMPASS #########
@@ -552,11 +639,45 @@
     name: "Wind Direction Raw"
     icon: mdi:arrow-all
     unit_of_measurement: '°'
-    state_topic: "Home/Weather/Wind/Dir"
-    availability_topic: "Home/Weather/LWT"
+    state_topic: "Outside/WStation/Stts"
+    availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
+    value_template: >
+      {% set WDraw = value_json.wind.d|float %}
+      {% if WDraw < 0 %}
+        {% set WD = 0.0 | float %}
+      {% else %}
+        {% set WD = WDraw + 180.0 | float %}
+        {% if WD >= 360 %}
+          {% set WD = WD - 360.0 | float %}
+        {% endif %}
+      {% endif %}
+      
+      {{ WD | round(3) }}
+    
+  - platform: average
+    name: "Wind Direction Average"
+    duration:
+      seconds: 10
+    entities:
+      - sensor.wind_direction_raw
+      
+  - platform: statistics
+    name: "Wind Direction Stats"
+    entity_id: sensor.wind_direction_raw
+    sampling_size: 30
+    # max_age:
+      # seconds: 10
+      
+  - platform: filter
+    name: "Wind Direction Filter"
+    entity_id: sensor.wind_direction_raw
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:01"
+        precision: 2
       
   - platform: template
     sensors:
@@ -566,7 +687,7 @@
         icon_template: mdi:arrow-all
         value_template: >
           {% if not is_state('sensor.wind_direction_raw','unavailable') %}
-            {% set WD = states('sensor.wind_speed_filter')|float %}
+            {% set WD = states('sensor.wind_direction_average')|float %}
             {% set ok = true %}
           {% elif not is_state('sensor.wind_bearing','unknown') %}
             {% set WD = states('sensor.wind_bearing')|float %}
@@ -578,7 +699,7 @@
           {% if ok == true %}
             {{- WD | round(1) -}}
           {% else %}
-            unavailable
+            unknown
           {% endif %}
 
   - platform: template
@@ -734,6 +855,8 @@
           {% else %}
             {{ states.sensor.wind_compass_abbreviation.state }}
           {% endif %}
+        attribute_templates:
+          raw_value: "{{ states('sensor.wind_direction_raw') }}"
         friendly_name_template: >
           {% if is_state('sensor.wind_direction','unavailable') %}
             Wind Direction
