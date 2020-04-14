@@ -66,6 +66,17 @@
 #        - share
 #        - addons_local.tar
 
+  - alias: Purge Database
+    initial_state: True
+    trigger:
+      platform: time
+      at: '04:00:00'
+    action:
+      service: recorder.purge
+      data:
+        keep_days: 2
+        repack: true
+
   - alias: Daily Backup Cleanup
     trigger: 
       platform: time
@@ -171,17 +182,19 @@
     action:
       - service: counter.reset
         entity_id: counter.heartbeat_counter
-        
-  # - alias: ControlRoom Unavailable
-    # trigger:
-      # - platform: time_pattern
-        # seconds: '/1'
-    # condition:
-      # - condition: template
-        # value_template: '{{ ((states.counter.heartbeat_counter.state|int) - (states.sensor.controlroom_heartbeat.state|int))|abs > 15 }}'
-    # action:
-      # service: switch.turn_on
-      # entity_id: switch.controlroom_unavailable
+
+  - alias: Rain Counter
+    trigger:
+      - platform: state
+        entity_id: sensor.rain_level_toggle
+        from: 'OFF'
+        to: 'ON'
+      - platform: state
+        entity_id: sensor.rain_level_toggle
+        from: 'ON'
+        to: 'OFF'
+    action:
+      - service: script.rain_count
   
   - alias: Doorchime TF Trigger
     trigger:
