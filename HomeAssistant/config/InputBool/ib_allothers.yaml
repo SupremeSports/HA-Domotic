@@ -11,3 +11,6 @@
     name: Request IOS positions
     initial: off
     icon: mdi:map-marker-radius
+
+  outdoor_rain_trigger:
+    name: Outdoor Rain Trigger
