@@ -8,6 +8,8 @@ homeassistant:
   packages: !include_dir_named packages
   auth_providers:
     - type: homeassistant
+  whitelist_external_dirs:
+    - /config
 
 #Activate iOS devices
 #ios:
@@ -25,7 +27,7 @@ frontend:
     - /local/custom_ui/state-card-custom-ui.html
   extra_html_url_es5:
     - /local/custom_ui/state-card-custom-ui-es5.html
-  javascript_version: latest
+  #javascript_version: latest
 
 # Custom iframe panels
 panel_iframe:
@@ -104,6 +106,7 @@ input_select: !include_dir_merge_named InputSelects
 input_number: !include input_number.yaml
 lock: !include locks.yaml
 counter: !include counters.yaml
+time_counter: !include timecounters.yaml
 input_datetime: !include input_datetime.yaml
 alarm_control_panel: !include alarm.yaml
 notify: !include notifications.yaml
@@ -142,7 +145,7 @@ iaqualink:
   
 media_player:
 - platform: kodi
-  host: 192.168.0.199
+  host: !secret kodi_ip
 
 #Communication protocols
 mqtt:
@@ -150,17 +153,6 @@ mqtt:
   port: !secret mqtt_port
   username: !secret mqtt_login
   password: !secret mqtt_pass
-  
-# modbus:
-  # - type: tcp
-    # name: MB_ControlRoom
-    # host: !secret modbus0_ip
-    # port: !secret modbus_port
-
-  # - type: tcp
-    # name: MB_PoolArea
-    # host: !secret modbus1_ip
-    # port: !secret modbus_port
 
 duckdns:
   domain: !secret duckdns_domain
@@ -168,7 +160,11 @@ duckdns:
 
 #Database recorder
 recorder: !include recorder.yaml
-#recorder:
+
+# logger:
+  # default: info
+  # logs:
+    # homeassistant.components.websocket_api: debug
 
 clean_up_snapshots_service:
   host: !secret ha_base_url
@@ -196,12 +192,3 @@ glances:
   - host: localhost
     version: 2
     name: Server
-    
-# influxdb:
-  # host: a0d7b954-influxdb
-  # port: 8086
-  # database: homeassistant
-  # username: homeassistant
-  # password: Eclipse1!
-  # max_retries: 3
-  # default_measurement: state
