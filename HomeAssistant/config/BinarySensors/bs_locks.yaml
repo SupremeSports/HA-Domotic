@@ -39,7 +39,6 @@
     name: Garage FD Bell
     state_topic: "Garage/Door/Front/Stts"
     availability_topic: "Garage/Door/Front/LWT"
-    value_template: '{{ value_json.bell }}'
     payload_available: "online"
     payload_not_available: "offline"
     value_template: '{{ value_json.bell }}'
