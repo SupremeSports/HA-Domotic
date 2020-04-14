@@ -65,11 +65,17 @@
       title: Storage
       show_header_toggle: false
       entities:
+        - sensor.home_assistant_v2_db
         - type: custom:fold-entity-row
           head: sensor.server_used_percent
           entities:
             - sensor.server_used
             - sensor.server_free
+        - type: custom:fold-entity-row
+          head: sensor.server_media_gauthier_data01_used_percent
+          entities:
+            - sensor.server_media_gauthier_data01_used
+            - sensor.server_media_gauthier_data01_free
 
     - type: entities
       title: Network
