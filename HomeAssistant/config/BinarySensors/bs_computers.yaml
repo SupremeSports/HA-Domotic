@@ -13,3 +13,21 @@
     host: !secret ip_cfor_pc
     count: 2
     scan_interval: 30
+    
+  - platform: ping
+    name: Main Router
+    host: !secret ip_main_rt
+    count: 2
+    scan_interval: 30
+    
+  - platform: ping
+    name: Garage Router
+    host: !secret ip_grge_rt
+    count: 2
+    scan_interval: 30
+    
+  - platform: ping
+    name: Pool Router
+    host: !secret ip_pool_rt
+    count: 2
+    scan_interval: 30
