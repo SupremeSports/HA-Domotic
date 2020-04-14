@@ -1,36 +1,6 @@
 ####################################################
 # GROUPS                                           #
 ####################################################
-
-  date_and_time:
-     icon: mdi:home 
-     entities:
-       - group.time
-  date_time:
-    name: Date and Time
-    entities:
-      - sensor.time
-      - sensor.date
-      - sensor.time_utc
-  admin:
-    name: Restart HASS
-    entities:
-      - input_boolean.restart_hass
-       
-  energySensor:
-    name: EnergyMonitor
-    entities:
-      - sensor.ted5000_mtu1_power
-      - sensor.ted5000_mtu1_voltage
-      - sensor.ted5000_mtu2_power
-      - sensor.ted5000_mtu2_voltage
-      - sensor.ted5000_mtu3_power
-      - sensor.ted5000_mtu3_voltage
-      
-  tempFeelsLike:
-    name: Feels Like
-    entities:
-      - sensor.outdoor_feelslike
       
   pool_clock_settings:
     name: Pool Clock Settings
@@ -38,7 +8,15 @@
       - input_text.pool_text_top
       - input_text.pool_text_bottom
       - input_number.pool_clock_scroll_speed
-  
+      
+  all_locks:
+    name: Lock All
+    entities:
+      - lock.house_fd_lock
+      - lock.house_sd_lock
+      - lock.house_bd_lock
+      - lock.garage_fd_lock
+
   locks:
     name: Locks
     entities:
