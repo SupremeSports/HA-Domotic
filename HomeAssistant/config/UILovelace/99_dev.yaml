@@ -6,7 +6,8 @@
   icon: mdi:hidden
   # Unique path for direct access /lovelace/${path}
   path: dev
-  visible: true
+  visible:
+    - user: !secret userid_jean
   badges:
     - sensor.time
   cards:
@@ -24,15 +25,6 @@
       title: Lovelace
       content: >
         Welcome to your **Lovelace UI**.
-        
-    - type: entities
-      title: Doorbells
-      show_header_toggle: false
-      entities:
-        - binary_sensor.house_fd_bell
-        - binary_sensor.house_sd_bell
-        - binary_sensor.house_bd_bell
-        - binary_sensor.garage_fd_bell
 
     - type: entities
       title: Milight RGBW Controller
@@ -44,14 +36,13 @@
             label: Milight Sync Function
           entities:
             - input_number.milight_id_sync
-            - type: entity-button
-              name: Generate Help Notification
-              entity: script.milightsynchelp
-              tap_action:
-                action: call-service
-                service: script.turn_on
-                service_data:
-                  entity_id: script.milightsynchelp
+            - type: "custom:button-entity-row"
+              buttons:
+                - icon: mdi:help-circle
+                  name: Generate Help Notification
+                  service: script.turn_on
+                  service_data:
+                    entity_id: script.milightsynchelp
         - type: custom:fold-entity-row
           head: light.master_bedroom_rgbw
           entities:
