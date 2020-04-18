@@ -72,7 +72,7 @@ void reconnect()
 
       long lastReading = millis();
 
-      // Wait 5 seconds before retrying
+      // Wait 10 seconds before retrying
       while (millis()-lastReading < 10000)
       {
         //Keep reading data even if MQTT is down
