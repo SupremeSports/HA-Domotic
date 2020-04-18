@@ -34,18 +34,43 @@ void processCommandJson(char* message)
   }
 
   if (root.containsKey(json_waterTemp))
-    getWaterTemp(root[json_waterTemp]);
+  {
+    if (strcmp(root[json_waterTemp], json_unavailable) != 0)
+      getWaterTemp(root[json_waterTemp]);
+    else
+      getWaterTemp(String(initValue));
+  }
+  
   if (root.containsKey(json_waterPH))
-    getWaterPH(root[json_waterPH]);
+  {
+    if (strcmp(root[json_waterPH], json_unavailable) != 0)
+      getWaterPH(root[json_waterPH]);
+    else
+      getWaterPH(String(initValue));
+  }
+  
   if (root.containsKey(json_outTemp))
-    getOutTemp(root[json_outTemp]);
+  {
+    if (strcmp(root[json_outTemp], json_unavailable) != 0)
+      getOutTemp(root[json_outTemp]);
+    else
+      getOutTemp(String(initValue));
+  }
+  
   if (root.containsKey(json_outHum))
-    getOutHum(root[json_outHum]);
+  {
+    if (strcmp(root[json_outHum], json_unavailable) != 0)
+      getOutHum(root[json_outHum]);
+    else
+      getOutHum(String(initValue));
+  }
+  
   if (root.containsKey(json_timeText))
   {
     timeTextStringBuffer = padString(root[json_timeText], timeDigits);
     rollingTimeTextIndex = 1;
   }
+  
   if (root.containsKey(json_tempText))
   {
     tempTextStringBuffer = padString(root[json_tempText], tempDigits);
