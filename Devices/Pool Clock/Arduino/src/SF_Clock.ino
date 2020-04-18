@@ -78,7 +78,11 @@ void updateTempString()
 void getOutTemp(String received)
 {
   outTempC = received.toFloat();
-  outTempF = celsiusToFahrenheit(outTempC);
+
+  if (waterTempF != initValue)
+    outTempF = celsiusToFahrenheit(outTempC);
+  else
+    outTempF = float(initValue);
 }
 
 void getOutHum(String received)
@@ -128,7 +132,11 @@ void updateWaterString()
 void getWaterTemp(String received)
 {
   waterTempF = received.toFloat();
-  waterTempC = fahrenheitToCelsius(waterTempF);
+  
+  if (waterTempF != initValue)
+    waterTempC = fahrenheitToCelsius(waterTempF);
+  else
+    waterTempC = float(initValue);
 }
 
 void getWaterPH(String received)
