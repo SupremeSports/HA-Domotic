@@ -27,9 +27,9 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
  Name:    Pool Clock - Neo7Segment
  Created: 2019/01/02
- Created: 2020/04/03
+ Created: 2020/04/17
  Author:  gauthier_j100@hotmail.com / SupremeSports
- GitHub:  https://github.com/SupremeSports/
+ GitHub:  https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Pool%20Clock
 */
 
 // ----------------------------------------------------------------------------------------------------
@@ -37,19 +37,19 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 // ----------------------------------------------------------------------------------------------------
 #include <ESP8266WiFi.h>
 
-#define ESP8266                   7
-ADC_MODE(ADC_VCC);                                //Read Vcc on ADC input
+#define ESP8266                     7
+ADC_MODE(ADC_VCC);                                  //Read Vcc on ADC input
 
 //Network settings - PLEASE, define those values in a config.h file
 #include "config.h"
 
-IPAddress ip(IP1, IP2, IP3, IP4);                 //Put the current device IP address here
-IPAddress gw(GW1, GW2, GW3, GW4);                 //Put your gateway IP address here
-IPAddress sn(SN1, SN2, SN3, SN4);                 //Put your subnetmask here
+IPAddress ip(IP1, IP2, IP3, IP4);                   //Put the current device IP address here
+IPAddress gw(GW1, GW2, GW3, GW4);                   //Put your gateway IP address here
+IPAddress sn(SN1, SN2, SN3, SN4);                   //Put your subnetmask here
 
-bool networkActive              = false;          //WiFi connectivity status
-int rssiPercent                   = 0;            //WiFi signal strength in percent
-int rssi                          = 0;            //WiFi signal strength in dBm
+bool networkActive                = false;          //WiFi connectivity status
+int rssiPercent                   = 0;              //WiFi signal strength in percent
+int rssi                          = 0;              //WiFi signal strength in dBm
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- WDT DEFINES --------------------------------------------
@@ -57,9 +57,9 @@ int rssi                          = 0;            //WiFi signal strength in dBm
 #include <Ticker.h>
 Ticker lwdTicker;
 
-#define LWD_TIMEOUT               5000            //WDT Value (ms)
+#define LWD_TIMEOUT                 5000            //WDT Value (ms)
 
-unsigned long lwdTime           = 0;
+unsigned long lwdTime             = 0;
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- OTA DEFINES --------------------------------------------
@@ -89,16 +89,16 @@ unsigned long lwdTime           = 0;
 // ------------------------------------------ OTHER DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //Used Pins
-const uint8_t boardLedPin       = 2;//LED_BUILTIN;    //Pin 1 on ESP-01, pin 2 on ESP-12E/ESP32
-const bool boardLedPinRevert    = true;           //If true, LED is on when output is low
-const bool enableBoardLED       = true;           //If true, LED will flash to indicate status
+const uint8_t boardLedPin         = 2;//LED_BUILTIN;//Pin 1 on ESP-01, pin 2 on ESP-12E/ESP32
+const bool boardLedPinRevert      = true;           //If true, LED is on when output is low
+const bool enableBoardLED         = true;           //If true, LED will flash to indicate status
 
 //Variables
-#define initValue                 -99             //Initialization value to insure values updates
+#define initValue                   -99             //Initialization value to insure values updates
 
-bool newStart                   = false;          //New start detection
+bool newStart                     = false;          //New start detection
 
-long ledFlashDelay              = 0;              //Led flashing delay
+long ledFlashDelay                = 0;              //Led flashing delay
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
@@ -107,21 +107,21 @@ long ledFlashDelay              = 0;              //Led flashing delay
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
-long lastMsg                    = 0;
+long lastMsg                      = 0;
 char msg[50];
 
-bool updatePublish              = false;
-bool mqttActive                 = false;
+bool updatePublish                = false;
+bool mqttActive                   = false;
 
-long lastSecond                 = 0;
-long lastMinute                 = 0;
+long lastSecond                   = 0;
+long lastMinute                   = 0;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#include <ArduinoJson.h>        // https://github.com/bblanchon/ArduinoJson
+#include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
 
-const int BUFFER_SIZE           = JSON_OBJECT_SIZE(100);
+const int BUFFER_SIZE             = JSON_OBJECT_SIZE(100);
 const int BUFFER_ARRAY_SIZE       = 255;
 
 char message[BUFFER_ARRAY_SIZE];
@@ -131,17 +131,17 @@ char message[BUFFER_ARRAY_SIZE];
 // ----------------------------------------------------------------------------------------------------
 #include <EEPROM.h>
 
-#define EEPROM_SIZE               64
+#define EEPROM_SIZE                 64
 
-int address_Sts                 = 0;
-int address_CAS                 = 1;
-int address_CCr                 = 2;
-int address_Spd                 = 3;
-int address_Opt                 = 4;
-int address_Lum                 = 5;
-int address_Red                 = 6;
-int address_Grn                 = 7;
-int address_Blu                 = 8;
+int address_Sts                   = 0;
+int address_CAS                   = 1;
+int address_CCr                   = 2;
+int address_Spd                   = 3;
+int address_Opt                   = 4;
+int address_Lum                   = 5;
+int address_Red                   = 6;
+int address_Grn                   = 7;
+int address_Blu                   = 8;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------- NEOPIXEL SEVEN SEGMENT DEFINES ----------------------------------
@@ -151,139 +151,139 @@ int address_Blu                 = 8;
 #define ENABLE_TEXTSTRINGS
 
 //Used Pins
-#define timePin                   14
-#define tempPin                   12
+#define timePin                     14
+#define tempPin                     12
 
 //Displays setup
-#define timeDigits                6
-#define timePixels                8
-#define timePixDp                 2
-#define tempDigits                8
-#define tempPixels                4
-#define tempPixDp                 1
+#define timeDigits                  6
+#define timePixels                  8
+#define timePixDp                   2
+#define tempDigits                  8
+#define tempPixels                  4
+#define tempPixDp                   1
 
 // Initalise the displays
 Neo7Segment timeDisplay(timeDigits, timePixels, timePixDp, timePin);
 Neo7Segment tempDisplay(tempDigits, tempPixels, tempPixDp, tempPin);
 
-#define timeStandardColor         16711680          //= timeDisplay.Color(255, 0, 0);
-#define tempStandardColor         65280             //= tempDisplay.Color(0, 255, 0);
-#define waterStandardColor        255               //= waterDisplay.Color(0, 0, 255);
+#define timeStandardColor           16711680          //= timeDisplay.Color(255, 0, 0);
+#define tempStandardColor           65280             //= tempDisplay.Color(0, 255, 0);
+#define waterStandardColor          255               //= waterDisplay.Color(0, 0, 255);
 
 //All possible alphabet characters that can be displayed on a 7 segments
-const String alphabet[26]       = {"A","B","C","D","E","F","G","H","I","J"," ","L"," ","N","O","P","Q","R","S","T","U"," "," ","X","Y","Z"};
+const String alphabet[26]         = {"A","B","C","D","E","F","G","H","I","J"," ","L"," ","N","O","P","Q","R","S","T","U"," "," ","X","Y","Z"};
 
-bool changeColor                = false;          //Change display color 
-bool initDisplays               = true;           //Initialize displays
+bool changeColor                  = false;          //Change display color 
+bool initDisplays                 = true;           //Initialize displays
 
-#define EFFECT_DEFAULT            0   //Default
-#define EFFECT_MIN                0
-#define EFFECT_MAX                7
+#define EFFECT_DEFAULT              0   //Default
+#define EFFECT_MIN                  0
+#define EFFECT_MAX                  7
 
-const char *effects[]           = {
-                                  "Default",
-                                  "RainbowCycle",
-                                  "TextColor",
-                                  "Spoon",
-                                  "VertRainbowCycle",
-                                  "HorizRainbowCycle",
-                                  "TextChaser",
-                                  "AllEffectsRolling",
-                                  };
+const char *effects[]             = {
+                                    "Default",
+                                    "RainbowCycle",
+                                    "TextColor",
+                                    "Spoon",
+                                    "VertRainbowCycle",
+                                    "HorizRainbowCycle",
+                                    "TextChaser",
+                                    "AllEffectsRolling",
+                                    };
 
 //Rainbow indexes and variables
-unsigned long nextRainbow       = 0;
-unsigned long nextSwitch        = 0;
-byte rainbowIndex               = 0;
-byte displayFeature             = 96;             //Initialize displays
-uint8_t loopIndex               = 0;
+unsigned long nextRainbow         = 0;
+unsigned long nextSwitch          = 0;
+byte rainbowIndex                 = 0;
+byte displayFeature               = 96;             //Initialize displays
+uint8_t loopIndex                 = 0;
 
 // Maintained state for reporting to HA
-byte stateOn                    = false;
-byte configRedCnl               = 255;
-byte configGreenCnl             = 255;
-byte configBlueCnl              = 255;
-int configCycleSpeed            = 250;            //Text scrolling speed in ms (updates every 250 ms)
+byte stateOn                      = false;
+byte configRedCnl                 = 255;
+byte configGreenCnl               = 255;
+byte configBlueCnl                = 255;
+int configCycleSpeed              = 250;            //Text scrolling speed in ms (updates every 250 ms)
 
-#define defaultBrightness         20
-byte brightness                 = 50;//defaultBrightness*255/100;
+#define defaultBrightness           20
+byte brightness                   = 50;//defaultBrightness*255/100;
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ TIME CONTROL --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#include <TimeLib.h>            // TimeLib library is needed https://github.com/PaulStoffregen/Time
-                                // http://playground.arduino.cc/code/time (Margolis 1.5.0)
+#include <TimeLib.h>              // TimeLib library is needed https://github.com/PaulStoffregen/Time
+                                  // http://playground.arduino.cc/code/time (Margolis 1.5.0)
                                 
-#define DELIMITER_TIME            ":"
+#define DELIMITER_TIME              ":"
 
 //Variables
-uint16_t Year                   = initValue;
-uint8_t Month                   = initValue;
-uint8_t Day                     = initValue;
-uint8_t Hour                    = initValue;
-uint8_t Minute                  = initValue;
-uint8_t Second                  = initValue;
-uint8_t DOW                     = initValue;
+uint16_t Year                     = initValue;
+uint8_t Month                     = initValue;
+uint8_t Day                       = initValue;
+uint8_t Hour                      = initValue;
+uint8_t Minute                    = initValue;
+uint8_t Second                    = initValue;
+uint8_t DOW                       = initValue;
 
-uint8_t prevHour                = initValue;
-uint8_t prevMinute              = initValue;
-uint8_t prevSecond              = initValue;
+uint8_t prevHour                  = initValue;
+uint8_t prevMinute                = initValue;
+uint8_t prevSecond                = initValue;
 
-bool localTimeValid             = false;          //Detect that local time is valid
+bool localTimeValid               = false;          //Detect that local time is valid
 
-long lastTimeRequestMillis      = millis();
+long lastTimeRequestMillis        = millis();
 
-uint8_t rollingTimeTextIndex    = 0;              //Scroll start index in string
-long timeTextScrollLast         = 0;              //millis since the last scroll
+uint8_t rollingTimeTextIndex      = 0;              //Scroll start index in string
+long timeTextScrollLast           = 0;              //millis since the last scroll
 
-String timeString;                                //Time display string
-String timeTextString;                            //Text display string
-String timeTextStringBuffer;                      //Text display full string buffer
+String timeString;                                  //Time display string
+String timeTextString;                              //Text display string
+String timeTextStringBuffer;                        //Text display full string buffer
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ TEMP DISPLAY --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //Variables
-float outTempC                  = initValue;      //Input in °C
-float outTempF                  = initValue;      //Input in °F
-float outHumidity               = initValue;      //Input in %
-float waterTempF                = initValue;      //Input in °F
-float waterTempC                = initValue;      //Input in °C
-float waterLevelPH              = initValue;      //Input in pH level
+float outTempC                    = initValue;      //Input in °C
+float outTempF                    = initValue;      //Input in °F
+float outHumidity                 = initValue;      //Input in %
+float waterTempF                  = initValue;      //Input in °F
+float waterTempC                  = initValue;      //Input in °C
+float waterLevelPH                = initValue;      //Input in pH level
 
-uint8_t rollingTempTextIndex    = 0;              //Scroll start index in string
-long tempTextScrollLast         = 0;              //millis since the last scroll
+uint8_t rollingTempTextIndex      = 0;              //Scroll start index in string
+long tempTextScrollLast           = 0;              //millis since the last scroll
 
-String tempString;                                //Outside temperature display string
-String waterString;                               //Water temperature display string
-String tempTextString;                            //Text display string
-String tempTextStringBuffer;                      //Text display full string buffer
+String tempString;                                  //Outside temperature display string
+String waterString;                                 //Water temperature display string
+String tempTextString;                              //Text display string
+String tempTextStringBuffer;                        //Text display full string buffer
 
-bool prevTempONS                = false;          //One shot for text changing sequence
-bool prevWaterONS               = false;          //One shot for text changing sequence
+bool prevTempONS                  = false;          //One shot for text changing sequence
+bool prevWaterONS                 = false;          //One shot for text changing sequence
 
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- BUTTONS -----------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-unsigned long forceTimeON       = 0;              //Timestamp of force ON request event
-bool forceON                    = false;          //Display is forced ON no matter the time of day
-bool forceOFF                   = false;          //Display is forced OFF no matter the time of day
+unsigned long forceTimeON         = 0;              //Timestamp of force ON request event
+bool forceON                      = false;          //Display is forced ON no matter the time of day
+bool forceOFF                     = false;          //Display is forced OFF no matter the time of day
 
-unsigned long lastButtonPress   = 0;              //Timestamp of button pressed event
+unsigned long lastButtonPress     = 0;              //Timestamp of button pressed event
 
-bool buttonActive               = false;          //Button is currently pressed (used to one shot timer)
-bool shortPressActive           = false;          //Button has reached short press delay
-bool medPressActive             = false;          //Button has reached medium press delay
-bool longPressActive            = false;          //Button has reached long press delay
+bool buttonActive                 = false;          //Button is currently pressed (used to one shot timer)
+bool shortPressActive             = false;          //Button has reached short press delay
+bool medPressActive               = false;          //Button has reached medium press delay
+bool longPressActive              = false;          //Button has reached long press delay
 
-bool colorAutoSwitch            = false;          //Displays are in auto color switch mode (scrolls between modes)
+bool colorAutoSwitch              = false;          //Displays are in auto color switch mode (scrolls between modes)
 
-#define shortPressTime            250
-#define medPressTime              2000
-#define longPressTime             5000
-#define extraTime                 3600000
+#define shortPressTime              250
+#define medPressTime                2000
+#define longPressTime               5000
+#define extraTime                   3600000
 
-#define buttonPin                 0
+#define buttonPin                   0
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- SETUP ------------------------------------------------
