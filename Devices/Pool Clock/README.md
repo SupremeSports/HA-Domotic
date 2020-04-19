@@ -7,6 +7,10 @@
 ### Description: ###
 Based on the neo pixels chips WS2812 5050, I purchased 8m of LED strips with 144LEDs/meter.
 
+![alt text](images/Default_C.jpg "Default Colors")
+![alt text](images/Rainbow_F.jpg "Vertical Colors")
+![alt text](images/Rainbow_H.jpg "Vertical Colors")
+
 #### Features: ####
 
 - Displays actual time (hh:mm:ss)
