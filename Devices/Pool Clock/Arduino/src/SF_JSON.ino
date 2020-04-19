@@ -35,7 +35,7 @@ void processCommandJson(char* message)
 
   if (root.containsKey(json_waterTemp))
   {
-    if (strcmp(root[json_waterTemp], json_unavailable) != 0)
+    if (strcmp(root[json_waterTemp], json_unavailable) != 0 && strcmp(root[json_waterTemp], json_blank) != 0)
       getWaterTemp(root[json_waterTemp]);
     else
       getWaterTemp(String(initValue));
@@ -43,7 +43,7 @@ void processCommandJson(char* message)
   
   if (root.containsKey(json_waterPH))
   {
-    if (strcmp(root[json_waterPH], json_unavailable) != 0)
+    if (strcmp(root[json_waterPH], json_unavailable) != 0 && strcmp(root[json_waterPH], json_blank) != 0)
       getWaterPH(root[json_waterPH]);
     else
       getWaterPH(String(initValue));
@@ -51,7 +51,7 @@ void processCommandJson(char* message)
   
   if (root.containsKey(json_outTemp))
   {
-    if (strcmp(root[json_outTemp], json_unavailable) != 0)
+    if (strcmp(root[json_outTemp], json_unavailable) != 0 && strcmp(root[json_outTemp], json_blank) != 0)
       getOutTemp(root[json_outTemp]);
     else
       getOutTemp(String(initValue));
@@ -59,7 +59,7 @@ void processCommandJson(char* message)
   
   if (root.containsKey(json_outHum))
   {
-    if (strcmp(root[json_outHum], json_unavailable) != 0)
+    if (strcmp(root[json_outHum], json_unavailable) != 0 && strcmp(root[json_outHum], json_blank) != 0)
       getOutHum(root[json_outHum]);
     else
       getOutHum(String(initValue));
