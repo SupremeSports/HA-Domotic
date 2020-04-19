@@ -6,7 +6,7 @@
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------- PROCESS COMMAND JSON ---------------------------------------
 // ----------------------------------------------------------------------------------------------------
-void processCommandJson(char* message)
+bool processCommandJson(char* message)
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
@@ -15,15 +15,17 @@ void processCommandJson(char* message)
   if (!root.success())
   {
     Sprintln(json_parseFailed);
-    return;
+    return false;
   }
+
+  bool ok = false;
 
   if (root.containsKey(json_reset))
   {
     mqttClient.publish(mqtt_controlStts, json_resetReq);
     
     if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
-      return;
+      return false;
   
     mqttClient.publish(mqtt_controlStts, json_resetReboot);
       
@@ -76,7 +78,34 @@ void processCommandJson(char* message)
     tempTextStringBuffer = padString(root[json_tempText], tempDigits);
     rollingTempTextIndex = 1;
   }
+
+  if (root.containsKey(json_scroll))
+  {
+    configScrollSpeed = map(root[json_scroll], 0, 100, 1000, 0);
+
+    Sprint("Scroll: ");
+    Sprintln(configScrollSpeed);
+
+    ok = true;
+  }
+
+  return ok;
 }
+
+void sendCommandState()
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  root[json_scroll] = map(configScrollSpeed, 1000, 0, 0, 100);
+
+  char buffer[root.measureLength() + 1];
+  root.printTo(buffer, sizeof(buffer));
+
+  mqttClient.publish(mqtt_controlStts, buffer);//, true);
+}
+
 
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- PROCESS LED JSON -----------------------------------------
@@ -106,7 +135,7 @@ bool processLightColorsJson(char* message)
 
   if (root.containsKey(json_transition))
   {
-    configCycleSpeed = map(root[json_transition], 0, 100, 1000, 0);
+    configCycleSpeed = root[json_transition];
 
     Sprint("Transition: ");
     Sprintln(configCycleSpeed);
@@ -195,7 +224,7 @@ void sendLightColorsState()
   else
     root[json_effect] = effects[displayFeature];
 
-  root[json_transition] = map(configCycleSpeed, 1000, 0, 0, 100);
+  root[json_transition] = configCycleSpeed;
 
   char buffer[root.measureLength() + 1];
   root.printTo(buffer, sizeof(buffer));
