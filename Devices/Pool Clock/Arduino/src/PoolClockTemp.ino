@@ -137,12 +137,13 @@ char message[BUFFER_ARRAY_SIZE];
 int address_Sts                   = 0;
 int address_CAS                   = 1;
 int address_CCr                   = 2;
-int address_Spd                   = 3;
-int address_Opt                   = 4;
-int address_Lum                   = 5;
-int address_Red                   = 6;
-int address_Grn                   = 7;
-int address_Blu                   = 8;
+int address_Scr                   = 3;
+int address_Cyc                   = 4;
+int address_Opt                   = 5;
+int address_Lum                   = 6;
+int address_Red                   = 7;
+int address_Grn                   = 8;
+int address_Blu                   = 9;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------- NEOPIXEL SEVEN SEGMENT DEFINES ----------------------------------
@@ -195,8 +196,9 @@ const char *effects[]             = {
 //Rainbow indexes and variables
 unsigned long nextRainbow         = 0;
 unsigned long nextSwitch          = 0;
+unsigned long loopDelay           = 0;
 byte rainbowIndex                 = 0;
-byte displayFeature               = 96;             //Initialize displays
+byte displayFeature               = 96;             //Initialize displays, put to zero to disable
 uint8_t loopIndex                 = 0;
 
 // Maintained state for reporting to HA
@@ -204,7 +206,8 @@ byte stateOn                      = false;
 byte configRedCnl                 = 255;
 byte configGreenCnl               = 255;
 byte configBlueCnl                = 255;
-int configCycleSpeed              = 250;            //Text scrolling speed in ms (updates every 250 ms)
+int configScrollSpeed             = 255;            //Text scrolling speed in ms (updates every 250 ms)
+int configCycleSpeed              = 1;              //Text color cycling speed step/scan (increases by 1 at each scan)
 
 #define defaultBrightness           20
 byte brightness                   = 50;//defaultBrightness*255/100;
@@ -316,6 +319,7 @@ void setup()
   
   //Initialize data
   newStart = true;
+  loopIndex = 0;
 
   Sprintln("Init completed...");
 }
@@ -382,6 +386,7 @@ void runEveryMinute()
   unsigned long loopTime = millis();
 
   sendLightColorsState();
+  sendCommandState();
 
   lastMinute = millis();
   minDelay = 60000;
