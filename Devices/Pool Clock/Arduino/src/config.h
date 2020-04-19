@@ -26,6 +26,7 @@ const char* json_outHum         = "ohum";
 const char* json_timeText       = "uptxt";
 const char* json_tempText       = "dntxt";
 const char* json_unavailable    = "unavailable";
+const char* json_blank          = "";
 
 //LEDs
 const char* mqtt_ledStts        = "Outside/Pool/Clock/LED/Stts";  //MQTT JSON LIGHT status data
