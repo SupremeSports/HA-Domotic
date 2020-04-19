@@ -97,52 +97,59 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
       timeDisplay.DisplayTextColorCycle(timeStringOutput, rainbowIndex);
       tempDisplay.DisplayTextColorCycle(tempStringOutput, rainbowIndex);
       nextRainbow = millis() + 10;
-      rainbowIndex++;
+      rainbowIndex += configCycleSpeed*5;
       break;
 
     case 2: //Text color
       timeDisplay.DisplayTextColor(timeStringOutput, timeDisplay.Wheel(rainbowIndex & 255));
       tempDisplay.DisplayTextColor(tempStringOutput, tempDisplay.Wheel(rainbowIndex & 255));
-      //timeDisplay.DisplayTextMarquee(timeStringOutput, 2, timeDisplay.Wheel(rainbowIndex & 255));
-      //tempDisplay.DisplayTextMarquee(tempStringOutput, 2, tempDisplay.Wheel(rainbowIndex & 255));
-      nextRainbow = millis() + 250;
-      rainbowIndex+=5;
+      nextRainbow = millis() + 50;
+      rainbowIndex += configCycleSpeed;
       break;
 
     case 3: //SPOON
-      loopIndex++;
-      if (loopIndex > 1)
-        loopIndex = 0;
+      if (millis()-loopDelay >= 250)
+      {
+        loopDelay = millis();
+        loopIndex++;
+        if (loopIndex > 1)
+          loopIndex = 0;
+      }
 
       timeDisplay.DisplayTextMarquee(timeStringOutput, loopIndex, timeDisplay.Wheel(rainbowIndex & 255));
       tempDisplay.DisplayTextMarquee(tempStringOutput, loopIndex, tempDisplay.Wheel(rainbowIndex & 255));
-      nextRainbow = millis() + 250;
-      rainbowIndex+=5;
+      nextRainbow = millis() + 50;
+      rainbowIndex += configCycleSpeed;
       break;
 
     case 4: //Vertical Rainbow Cycle
       timeDisplay.DisplayTextVerticalRainbow(timeStringOutput, timeDisplay.Wheel(rainbowIndex & 255), timeDisplay.Wheel((rainbowIndex+50) & 255));
       tempDisplay.DisplayTextVerticalRainbow(tempStringOutput, tempDisplay.Wheel(rainbowIndex & 255), tempDisplay.Wheel((rainbowIndex+50) & 255));
       nextRainbow = millis() + 50;
-      rainbowIndex--;
+      rainbowIndex -= configCycleSpeed;
       break;
     
     case 5: //Horizontal Rainbow Cycle
       timeDisplay.DisplayTextHorizontalRainbow(timeStringOutput, timeDisplay.Wheel(rainbowIndex & 255), timeDisplay.Wheel((rainbowIndex+50) & 255));
       tempDisplay.DisplayTextHorizontalRainbow(tempStringOutput, tempDisplay.Wheel(rainbowIndex & 255), tempDisplay.Wheel((rainbowIndex+50) & 255));
       nextRainbow = millis() + 50;
-      rainbowIndex--;
+      rainbowIndex -= configCycleSpeed;
       break;
            
     case 6: //Text Chaser
-      loopIndex++;
-      if (loopIndex > timePixels*tempPixels)
-        loopIndex = 0;
+      if (millis()-loopDelay >= 25)
+      {
+        loopDelay = millis();
+        loopIndex++;
+        if (loopIndex > timePixels*tempPixels)
+          loopIndex = 0;
+      }
 
       timeDisplay.DisplayTextChaser(timeStringOutput, loopIndex%timePixels, timeDisplay.Wheel(rainbowIndex & 255));
       tempDisplay.DisplayTextChaser(tempStringOutput, loopIndex%tempPixels, tempDisplay.Wheel(rainbowIndex & 255));
-      nextRainbow = millis() + 50;
-      rainbowIndex+=5;
+      nextRainbow = millis() + 10;
+      if (loopIndex%2==0)
+        rainbowIndex += configCycleSpeed;
       break;  
 
     case 96: //Initialize, show all colors one by one
@@ -168,11 +175,13 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
       break;
 
     case 99: //Initialize, show all colors in rainbow pattern
-      timeDisplay.DisplayTextHorizontalRainbow(timeStringOutput, timeDisplay.Wheel(rainbowIndex & 255), timeDisplay.Wheel((rainbowIndex + 50) & 255));
-      tempDisplay.DisplayTextHorizontalRainbow(tempStringOutput, tempDisplay.Wheel(rainbowIndex & 255), tempDisplay.Wheel((rainbowIndex + 50) & 255));
+      timeDisplay.DisplayTextHorizontalRainbow(timeStringOutput, timeDisplay.Wheel(rainbowIndex & 255), timeDisplay.Wheel((rainbowIndex+50) & 255));
+      tempDisplay.DisplayTextHorizontalRainbow(tempStringOutput, tempDisplay.Wheel(rainbowIndex & 255), tempDisplay.Wheel((rainbowIndex+50) & 255));
       nextRainbow = millis() + 1;
-      rainbowIndex ++;
-      if (rainbowIndex >= 255)
+      rainbowIndex += 10;
+      if (rainbowIndex >= 250)
+        loopIndex++;
+      if (loopIndex >= 2)
       {
         rainbowIndex = 0;
         displayFeature = 0;
@@ -184,6 +193,8 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
         tempDisplay.DisplayTextColor("", tempDisplay.Color(0, 0, 0));
 
         readEEPROM();
+
+        loopIndex = 0;
 
         Sprintln("Initialization completed...");
       }
