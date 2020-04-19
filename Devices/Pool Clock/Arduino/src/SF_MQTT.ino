@@ -61,6 +61,8 @@ void reconnect()
       // Once connected, publish an announcement...
       updatePublish = true;
       mqttPublish();
+      lastMinute = millis();
+      minDelay = 3000;
       // ... and resubscribe
       mqttSubscribe();
     }
