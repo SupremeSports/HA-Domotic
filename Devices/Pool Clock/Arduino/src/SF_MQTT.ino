@@ -103,7 +103,11 @@ void mqttReceive(char* topic, char* message)
   //Pool Clock settings
   if (strcmp(topic,mqtt_controlCmd)==0)
   {
-    processCommandJson(message);
+    if (processCommandJson(message))
+    {
+      writeEEPROM();
+      sendCommandState();
+    }
 
     //flashBoardLed(100, 2);
   }
