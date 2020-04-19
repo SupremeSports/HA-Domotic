@@ -25,6 +25,7 @@ const char* json_outTemp        = "otemp";
 const char* json_outHum         = "ohum";
 const char* json_timeText       = "uptxt";
 const char* json_tempText       = "dntxt";
+const char* json_scroll         = "scroll";
 const char* json_unavailable    = "unavailable";
 const char* json_blank          = "";
 
