@@ -24,6 +24,13 @@ input_number:
     min: 0
     max: 100
     step: 5
+  pool_clock_trans_speed:
+    name: Pool Color Cycle Speed
+    mode: slider
+    initial: 1
+    min: 1
+    max: 10
+    step: 1
     
 input_text:
   pool_text_top:
@@ -88,6 +95,19 @@ automation:
     action:
     - service: mqtt.publish
       data_template:
+        topic: "Outside/Pool/Clock/Cmd"
+        payload: '{"scroll":{{ trigger.to_state.state | int }}}'
+        qos: 0
+        retain: false
+        
+  - alias: "Pool Clock Transistion Speed"
+    initial_state: True
+    trigger:
+      platform: state
+      entity_id: input_number.pool_clock_trans_speed
+    action:
+    - service: mqtt.publish
+      data_template:
         topic: "Outside/Pool/Clock/LED/Cmd"
         payload: '{"transition":{{ trigger.to_state.state | int }}}'
         qos: 0
@@ -106,7 +126,7 @@ automation:
       - service: mqtt.publish
         data_template:
           topic: "Outside/Pool/Clock/Cmd"
-          payload_template: '{"wtemp":"{{states.sensor.pool_temp_sensor.state}}","wph":"{{states.sensor.pool_ph_sensor.state}}","otemp":"{{states.sensor.outdoor_temperature.state}}","ohum":"{{states.sensor.outdoor_humidity.state}}"}'
+          payload_template: '{"wtemp":"{{states.sensor.pool_temperature.state}}","wph":"{{states.sensor.pool_ph.state}}","otemp":"{{states.sensor.outdoor_temperature.state}}","ohum":"{{states.sensor.outdoor_humidity.state}}"}'
           qos: 0
           retain: false
         
