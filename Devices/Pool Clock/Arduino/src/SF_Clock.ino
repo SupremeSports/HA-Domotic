@@ -79,7 +79,7 @@ void getOutTemp(String received)
 {
   outTempC = received.toFloat();
 
-  if (waterTempF != initValue)
+  if (outTempC != initValue)
     outTempF = celsiusToFahrenheit(outTempC);
   else
     outTempF = float(initValue);
@@ -153,7 +153,7 @@ String setTimeValues()
   //Set display data
   int len = 2 * timeDigits; //Account for decimal points
   String digitTime[len];
-  digitTime[0] = (Hour<10) ? " " : String(Hour/10);
+  digitTime[0] = (Hour<10) ? ((Hour==0)?"0":" ") : String(Hour/10);
   digitTime[2] = String(Hour%10);
   digitTime[4] = (Minute<10) ? "0" : String(Minute/10);
   digitTime[6] = String(Minute%10);
