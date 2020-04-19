@@ -3,9 +3,9 @@ light:
   - platform: mqtt
     schema: json
     name: Pool Clock
-    state_topic: "Home/Pool/Clock/Stts"
-    command_topic: "Home/Pool/Clock/Cmd"
-    availability_topic: "Home/Pool/Clock/LWT"
+    state_topic: "Outside/Pool/Clock/LED/Stts"
+    command_topic: "Outside/Pool/Clock/LED/Cmd"
+    availability_topic: "Outside/Pool/Clock/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     brightness: true
@@ -13,13 +13,13 @@ light:
     white_value: false
     effect: true
     effect_list: [Default, RainbowCycle, TextColor, Spoon, VertRainbowCycle, HorizRainbowCycle, TextChaser, AllEffectsRolling]
-    #transition: '{{ states.input_number.pool_clock_scroll_speed.state }}'
     optimistic: false
     qos: 0
     
 input_number:
   pool_clock_scroll_speed:
     name: Pool Text Scroll Speed
+    mode: slider
     initial: 80
     min: 0
     max: 100
@@ -28,15 +28,15 @@ input_number:
 input_text:
   pool_text_top:
     name: Pool Text Display Top
-    pattern: '[a-fA-F0-9]*'
+    pattern: '^[a-zA-Z0-9]*$'
     min: 0
-    max: 100
+    max: 80
     mode: text
   pool_text_bottom:
     name: Pool Text Display Bottom
-    pattern: '[a-fA-F0-9]*'
+    pattern: '^[a-zA-Z0-9]*$'
     min: 0
-    max: 100
+    max: 80
     mode: text
 
 automation:
@@ -56,47 +56,106 @@ automation:
         #IMPORTANT - Always send a delimiter at the end of the string for parsing to succeed
         payload: "{{ '{:04}:{:02}:{:02}:{:02}:{:02}:{:02}:'.format(now().year, now().month, now().day, now().hour, now().minute, now().second) }}"
   
-  - alias: Pool Text Change
+  - alias: Pool Top Text Change
     trigger:
-    - platform: state
+      platform: state
       entity_id: input_text.pool_text_top
-    - platform: state
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Outside/Pool/Clock/Cmd"
+        payload: '{"uptxt":"{{ trigger.to_state.state }}"}'
+        qos: 0
+        retain: false
+        
+  - alias: Pool Bottom Text Change
+    trigger:
+      platform: state
       entity_id: input_text.pool_text_bottom
     action:
     - service: mqtt.publish
       data_template:
-        topic: "Home/Pool/Clock/Text/Time"
-        payload_template: >
-          {% if is_state('input_text.pool_text_top', '') %}
-            null
-          {% else %}
-            {{ states.input_text.pool_text_top.state }}
-          {% endif %}
+        topic: "Outside/Pool/Clock/Cmd"
+        payload: '{"dntxt":"{{ trigger.to_state.state }}"}'
         qos: 0
-        retain: true
-    - service: mqtt.publish
-      data_template:
-        topic: "Home/Pool/Clock/Text/Temp"
-        payload_template: >
-          {% if is_state('input_text.pool_text_bottom', '') %}
-            null
-          {% else %}
-            {{ states.input_text.pool_text_bottom.state }}
-          {% endif %}
-        qos: 0
-        retain: true
+        retain: false
 
   - alias: "Pool Clock Scroll Speed"
     initial_state: True
-    hide_entity: False
     trigger:
-    - platform: state
+      platform: state
       entity_id: input_number.pool_clock_scroll_speed
     action:
     - service: mqtt.publish
       data_template:
-        topic: "Home/Pool/Clock/Cmd"
+        topic: "Outside/Pool/Clock/LED/Cmd"
         payload: '{"transition":{{ trigger.to_state.state | int }}}'
+        qos: 0
+        retain: false
+        
+#Publish data to device every minute or when a device requests an update (boot up or invalid data detected (by the device))
+  - alias: Publish Pool Clock Data
+    trigger:
+      - platform: time_pattern
+        minutes: '/1'
+      - platform: mqtt
+        topic: "Home/Global/Time/Request"
+        payload: 'ON'
+        encoding: 'utf-8'
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Outside/Pool/Clock/Cmd"
+          payload_template: '{"wtemp":"{{states.sensor.pool_temp_sensor.state}}","wph":"{{states.sensor.pool_ph_sensor.state}}","otemp":"{{states.sensor.outdoor_temperature.state}}","ohum":"{{states.sensor.outdoor_humidity.state}}"}'
+          qos: 0
+          retain: false
         
 sensor:
-  //Add your sensors for outside temp/hum, water temp/ph
+  //Add your sensors for outside temp, outside hum, water temp and water ph
+  
+  - platform: mqtt
+    name: "Pool Clock"
+    icon: mdi:clock
+    state_topic: "Outside/Pool/Clock/LED/Stts"
+    availability_topic: "Outside/Pool/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        On
+      {% else %}
+        Off
+      {% endif %}
+    json_attributes_topic: "Outside/Pool/Clock/Json"
+
+customize:
+  sensor.pool_clock:
+    friendly_name: "Pool Clock"
+    templates:
+      icon_color: >
+        if (state === 'On') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+
+views:
+- title: Pool Controls
+  icon: mdi:pool
+  path: pool
+  visible: true
+  badges:
+    - sensor.pool_temperature
+    - sensor.pool_ph
+  cards:
+    - type: entities
+      title: Pool Clock Display
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_clock
+          entities:
+          - light.pool_clock
+          - input_text.pool_text_top
+          - input_text.pool_text_bottom
+          - input_number.pool_clock_scroll_speed
+    
