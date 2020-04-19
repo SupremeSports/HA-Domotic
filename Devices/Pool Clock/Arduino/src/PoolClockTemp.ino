@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
  Name:    Pool Clock - Neo7Segment
  Created: 2019/01/02
- Created: 2020/04/17
+ Created: 2020/04/18
  Author:  gauthier_j100@hotmail.com / SupremeSports
  GitHub:  https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Pool%20Clock
 */
@@ -115,6 +115,7 @@ bool mqttActive                   = false;
 
 long lastSecond                   = 0;
 long lastMinute                   = 0;
+long minDelay                     = 3000;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
@@ -309,6 +310,7 @@ void setup()
   
   lastSecond = millis();
   lastMinute = millis();
+  minDelay = 10000;
 
   local_delay(5);                                //Wait for all data to be ready
   
@@ -371,7 +373,10 @@ void runEverySecond()
 
 void runEveryMinute()
 {
-  if (millis()-lastMinute < 60000)
+  //if (millis()-lastMinute < 60000)
+  //Variable delay necessary otherwise ESP loops fail on start
+  //Update 3 seconds after MQTT reconnect success, then every 60 seconds
+  if (millis()-lastMinute < minDelay)
     return;
 
   unsigned long loopTime = millis();
@@ -379,6 +384,7 @@ void runEveryMinute()
   sendLightColorsState();
 
   lastMinute = millis();
+  minDelay = 60000;
 
   loopTime = millis() - loopTime;
   Sprint("Process time (minute): ");
