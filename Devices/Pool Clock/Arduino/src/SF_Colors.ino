@@ -54,8 +54,8 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
     return;
   }
   
-  timeDisplay.ForceUppercase(true);
-  tempDisplay.ForceUppercase(true);
+  timeDisplay.ForceUppercase(false);
+  tempDisplay.ForceUppercase(false);
 
   uint32_t colorStart;
   uint32_t colorEnd;
@@ -172,6 +172,7 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
       nextRainbow = millis() + 1000;
       displayFeature++;
       rainbowIndex = 0;
+      loopIndex = 0;
       break;
 
     case 99: //Initialize, show all colors in rainbow pattern
