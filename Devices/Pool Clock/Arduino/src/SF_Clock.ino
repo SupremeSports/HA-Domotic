@@ -30,7 +30,7 @@ void updateTimeString()
   if (Second == prevSecond && !newStart)
     return;
     
-  timeDisplay.ForceUppercase(true);
+  timeDisplay.ForceUppercase(false);
   timeString = setTimeValues();
 
   Sprintln(timeString);
@@ -249,7 +249,7 @@ String set4DigitsValues(float value, String units)
 //This function gets the text scrolling
 void updateTimeText()
 {
-  if ((millis()-timeTextScrollLast) < configCycleSpeed || newStart)
+  if ((millis()-timeTextScrollLast) < configScrollSpeed || newStart)
     return;
 
   timeTextScrollLast = millis();
@@ -276,7 +276,7 @@ void updateTimeText()
 //This function gets the text scrolling
 void updateTempText()
 {
-  if ((millis()-tempTextScrollLast) < configCycleSpeed || newStart)
+  if ((millis()-tempTextScrollLast) < configScrollSpeed || newStart)
     return;
 
   tempTextScrollLast = millis();
@@ -311,7 +311,7 @@ String padString(String received, uint8_t digits)
   if (received == "null" || received == "")
     return data;
     
-  data += received;
+  data += adjustString(received);
   int len = data.length();
 
   //If string shorter than number of digits
@@ -338,4 +338,59 @@ String padString(String received, uint8_t digits)
     rollingText += " ";
 
   return rollingText;
+}
+
+//Force uppercase characters
+//Replace letters that cannot be reproduced on 7-segment
+//read character c:
+//if not acceptable, replace with a space
+String adjustString(String str)
+{
+  //str.toUpperCase();
+  str.replace("K"," ");
+  str.replace("k"," ");
+  str.replace("M"," ");
+  str.replace("m"," ");
+  str.replace("V"," ");
+  str.replace("v"," ");
+  str.replace("W"," ");
+  str.replace("w"," ");
+
+  String output = "";
+  for(int i=0; i<str.length(); i++)
+  {
+    char test = str.charAt(i);
+    if (isAlphaNumeric(test) || isWhitespace(test) || str.charAt(i) == '.' || str.charAt(i) == '-' || str.charAt(i) == '_')
+      output += test;
+    else
+      output += " ";
+  }
+
+  return output;
+}
+
+//read character c:
+//if c is - or . (decimal point): get next character
+//  Only one of each is accepted
+//if c is digit: get next character
+//if c is something else: stop it is not a number
+boolean isValidNumber(String str)
+{
+  int dotCount = 0;
+  int dashCount = 0;
+  bool isNum = false;
+  for(int i=0; i<str.length(); i++)
+  {
+    isNum = isDigit(str.charAt(i)) || str.charAt(i) == '.' || str.charAt(i) == '-';
+
+    if (str.charAt(i) == '.')
+      dotCount++;
+    else if (str.charAt(i) == '-')
+      dashCount++;
+      
+    if (!isNum || dotCount>1 || dashCount>1)
+      return false;
+  }
+  
+  return isNum;
 }
