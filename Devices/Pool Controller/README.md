@@ -1,7 +1,7 @@
 # Pool controller:
 
-#### Main controller :  Arduino Nano with ENC28J60
-#### Status: Up and running (Modbus version)
+#### Main controller :  Arduino Mega2560 with ENC28J60
+#### Status: Upgrading to MQTT, getting ready for summer...
 
 #### Features:
 - Controls pool pump dual speeds depending on time of day
@@ -18,5 +18,5 @@
   - Reads water temperature at each step and a PID controller tries to get the best heating/$ ratio
   
 #### Features for future:
-- Read chlorine and pH level (eventually, will automatically control the levels)
-- Upgrade to MQTT with an Arduino Mega2560
+- Read chlorine and pH level (eventually, will automatically control the levels) - In progress
+- Upgrade to MQTT with an Arduino Mega2560 - In progress
