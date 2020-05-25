@@ -1,6 +1,9 @@
 ####################################################
 # BINARY SENSORS - COMPUTERS                       #
 ####################################################
+  
+  - platform: apcupsd
+    name: Server UPS Online Status
 
   - platform: ping
     name: JGAU-PC
@@ -31,3 +34,4 @@
     host: !secret ip_pool_rt
     count: 2
     scan_interval: 30
+

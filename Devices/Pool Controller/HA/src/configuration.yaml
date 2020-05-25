@@ -1,0 +1,661 @@
+binary_sensor:
+  - platform: mqtt
+    name: Pool Level High
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.hilvl }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Level Low
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.lolvl }}'
+    qos: 0
+    
+  - platform: template
+    sensors:
+      poolpump_status:
+        friendly_name: "Pool Pump"
+        entity_id:
+          - switch.pool_pump
+          - input_select.poolpump_mode
+        value_template: >
+          {{ is_state("switch.pool_pump", "on") }}
+        availability_template: >
+          {{ not is_state('switch.pool_pump', 'unavailable') }}
+        #mdi:pump
+        icon_template: >
+          mdi:debug-step-over
+
+  - platform: template
+    sensors:
+      poolfiller_status:
+        friendly_name: "Pool Filler Valve"
+        entity_id:
+          - switch.pool_filler_valve
+        value_template: >
+          {{ is_state("switch.pool_filler_valve", "on") }}
+        availability_template: >
+          {{ not is_state('switch.pool_filler_valve', 'unavailable') }}
+        icon_template: >
+          mdi:debug-step-out
+          
+input_select:
+  poolpump_mode:
+    name: Pool Pump Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Spring
+      - Summer
+      - Autumn
+      - 24/7
+    
+input_number:
+  pool_drain_percent:
+    name: Pool Drain Percent (Drain / Skim)
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+  pool_heatpump_percent:
+    name: Pool Heat Pump Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+  pool_slide_percent:
+    name: Pool Slide Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+
+switch;
+  - platform: mqtt
+    name: Pool Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r8 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r8":"ON"}'
+    payload_off: '{"r8":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Heat Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r7 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r7":"ON"}'
+    payload_off: '{"r7":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Filler Valve
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Garden Watering
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r2 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r2":"ON"}'
+    payload_off: '{"r2":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pond Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r6 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r6":"ON"}'
+    payload_off: '{"r6":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+        
+sensor:
+  - platform: mqtt
+    name: "Pool Control Status"
+    icon: mdi:pool
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set status = value_json.wtemp|float %}
+      {% if status > 0 %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Pool/Control/Json"
+    
+  - platform: mqtt
+    name: "Pool Cabin Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.temp_out | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Cabin Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.hum_out | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: template
+    sensors:
+      pool_control_5v_voltage:
+        entity_id:
+          - sensor.pool_control_status
+          - sensor.pool_temperature
+        unit_of_measurement: 'V'
+        friendly_name: "Pool Control 5V Voltage"
+        value_template: >
+          {{ state_attr('sensor.pool_control_status', '5Vcc')| float | round(1) }}
+        icon_template: >
+          mdi:flash-outline
+        availability_template: >
+          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
+          
+      pool_control_12v_voltage:
+        entity_id:
+          - sensor.pool_control_status
+          - sensor.pool_temperature
+        unit_of_measurement: 'V'
+        friendly_name: "Pool Control 12V Voltage"
+        value_template: >
+          {{ state_attr('sensor.pool_control_status', '12Vcc')| float | round(1) }}
+        icon_template: >
+          mdi:flash-outline
+        availability_template: >
+          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
+    
+######### POOL CONTROL - SENSORS #########
+  - platform: mqtt
+    name: "Pool Temperature"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    #json_attributes_topic: "Pool/Control/Json"
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.wtemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {{ TF | round(1) }}
+      
+  - platform: mqtt
+    name: "Pool Heater Temp"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.htemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {{ TF | round(1) }}
+      
+  - platform: mqtt
+    name: "Pool Pump Temp"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: '°C'
+    value_template: >
+      {% set RT = value_json.ptemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {% set TC =  ((TF-32.0)*5.0/9.0)|float %}
+      {{ TC | round(1) }}
+
+  - platform: mqtt
+    name: "Pool Pressure"
+    icon: mdi:gauge
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: 'psi'
+    value_template: >
+      {% set RP = value_json.wpsi|float %}
+      {% set min = 0.5|float %} 
+      {% set span = 4.0|float %}
+      {% set presmax = 60.0|float %}
+      
+      {% set ax = (presmax / span)|float %}
+      {% set b = (ax * min * -1.0)|float %}
+      {% set ax = ((ax * 5.0) / 1023.0)|float %}
+      
+      {% set PV = ((ax*RP)+b)|float %}
+      
+      {% if PV < 0 or PV > 35 %}
+        {{ "ERROR" }}
+      {% else %}
+        {{ PV | round(1) }}
+      {% endif %}
+          
+  - platform: mqtt
+    name: "Pool PH"
+    icon: mdi:gauge
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: 'pH'
+    value_template: >
+      {% set PH = value_json.wph|float %}
+      {% set ax = 0.01369|float %}
+      {% set b = 0.000|float %}
+      
+      {% set PHO = ((ax*PH)+b)|float %}
+      
+      {% if PHO <= 3 or PHO >= 11 %}
+        {{ "ERROR" }}
+      {% else %}
+        {{ PHO | round(1) }}
+      {% endif %}
+
+  - platform: history_stats
+    name: Pool Filler Timer
+    entity_id: switch.pool_filler_valve
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+    
+automation:
+  #Spring mode, runs pump all day, stop 4h, run 4h, stop 4h, run 12h
+  #Summer mode, runs pump based on day of week (runs longer on fridays/saturdays)
+  #Autumn mode, pump not running on peak hours
+  #If temperature below 5°C, run pump
+  #Pool water level has to be above low level since 2 minutes
+  - alias: Pool Pump Control
+    initial_state: true
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.poolpump_mode
+    action:
+      entity_id: switch.pool_pump
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set curWeekday = now().weekday() %}
+        {% set PP = false %}
+        
+        {% if is_state('input_select.poolpump_mode', '24/7') %}
+          {% set PP = true %}
+        {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+          {% if curHour >= 8 and curHour < 20 %}
+            {% set PP = true %}
+          {% elif curHour >= 0 and curHour < 24 %}
+            {% set PP = true %}
+          {% endif %}
+        {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+          {% if curWeekday in (0,1,2,3,6) %}
+            {% if curHour >= 6 and curHour < 18 %}
+              {% set PP = true %}
+            {% elif curHour >= 22 or curHour < 2 %}
+              {% set PP = true %}
+            {% endif %}
+          {% else %}
+            {% if curHour >= 6 and curHour < 23 %}
+              {% set PP = true %}
+            {% elif curHour >= 1 or curHour < 4 %}
+              {% set PP = true %}
+            {% endif %}
+          {% endif %}
+        {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+          {% if curHour >= 2 and curHour < 6 %}
+            {% set PP = true %}
+          {% elif curHour >= 9 and curHour < 11 %}
+            {% set PP = true %}
+          {% elif curHour >= 14 and curHour < 16 %}
+            {% set PP = true %}
+          {% elif curHour >= 21 and curHour < 23 %}
+            {% set PP = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if not is_state('input_select.poolpump_mode', 'Winter/Off') and states.sensor.outdoor_temperature.state|float < 5.0 %}
+          {% set PP = true %}
+        {% endif %}
+        
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_low.last_changed) %}
+        {% if is_state('binary_sensor.pool_level_low', 'off') and lastLevel >= 120 %}
+          {% set PP = false %}
+        {% endif %}
+        
+        {% if PP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  #Pool water level has to be below high level since 2 minutes
+  #Pool pump mode shall not be in Winter mode
+  #Filler valve can't operate more than 1h/day
+  - alias: Pool Filler Control
+    initial_state: true
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    action:
+      entity_id: switch.pool_filler_valve
+      service_template: >
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed) %}
+        {% set PF = false %}
+        
+        {% if lastLevel >= 120 %}
+          {% if is_state('binary_sensor.pool_level_high', 'off') %}
+            {% set PF = true %}
+          {% elif is_state('binary_sensor.pool_level_high', 'on') %}
+            {% set PF = false %}
+          {% endif %}
+        {% endif %}
+        
+        {% if states.sensor.pool_filler_timer.state|float >= 1.0 %}
+          {% set PF = false %}
+        {% elif is_state('input_select.poolpump_mode', 'Winter/Off') %}
+          {% set PF = false %}
+        {% endif %}
+                
+        {% if PF == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: "Pool Drain Adjust"
+    initial_state: true
+    trigger:
+      platform: state
+      entity_id: input_number.pool_drain_percent
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Pool/Control/Cmd"
+        payload: '{"drain":{{ trigger.to_state.state | int }}}'
+        qos: 0
+        retain: false
+        
+  - alias: "Pool Slide Adjust"
+    initial_state: true
+    trigger:
+      platform: state
+      entity_id: input_number.pool_slide_percent
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Pool/Control/Cmd"
+        payload: '{"slide":{{ trigger.to_state.state | int }}}'
+        qos: 0
+        retain: false
+        
+  - alias: "Pool Heatpump Adjust"
+    initial_state: true
+    trigger:
+      platform: state
+      entity_id: input_number.pool_heatpump_percent
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Pool/Control/Cmd"
+        payload: '{"heatp":{{ trigger.to_state.state | int }}}'
+        qos: 0
+        retain: false
+        
+customixe:
+  input_select.poolpump_mode:
+    icon: mdi:power-plug-off
+    templates:
+      icon: >
+        if (state === 'Spring') return 'mdi:flower-tulip';
+        if (state === 'Summer') return 'mdi:weather-sunny';
+        if (state === 'Autumn') return 'mdi:leaf-maple';
+        if (state === '24/7') return 'mdi:clock-start';
+        if (state === 'Winter/Off') return 'mdi:power-off';
+        return 'mdi:power-plug-off';
+        
+  binary_sensor.poolpump_status:
+    icon: mdi:debug-step-over
+    #icon: mdi:pump
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+    
+  switch.pool_pump:
+    icon: mdi:debug-step-over
+    #icon: mdi:pump
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+    
+  switch.pool_heat_pump:
+    icon: mdi:radiator
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:radiator';
+        return 'mdi:radiator-off';
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+  
+  binary_sensor.poolfiller_status:
+    icon: mdi:debug-step-out
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+        
+  switch.pool_filler_valve:
+    icon: mdi:debug-step-out
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+  
+  switch.pond_pump:
+    icon: mdi:fish
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+        
+  switch.garden_watering:
+    icon: mdi:water
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+        
+views:
+- title: Pool Controls
+  icon: mdi:pool
+  # Unique path for direct access /lovelace/${path}
+  path: pool
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.pool_temperature
+    - sensor.pool_heater_temp
+    - sensor.pool_pump_temp
+    - sensor.pool_pressure
+    - sensor.pool_ph
+    - binary_sensor.pool_level_low
+    - binary_sensor.pool_level_high
+  cards:
+    - type: entities
+      title: Pool pump and heater
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.poolpump_status
+          entities:
+          - switch.pool_pump
+          - input_select.poolpump_mode
+          - type: custom:fold-entity-row
+            head:
+              type: section
+              label: Automations
+            entities:
+              - automation.pool_pump_control
+        - switch.pool_heat_pump
+    
+    - type: entities
+      title: Pool Filling
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.poolfiller_status
+          entities:
+          - type: "custom:secondaryinfo-entity-row"
+            entity: switch.pool_filler_valve
+            secondary_info: "Time last 24h: [[ sensor.pool_filler_timer ]] hours"
+          - binary_sensor.pool_level_low
+          - binary_sensor.pool_level_high
+          - type: custom:fold-entity-row
+            head:
+              type: section
+              label: Automations
+            entities:
+              - automation.pool_filler_control
+    
+    - type: entities
+      title: Pool Valves
+      show_header_toggle: false
+      entities:
+        - input_number.pool_drain_percent
+        - input_number.pool_heatpump_percent
+        - input_number.pool_slide_percent
+    
+    - type: entities
+      title: Pool Clock Display
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_clock
+          entities:
+          - light.pool_clock
+          - input_number.pool_clock_trans_speed
+          - input_text.pool_text_top
+          - input_text.pool_text_bottom
+          - input_number.pool_clock_scroll_speed
+    
+    - type: entities
+      title: Pond
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - switch.pond_pump
+        
+    - type: entities
+      title: Garden
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - switch.garden_watering
+    
+    - type: entities
+      title: Pool Cabin Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_control_status
+          entities:
+            - sensor.pool_cabin_temperature
+            - sensor.pool_cabin_humidity
+            - sensor.pool_control_box_temperature
+            - sensor.pool_control_box_humidity
+            - sensor.pool_control_12v_voltage
+            - sensor.pool_control_5v_voltage

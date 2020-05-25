@@ -16,6 +16,13 @@
     min: 0
     max: 100
     step: 10
+  pool_slide_percent:
+    name: Pool Slide Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
     
   pool_clock_scroll_speed:
     name: Pool Text Scroll Speed
@@ -24,14 +31,21 @@
     min: 0
     max: 100
     step: 5
+  pool_clock_trans_speed:
+    name: Pool Color Cycle Speed
+    mode: slider
+    initial: 1
+    min: 1
+    max: 10
+    step: 1
     
   milight_id_sync:
-    name: Milight ID to Sync (1-255)
+    name: Milight ID to Sync (1-254)
     icon: mdi:sync
     mode: box
     initial: 0
     min: 0
-    max: 255
+    max: 254
     step: 1
     
   doorchime_tf_volume:
@@ -60,4 +74,4 @@
     min: 0
     max: 7
     step: 1
-    
+

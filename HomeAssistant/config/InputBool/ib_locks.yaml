@@ -47,3 +47,22 @@
     name: Garage CD Trigger
     initial: off
     icon: mdi:garage-open
+    
+  shed_fd_lock:
+    name: Shed FD Lock
+    initial: off
+    icon: mdi:lock
+  shed_fd_unlock:
+    name: Shed FD Unlock
+    initial: off
+    icon: mdi:lock-open
+    
+  pool_fd_lock:
+    name: Pool FD Lock
+    initial: off
+    icon: mdi:lock
+  pool_fd_unlock:
+    name: Pool FD Unlock
+    initial: off
+    icon: mdi:lock-open
+    

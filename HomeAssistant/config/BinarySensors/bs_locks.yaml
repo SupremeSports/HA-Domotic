@@ -107,3 +107,27 @@
         availability_template: >
           {{ not is_state('cover.garage_cd_opener', 'unavailable') }}
           
+  - platform: mqtt
+    name: Shed FD Opened
+    state_topic: "Shed/Door/Front/Stts"
+    availability_topic: "Shed/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool FD Opened
+    state_topic: "Pool/Door/Cabin/Stts"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.closed }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    device_class: door
+    qos: 0
+    

@@ -5,6 +5,7 @@
 homeassistant:
   # Customization file
   customize: !include_dir_merge_named Customizations
+  customize_glob: !include customize_glob.yaml
   packages: !include_dir_named packages
   auth_providers:
     - type: homeassistant
@@ -40,8 +41,8 @@ panel_iframe:
 config:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
-http:
-  base_url: !secret ha_base_url
+# http:
+  # base_url: !secret ha_base_url
 
 # Checks for available updates
 # Note: This component will send some information about your system to
@@ -81,6 +82,15 @@ tts:
   
   # client_id: 1056160143124-emgfqkspihb31akkhqk9ql11funjpt60.apps.googleusercontent.com
   # client_secret: RrV2Km-tZPY0yEB2DvN6n5B4
+  
+# google_assistant:
+  # project_id: home-assistant-ca81e
+  # # service_account: !include SERVICE_ACCOUNT.JSON
+  # # report_state: true
+  # exposed_domains:
+    # - switch
+    # - light
+    # - vacuum
 
 # Cloud
 cloud:
@@ -106,7 +116,7 @@ input_select: !include_dir_merge_named InputSelects
 input_number: !include input_number.yaml
 lock: !include locks.yaml
 counter: !include counters.yaml
-time_counter: !include timecounters.yaml
+#time_counter: !include timecounters.yaml
 input_datetime: !include input_datetime.yaml
 alarm_control_panel: !include alarm.yaml
 notify: !include notifications.yaml
@@ -122,22 +132,27 @@ weather:
 camera:
   - platform: environment_canada
     name: !secret ha_city
+  - platform: mjpeg
+    name: OctoPrint
+    still_image_url: !secret img_octopi
+    mjpeg_url: !secret cam_octopi
 
 #Health
 system_health:
+apcupsd:
 
 speedtestdotnet:
   scan_interval:
     minutes: 10
     
 #Devices and integrations
-vacuum:
-  - platform: roomba
-    name: Roomba iRobot
-    host: !secret roomba_ip
-    username: !secret roomba_username
-    password: !secret roomba_password
-    entity_id: sensor.dates_second
+# vacuum:
+  # - platform: roomba
+    # name: Roomba iRobot
+    # host: !secret roomba_ip
+    # username: !secret roomba_username
+    # password: !secret roomba_password
+    # entity_id: sensor.dates_second
 
 iaqualink:
   username: !secret iaqualink_username
@@ -192,3 +207,11 @@ glances:
   - host: localhost
     version: 2
     name: Server
+
+octoprint:
+  - host: !secret ip_octopi
+    api_key: !secret key_octopi
+    name: OctoPrint
+    bed: true
+    number_of_tools: 1
+    

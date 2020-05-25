@@ -1,12 +1,12 @@
 # Weather Station
 
-#### Main controller : Arduino Mega 2560 with ENC28J60 and POE ####
-#### Status: Completed - In Service ####
+#### Main controller : Arduino Mega 2560 with ENC28J60 and POE
+#### Status: Completed - In Service
 
-### Description: ###
+### Description:
 I wanted my own personnal data for my location. So, I decided to build my own weatehr station with as much sensors as possible.
 
-#### Features: ####
+#### Features:
 - Reads Air Quality Index - MQ135
 - Reads solar UV level - VEML6070 
 - Reads outdoor temperature - AM2320 & BME280
@@ -21,11 +21,11 @@ I wanted my own personnal data for my location. So, I decided to build my own we
 - Reads internal temperature/humidity - AM2320
 - Reads input and 5V rail voltages
 
-#### Features for future: ####
+#### Features for future:
 - Lightning Detection
 - Replace analog rain sensor with an optical rain detection
 
-### Home Assistant Link: ###
+### Home Assistant Link:
 - MQTT device with QoS and LWT
 - Receives all data once per second
 - Calculates wind chill or heat index depending on temperature

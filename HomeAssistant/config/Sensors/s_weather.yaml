@@ -558,7 +558,7 @@
       {% if WSraw < 0 or WSraw > 300 %}
         {% set WS = 0 %}
       {% else %}
-        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float * 4.0 %}
+        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float * 2.0 %}
       {% endif %}
       
       {{ WS | round(3) }}

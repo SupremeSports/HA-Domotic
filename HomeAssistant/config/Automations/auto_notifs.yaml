@@ -17,8 +17,8 @@
           
   - alias: Publish Postal Arrival
     trigger:
-      - entity_id: sensor.postal_status
-        platform: state
+      - platform: state
+        entity_id: sensor.postal_status
         from: 'No Mail'
         to: 'New Mail'
         for: '00:00:30'
@@ -41,8 +41,8 @@
           
   - alias: Publish Postal Removal
     trigger:
-      - entity_id: sensor.postal_status
-        platform: state
+      - platform: state
+        entity_id: sensor.postal_status
         from: 'New Mail'
         to: 'No Mail'
         for: '00:00:30'
@@ -127,3 +127,37 @@
           {% elif is_state('sensor.collect_recycle_week', 'Today') %}
             Put recycle out for collection today
           {% endif %}
+
+  - alias: Printer3D Job Complete
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.octoprint_printing
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.octoprint_printing_error
+        state: 'off'
+      - condition: numeric_state
+        entity_id: sensor.master_bed_raw
+        below: 100
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "3D Printing Completed"
+          
+  - alias: Printer3D Job Failed
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.octoprint_printing_error
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: numeric_state
+        entity_id: sensor.master_bed_raw
+        below: 100
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "3D Printing Failed"
+          

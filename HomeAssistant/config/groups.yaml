@@ -2,13 +2,6 @@
 # GROUPS                                           #
 ####################################################
       
-  pool_clock_settings:
-    name: Pool Clock Settings
-    entities:
-      - input_text.pool_text_top
-      - input_text.pool_text_bottom
-      - input_number.pool_clock_scroll_speed
-      
   all_locks:
     name: Lock All
     entities:
