@@ -46,3 +46,6 @@
   
 ### Credits & 3D printing
 I 3D printed the lamacoids for the selector switches
+
+![alt text](images/ControlOutZoomed.jpg "Control Box Outside")
+![alt text](images/ControlInZoomed.jpg "Control Box Inside")
