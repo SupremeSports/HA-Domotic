@@ -22,7 +22,7 @@ Control to heatpump is pretty important as it must be derived when shocking the 
 
 Normally, a setup of 3x 2-way valves bypass is used, but with 3-way valves tied together, you can have only 2. The reason you wouldn't set a 2x 3-way valve controlled manually is that you don't want to block water flow risking damages to plumbing or pump.
 
-![alt text](images/Bypass.jpg "Normal bypass setup")
+![alt text](images/bypass.jpg "Normal bypass setup")
 
 I made an H splitter for it, both valves has to rotate 90° but in different direction. I put a set of sprocket with a chain (probably overkill size, but that's all my local shop had in hand). The chain has to be placed in a 8 shape as pictured here:
 
