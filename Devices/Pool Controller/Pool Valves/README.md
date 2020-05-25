@@ -8,11 +8,11 @@ I wanted a way to adjust water flow of my pool remotely, so I designed a valve c
 
 ![alt text](images/Servo.jpg "Servo Motor")
 
-*Step file is included for anyone who would like to replicate and/or adapt to his situation
-
 #### Design
 
 ![alt text](images/Rendering.jpg "Rendering")
+
+*Step file is included for anyone who would like to replicate and/or adapt to his situation
 
 #### Skimmer/Drain controller
 Main valve is to control source (suction) going to the pump, this one needs a 180° rotation. It goes from Full skimmer to 50/50 to full drain (never passing over pump inlet). This valve is directly drived by the servo.
@@ -22,11 +22,13 @@ Control to heatpump is pretty important as it must be derived when shocking the 
 
 Normally, a setup of 3x 2-way valves bypass is used, but with 3-way valves tied together, you can have only 2. The reason you wouldn't set a 2x 3-way valve controlled manually is that you don't want to block water flow risking damages to plumbing or pump.
 
-![alt text](images/bypass.jpg "Normal bypass setup")
+![alt text](images/bypass2.jpg "Normal bypass setup")
 
 I made an H splitter for it, both valves has to rotate 90° but in different direction. I put a set of sprocket with a chain (probably overkill size, but that's all my local shop had in hand). The chain has to be placed in a 8 shape as pictured here:
 
-![alt text](images/Chain.jpg "Chain installation")
+![alt text](images/Chain2.jpg "Chain installation")
+
+![alt text](images/InstalledChains.jpg "Chain instaleld")
 
 #### Slide control
 At first, this was supposed to control flow toward solar heater panels. After much consideration, calculations and logic, my location is not optimal for solar heater and would have cost so much for so few benefits. I decided to upgrade my heatpump instead. So, there's a bypass installed for the slide, but chain will be removed, servo adjusted for 180° and will have a spot to add an extra servo for whatever reason I may need in the future.
@@ -34,6 +36,7 @@ At first, this was supposed to control flow toward solar heater panels. After mu
 #### Features:
 - Control water circulation valves position with servos
 
+![alt text](images/InstalledServos.jpg "Servos instaleld")
 
 ### Home Assistant Link:
 - MQTT device with QoS and LWT
@@ -44,4 +47,4 @@ At first, this was supposed to control flow toward solar heater panels. After mu
 - Add buttons for easy selection instead of using my phone when hands full of water
   
 ### Credits & 3D printing
-I 3D printed the lamacoids for the selector switches
+None
