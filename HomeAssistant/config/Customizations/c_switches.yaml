@@ -50,6 +50,7 @@
         return 'var(--state-icon-color)';
         
   binary_sensor.poweroutlet_status:
+    state_color: true
     templates:
       icon_color: >
         if (state === 'on') return 'var(--state-icon-active-color)';

@@ -28,6 +28,7 @@
     - type: entities
       title: Sun
       show_header_toggle: false
+      state_color: true
       entities:
         - sensor.forecast
         - sun.sun
@@ -38,14 +39,18 @@
     - type: entities
       title: Wind
       show_header_toggle: false
+      state_color: true
       entities:
-        - sensor.wind_compass
+        - type: "custom:secondaryinfo-entity-row"
+          entity: sensor.wind_compass
+          secondary_info: "Wind Direction: [[ sensor.wind_direction_average ]]°"
         - sensor.wind_speed
-        - sensor.wind_gust
+        - sensor.wind_speed_gust
         
     - type: entities
       title: Rain
       show_header_toggle: false
+      state_color: true
       entities:
         - sensor.outdoor_rain_sensor
         - sensor.outdoor_rain_level
@@ -56,6 +61,7 @@
     - type: entities
       title: Weather
       show_header_toggle: false
+      state_color: true
       entities:
         - sensor.outdoor_temperature
         - sensor.outdoor_feelslike
@@ -65,6 +71,7 @@
     - type: entities
       title: Atmospheric
       show_header_toggle: false
+      state_color: true
       entities:
         - sensor.outdoor_humidity
         - sensor.outdoor_dewpoint
@@ -75,6 +82,7 @@
     - type: entities
       title: Messages
       show_header_toggle: false
+      state_color: true
       entities:
         - sensor.warnings
         - sensor.watches
@@ -85,6 +93,12 @@
     - type: entities
       title: Weather Control Box
       show_header_toggle: false
+      state_color: true
       entities:
-        - sensor.weather_control_box_temperature
-        - sensor.weather_control_box_humidity
+        - type: custom:fold-entity-row
+          head: sensor.weather_station_status
+          entities:
+            - sensor.weather_control_box_temperature
+            - sensor.weather_control_box_humidity
+            - sensor.weather_control_input_voltage
+            - sensor.weather_control_5v_voltage

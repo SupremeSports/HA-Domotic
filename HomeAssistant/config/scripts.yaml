@@ -54,11 +54,20 @@
   garagedoor:
     alias: Garage Door Script
     sequence:
-      - service: cover.open_cover
+      - service: cover.toggle
         data_template:
           entity_id: cover.{{ entity_id }}_opener
       - service: script.turn_on
         entity_id: script.clear_garagedoor
+        
+  # garagedoor_close:
+    # alias: Garage Door Close Script
+    # sequence:
+      # - service: cover.close_cover
+        # data_template:
+          # entity_id: cover.{{ entity_id }}_opener
+      # - service: script.turn_on
+        # entity_id: script.clear_garagedoor
 
   cars:
     alias: Cars Script

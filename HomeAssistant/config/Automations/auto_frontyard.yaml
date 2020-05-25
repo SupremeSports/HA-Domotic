@@ -43,13 +43,12 @@
         {% set time = now().hour %}
         {% set date = now().strftime("%m-%d") %}
         {% set sunset_hour = as_timestamp(states.sun.sun.attributes.next_setting)|int %}
-        {% set sunset_hour = sunset_hour - 60*60 %}
-        {% set sunset_early = (sunset_hour | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
+        {% set sunset_early = ((sunset_hour - 60*60) | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
         {% set PO = false %}
         {% if is_state('input_select.poweroutlet_mode', '24/7') %}
           {% set PO = true %}
         {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
-          {% if is_state('sun.sun', 'below_horizon') and time < 22 %}
+          {% if is_state('sun.sun', 'above_horizon') or (time > 12 and time < 22) %}
             {% set PO = true %}
           {% elif states.sensor.outdoor_temperature.state|float < 5.0 %}
             {% set PO = true %}

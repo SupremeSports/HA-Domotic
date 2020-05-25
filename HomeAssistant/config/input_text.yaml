@@ -4,13 +4,13 @@
   
   pool_text_top:
     name: Pool Text Display Top
-    pattern: '[a-fA-F0-9]*'
+    pattern: '^[a-zA-Z0-9]*$'
     min: 0
     max: 80
     mode: text
   pool_text_bottom:
     name: Pool Text Display Bottom
-    pattern: '[a-fA-F0-9]*'
+    pattern: '^[a-zA-Z0-9]*$'
     min: 0
     max: 80
     mode: text

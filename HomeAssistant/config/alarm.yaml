@@ -7,23 +7,24 @@
   - platform: manual
     name: House
     code: 1725
-    pending_time: 10
+    arming_time: 10
     delay_time: 20
     trigger_time: 4
     disarmed:
       trigger_time: 0
     armed_home:
-      pending_time: 0
+      arming_time: 0
       delay_time: 0
       
   - platform: manual
     name: Garage
     code: 1425
-    pending_time: 10
+    arming_time: 10
     delay_time: 20
     trigger_time: 4
     disarmed:
       trigger_time: 0
     armed_home:
-      pending_time: 0
+      arming_time: 0
       delay_time: 0
+

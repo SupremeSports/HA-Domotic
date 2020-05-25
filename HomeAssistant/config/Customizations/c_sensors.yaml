@@ -138,7 +138,7 @@
         return 'var(--state-icon-unavailable-color)';
         
   sensor.outdoor_temperature:
-    custom_ui_state_card: state-card-custom-ui
+    #custom_ui_state_card: state-card-custom-ui
     icon: mdi:thermometer 
     templates:
       icon_color: >
@@ -175,11 +175,6 @@
         if (state === 'Raining') return '#FFFF00';
         if (state === 'Pouring') return '#FFA500';
         return 'var(--state-icon-unavailable-color)';
-
-  # sensor.controlroom_heartbeat:
-    # icon: mdi:heart-pulse
-  # sensor.controlroom_box_humidity:
-    # icon: mdi:water-percent
 
   sensor.collect_trash_week:
     custom_ui_state_card: state-card-custom-ui
@@ -231,11 +226,11 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'var(--state-icon-color)';
         
-  sensor.nixie_clock:
-    friendly_name: "Nixie Clock"
+  sensor.pool_clock:
+    friendly_name: "Pool Clock"
     templates:
       icon_color: >
-        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'On') return 'var(--state-icon-active-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'var(--state-icon-color)';
 

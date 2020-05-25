@@ -2,11 +2,7 @@
 # RECORDER                                         #
 ####################################################
 
-#  db_url: !secret db_mysql
-#  purge_keep_days: 365
-#  db_url: mysql://homeassistant:test1234@core-mariadb/homeassistant?charset=utf8
-  purge_keep_days: 5
-  purge_interval: 1
+  #purge_interval: 0
   exclude:
     domains:
       - automation
@@ -40,10 +36,24 @@
       - sensor.time_date
   include:
     entities:
-      - device_tracker.life360_cindy
-      - device_tracker.life360_jean
+#Control Room
+      - sensor.water_valve_status
       - sensor.controlroom_box_humidity
       - sensor.controlroom_box_temperature
+
+#People
+      - device_tracker.life360_cindy
+      - sensor.iphone_de_cindy_battery_level
+      - sensor.iphone_de_cindy_battery_state
+      - device_tracker.life360_jean
+      - sensor.iphone_de_jean_battery_level
+      - sensor.iphone_de_jean_battery_state
+      
+#Computers
+      - binary_sensor.jgau_pc
+      - binary_sensor.cfor_pc
+
+#HA Server
       - sensor.server_cpu_used
       - sensor.server_cpu_temperature_temp
       - sensor.server_mb_temperature_temp
@@ -54,29 +64,28 @@
       - sensor.server_used_percent
       - sensor.network_throughput_in_eth0
       - sensor.network_throughput_out_eth0
-      - sensor.garage_cd_status
-      - sensor.garage_fd_status
-      - sensor.house_fd_status
-      - sensor.iphone_de_cindy_battery_level
-      - sensor.iphone_de_cindy_battery_state
-      - sensor.iphone_de_jean_battery_level
-      - sensor.iphone_de_jean_battery_state
-      - sensor.moon_phases
-      - sensor.outdoor_dewpoint
-      - sensor.outdoor_feelslike
-      - sensor.outdoor_heatindex
-      - sensor.outdoor_humidex
-      - sensor.outdoor_humidity
-      - sensor.outdoor_pressure
-      - sensor.outdoor_temperature
-      - sensor.outdoor_uv_sensor
-      - sensor.outdoor_windchill
-      - sensor.postal_battery
-      - sensor.postal_new
-      - sensor.postal_status
       - sensor.speedtest_download
       - sensor.speedtest_ping
       - sensor.speedtest_upload
+
+#House Status
+      - sensor.garage_cd_status
+      - sensor.garage_fd_status
+      - sensor.house_fd_status
+      - sensor.house_sd_status
+      - sensor.house_bd_status
+      - sensor.postal_battery
+      - sensor.postal_new
+      - sensor.postal_status
+      - sensor.master_bed_presence
+      - sensor.master_bed_raw
+      - switch.stepper_wall_clock
+      - binary_sensor.house_fd_bell
+      - binary_sensor.house_sd_bell
+      - binary_sensor.house_bd_bell
+      - binary_sensor.garage_fd_bell
+
+#Power Measurement
       - sensor.ted5000_mtu1_power
       - sensor.ted5000_mtu1_voltage
       - sensor.ted5000_mtu2_power
@@ -92,13 +101,33 @@
       - sensor.garage_monthly_energy
       - sensor.pool_daily_energy
       - sensor.pool_monthly_energy
+      
+#Weather Data
       - sensor.tendency
-      - sensor.water_valve_status
+      - sensor.moon_phases
+      - sensor.outdoor_dewpoint
+      - sensor.outdoor_feelslike
+      - sensor.outdoor_heatindex
+      - sensor.outdoor_humidex
+      - sensor.outdoor_humidity
+      - sensor.outdoor_pressure
+      - sensor.outdoor_temperature
+      - sensor.outdoor_uv_sensor
+      - sensor.outdoor_windchill
       - sensor.weather_control_box_humidity
       - sensor.weather_control_box_temperature
+      - sensor.weather_station_status
+      - sensor.outdoor_rain_level
+      - sensor.outdoor_rain_sensor
+      - input_boolean.outdoor_rain_trigger
       - sensor.wind_compass
       - sensor.wind_direction
+      - sensor.wind_direction_raw
       - sensor.wind_speed
+      - sensor.wind_speed_raw
+      - sensor.uv_index
+      
+#Coronavirus
       - sensor.worldwide_coronavirus_confirmed
       - sensor.worldwide_coronavirus_current
       - sensor.worldwide_coronavirus_deaths
@@ -107,16 +136,27 @@
       - sensor.canada_coronavirus_current
       - sensor.canada_coronavirus_deaths
       - sensor.canada_coronavirus_recovered
-      - sensor.master_bed_presence
-      - sensor.master_bed_raw
-      - switch.pool_filler_valve
-      - switch.stepper_wall_clock
+      
+#Front Yard
       - binary_sensor.lamppost_status
       - binary_sensor.poweroutlet_status
       - binary_sensor.garagefrontlight_status
       - binary_sensor.garagefrontpower_status
-      - binary_sensor.house_fd_bell
-      - binary_sensor.house_sd_bell
-      - binary_sensor.house_bd_bell
-      - binary_sensor.garage_fd_bell
+      
+#Pool Data
+      - binary_sensor.pool_level_high
+      - binary_sensor.pool_level_low
+      - binary_sensor.poolfiller_status
+      - binary_sensor.poolpump_status
+      - sensor.pool_clock
+      - sensor.pool_ph
+      - sensor.pool_pressure
+      - sensor.pool_temperature
+      - sensor.pool_heater_temp
+      - sensor.pool_pump_temp
+      - switch.pool_heat_pump
+      
+#Pond Data
+      - switch.pond_pump
+      - switch.pond_filler_valve
       
