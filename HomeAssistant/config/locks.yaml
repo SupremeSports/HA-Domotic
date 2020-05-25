@@ -70,3 +70,36 @@
     qos: 0
     json_attributes_topic: "Garage/Door/Front/Json"
     
+  - platform: mqtt
+    name: Shed FD Lock
+    state_topic: "Shed/Door/Front/Stts"
+    command_topic: "Shed/Door/Front/Cmd"
+    availability_topic: "Shed/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Shed/Door/Front/Json"
+    
+  - platform: mqtt
+    name: Pool FD Lock
+    state_topic: "Pool/Door/Front/Stts"
+    command_topic: "Pool/Door/Front/Cmd"
+    availability_topic: "Pool/Door/Front/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.locked }}'
+    payload_lock: '{"lock": "lock"}'
+    payload_unlock: '{"lock": "unlock"}'
+    state_locked: "locked"
+    state_unlocked: "unlocked"
+    retain: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Pool/Door/Front/Json"

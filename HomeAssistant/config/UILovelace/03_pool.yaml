@@ -10,27 +10,50 @@
   badges:
     - sensor.time
     - sensor.pool_temperature
+    - sensor.pool_heater_temp
+    - sensor.pool_pump_temp
     - sensor.pool_pressure
+    - sensor.pool_ph
     - binary_sensor.pool_level_low
     - binary_sensor.pool_level_high
   cards:
     - type: entities
       title: Pool pump and heater
       show_header_toggle: false
+      state_color: true
       entities:
-        # - switch.pool_pump
-        # - switch.pool_heat_pump
-        - input_select.poolpump_mode
-        - binary_sensor.poolpump_status
+        - type: custom:fold-entity-row
+          head: binary_sensor.poolpump_status
+          entities:
+          - switch.pool_pump
+          - input_select.poolpump_mode
+          - type: custom:fold-entity-row
+            head:
+              type: section
+              label: Automations
+            entities:
+              - automation.pool_pump_control
         - switch.pool_heat_pump
     
     - type: entities
       title: Pool Filling
       show_header_toggle: false
+      state_color: true
       entities:
-        - switch.pool_filler_valve
-        - binary_sensor.pool_level_low
-        - binary_sensor.pool_level_high
+        - type: custom:fold-entity-row
+          head: binary_sensor.poolfiller_status
+          entities:
+          - type: "custom:secondaryinfo-entity-row"
+            entity: switch.pool_filler_valve
+            secondary_info: "Time last 24h: [[ sensor.pool_filler_timer ]] hours"
+          - binary_sensor.pool_level_low
+          - binary_sensor.pool_level_high
+          - type: custom:fold-entity-row
+            head:
+              type: section
+              label: Automations
+            entities:
+              - automation.pool_filler_control
     
     - type: entities
       title: Pool Valves
@@ -38,19 +61,61 @@
       entities:
         - input_number.pool_drain_percent
         - input_number.pool_heatpump_percent
+        - input_number.pool_slide_percent
     
     - type: entities
       title: Pool Clock Display
       show_header_toggle: false
+      state_color: true
       entities:
-        - light.pool_clock
-        - input_text.pool_text_top
-        - input_text.pool_text_bottom
-        - input_number.pool_clock_scroll_speed
+        - type: custom:fold-entity-row
+          head: sensor.pool_clock
+          entities:
+          - light.pool_clock
+          - input_number.pool_clock_trans_speed
+          - input_text.pool_text_top
+          - input_text.pool_text_bottom
+          - input_number.pool_clock_scroll_speed
     
     - type: entities
       title: Pond
       show_header_toggle: false
+      state_color: true
       entities:
         - switch.pond_pump
+        
+    - type: entities
+      title: Garden
+      show_header_toggle: false
+      state_color: true
+      entities:
+        - switch.garden_watering
     
+    - type: entities
+      title: Pool Cabin Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_control_status
+          entities:
+            - sensor.pool_cabin_temperature
+            - sensor.pool_cabin_humidity
+            - sensor.pool_control_box_temperature
+            - sensor.pool_control_box_humidity
+            - sensor.pool_control_12v_voltage
+            - sensor.pool_control_5v_voltage
+            
+    - type: entities
+      title: Pool Power usage
+      show_header_toggle: false
+      state_color: true
+      entities: 
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu3_power
+          entities:
+            - sensor.ted5000_mtu3_power
+            - sensor.ted5000_mtu3_voltage
+            - sensor.pool_power_usage
+            - sensor.pool_daily_energy
+            - sensor.pool_monthly_energy
+            

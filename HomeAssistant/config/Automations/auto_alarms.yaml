@@ -1,0 +1,101 @@
+###################################################
+# AUTOMATIONS - ALARMS                            #
+###################################################
+  
+### HOUSE ###
+
+  - alias: Alarm House Armed
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_sd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_bd_opened
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: alarm_control_panel.house
+        state: 'armed_away'
+    action:
+      - service: alarm_control_panel.alarm_trigger
+        entity_id: alarm_control_panel.house
+          
+  - alias: Alarm House Armed Home
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_sd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_bd_opened
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: alarm_control_panel.house
+        state: 'armed_home'
+    action:
+      - service: alarm_control_panel.alarm_trigger
+        entity_id: alarm_control_panel.house
+          
+  - alias: Alarm House Armed Night
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_sd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.house_bd_opened
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: alarm_control_panel.house
+        state: 'armed_night'
+    action:
+      - service: alarm_control_panel.alarm_trigger
+        entity_id: alarm_control_panel.house
+
+  - alias: Alarm House Triggered
+    trigger:
+      - platform: state
+        entity_id: alarm_control_panel.house
+        to: 'triggered'
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "HOUSE ALARM! has been triggered"
+
+### GARAGE ###
+  
+  - alias: Alarm Garage Armed
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.garage_fd_opened
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.garage_cd_opened
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: alarm_control_panel.garage
+        state: 'armed_away'
+    action:
+      - service: alarm_control_panel.alarm_trigger
+        entity_id: alarm_control_panel.garage
+          
+  - alias: Alarm Garage Triggered
+    trigger:
+      - platform: state
+        entity_id: alarm_control_panel.garage
+        to: 'triggered'
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "GARAGE ALARM! has been triggered"
+          

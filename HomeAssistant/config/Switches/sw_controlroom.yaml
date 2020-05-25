@@ -2,6 +2,7 @@
 # SWITCHES - CONTROL ROOM                          #
 ####################################################
 
+  #Outdoor Relay
   - platform: mqtt
     name: Lamp Post
     state_topic: "Home/Control/Relay/Stts"
@@ -15,7 +16,8 @@
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    
+  
+  #Outdoor Relay
   - platform: mqtt
     name: Power Outlet
     state_topic: "Home/Control/Relay/Stts"

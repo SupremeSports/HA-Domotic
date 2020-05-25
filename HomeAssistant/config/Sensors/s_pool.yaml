@@ -1,0 +1,218 @@
+####################################################
+# SENSORS - POOL                                   #
+####################################################
+
+######### POOL CONTROL - BASIC DATA #########
+  - platform: mqtt
+    name: "Pool Control Status"
+    icon: mdi:pool
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    # value_template: >
+      # {% set status = value_json.state %}
+      # {% if status == "ON" %}
+        # Running...
+      # {% else %}
+        # ERROR
+      # {% endif %}
+    value_template: >
+      {% set status = value_json.wtemp|float %}
+      {% if status > 0 %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Pool/Control/Json"
+    
+  - platform: mqtt
+    name: "Pool Cabin Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.temp_out | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Cabin Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.hum_out | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Pool Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: template
+    sensors:
+      pool_control_5v_voltage:
+        entity_id:
+          - sensor.pool_control_status
+          - sensor.pool_temperature
+        unit_of_measurement: 'V'
+        friendly_name: "Pool Control 5V Voltage"
+        value_template: >
+          {{ state_attr('sensor.pool_control_status', '5Vcc')| float | round(1) }}
+        icon_template: >
+          mdi:flash-outline
+        availability_template: >
+          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
+          
+      pool_control_12v_voltage:
+        entity_id:
+          - sensor.pool_control_status
+          - sensor.pool_temperature
+        unit_of_measurement: 'V'
+        friendly_name: "Pool Control 12V Voltage"
+        value_template: >
+          {{ state_attr('sensor.pool_control_status', '12Vcc')| float | round(1) }}
+        icon_template: >
+          mdi:flash-outline
+        availability_template: >
+          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
+    
+######### POOL CONTROL - SENSORS #########
+  - platform: mqtt
+    name: "Pool Temperature"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    #json_attributes_topic: "Pool/Control/Json"
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.wtemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {{ TF | round(1) }}
+      
+  - platform: mqtt
+    name: "Pool Heater Temp"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.htemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {{ TF | round(1) }}
+      
+  - platform: mqtt
+    name: "Pool Pump Temp"
+    icon: mdi:oil-temperature
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: '°C'
+    value_template: >
+      {% set RT = value_json.ptemp|float %}
+      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
+      {% set TC =  ((TF-32.0)*5.0/9.0)|float %}
+      {{ TC | round(1) }}
+
+  - platform: mqtt
+    name: "Pool Pressure"
+    icon: mdi:gauge
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: 'psi'
+    value_template: >
+      {% set RP = value_json.wpsi|float %}
+      {% set min = 0.5|float %} 
+      {% set span = 4.0|float %}
+      {% set presmax = 60.0|float %}
+      
+      {% set ax = (presmax / span)|float %}
+      {% set b = (ax * min * -1.0)|float %}
+      {% set ax = ((ax * 5.0) / 1023.0)|float %}
+      
+      {% set PV = ((ax*RP)+b)|float %}
+      
+      {% if PV < 0 or PV > 35 %}
+        {{ "ERROR" }}
+      {% else %}
+        {{ PV | round(1) }}
+      {% endif %}
+          
+  - platform: mqtt
+    name: "Pool PH"
+    icon: mdi:gauge
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    unit_of_measurement: 'pH'
+    value_template: >
+      {% set PH = value_json.wph|float %}
+      {% set ax = 0.01369|float %}
+      {% set b = 0.000|float %}
+      
+      {% set PHO = ((ax*PH)+b)|float %}
+      
+      {% if PHO <= 3 or PHO >= 11 %}
+        {{ "ERROR" }}
+      {% else %}
+        {{ PHO | round(1) }}
+      {% endif %}
+
+  - platform: history_stats
+    name: Pool Filler Timer
+    entity_id: switch.pool_filler_valve
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+    
+  - platform: mqtt
+    name: "Pool Clock"
+    icon: mdi:clock
+    state_topic: "Pool/Clock/LED/Stts"
+    availability_topic: "Pool/Clock/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.state == "ON" %}
+        On
+      {% else %}
+        Off
+      {% endif %}
+    json_attributes_topic: "Pool/Control/Clock/Json"
+    

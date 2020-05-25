@@ -16,8 +16,8 @@
   - platform: mqtt
     name: "ControlRoom Box Humidity"
     icon: mdi:water-percent
-    state_topic: "Home/Control/Json"
     unit_of_measurement: '%'
+    state_topic: "Home/Control/Json"
     value_template: "{{ value_json.hum_in }}"
     availability_topic: "Home/Control/LWT"
     payload_available: "online"
@@ -27,8 +27,8 @@
     
   - platform: mqtt
     name: "Cold Storage Temperature"
-    state_topic: "Home/Control/Json"
     unit_of_measurement: '°C'
+    state_topic: "Home/Control/Json"
     value_template: "{{ value_json.temp_out }}"
     availability_topic: "Home/Control/LWT"
     payload_available: "online"
@@ -39,8 +39,8 @@
   - platform: mqtt
     name: "Cold Storage Humidity"
     icon: mdi:water-percent
-    state_topic: "Home/Control/Json"
     unit_of_measurement: '%'
+    state_topic: "Home/Control/Json"
     value_template: "{{ value_json.hum_out }}"
     availability_topic: "Home/Control/LWT"
     payload_available: "online"

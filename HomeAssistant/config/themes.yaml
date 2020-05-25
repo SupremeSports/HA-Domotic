@@ -15,6 +15,12 @@ sensor_off:
   primary-text-color: '#48485E'
   paper-item-icon-color: '#48485E'
 
+th_gauge_3: 
+  label-badge-blue: "#55ACEE"
+  label-badge-green: "#0DA035"
+  label-badge-yellow: "#F4B400"
+  label-badge-red: "#B82A27"
+
 Light - Navy Blue:
 ### Main Interface Colors ###
   primary-color: "#395274"

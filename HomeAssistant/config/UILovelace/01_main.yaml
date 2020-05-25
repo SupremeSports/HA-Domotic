@@ -24,12 +24,14 @@
     - type: entities
       title: "Party 18 ans de Cody"
       show_header_toggle: false
+      #state_color: true
       entities:
         - sensor.party_18_ans_cody
 
     - type: entities
       title: Front Lawn
       show_header_toggle: false
+      #color_state: true
       #state_color: true
       entities:
         - type: custom:fold-entity-row
@@ -282,7 +284,7 @@
             - entity: input_boolean.lock_all
               name: LOCK ALL DOORS
               state_icons:
-                "off": "mdi:lock-open"
+                "off": "mdi:lock"
                 "on": "mdi:lock"
               state_styles:
                 "off":
@@ -297,21 +299,19 @@
             - type: "custom:button-entity-row"
               buttons:
                 - entity: binary_sensor.house_fd_opened
+                  icon: "mdi:door"
                   state_icons:
                     "on": "mdi:door-open"
                     "off": "mdi:door"
                 - entity: binary_sensor.house_fd_bell
+                  icon: "mdi:bell"
                   state_icons:
                     "on": "mdi:bell-ring"
                     "off": "mdi:bell"
                 - entity: input_boolean.house_fd_lock
-                  state_icons:
-                    "on": "mdi:lock"
-                    "off": "mdi:lock"
+                  icon: "mdi:lock"
                 - entity: input_boolean.house_fd_unlock
-                  state_icons:
-                    "on": "mdi:lock-open"
-                    "off": "mdi:lock-open"
+                  icon: "mdi:lock-open-outline"
             - type: custom:fold-entity-row
               head:
                 type: section
@@ -334,78 +334,59 @@
             - type: "custom:button-entity-row"
               buttons:
                 - entity: binary_sensor.garage_fd_opened
+                  icon: "mdi:door"
                   state_icons:
                     "on": "mdi:door-open"
                     "off": "mdi:door"
                 - entity: binary_sensor.house_fd_bell
+                  icon: "mdi:bell"
                   state_icons:
                     "on": "mdi:bell-ring"
                     "off": "mdi:bell"
                 - entity: input_boolean.garage_fd_lock
-                  state_icons:
-                    "on": "mdi:lock"
-                    "off": "mdi:lock"
+                  icon: "mdi:lock"
                 - entity: input_boolean.garage_fd_unlock
-                  state_icons:
-                    "on": "mdi:lock-open"
-                    "off": "mdi:lock-open"
+                  icon: "mdi:lock-open-outline"
         - type: custom:fold-entity-row
           head: sensor.garage_cd_status
           entities:
             - type: "custom:button-entity-row"
               buttons:
                 - entity: binary_sensor.garage_cd_opened
+                  icon: "mdi:garage"
                   state_icons:
                     "on": "mdi:garage-open"
                     "off": "mdi:garage"
                 - entity: input_boolean.garage_cd_trigger
+                  icon: "mdi:arrow-up-down-bold-outline"
+        - type: custom:fold-entity-row
+          head: sensor.shed_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.shed_fd_opened
+                  icon: "mdi:door"
                   state_icons:
-                    "on": "mdi:arrow-up-down-bold-outline"
-                    "off": "mdi:arrow-up-down-bold-outline"
-                    
-    # - type: entities
-      # title: COVID-19 - Quarantine
-      # show_header_toggle: false
-      # entities:
-        # - sensor.jean
-        # - type: custom:fold-entity-row
-          # head: sensor.worldwide_coronavirus_current
-          # entities:
-            # - sensor.worldwide_coronavirus_confirmed
-            # - sensor.worldwide_coronavirus_deaths
-            # - sensor.worldwide_coronavirus_recovered
-        # - type: custom:fold-entity-row
-          # head: sensor.canada_coronavirus_current
-          # entities:
-            # - sensor.canada_coronavirus_confirmed
-            # - sensor.canada_coronavirus_deaths
-            # - sensor.canada_coronavirus_recovered
-            
-    # - type: history-graph
-      # title: COVID-19 - Worldwide
-      # hours_to_show: 80
-      # entities:
-        # - entity: sensor.worldwide_coronavirus_current
-          # name: Current
-        # - entity: sensor.worldwide_coronavirus_confirmed
-          # name: Confirmed
-        # - entity: sensor.worldwide_coronavirus_deaths
-          # name: Deaths
-        # - entity: sensor.worldwide_coronavirus_recovered
-          # name: Recovered
-
-    # - type: history-graph
-      # title: COVID-19 - Canada
-      # hours_to_show: 80
-      # entities:
-        # - entity: sensor.canada_coronavirus_current
-          # name: Current
-        # - entity: sensor.canada_coronavirus_confirmed
-          # name: Confirmed
-        # - entity: sensor.canada_coronavirus_deaths
-          # name: Deaths
-        # - entity: sensor.canada_coronavirus_recovered
-          # name: Recovered
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: input_boolean.shed_fd_lock
+                  icon: "mdi:lock"
+                - entity: input_boolean.shed_fd_unlock
+                  icon: "mdi:lock-open-outline"
+        - type: custom:fold-entity-row
+          head: sensor.pool_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.pool_fd_opened
+                  icon: "mdi:door"
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: input_boolean.pool_fd_lock
+                  icon: "mdi:lock"
+                - entity: input_boolean.pool_fd_unlock
+                  icon: "mdi:lock-open-outline"
           
     - type: glance
       show_icon: true

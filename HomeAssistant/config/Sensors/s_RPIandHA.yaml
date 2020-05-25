@@ -27,6 +27,39 @@
   - platform: uptime
     name: Time Online
     unit_of_measurement: hours
+
+#https://wiki.archlinux.org/index.php/APC_UPS
+#Do a "apcaccess status" without quotes and use what's available there...
+  - platform: apcupsd
+    resources:
+      - apc
+      - date
+      - hostname
+      - version
+      - upsname
+      - cable
+      - starttime
+      - model
+      - status
+      - linev
+      - loadpct
+      - bcharge
+      - timeleft
+      - mbattchg
+      - mintimel
+      - maxtime
+      - lotrans
+      - hitrans
+      - battv
+      - numxfers
+      - xonbatt
+      - tonbatt
+      - cumonbatt
+      - xoffbatt
+      - battdate
+      - nominv
+      - nombattv
+      - nompower
     
   - platform: filesize
     file_paths:

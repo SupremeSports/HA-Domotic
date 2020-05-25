@@ -1,0 +1,74 @@
+####################################################
+# SWITCHES - POOL                                  #
+####################################################
+
+  - platform: mqtt
+    name: Pool Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r8 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r8":"ON"}'
+    payload_off: '{"r8":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Heat Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r7 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r7":"ON"}'
+    payload_off: '{"r7":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Filler Valve
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Garden Watering
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r2 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r2":"ON"}'
+    payload_off: '{"r2":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pond Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r6 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r6":"ON"}'
+    payload_off: '{"r6":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    

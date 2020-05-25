@@ -13,6 +13,14 @@
     scan_interval: 5
     quote: CAD
     
+  # - platform: ebox
+    # username: !secret ebox_username
+    # password: !secret ebox_password
+    # monitored_variables:
+     # - download
+     # - upload
+     # - total
+    
   - platform: integration
     name: Main Power Usage
     source: sensor.ted5000_mtu1_power
@@ -116,6 +124,7 @@
   - platform: template
     sensors:
       nixie_clock:
+        friendly_name: Nixie Clock
         entity_id:
           - light.nixie_clock
           - sensor.nixie_clock_status

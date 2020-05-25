@@ -1,0 +1,30 @@
+##########################################
+# CUSTOMIZATIONS - GLOBAL                #
+##########################################
+
+  input_boolean.*:
+    state_color: true
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+        
+  binary_sensor.*:
+    state_color: true
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+        
+  switch.*:
+    state_color: true
+    templates:
+      icon_color: >
+        if (state === 'on') return '#FBCD41';
+        if (state === 'unavailable') return '#48485E';
+        return '#2F7EFD';
+    
+  sensor.*:
+    state_color: true

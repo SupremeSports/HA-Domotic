@@ -13,6 +13,8 @@
           input_boolean.house_sd_lock, input_boolean.house_sd_unlock, 
           input_boolean.house_bd_lock, input_boolean.house_bd_unlock, 
           input_boolean.garage_fd_lock, input_boolean.garage_fd_unlock,
+          input_boolean.shed_fd_lock, input_boolean.shed_fd_unlock,
+          input_boolean.pool_fd_lock, input_boolean.pool_fd_unlock,
           input_boolean.lock_all
         to: 'on'
     condition:

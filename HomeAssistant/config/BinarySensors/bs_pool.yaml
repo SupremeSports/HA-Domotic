@@ -1,0 +1,49 @@
+####################################################
+# BINARY SENSORS - POOL                            #
+####################################################
+
+  - platform: mqtt
+    name: Pool Level High
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.hilvl }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Level Low
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.lolvl }}'
+    qos: 0
+    
+  - platform: template
+    sensors:
+      poolpump_status:
+        friendly_name: "Pool Pump"
+        entity_id:
+          - switch.pool_pump
+          - input_select.poolpump_mode
+        value_template: >
+          {{ is_state("switch.pool_pump", "on") }}
+        availability_template: >
+          {{ not is_state('switch.pool_pump', 'unavailable') }}
+        #mdi:pump
+        icon_template: >
+          mdi:debug-step-over
+
+  - platform: template
+    sensors:
+      poolfiller_status:
+        friendly_name: "Pool Filler Valve"
+        entity_id:
+          - switch.pool_filler_valve
+        value_template: >
+          {{ is_state("switch.pool_filler_valve", "on") }}
+        availability_template: >
+          {{ not is_state('switch.pool_filler_valve', 'unavailable') }}
+        icon_template: >
+          mdi:debug-step-out

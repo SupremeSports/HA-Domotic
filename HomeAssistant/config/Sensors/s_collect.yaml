@@ -73,8 +73,8 @@
             {% set day = state_attr('sensor.dates', 'day')|int %}
             {% set enable = year_start >= year and year_end >= year %}
             
-            {% set start = month >= month_start or (month == month_start and day >= day_start) %}
-            {% set end = month <= month_end or (month == month_end and day <= day_end) %}
+            {% set start = month > month_start or (month == month_start and day >= day_start) %}
+            {% set end = month < month_end or (month == month_end and day <= day_end) %}
             
             {% if not enable %}
               disabled
@@ -197,8 +197,8 @@
             {% set day = state_attr('sensor.dates', 'day')|int %}
             {% set enable = year_start >= year and year_end >= year %}
             
-            {% set start = month >= month_start or (month == month_start and day >= day_start) %}
-            {% set end = month <= month_end or (month == month_end and day <= day_end) %}
+            {% set start = month > month_start or (month == month_start and day >= day_start) %}
+            {% set end = month < month_end or (month == month_end and day <= day_end) %}
             
             {% if not enable %}
               disabled
