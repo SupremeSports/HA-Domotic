@@ -33,11 +33,6 @@
   - Pool cabin door locked status
   - Power usage
 
-## Features for future:
-- ph Sensor installation
-- Remove pond control as it will have it's own controller
-- Pool lighting RGBW with neopixels
-
 ### Home Assistant Link:
 - MQTT device with QoS and LWT
 - Receives all data once per second
@@ -46,6 +41,8 @@
 #### Features for future:
 - Read chlorine and pH level 
   - Automatically control the levels
+- Remove pond control as it will have it's own controller
+- Pool lighting RGBW with neopixels
   
 ### Credits & 3D printing
 I 3D printed the lamacoids for the selector switches
