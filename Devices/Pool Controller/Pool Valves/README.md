@@ -47,4 +47,4 @@ At first, this was supposed to control flow toward solar heater panels. After mu
 - Add buttons for easy selection instead of using my phone when hands full of water
   
 ### Credits & 3D printing
-I 3D printed the lamacoids for the selector switches
+None
