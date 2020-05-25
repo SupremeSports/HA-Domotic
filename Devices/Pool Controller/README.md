@@ -48,4 +48,4 @@
 I 3D printed the lamacoids for the selector switches
 
 ![alt text](images/ControlOutZoomed.jpg "Control Box Outside")
-![alt text](images/ControlInZoomed.jpg "Control Box Inside")
+![alt text](images/ControlIn.jpg "Control Box Inside")
