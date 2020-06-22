@@ -121,7 +121,7 @@ void ICACHE_RAM_ATTR interruptReboot(void)
   {
     Sprintln("Rebooting...");
     flashBoardLed(1, 1000);
-    ESP.restart();  
+    ESP.restart();
   }
 }
 
