@@ -112,9 +112,11 @@ void mqttReceive(char* topic, char* message)
     processDoorJson(message);
 
     //flashBoardLed(100, 4);
+
+    updatePublish = true;
   }
   
-  updatePublish = true;
+  //updatePublish = true;
 }
 
 //Functions to run while trying to reconnect
