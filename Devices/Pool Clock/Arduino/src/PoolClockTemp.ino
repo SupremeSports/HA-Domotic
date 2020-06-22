@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
  Name:    Pool Clock - Neo7Segment
  Created: 2019/01/02
- Created: 2020/04/18
+ Created: 2020/06/21
  Author:  gauthier_j100@hotmail.com / SupremeSports
  GitHub:  https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Pool%20Clock
 */
@@ -77,8 +77,8 @@ unsigned long lwdTime             = 0;
   #define Sprintln(a) (Serial.println(a))
   #define Sprint(a) (Serial.print(a))
 #else
-  #define Sprintln(a)
-  #define Sprint(a)
+  #define Sprintln(a) (Serial.println(a))
+  #define Sprint(a) (Serial.print(a))
 #endif
 
 #ifndef ESP8266
@@ -104,6 +104,7 @@ long ledFlashDelay                = 0;              //Led flashing delay
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 #include <PubSubClient.h>
+#include <math.h>
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
