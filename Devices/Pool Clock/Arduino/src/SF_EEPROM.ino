@@ -57,7 +57,7 @@ void writeEEPROM()
   byte value_CCr = changeColor ? 1 : 0;
   byte value_Scr = map(configScrollSpeed, 0, 1000, 0, 255);
   byte value_Cyc = configCycleSpeed;
-  byte value_Opt = displayFeature;
+  byte value_Opt = displayFeature < 90 ? displayFeature : 0;
   byte value_Lum = brightness;
   byte value_Red = configRedCnl;
   byte value_Grn = configGreenCnl;
