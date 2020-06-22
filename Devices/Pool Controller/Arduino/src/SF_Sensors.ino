@@ -206,6 +206,8 @@ void flashEvery5sec()
   ledFlashDelay = millis();
 
   readSensors(true);
+  sendDigAnStates();
+  local_delay(10);
   sendSensors();
 }
 
