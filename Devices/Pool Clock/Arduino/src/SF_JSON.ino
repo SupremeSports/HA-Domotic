@@ -37,7 +37,7 @@ bool processCommandJson(char* message)
 
   if (root.containsKey(json_waterTemp))
   {
-    if (strcmp(root[json_waterTemp], json_unavailable) != 0 && strcmp(root[json_waterTemp], json_blank) != 0)
+    if (isValidNumber(root[json_waterTemp]))
       getWaterTemp(root[json_waterTemp]);
     else
       getWaterTemp(String(initValue));
@@ -45,7 +45,7 @@ bool processCommandJson(char* message)
   
   if (root.containsKey(json_waterPH))
   {
-    if (strcmp(root[json_waterPH], json_unavailable) != 0 && strcmp(root[json_waterPH], json_blank) != 0)
+    if (isValidNumber(root[json_waterPH]))
       getWaterPH(root[json_waterPH]);
     else
       getWaterPH(String(initValue));
@@ -53,7 +53,7 @@ bool processCommandJson(char* message)
   
   if (root.containsKey(json_outTemp))
   {
-    if (strcmp(root[json_outTemp], json_unavailable) != 0 && strcmp(root[json_outTemp], json_blank) != 0)
+    if (isValidNumber(root[json_outTemp]))
       getOutTemp(root[json_outTemp]);
     else
       getOutTemp(String(initValue));
@@ -61,7 +61,7 @@ bool processCommandJson(char* message)
   
   if (root.containsKey(json_outHum))
   {
-    if (strcmp(root[json_outHum], json_unavailable) != 0 && strcmp(root[json_outHum], json_blank) != 0)
+    if (isValidNumber(root[json_outHum]))
       getOutHum(root[json_outHum]);
     else
       getOutHum(String(initValue));
@@ -105,7 +105,6 @@ void sendCommandState()
 
   mqttClient.publish(mqtt_controlStts, buffer);//, true);
 }
-
 
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- PROCESS LED JSON -----------------------------------------
@@ -237,6 +236,7 @@ void sendLightColorsState()
 // ----------------------------------------------------------------------------------------------------
 void sendSensors()
 {
+  //return;
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
 
   JsonObject& root = jsonBuffer.createObject();
@@ -244,14 +244,19 @@ void sendSensors()
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
 
-  dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
-  root[json_rssi] = result;
-
-  dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
-  root[json_rssiPercent] = result;
+  root[json_state] = mqtt_cmdOn;
+  
+  #if defined(ESP32) || defined(ESP8266)
+    dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
+    root[json_rssi] = result;
+  
+    dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
+    root[json_rssiPercent] = result;
+  #endif
 
   char buffer[BUFFER_ARRAY_SIZE];
   root.printTo(buffer, root.measureLength() + 1);
 
   mqttClient.publish(mqtt_sensorJson, buffer);
+  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 }
