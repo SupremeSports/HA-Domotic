@@ -118,6 +118,31 @@ void sendRelayStates()
 }
 
 // ----------------------------------------------------------------------------------------------------
+// -------------------------------------- PROCESS JSON SENSORS ----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendDigAnStates()
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.createObject();
+
+  root[json_wtemp] = poolTempIn;
+  root[json_htemp] = poolTempOut;
+  root[json_ptemp] = poolPumpTemp;
+  
+  root[json_wpsi] = poolPress;
+  root[json_wph] = poolPH;
+
+  root[json_hilvl] = poolLvlHi ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_lolvl] = poolLvlLo ? mqtt_cmdOn : mqtt_cmdOff;
+
+  char buffer[BUFFER_ARRAY_SIZE];
+  root.printTo(buffer, root.measureLength() + 1);
+
+  mqttClient.publish(mqtt_sensorsStts, buffer);
+}
+
+// ----------------------------------------------------------------------------------------------------
 // ------------------------------------- PROCESS JSON DOOR/LOCK ---------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void processDoorJson(char* message)
@@ -155,7 +180,7 @@ void sendDoorStates()
 }
 
 // ----------------------------------------------------------------------------------------------------
-// ---------------------------------------- SEND JSON SENSORS -----------------------------------------
+// ----------------------------------------- SEND JSON STATUS -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void sendSensors()
 {
@@ -166,15 +191,7 @@ void sendSensors()
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
 
-  root[json_wtemp] = poolTempIn;
-  root[json_htemp] = poolTempOut;
-  root[json_ptemp] = poolPumpTemp;
-  
-  root[json_wpsi] = poolPress;
-  root[json_wph] = poolPH;
-
-  root[json_hilvl] = poolLvlHi ? mqtt_cmdOn : mqtt_cmdOff;
-  root[json_lolvl] = poolLvlLo ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_state] = mqtt_cmdOn;
   
   dtostrf(DHTTempIn, 4, 1, result); // Leave room for too large numbers!
   root[json_tempin] = result;
@@ -194,7 +211,7 @@ void sendSensors()
   dtostrf(voltage12V, 5, 1, result); // Leave room for too large numbers!
   root[json_12v] = result;
 
-  #ifdef ESP32 || ESP8266
+  #if defined(ESP32) || defined(ESP8266)
     dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
     root[json_rssi] = result;
   
