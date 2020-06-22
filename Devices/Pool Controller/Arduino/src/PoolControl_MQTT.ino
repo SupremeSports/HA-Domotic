@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
   Name:     Pool Control (MQTT)
   Created:  2020/04/19
-  Modified: 2020/05/21
+  Modified: 2020/06/01
   Author:   gauthier_j100@hotmail.com / SupremeSports
   GitHub:   https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Pool%20Controller
 */
@@ -45,7 +45,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 
 byte mac[]                        = {MC0,MC1,MC2,MC3,MC4,MC5};
 IPAddress ip(IP1, IP2, IP3, IP4);                 //Put the current device IP address here
-IPAddress gateway(GW1, GW2, GW3, GW4);            //Put your gateway IP address here
+IPAddress gateway(IP1, IP2, IP3, IP4);            //Put your gateway IP address here
 IPAddress subnet(SN1, SN2, SN3, SN4);             //Put your subnet mask here
 IPAddress dnsIp(IP1, IP2, IP3, IP4);              //Put your DNS Server here
 
@@ -151,14 +151,14 @@ const uint8_t ValveControl_ptr    = 0;  //12Vdc   - Pin 1
 //const uint8_t Unknown_ptr       = 5;  //12Vdc   - Pin 6
 //const uint8_t Unknown_ptr       = 6;  //12Vdc   - Pin 7
 //const uint8_t Unknown_ptr       = 7;  //12Vdc   - Pin 8
-const uint8_t PoolFiller_ptr      = 8;  //12Vdc   - Pin 1
-const uint8_t GardenWater_ptr     = 9;  //12Vdc   - Pin 2
+//const uint8_t PoolFiller_ptr    = 8;  //12Vdc   - Pin 1
+//const uint8_t GardenWater_ptr   = 9;  //12Vdc   - Pin 2
 const uint8_t DoorLock_ptr        = 10; //12Vdc   - Pin 3
 const uint8_t DoorUnlock_ptr      = 11; //12Vdc   - Pin 4
 //const uint8_t Unknown_ptr       = 12; //120Vac  - Pin 5
-const uint8_t PondPump_ptr        = 13; //120Vac  - Pin 6
-const uint8_t PoolHeat_ptr        = 14; //120Vac  - Pin 7
-const uint8_t PoolPump_ptr        = 15; //120Vac  - Pin 8
+//const uint8_t PondPump_ptr      = 13; //120Vac  - Pin 6
+//const uint8_t PoolHeat_ptr      = 14; //120Vac  - Pin 7
+//const uint8_t PoolPump_ptr      = 15; //120Vac  - Pin 8
 
 // -------------------------------------- ANALOG SENSORS DEFINES --------------------------------------
 /*
