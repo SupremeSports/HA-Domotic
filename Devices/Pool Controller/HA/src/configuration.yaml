@@ -422,19 +422,26 @@ automation:
       entity_id: switch.pool_filler_valve
       service_template: >
         {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed) %}
+        {% set lastStatus = is_state('binary_sensor.pool_level_high', 'off') %}
+        {% set lastSwitch = is_state('switch.pool_filler_valve', 'on') %}
+        {% set lastDay = states('sensor.pool_filler_timer')|float %}
         {% set PF = false %}
         
-        {% if lastLevel >= 120 %}
-          {% if is_state('binary_sensor.pool_level_high', 'off') %}
+        {% if lastSwitch %}
+          {% if lastStatus %}
             {% set PF = true %}
-          {% elif is_state('binary_sensor.pool_level_high', 'on') %}
-            {% set PF = false %}
+          {% elif lastLevel <= 300 %}
+            {% set PF = true %}
           {% endif %}
+        {% elif lastStatus and lastLevel >= 300 and lastDay <= 0.92 %}
+          {% set PF = true %}
         {% endif %}
         
-        {% if states.sensor.pool_filler_timer.state|float >= 1.0 %}
+        {% if lastDay >= 1.0 %}
           {% set PF = false %}
         {% elif is_state('input_select.poolpump_mode', 'Winter/Off') %}
+          {% set PF = false %}
+        {% elif is_state('binary_sensor.pool_level_high', 'unavailable') %}
           {% set PF = false %}
         {% endif %}
                 
@@ -483,7 +490,7 @@ automation:
         qos: 0
         retain: false
         
-customixe:
+customize:
   input_select.poolpump_mode:
     icon: mdi:power-plug-off
     templates:
