@@ -19,7 +19,7 @@ My door bell has never worked since I got in my home. So after over 5 years and 
 - Extra temp sensor to read the output temperature (NOT room temperature)
 - Special library for Fujitsu AC units has been used
     - Will need to be adapted to your own AC unit
-    - **Unless you have the EXACT same unit and expescially remote as I do, it WON'T work**
+    - **Unless you have the EXACT same unit and especially the same remote as I do, it WON'T work**
 
 #### Outcome ####
 Device works very great
