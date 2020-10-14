@@ -10,7 +10,6 @@ All devices are to be integrated into the HomeAssistant interface
 - AMD64 machine with Ubuntu Linux
 - Docker container for Home Assistant
 - 120Gb SSD running everything
-- Hass.io into a Docker
 
 ## Futur Upgrades ##
 - Better server or NUC (one day maybe...)
