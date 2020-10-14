@@ -20,19 +20,27 @@
     - type: custom:bignumber-card
       entity: sensor.dates
       scale: 25px
-      
-    - type: entities
-      title: "Party 18 ans de Cody"
-      show_header_toggle: false
-      #state_color: true
-      entities:
-        - sensor.party_18_ans_cody
+        
+    # - type: custom:button-card
+    #   color_type: card
+    #   entity: sensor.flashing_1s
+    #   name: Intruder Alert
+    #   state:
+    #     - value: "on"
+    #       color: red
+    #       icon: mdi:alert
+    #       styles:
+    #         card:
+    #           - animation: blink 2s ease infinite
+    #     - operator: default
+    #       color: green
+    #       icon: mdi:shield-check
 
     - type: entities
-      title: Front Lawn
+      title: Lighting & Decoration
       show_header_toggle: false
       #color_state: true
-      #state_color: true
+      ##state_color: true
       entities:
         - type: custom:fold-entity-row
           head: binary_sensor.lamppost_status
@@ -46,6 +54,7 @@
           head: binary_sensor.garagefrontlight_status
           entities:
             - input_select.garagefrontlight_mode
+            - sensor.garage_front_rssi
         - type: custom:fold-entity-row
           head: binary_sensor.garagefrontpower_status
           entities:
@@ -79,6 +88,7 @@
             - sensor.pool_power_usage
             - sensor.pool_daily_energy
             - sensor.pool_monthly_energy
+        - binary_sensor.power_peakperiod
 
     - type: entities
       title: Home Presences
@@ -97,13 +107,13 @@
                 - sensor.iphone_de_jean_connection_type
                 - sensor.iphone_de_jean_activity
                 - sensor.iphone_de_jean_ssid
-                - sensor.iphone_de_jean_sim
+                - sensor.iphone_de_jean_sim_1
             - type: custom:fold-entity-row
               head:
                 type: section
                 label: Device Position
               entities:
-                - sensor.iphone_de_jean_last_update
+                - sensor.iphone_de_jean_last_update_trigger
                 - sensor.iphone_de_jean_distance_home
                 - sensor.iphone_de_jean_geocoded_location
             - type: custom:fold-entity-row
@@ -144,13 +154,13 @@
                 - sensor.iphone_de_cindy_connection_type
                 - sensor.iphone_de_cindy_activity
                 - sensor.iphone_de_cindy_ssid
-                - sensor.iphone_de_cindy_sim
+                - sensor.iphone_de_cindy_sim_1
             - type: custom:fold-entity-row
               head:
                 type: section
                 label: Device Position
               entities:
-                - sensor.iphone_de_cindy_last_update
+                - sensor.iphone_de_cindy_last_update_trigger
                 - sensor.iphone_de_cindy_distance_home
                 - sensor.iphone_de_cindy_geocoded_location
             - type: custom:fold-entity-row
@@ -208,10 +218,12 @@
           entities:
             - type: "custom:secondaryinfo-entity-row"
               entity: switch.postal_status
-              secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
+              #secondary_info: "Battery: [[ sensor.postal_status.attributes.battery ]]%"
+              secondary_info: 'Battery: [[ if(sensor.postal_status == unavailable, "N/A", if(sensor.postal_status == unknown, "N/A", sensor.postal_status.attributes.battery)) ]]%'
             - type: "custom:secondaryinfo-entity-row"
               entity: switch.postal_status_activate_delay
-              secondary_info: "Time Left: [[ switch.postal_status.attributes.delay ]]"
+              #secondary_info: "Time Left: [[ switch.postal_status.attributes.delay ]]"
+              secondary_info: 'Time Left: [[ if(sensor.postal_status == unavailable, "N/A", if(sensor.postal_status == unknown, "N/A", switch.postal_status.attributes.delay)) ]]'
             - entity: sensor.last_postal_arrival
             - entity: sensor.last_postal_removal
             - type: custom:fold-entity-row
@@ -236,7 +248,7 @@
         #       - vacuum.roomba_irobot.battery_level
         
     - type: entities
-      title: Trash/Recycle
+      title: Trash/Recycle/Compost
       show_header_toggle: false
       entities:
         - type: custom:fold-entity-row
@@ -273,26 +285,28 @@
                 label: Automations
               entities:
                 - automation.publish_collect_notification
+        - type: custom:fold-entity-row
+          head: sensor.collect_compost_week
+          entities:
+            - input_select.collect_compost
+            - type: custom:fold-entity-row
+              head: sensor.collect_compost_summer_mode
+              entities:
+                - type: "custom:button-entity-row"
+                  buttons:
+                    - entity: input_datetime.collect_compost_start
+                    - entity: input_datetime.collect_compost_end
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.publish_collect_notification
 
     - type: entities
       title: Doors & Locks
       show_header_toggle: false
       entities:
-        - input_text.doorlock_passcode
-        - type: "custom:button-entity-row"
-          buttons:
-            - entity: input_boolean.lock_all
-              name: LOCK ALL DOORS
-              state_icons:
-                "off": "mdi:lock"
-                "on": "mdi:lock"
-              state_styles:
-                "off":
-                  color: "var(--state-icon-color)"
-                  font-weight: bold
-                "on":
-                  color: "var(--state-icon-active-color)"
-                  font-weight: bold
         - type: custom:fold-entity-row
           head: sensor.house_fd_status
           entities:
@@ -387,37 +401,100 @@
                   icon: "mdi:lock"
                 - entity: input_boolean.pool_fd_unlock
                   icon: "mdi:lock-open-outline"
+        - type: "custom:button-entity-row"
+          buttons:
+            - entity: input_boolean.lock_all
+              name: LOCK ALL DOORS
+              state_icons:
+                "off": "mdi:lock"
+                "on": "mdi:lock"
+              state_styles:
+                "off":
+                  color: "var(--state-icon-color)"
+                  font-weight: bold
+                "on":
+                  color: "var(--state-icon-active-color)"
+                  font-weight: bold
+        - input_text.doorlock_passcode
           
-    - type: glance
-      show_icon: true
-      show_name: true
-      show_state: true
-      title: COVID-19
-      columns: 4
+    # - type: glance
+      # show_icon: true
+      # show_name: true
+      # show_state: true
+      # title: COVID-19
+      # columns: 4
+      # entities:
+        # - entity: sensor.worldwide_coronavirus_confirmed
+          # icon: 'mdi:emoticon-neutral-outline'
+          # name: W - Confirmed
+        # - entity: sensor.worldwide_coronavirus_current
+          # icon: 'mdi:emoticon-frown-outline'
+          # name: W - Current
+        # - entity: sensor.worldwide_coronavirus_recovered
+          # icon: 'mdi:emoticon-happy-outline'
+          # name: W - Recovered
+        # - entity: sensor.worldwide_coronavirus_deaths
+          # icon: 'mdi:emoticon-dead-outline'
+          # name: W - Deaths
+        # - entity: sensor.canada_coronavirus_confirmed
+          # icon: 'mdi:emoticon-neutral-outline'
+          # name: C - Confirmed
+        # - entity: sensor.canada_coronavirus_current
+          # icon: 'mdi:emoticon-frown-outline'
+          # name: C - Current
+        # - entity: sensor.canada_coronavirus_recovered
+          # icon: 'mdi:emoticon-happy-outline'
+          # name: C - Recovered
+        # - entity: sensor.canada_coronavirus_deaths
+          # icon: 'mdi:emoticon-dead-outline'
+          # name: C - Deaths
+        # - entity: sensor.jean
+        
+    # - type: entities
+      # title: Quarantine
+      # show_header_toggle: false
+      # #state_color: true
+      # entities:
+        # - entity: sensor.jean
+        
+    - type: entities
+      title: Watering & Irrigation
+      show_header_toggle: false
+      #state_color: true
       entities:
-        - entity: sensor.worldwide_coronavirus_confirmed
-          icon: 'mdi:emoticon-neutral-outline'
-          name: W - Confirmed
-        - entity: sensor.worldwide_coronavirus_current
-          icon: 'mdi:emoticon-frown-outline'
-          name: W - Current
-        - entity: sensor.worldwide_coronavirus_recovered
-          icon: 'mdi:emoticon-happy-outline'
-          name: W - Recovered
-        - entity: sensor.worldwide_coronavirus_deaths
-          icon: 'mdi:emoticon-dead-outline'
-          name: W - Deaths
-        - entity: sensor.canada_coronavirus_confirmed
-          icon: 'mdi:emoticon-neutral-outline'
-          name: C - Confirmed
-        - entity: sensor.canada_coronavirus_current
-          icon: 'mdi:emoticon-frown-outline'
-          name: C - Current
-        - entity: sensor.canada_coronavirus_recovered
-          icon: 'mdi:emoticon-happy-outline'
-          name: C - Recovered
-        - entity: sensor.canada_coronavirus_deaths
-          icon: 'mdi:emoticon-dead-outline'
-          name: C - Deaths
-        - entity: sensor.jean
-          
+        - type: custom:fold-entity-row
+          head: binary_sensor.frontyardirrigation_status
+          entities:
+          - input_select.frontyardirrigation_mode
+          - input_datetime.frontyardirrigation_start
+          - input_datetime.frontyardirrigation_stop
+          - automation.frontyard_irrigation_control
+        - type: custom:fold-entity-row
+          head: binary_sensor.backyardirrigation_status
+          entities:
+          - input_select.backyardirrigation_mode
+          - input_datetime.backyardirrigation_start
+          - input_datetime.backyardirrigation_stop
+          - automation.backyard_irrigation_control
+        - type: custom:fold-entity-row
+          head: binary_sensor.gardenirrigation_status
+          entities:
+          - input_select.gardenirrigation_mode
+          - input_datetime.gardenirrigation_start
+          - input_datetime.gardenirrigation_stop
+          - input_select.gardenirrigationaux_mode
+          - input_datetime.gardenirrigationaux_start
+          - input_datetime.gardenirrigationaux_stop
+          #- automation.garden_irrigation_control
+          - type: "custom:button-entity-row"
+            buttons:
+              - entity: input_boolean.gardenirrigation_start30m
+                name: 30 min
+                icon: "mdi:play"
+              - entity: input_boolean.gardenirrigation_start1h
+                name: 1 hour
+                icon: "mdi:play"
+              - entity: input_boolean.gardenirrigation_cancel
+                name: Stop
+                icon: "mdi:stop"
+                

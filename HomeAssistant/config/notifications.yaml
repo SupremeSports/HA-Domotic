@@ -5,7 +5,9 @@
   - name: sms_test
     platform: smtp
     server: !secret notify_smtp
-    sender: !secret email_jean
+    sender: !secret notify_sender
+    username: !secret notify_sender
+    password: !secret notify_password
     recipient:
       - !secret sms_jean
       - !secret email_jean
@@ -14,7 +16,9 @@
   - name: sms_jean
     platform: smtp
     server: !secret notify_smtp
-    sender: !secret email_jean
+    sender: !secret notify_sender
+    username: !secret notify_sender
+    password: !secret notify_password
     recipient:
       - !secret sms_jean
     sender_name: My Home Assistant
@@ -22,7 +26,9 @@
   - name: sms_cindy
     platform: smtp
     server: !secret notify_smtp
-    sender: !secret email_jean
+    sender: !secret notify_sender
+    username: !secret notify_sender
+    password: !secret notify_password
     recipient:
       - !secret sms_cindy
     sender_name: My Home Assistant
@@ -30,7 +36,9 @@
   - name: SMS Notify All
     platform: smtp
     server: !secret notify_smtp
-    sender: !secret email_jean
+    sender: !secret notify_sender
+    username: !secret notify_sender
+    password: !secret notify_password
     recipient:
        - !secret sms_jean
        - !secret sms_cindy

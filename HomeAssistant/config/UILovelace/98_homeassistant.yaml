@@ -13,6 +13,8 @@
     - sensor.time_online
     - sensor.server_cpu_temperature_temp
     - sensor.server_used_percent
+    - binary_sensor.ha_update_available
+    - sensor.ha_installed_version
   cards:
     - type: entities
       title: Health Data
@@ -21,7 +23,21 @@
         - sensor.date_time
         - sensor.last_boot
         - sensor.time_online
+        - binary_sensor.ha_update_available
         - binary_sensor.remote_ui
+        - !include /config/UILovelaceCards/entities.yaml
+        
+    # - type: 'custom:monster-card'
+      # show_empty: true
+      # card:
+        # type: entities
+        # title: Air quality
+        # show_header_toggle: false
+      # filter:
+        # exclude:
+          # - state: unavailable
+        # include:
+          # - entity_id: "sensor.*status*"
         
     - type: entities
       title: Resources
@@ -45,6 +61,11 @@
             - sensor.server_total
             - sensor.server_thread
         - type: custom:fold-entity-row
+          head: sensor.server_cpu_used
+          entities:
+            - sensor.load_1m
+            - sensor.load_15m
+        - type: custom:fold-entity-row
           head: sensor.server_ram_used_percent
           entities:
             - sensor.server_ram_used
@@ -54,11 +75,6 @@
           entities:
             - sensor.server_swap_used
             - sensor.server_swap_free
-        - type: custom:fold-entity-row
-          head: sensor.server_cpu_used
-          entities:
-            - sensor.load_1m
-            - sensor.load_15m
         
     - type: entities
       title: Storage
@@ -129,8 +145,8 @@
             - sensor.ups_total_time_on_battery
             - sensor.ups_transfer_low
             - sensor.ups_transfer_high
-            - sensor.ups_transfer_to_battery
             - sensor.ups_transfer_from_battery
+            - sensor.ups_last_transfer
         - type: custom:fold-entity-row
           head: sensor.ups_model
           entities:

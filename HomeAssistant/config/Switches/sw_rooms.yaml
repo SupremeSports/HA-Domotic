@@ -2,6 +2,42 @@
 # SWITCHES - ROOMS                                 #
 ####################################################
 
+########## MASSAGE ROOM ##########
+
+  - platform: mqtt
+    name: "Massage Room Appliances"
+    state_topic: "Home/Massage/tele/STATE"
+    command_topic: "Home/Massage/cmnd/POWER"
+    availability_topic: "Home/Massage/tele/LWT"
+    value_template: "{{ value_json.POWER }}"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    retain: false
+
+########## THINKERING ROOM ##########
+    
+  - platform: mqtt
+    name: "Soldering Station"
+    state_topic: "Home/Soldering/tele/STATE"
+    command_topic: "Home/Soldering/cmnd/POWER"
+    availability_topic: "Home/Soldering/tele/LWT"
+    value_template: "{{ value_json.POWER }}"
+    qos: 1
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    retain: false
+    
+########## MASTER BEDROOM ##########
+
   - platform: mqtt
     name: "Master Bed Tare"
     icon: mdi:scale
@@ -14,4 +50,4 @@
     state_on: "ON"
     state_off: "OFF"
     payload_available: "online"
-    payload_not_available: "offline"
+    payload_not_available: "offline"    

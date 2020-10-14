@@ -1,0 +1,26 @@
+####################################################
+# THERMOSTATS                                      #
+####################################################
+
+  - platform: mqtt
+    name: "Living Room Temp"
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Home/Living/Therm/Json"
+    availability_topic: "Home/Living/Therm/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.room_temp }}"
+    json_attributes_topic: "Home/Living/Therm/Json"
+    
+  - platform: mqtt
+    name: "Living Room Hum"
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Home/Living/Therm/Json"
+    availability_topic: "Home/Living/Therm/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: "{{ value_json.room_hum }}"

@@ -13,9 +13,6 @@
   - platform: template
     sensors:
       lock_passcode_ok:
-        entity_id:
-          - sensor.refresh_1s
-          - input_text.doorlock_passcode
         friendly_name: "Lock Passcode OK"
         value_template: >
           {% set string = states('input_text.doorlock_passcode_list') %}
@@ -26,7 +23,7 @@
               {% set ok.found = True %}
             {% endif %}
           {% endfor %}
-          
+
           {% if ok.found == true %}
             on
           {% else %}
@@ -36,16 +33,12 @@
   - platform: template
     sensors:
       house_fd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.house_fd_lock
-          - binary_sensor.house_fd_opened
         friendly_name: "House Front Door"
         value_template: >
           {% set locked = is_state('lock.house_fd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.house_fd_opened', 'off') %}
           {% set unavailable = is_state('lock.house_fd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}
@@ -85,20 +78,17 @@
               NA
             {% endif %}
           battery:  "{{ state_attr('lock.house_fd_lock', 'battery') }}"
+          ssid: "{{ state_attr('lock.house_fd_lock', 'wifi_ssid') }}"
           rssi: "{{ state_attr('lock.house_fd_lock', 'wifi_rssi') }}"
           wifi_percent: "{{ state_attr('lock.house_fd_lock', 'wifi_percent') }}"
       
       house_sd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.house_sd_lock
-          - binary_sensor.house_sd_opened
         friendly_name: "House Side Door"
         value_template: >
           {% set locked = is_state('lock.house_sd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.house_sd_opened', 'off') %}
           {% set unavailable = is_state('lock.house_sd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}
@@ -138,20 +128,17 @@
               NA
             {% endif %}
           battery:  "{{ state_attr('lock.house_sd_lock', 'battery') }}"
+          ssid: "{{ state_attr('lock.house_sd_lock', 'wifi_ssid') }}"
           rssi: "{{ state_attr('lock.house_sd_lock', 'wifi_rssi') }}"
           wifi_percent: "{{ state_attr('lock.house_sd_lock', 'wifi_percent') }}"
       
       house_bd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.house_bd_lock
-          - binary_sensor.house_bd_opened
         friendly_name: "House Back Door"
         value_template: >
           {% set locked = is_state('lock.house_bd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.house_bd_opened', 'off') %}
           {% set unavailable = is_state('lock.house_bd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}
@@ -191,20 +178,17 @@
               NA
             {% endif %}
           battery:  "{{ state_attr('lock.house_bd_lock', 'battery') }}"
+          ssid: "{{ state_attr('lock.house_bd_lock', 'wifi_ssid') }}"
           rssi: "{{ state_attr('lock.house_bd_lock', 'wifi_rssi') }}"
           wifi_percent: "{{ state_attr('lock.house_bd_lock', 'wifi_percent') }}"
       
       garage_fd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.garage_fd_lock
-          - binary_sensor.garage_fd_opened
         friendly_name: "Garage Front Door"
         value_template: >
           {% set locked = is_state('lock.garage_fd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.garage_fd_opened', 'off') %}
           {% set unavailable = is_state('lock.garage_fd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}
@@ -244,20 +228,17 @@
               NA
             {% endif %}
           battery:  "{{ state_attr('lock.garage_fd_lock', 'battery') }}"
+          ssid: "{{ state_attr('lock.garage_fd_lock', 'wifi_ssid') }}"
           rssi: "{{ state_attr('lock.garage_fd_lock', 'wifi_rssi') }}"
           wifi_percent: "{{ state_attr('lock.garage_fd_lock', 'wifi_percent') }}"
       
       garage_cd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - sensor.garage_cd_raw
-          - sensor.garage_cd_status
         friendly_name: "Garage Car Door"
         value_template: >
           {% set fullOpen = is_state('sensor.garage_cd_raw', 'opened') %}
           {% set closed = is_state('sensor.garage_cd_raw', 'closed') %}
           {% set unavailable = is_state('cover.garage_cd_opener', 'unavailable') or is_state('sensor.garage_cd_raw', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed %}
@@ -288,20 +269,17 @@
             {% else %}
               50
             {% endif %}
+          ssid: "{{ state_attr('cover.garage_cd_opener', 'wifi_ssid') }}"
           rssi: "{{ state_attr('cover.garage_cd_opener', 'wifi_rssi') }}"
           wifi_percent: "{{ state_attr('cover.garage_cd_opener', 'wifi_percent') }}"
           
       shed_fd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.shed_fd_lock
-          - binary_sensor.shed_fd_opened
         friendly_name: "Shed Door"
         value_template: >
           {% set locked = is_state('lock.shed_fd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.shed_fd_opened', 'off') %}
           {% set unavailable = is_state('lock.shed_fd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}
@@ -334,16 +312,12 @@
             {% endif %}
             
       pool_fd_status:
-        entity_id:
-          - sensor.refresh_1s
-          - lock.pool_fd_lock
-          - binary_sensor.pool_fd_opened
         friendly_name: "Pool Cabin Door"
         value_template: >
           {% set locked = is_state('lock.pool_fd_lock', 'locked') %}
           {% set closed = is_state('binary_sensor.pool_fd_opened', 'off') %}
           {% set unavailable = is_state('lock.pool_fd_lock', 'unavailable') %}
-
+          
           {% if unavailable %}
             Unavailable
           {% elif closed and locked %}

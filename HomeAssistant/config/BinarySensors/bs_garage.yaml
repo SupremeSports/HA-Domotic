@@ -6,9 +6,6 @@
     sensors:
       garagefrontlight_status:
         friendly_name: Garage Front Light
-        entity_id: 
-          - switch.garage_front_light
-          - input_select.garagefrontlight_mode
         value_template: >
           {{ is_state('switch.garage_front_light', 'on') }}
         availability_template: >
@@ -19,14 +16,21 @@
           {% else %}
             mdi:lightbulb
           {% endif %}
+        attribute_templates:
+          ssid: "{{ state_attr('switch.garage_front_light', 'wifi_ssid') }}"
+          rssi: "{{ state_attr('switch.garage_front_light', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('switch.garage_front_light', 'wifi_percent') }}"
   
   - platform: template
     sensors:
       garagefrontpower_status:
         friendly_name: Garage Front Power
-        entity_id: 
-          - switch.garage_front_power
-          - input_select.garagefrontpower_mode
+        # friendly_name: >-
+        #   {% if is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') or is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+        #     {{ states.input_select.poweroutlet_mode.state }}
+        #   {% else %}
+        #     Power Outlet
+        #   {% endif %}
         value_template: >
           {{ is_state('switch.garage_front_power', 'on') }}
         availability_template: >
@@ -34,9 +38,24 @@
         icon_template: >
           {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
             mdi:power-plug
+          {% elif is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') %}
+            mdi:pumpkin
           {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
             mdi:pine-tree
           {% else %}
             mdi:power-plug-off
           {% endif %}
+        attribute_templates:
+          ssid: "{{ state_attr('switch.garage_front_power', 'wifi_ssid') }}"
+          rssi: "{{ state_attr('switch.garage_front_power', 'wifi_rssi') }}"
+          wifi_percent: "{{ state_attr('switch.garage_front_power', 'wifi_percent') }}"
           
+  - platform: mqtt
+    name: Garage Attic Light
+    state_topic: "Garage/Lights/Json"
+    availability_topic: "Home/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.attic_light }}'
+    qos: 0
+    json_attributes_topic : "Garage/Lights/Json"

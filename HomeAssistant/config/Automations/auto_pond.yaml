@@ -1,0 +1,146 @@
+###################################################
+# AUTOMATIONS - POND                              #
+###################################################
+
+  #Spring mode, runs pump all day, stop 4h, run 4h, stop 4h, run 12h
+  #Summer mode, runs pump based on day of week (runs longer on fridays/saturdays)
+  #Autumn mode, pump not running on peak hours
+  #If temperature below 5°C, run pump
+  #Pond water level has to be above low level since 2 minutes
+  - alias: Pond Pump Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.pondpump_mode
+    action:
+      entity_id: switch.pond_pump
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set curWeekday = now().weekday() %}
+        {% set PP = false %}
+        
+        {% if is_state('input_select.pondpump_mode', '24/7') %}
+          {% set PP = true %}
+        {% elif is_state('input_select.pondpump_mode', 'Spring') %}
+          {% if curHour >= 8 and curHour < 20 %}
+            {% set PP = true %}
+          {% elif curHour >= 0 and curHour < 4 %}
+            {% set PP = true %}
+          {% endif %}
+        {% elif is_state('input_select.pondpump_mode', 'Summer') %}
+          {% if curWeekday in (0,1,2,3,6) %}
+            {% if curHour >= 6 and curHour < 18 %}
+              {% set PP = true %}
+            {% elif curHour >= 22 or curHour < 2 %}
+              {% set PP = true %}
+            {% endif %}
+          {% else %}
+            {% if curHour >= 6 and curHour < 23 %}
+              {% set PP = true %}
+            {% elif curHour >= 1 or curHour < 4 %}
+              {% set PP = true %}
+            {% endif %}
+          {% endif %}
+        {% elif is_state('input_select.pondpump_mode', 'Autumn') %}
+          {% if curHour >= 2 and curHour < 6 %}
+            {% set PP = true %}
+          {% elif curHour >= 9 and curHour < 11 %}
+            {% set PP = true %}
+          {% elif curHour >= 14 and curHour < 16 %}
+            {% set PP = true %}
+          {% elif curHour >= 21 and curHour < 23 %}
+            {% set PP = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if not is_state('input_select.pondpump_mode', 'Winter/Off') and is_state('binary_sensor.antifreeze_active', 'on') %}
+          {% set PP = true %}
+        {% endif %}
+        
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pond_level_low.last_changed) %}
+        {% if is_state('binary_sensor.pond_level_low', 'off') and lastLevel >= 120 and false %}
+          {% set PP = false %}
+        {% endif %}
+        
+        {% if PP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  #Pond water level has to be below high level since 2 minutes
+  #Pond pump mode shall not be in Winter mode
+  #Filler valve can't operate more than 1h/day
+  - alias: Pond Filler Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: 'script.pondfiller_start30m'
+          state: 'off'
+        - condition: state
+          entity_id: 'script.pondfiller_start1h'
+          state: 'off'
+        - condition: state
+          entity_id: 'script.pondfiller_start2h'
+          state: 'off'
+    action:
+      entity_id: switch.pond_filler_valve
+      service_template: >
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pond_level_high.last_changed) %}
+        {% set lastStatus = is_state('binary_sensor.pond_level_high', 'off') %}
+        {% set lastSwitch = is_state('switch.pond_filler_valve', 'on') %}
+        {% set lastDay = states('sensor.pond_filler_timer')|float %}
+        {% set pondRunning = is_state('input_boolean.pond_running', 'on') %}
+        {% set PF = false %}
+        
+        {% if lastSwitch %}
+          {% if lastStatus %}
+            {% set PF = true %}
+          {% elif lastLevel <= 120 %}
+            {% set PF = true %}
+          {% endif %}
+        {% elif lastStatus and lastLevel >= 120 and lastDay <= 0.92 %}
+          {% set PF = true %}
+        {% endif %}
+        
+        {% if lastDay >= 1.0 %}
+          {% set PF = false %}
+        {% elif is_state('input_select.pondpump_mode', 'Winter/Off') %}
+          {% set PF = false %}
+        {% elif is_state('binary_sensor.pond_level_high', 'unavailable') %}
+          {% set PF = false %}
+        {% elif is_state('group.irrigation', 'on') %}
+          {% set PF = false %}
+        {% endif %}
+                
+        {% if PF == true and pondRunning %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  - alias: Pond Filler Force Start
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.pondfiller_start30m
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.pondfiller_start1h
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.pondfiller_start2h
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.pondfiller_cancel
+        to: 'on'
+    action:
+      - service_template: script.{% if '30m' in trigger.to_state.entity_id %}pondfiller_start30m{% elif '1h' in trigger.to_state.entity_id %}pondfiller_start1h{% elif '2h' in trigger.to_state.entity_id %}pondfiller_start2h{% else %}pondfiller_cancel{% endif %}
+      

@@ -9,3 +9,54 @@
   visible: true
   badges:
     - sensor.time
+
+  cards:
+    - type: entities
+      title: Doors & Locks
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.garage_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_fd_opened
+                  icon: "mdi:door"
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: binary_sensor.house_fd_bell
+                  icon: "mdi:bell"
+                  state_icons:
+                    "on": "mdi:bell-ring"
+                    "off": "mdi:bell"
+                - entity: input_boolean.garage_fd_lock
+                  icon: "mdi:lock"
+                - entity: input_boolean.garage_fd_unlock
+                  icon: "mdi:lock-open-outline"
+        - type: custom:fold-entity-row
+          head: sensor.garage_cd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_cd_opened
+                  icon: "mdi:garage"
+                  state_icons:
+                    "on": "mdi:garage-open"
+                    "off": "mdi:garage"
+                - entity: input_boolean.garage_cd_trigger
+                  icon: "mdi:arrow-up-down-bold-outline"
+    - type: entities
+      title: Lights
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontlight_status
+          entities:
+            - input_select.garagefrontlight_mode
+            - sensor.garage_front_rssi
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontpower_status
+          entities:
+            - input_select.garagefrontpower_mode
+        - binary_sensor.garage_attic_light
