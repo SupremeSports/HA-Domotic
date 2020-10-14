@@ -1,0 +1,33 @@
+####################################################
+# BINARY SENSORS - POND                            #
+####################################################
+
+  - platform: mqtt
+    name: Pond Level High
+    state_topic: "Home/Control/Sensors/Stts"
+    availability_topic: "Home/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.hilvl }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Pond Level Low
+    state_topic: "Home/Control/Sensors/Stts"
+    availability_topic: "Home/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.lolvl }}'
+    qos: 0
+
+  - platform: template
+    sensors:
+      pondfiller_status:
+        friendly_name: "Pond Filler Valve"
+        value_template: >
+          {{ is_state('switch.pond_filler_valve', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.pond_filler_valve', 'unavailable') and not is_state('input_boolean.pond_running', 'off') }}
+        icon_template: mdi:debug-step-out
+        
+    

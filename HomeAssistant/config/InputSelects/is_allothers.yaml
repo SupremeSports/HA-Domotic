@@ -1,26 +1,6 @@
 ####################################################
 # INPUT SELECT                                     #
 ####################################################
-
-  pool_clock_time_color:
-    name: Time Display Color
-    icon: mdi:clock
-    options:
-      - Red
-      - Green
-      - Blue
-      - Scroll
-    initial: Red
-
-  poolpump_mode:
-    name: Pool Pump Mode
-    icon: mdi:calendar-clock
-    options:
-      - Winter/Off
-      - Spring
-      - Summer
-      - Autumn
-      - 24/7
     
   poweroutlet_mode:
     name: Power Outlet Mode
@@ -38,8 +18,8 @@
     options:
       - Force Off
       - Sunset to 23h
+      - Sunset to Sunrise
       - 24/7
-      - COVID-19
     
   garagefrontlight_mode:
     name: Garage Front Light Mode
@@ -99,3 +79,68 @@
       - Yankee Doodle
       - Final Fantasy VII
       - Yoshi's Island
+      
+  doorchime_bf_sound:
+    name: Sound Selection
+    icon: mdi:music-note
+    options:
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+
+  frontyardirrigation_mode:
+    name: Frontyard Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  backyardirrigation_mode:
+    name: Backyard Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  gardenirrigation_mode:
+    name: Garden Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  gardenirrigationaux_mode:
+    name: Garden Irrigation Aux Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto

@@ -1,4 +1,5 @@
-const LitElement = Object.getPrototypeOf(customElements.get("hui-view"))
+//See https://developers.home-assistant.io/blog/2020/09/30/customViewChanges
+const LitElement = Object.getPrototypeOf(customElements.get("hui-masonry-view")); //TODO: This might break with any new version
 const html = LitElement.prototype.html
 const css = LitElement.prototype.css
 
@@ -41,7 +42,7 @@ class ButtonEntityRow extends LitElement {
       }
     `
   }
-  
+
   render() {
     return html`
       ${this.rows.map(row => {
@@ -193,7 +194,7 @@ class ButtonEntityRow extends LitElement {
   _getCurrentIconStyle(button, entityState) {
     const mergedStyle = {
       ...this._getObjectData(button.iconStyle || {}),
-      ...this._getObjectData((button.stateIconStyles && button.stateStyles[entityState.state]) || {})
+      ...this._getObjectData((button.stateIconStyles && button.stateIconStyles[entityState.state]) || {})
     }
 
     return Object.keys(mergedStyle)
@@ -228,11 +229,17 @@ class ButtonEntityRow extends LitElement {
     if (button.service) {
       const service = button.service.split(".")
       this.hass.callService(service[0], service[1], button.serviceData)
+      this._forwardHaptic("light")
     } else if (button.entityId) {
       this._showEntityMoreInfo(button.entityId)
     }
   }
 
+  _forwardHaptic(hapticType) {
+    const event = new Event("haptic", { bubbles: true, cancelable: false, composed: true })
+    event.detail = hapticType
+    this.dispatchEvent(event)
+  }
   _showEntityMoreInfo(entityId) {
     const event = new Event("hass-more-info", { bubbles: true, cancelable: false, composed: true })
     event.detail = { entityId }

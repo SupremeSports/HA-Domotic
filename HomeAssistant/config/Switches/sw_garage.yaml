@@ -4,25 +4,31 @@
 
   - platform: mqtt
     name: Garage Front Light
-    state_topic: "Garage/Light/Front/Stts"
-    command_topic: "Garage/Light/Front/Cmd"
-    availability_topic: "Garage/Light/Front/LWT"
-    payload_on: "ON"
-    payload_off: "OFF"
+    state_topic: "Garage/Lights/Relay/Stts"
+    command_topic: "Garage/Lights/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    availability_topic: "Garage/Lights/LWT"
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
     payload_available: "online"
     payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Garage/Lights/Json"
     
   - platform: mqtt
     name: Garage Front Power
-    state_topic: "Garage/Power/Front/Stts"
-    command_topic: "Garage/Power/Front/Cmd"
-    availability_topic: "Garage/Light/Front/LWT"
-    payload_on: "ON"
-    payload_off: "OFF"
+    state_topic: "Garage/Lights/Relay/Stts"
+    command_topic: "Garage/Lights/Relay/Cmd"
+    value_template: '{{ value_json.r2 }}'
+    availability_topic: "Garage/Lights/LWT"
+    payload_on: '{"r2":"ON"}'
+    payload_off: '{"r2":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
     payload_available: "online"
     payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Garage/Lights/Json"
     

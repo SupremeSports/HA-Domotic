@@ -2,10 +2,18 @@
 # COUNTERS                                         #
 ####################################################
 
-  heartbeat_counter:
-    name: Heartbeat Counter
+  second_counter:
+    name: Second Counter
     restore: true
-    minimum: 1
-    maximum: 9999
-    initial: 1
+    minimum: 0
+    maximum: 59
+    initial: 0
+    step: 1
+    
+  minute_counter:
+    name: Minute Counter
+    restore: true
+    minimum: 0
+    maximum: 59
+    initial: 0
     step: 1

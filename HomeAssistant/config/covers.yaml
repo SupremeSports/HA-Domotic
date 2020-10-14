@@ -24,7 +24,6 @@
     covers:
       master_bedroom_rgbw:
         friendly_name: "Master Bedroom RGBW Speed"
-        entity_id: cover.master_bedroom_rgbw
         position_template: "{{ 50 }}"
         open_cover:
           service: script.milightspeed
@@ -39,7 +38,6 @@
             
       under_bar_rgbw:
         friendly_name: "Under Bar RGBW Speed"
-        entity_id: cover.under_bar_rgbw
         position_template: "{{ 50 }}"
         open_cover:
           service: script.milightspeed

@@ -1,0 +1,13 @@
+####################################################
+# INPUT SELECT - POND                              #
+####################################################
+
+  pondpump_mode:
+    name: Pond Pump Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Spring
+      - Summer
+      - Autumn
+      - 24/7

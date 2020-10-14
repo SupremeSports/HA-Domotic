@@ -1,0 +1,6 @@
+{
+  "domain": "hydroquebec",
+  "name": "Hydro Quebec",
+  "documentation": "https://home-assistant-china.github.io/components/sensor.hydroquebec/",
+  "codeowners": []
+}

@@ -11,16 +11,9 @@
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    # value_template: >
-      # {% set status = value_json.state %}
-      # {% if status == "ON" %}
-        # Running...
-      # {% else %}
-        # ERROR
-      # {% endif %}
     value_template: >
-      {% set status = value_json.wtemp|float %}
-      {% if status > 0 %}
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
         Running...
       {% else %}
         ERROR
@@ -47,7 +40,7 @@
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    
+
   - platform: mqtt
     name: "Pool Control Box Temperature"
     unit_of_measurement: '°C'
@@ -68,55 +61,149 @@
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    
-  - platform: template
-    sensors:
-      pool_control_5v_voltage:
-        entity_id:
-          - sensor.pool_control_status
-          - sensor.pool_temperature
-        unit_of_measurement: 'V'
-        friendly_name: "Pool Control 5V Voltage"
-        value_template: >
-          {{ state_attr('sensor.pool_control_status', '5Vcc')| float | round(1) }}
-        icon_template: >
-          mdi:flash-outline
-        availability_template: >
-          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
           
-      pool_control_12v_voltage:
-        entity_id:
-          - sensor.pool_control_status
-          - sensor.pool_temperature
-        unit_of_measurement: 'V'
-        friendly_name: "Pool Control 12V Voltage"
-        value_template: >
-          {{ state_attr('sensor.pool_control_status', '12Vcc')| float | round(1) }}
-        icon_template: >
-          mdi:flash-outline
-        availability_template: >
-          {{ not is_state('sensor.pool_control_status', 'unavailable') }}
-    
-######### POOL CONTROL - SENSORS #########
   - platform: mqtt
-    name: "Pool Temperature"
-    icon: mdi:oil-temperature
+    name: "Pool Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
     state_topic: "Pool/Control/Json"
     availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
-    #json_attributes_topic: "Pool/Control/Json"
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - platform: mqtt
+    name: "Pool Control 12V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pool/Control/Json"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+          
+  - platform: template
+    sensors:
+      poolpump_status:
+        friendly_name: "Pool Pump"
+        value_template: >
+          {% if is_state('switch.pool_pump', 'on') %}
+            {% if is_state('binary_sensor.antifreeze_active', 'on') %}
+              Run Low Temp
+            {% else %}
+              On
+            {% endif %}
+          {% elif is_state('switch.pool_pump', 'off') %}
+            {% if is_state('binary_sensor.pool_level_low', 'off')%}
+              Low Level
+            {% else %}
+              Off
+            {% endif %}
+          {% else %}
+            unknown
+          {% endif %}
+        availability_template: >
+          {{ not is_state('switch.pool_pump', 'unavailable') }}
+        icon_template: >
+          mdi:pump
+          
+      pool_heater_status:
+        friendly_name_template: >
+          {% if is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+            {% set differential = states('sensor.pool_heater_temp')|float - states('sensor.pool_temperature') | float %}
+            {% if differential < 0.0 %}
+              {% set differential = 0.0 %}
+            {% endif %}
+            Pool Heater Status: +{{ differential|round(1) }}°C
+          {% else %}
+            Pool Heater Status
+          {% endif %}
+        value_template: >
+          {% if is_state('switch.pool_heater', 'off') %}
+            Off
+          {% elif is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+            Heating
+          {% else %}
+            Ready
+          {% endif %}
+        availability_template: >
+          {{ not is_state('switch.pool_heater', 'unavailable') }}
+        icon_template: >
+          {% if is_state('switch.pool_heater', 'off') %}
+            mdi:radiator-off
+          {% elif is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+            mdi:radiator
+          {% else %}
+            mdi:radiator-disabled
+          {% endif %}
+        attribute_templates:
+          water_in: "{{ states('sensor.pool_temperature') }}"
+          water_out: "{{ states('sensor.pool_heater_temp') }}"
+          heating: "{{ is_state('binary_sensor.pool_heater_run', 'on') }}"
+    
+######### POOL CONTROL - SENSORS #########
+  - platform: mqtt
+    name: "Pool Temperature Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability_topic: "Pool/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
     unit_of_measurement: '° F'
     value_template: >
       {% set RT = value_json.wtemp|float %}
-      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
-      {{ TF | round(1) }}
+      {% set TF = ((0.16014*RT)-5.69819)+2.0|float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 50.0 | round(1) }}
+      {% else %}
+        {{ TF | round(1) }}
+      {% endif %}
+      
+  - platform: statistics
+    name: "Pool Temperature Stats"
+    entity_id: sensor.pool_temperature_raw
+    max_age:
+      minutes: 10
+    precision: 1
+    
+  - platform: template
+    sensors:
+      pool_temperature:
+        friendly_name: "Pool Temperature"
+        unit_of_measurement: '° F'
+        value_template: >
+          {{ states('sensor.pool_temperature_stats') }}
+        availability_template: >
+          {{ not is_state('sensor.pool_temperature_raw', 'unavailable') }}
+        icon_template: mdi:thermometer
+        attribute_templates:
+          temp_raw: "{{ states('sensor.pool_temperature_raw') }}"
+          temp_mean: "{{ state_attr('sensor.pool_temperature_stats', 'mean') }}"
+          temp_min: "{{ state_attr('sensor.pool_temperature_stats', 'min_value') }}"
+          temp_max: "{{ state_attr('sensor.pool_temperature_stats', 'max_value') }}"
       
   - platform: mqtt
-    name: "Pool Heater Temp"
-    icon: mdi:oil-temperature
-    state_topic: "Pool/Control/Json"
+    name: "Pool Heater Temp Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
     availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
@@ -124,13 +211,41 @@
     unit_of_measurement: '° F'
     value_template: >
       {% set RT = value_json.htemp|float %}
-      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
-      {{ TF | round(1) }}
+      {% set TF = ((0.16014*RT)-5.69819)+2.0|float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 50.0 | round(1) }}
+      {% else %}
+        {{ TF | round(1) }}
+      {% endif %}
+      
+  - platform: statistics
+    name: "Pool Heater Temp Stats"
+    entity_id: sensor.pool_heater_temp_raw
+    max_age:
+      minutes: 10
+    precision: 1
+    
+  - platform: template
+    sensors:
+      pool_heater_temp:
+        friendly_name: "Pool Heater Temp"
+        unit_of_measurement: '° F'
+        value_template: >
+          {{ states('sensor.pool_heater_temp_stats') }}
+        availability_template: >
+          {{ not is_state('sensor.pool_heater_temp_raw', 'unavailable') }}
+        icon_template: mdi:thermometer
+        attribute_templates:
+          temp_raw: "{{ states('sensor.pool_heater_temp_raw') }}"
+          temp_mean: "{{ state_attr('sensor.pool_heater_temp_stats', 'mean') }}"
+          temp_min: "{{ state_attr('sensor.pool_heater_temp_stats', 'min_value') }}"
+          temp_max: "{{ state_attr('sensor.pool_heater_temp_stats', 'max_value') }}"
       
   - platform: mqtt
-    name: "Pool Pump Temp"
-    icon: mdi:oil-temperature
-    state_topic: "Pool/Control/Json"
+    name: "Pool Pump Temp Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
     availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
@@ -138,41 +253,84 @@
     unit_of_measurement: '°C'
     value_template: >
       {% set RT = value_json.ptemp|float %}
-      {% set TF = ((0.1715*RT)-8.6401)-2.0|float %}
-      {% set TC =  ((TF-32.0)*5.0/9.0)|float %}
+      {% set TC = ((0.08897*RT)-20.94344)+3.6|float %}
       {{ TC | round(1) }}
+      
+  - platform: statistics
+    name: "Pool Pump Temp Stats"
+    entity_id: sensor.pool_pump_temp_raw
+    max_age:
+      minutes: 10
+    precision: 1
+    
+  - platform: template
+    sensors:
+      pool_pump_temp:
+        friendly_name: "Pool Pump Temp"
+        unit_of_measurement: '°C'
+        value_template: >
+          {{ states('sensor.pool_pump_temp_stats') }}
+        availability_template: >
+          {{ not is_state('sensor.pool_pump_temp_raw', 'unavailable') }}
+        icon_template: mdi:thermometer
+        attribute_templates:
+          temp_raw: "{{ states('sensor.pool_pump_temp_raw') }}"
+          temp_mean: "{{ state_attr('sensor.pool_pump_temp_stats', 'mean') }}"
+          temp_min: "{{ state_attr('sensor.pool_pump_temp_stats', 'min_value') }}"
+          temp_max: "{{ state_attr('sensor.pool_pump_temp_stats', 'max_value') }}"
 
   - platform: mqtt
-    name: "Pool Pressure"
+    name: "Pool Pressure Raw"
     icon: mdi:gauge
-    state_topic: "Pool/Control/Json"
+    state_topic: "Pool/Control/Sensors/Stts"
     availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     unit_of_measurement: 'psi'
     value_template: >
-      {% set RP = value_json.wpsi|float %}
-      {% set min = 0.5|float %} 
-      {% set span = 4.0|float %}
-      {% set presmax = 60.0|float %}
+      {{ value_json.wpsi|int }}
       
-      {% set ax = (presmax / span)|float %}
-      {% set b = (ax * min * -1.0)|float %}
-      {% set ax = ((ax * 5.0) / 1023.0)|float %}
-      
-      {% set PV = ((ax*RP)+b)|float %}
-      
-      {% if PV < 0 or PV > 35 %}
-        {{ "ERROR" }}
-      {% else %}
-        {{ PV | round(1) }}
-      {% endif %}
+  - platform: template
+    sensors:
+      pool_pressure:
+        friendly_name: "Pool Pressure"
+        unit_of_measurement: 'psi'
+        value_template: >
+          {% set RP = states('sensor.pool_pressure_raw')|float %}
+          {% set min = 0.5|float %} 
+          {% set span = 4.0|float %}
+          {% set presmax = 70.0|float %}
+          
+          {% if RP < 104 and RP > 30 %}
+            {% set RP = 104.0 %}
+          {% endif %}
+          
+          {% set ax = (presmax / span)|float %}
+          {% set b = (ax * min * -1.0)|float %}
+          {% set ax = ((ax * 5.0) / 1023.0)|float %}
+          
+          {% set PV = ((ax*RP)+b)|float %}
+          
+          {% if PV < -0.2 or PV > 50.0 %}
+            {{ "unknown" }}
+          {% elif PV < 1.0 %}
+            {{ 0.0 | round(1) }}
+          {% elif is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+            {{ 0.0 | round(1) }}
+          {% else %}
+            {{ PV | round(1, "half") }}
+          {% endif %}
+        availability_template: >
+          {{ not is_state('sensor.pool_pressure_raw', 'unavailable') }}
+        icon_template: mdi:thermometer
+        attribute_templates:
+          pres_raw: "{{ states('sensor.pool_pressure_raw') }}"
           
   - platform: mqtt
     name: "Pool PH"
-    icon: mdi:gauge
-    state_topic: "Pool/Control/Json"
+    icon: mdi:flask
+    state_topic: "Pool/Control/Sensors/Stts"
     availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
@@ -185,15 +343,17 @@
       
       {% set PHO = ((ax*PH)+b)|float %}
       
-      {% if PHO <= 3 or PHO >= 11 %}
-        {{ "ERROR" }}
+      {% set PHO = 0.0|float %}
+      
+      {% if PHO <= 4.0 or PHO >= 9.0 %}
+        {{ "unknown" }}
       {% else %}
         {{ PHO | round(1) }}
       {% endif %}
 
   - platform: history_stats
     name: Pool Filler Timer
-    entity_id: switch.pool_filler_valve
+    entity_id: binary_sensor.poolfiller_status
     state: 'on'
     type: time
     end: '{{ now() }}'
@@ -201,18 +361,22 @@
       hours: 24
     
   - platform: mqtt
-    name: "Pool Clock"
+    name: "Pool Clock Status"
     icon: mdi:clock
-    state_topic: "Pool/Clock/LED/Stts"
+    state_topic: "Pool/Clock/Json"
     availability_topic: "Pool/Clock/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
     value_template: >
-      {% if value_json.state == "ON" %}
+      {% set status = value_json.state %}
+      
+      {% if is_state('light.pool_clock', 'on') %}
         On
+      {% elif status == "ON" %}
+        Running...
       {% else %}
-        Off
+        ERROR
       {% endif %}
-    json_attributes_topic: "Pool/Control/Clock/Json"
+    json_attributes_topic: "Pool/Clock/Json"
     

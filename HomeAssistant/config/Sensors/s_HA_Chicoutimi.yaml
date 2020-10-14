@@ -1,0 +1,114 @@
+####################################################
+# SENSORS - HA Chicoutimi                          #
+####################################################
+
+  - platform: rest
+    name: Chicoutimi Update Available
+    resource: http://blackmagics.duckdns.org:8123/api/states/binary_sensor.ha_update_available
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - major_update
+      - current
+      - latest
+      - icon
+      
+  - platform: rest
+    name: Chicoutimi UUN Entities
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.uun_ordered
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - all_count
+      - none_count
+      - unavailable_count
+      - unknown_count
+      - sensors_count
+      - unfiltered_count
+      
+#   - platform: rest
+#     name: Chicoutimi Last Boot
+#     resource: http://blackmagics.duckdns.org:8123/api/states/sensor.last_boot
+#     method: GET
+#     headers: 
+#       Authorization: !secret ha_chicoutimi_token
+#       content-type: "application/json"
+#     device_class: timestamp
+#     value_template: >
+#       {% set status = value_json.state %}
+#       {% set time = (as_timestamp(now()) - as_timestamp(status)) | int  %}
+#       {% set minutes = ((time % 3600) // 60) %}
+#       {% set hours = ((time % 86400) // 3600) %}
+#       {% set days = (time // 86400) %}
+
+#       {% if time < 60 %}
+#         Less than 1 minute
+#       {% elif time < 3660 %}
+#         {{ minutes }} minutes ago
+#       {% elif time < 86400 %}
+#         {{ hours }} hours ago
+#       {% else %}
+#         {{ days }} days ago
+#       {% endif %}
+#     json_attributes:
+#       - state
+
+  - platform: rest
+    name: Chicoutimi Last Boot
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.last_boot
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - latest
+    device_class: timestamp
+    unit_of_measurement: ""
+      
+  - platform: rest
+    name: Chicoutimi Time Online
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.time_online
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+    unit_of_measurement: hours
+    
+  - platform: rest
+    name: Chicoutimi home_assistant_v2_db
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.home_assistant_v2_db
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - path
+      - last_updated
+      - bytes
+      - icon
+    unit_of_measurement: MB
+
+      
+# to test GET
+# curl -X GET -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlMzAxZDMyOTVmNmM0NzEyOGEzYTU5OGFhZGE0ODM0YSIsImlhdCI6MTYwMDQ3ODA2NSwiZXhwIjoxOTE1ODM4MDY1fQ.1VU-K_fwQk_A7mFOzkXqJpPVVnfL8y2twjiJR9-RWUA" \
+#     -H "Content-Type: application/json" \
+#     http://blackmagics.duckdns.org:8123/api/states/sensor.uun_ordered
+    
+# https://community.home-assistant.io/t/json-attribute/62564/2
+# https://www.home-assistant.io/integrations/http/

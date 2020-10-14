@@ -16,9 +16,6 @@
     sensors:
       dates:
         friendly_name: 'Dates'
-        entity_id: 
-          - sensor.refresh_1m
-          - sensor.dates
         value_template: >
           {{ state_attr('sensor.dates', 'full_en') }}
         attribute_templates:
@@ -82,7 +79,6 @@
             {{ state_attr('sensor.dates', 'weekdayname_fr')|string + ', ' + state_attr('sensor.dates', 'long_fr')|string }}
       times:
         friendly_name: 'Times'
-        entity_id: counter.heartbeat_counter
         value_template: >
           {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' +now().strftime("%S")|string }}
         attribute_templates:
@@ -93,45 +89,39 @@
           second: >
             {{ now().strftime("%S")|int }}
           long: >
-            {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' +now().strftime("%S")|string }}
+            {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' + now().strftime("%S")|string }}
           short: >
             {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string }}
           internet: >
             {{ states('sensor.internet_time') }}
           utc: >
             {{ states('sensor.time_utc') }}
-
-  #refresh
-  - platform: template
-    sensors:
-      refresh_1s:
-        friendly_name: 'Refresh 1s'
-        entity_id: sensor.times
-        value_template: >
-          {{ state_attr('sensor.times', 'second') }}
-      refresh_1m:
-        friendly_name: 'Refresh 1m'
-        entity_id: sensor.times
-        value_template: >
-          {{ state_attr('sensor.times', 'minute') }}
+          sec_midnight: >
+            {{ now().strftime("%H")|int*60*60 + now().strftime("%M")|int*60 + now().strftime("%S")|int }}
+          hourmin: >
+            {{ now().strftime("%H")|int*100 + now().strftime("%M")|int }}
           
   #Flashing code
   - platform: template
     sensors:
       flashing_1s:
-        entity_id: sensor.refresh_1s
         value_template: >
-          {% if state_attr('sensor.times', 'second')|int % 2 == 0 %}
+          {% if states('counter.second_counter')|int % 2 %}
+            on
+          {% else %}
+            off
+          {% endif %}
+      flashing_1m:
+        value_template: >
+          {% if states('counter.minute_counter')|int % 2 %}
             on
           {% else %}
             off
           {% endif %}
       flashing_test:
-        entity_id: sensor.refresh_1s
         value_template: >
           {{ states('sensor.flashing_1s') }}
       toggling_test:
-        entity_id: sensor.refresh_1s
         value_template: >
           {{ states('sensor.flashing_1s') }}
         icon_template: >

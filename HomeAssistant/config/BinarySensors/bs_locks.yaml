@@ -97,9 +97,6 @@
   - platform: template
     sensors:
       garage_cd_opened:
-        entity_id:
-          - cover.garage_cd_opener
-          - sensor.garage_cd_status
         friendly_name: "Garage CD Opened"
         device_class: garage_door
         value_template: >

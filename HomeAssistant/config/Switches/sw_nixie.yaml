@@ -5,7 +5,6 @@
 #   - platform: template
 #     switches:
 #       nixie_clock:
-#         entity_id: light.nixie_clock
 #         value_template: "{{ is_state('light.nixie_clock', 'on') }}"
 #         turn_on:
 #           service: light.turn_on

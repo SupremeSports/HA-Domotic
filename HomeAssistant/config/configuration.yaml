@@ -5,15 +5,16 @@
 homeassistant:
   # Customization file
   customize: !include_dir_merge_named Customizations
-  customize_glob: !include customize_glob.yaml
+  customize_glob: !include_dir_merge_named CustomizationsGlob
+  customize_domain: !include_dir_merge_named CustomizationsDomain
   packages: !include_dir_named packages
   auth_providers:
     - type: homeassistant
-  whitelist_external_dirs:
+  #whitelist_external_dirs:
+  allowlist_external_dirs:
     - /config
 
 #Activate iOS devices
-#ios:
 mobile_app:
     
 #Lovelace personalized interface
@@ -24,11 +25,8 @@ lovelace:
 # Enables the frontend
 frontend:
   themes: !include themes.yaml
-  extra_html_url:
-    - /local/custom_ui/state-card-custom-ui.html
-  extra_html_url_es5:
-    - /local/custom_ui/state-card-custom-ui-es5.html
-  #javascript_version: latest
+  extra_module_url:
+    - /local/custom-ui/custom-ui.js
 
 # Custom iframe panels
 panel_iframe:
@@ -63,7 +61,10 @@ conversation:
 history:
 
 # View all events in a logbook
-logbook:
+#logbook: !include logbook.yaml
+
+#Database recorder
+recorder: !include recorder.yaml
 
 # Enables a map showing the location of tracked devices
 map:
@@ -95,33 +96,36 @@ tts:
 # Cloud
 cloud:
 
-#Sensors and others  
-shell_command: !include shell_commands.yaml
-group: !include groups.yaml
+# Python scripts
+python_script:
+
+#Sensors and others
+alarm_control_panel: !include alarm.yaml
+alert: !include alerts.yaml
 automation: !include_dir_merge_list Automations
+binary_sensor: !include_dir_merge_list BinarySensors
+climate: !include climates.yaml
+counter: !include counters.yaml
+cover: !include covers.yaml
+device_tracker: !include device_tracker.yaml
+fan: !include fans.yaml
+group: !include groups.yaml
+input_boolean: !include_dir_merge_named InputBool
+input_datetime: !include input_datetime.yaml
+input_number: !include_dir_merge_named InputNumbers
+input_select: !include_dir_merge_named InputSelects
+input_text: !include input_text.yaml
+light: !include lights.yaml
+lock: !include locks.yaml
+notify: !include notifications.yaml
+shell_command: !include shell_commands.yaml
 script: !include scripts.yaml
-zone: !include zones.yaml
 sensor: !include_dir_merge_list Sensors
 switch: !include_dir_merge_list Switches
-device_tracker: !include device_tracker.yaml
-input_boolean: !include_dir_merge_named InputBool
-binary_sensor: !include_dir_merge_list BinarySensors
-light: !include lights.yaml
-fan: !include fans.yaml
-#hello_state:
-cover: !include covers.yaml
-alert: !include alerts.yaml
-input_text: !include input_text.yaml
-input_select: !include_dir_merge_named InputSelects
-input_number: !include input_number.yaml
-lock: !include locks.yaml
-counter: !include counters.yaml
 #time_counter: !include timecounters.yaml
-input_datetime: !include input_datetime.yaml
-alarm_control_panel: !include alarm.yaml
-notify: !include notifications.yaml
 utility_meter: !include utilities.yaml
-climate: !include climates.yaml
+zone: !include zones.yaml
+
 
 #Weather Forecasts from Environement Canada
 weather:
@@ -136,9 +140,19 @@ camera:
     name: OctoPrint
     still_image_url: !secret img_octopi
     mjpeg_url: !secret cam_octopi
-
+  - platform: mjpeg
+    name: Pool Area
+    mjpeg_url: !secret cam_pool
+    
+#   - platform: mjpeg 
+    # name: Pool Area
+    # still_image_url: !secret img_pool
+    # mjpeg_url: !secret cam_pool
+    # verify_ssl: false
+    
 #Health
 system_health:
+breaking_changes:
 apcupsd:
 
 speedtestdotnet:
@@ -152,15 +166,14 @@ speedtestdotnet:
     # host: !secret roomba_ip
     # username: !secret roomba_username
     # password: !secret roomba_password
-    # entity_id: sensor.dates_second
 
-iaqualink:
-  username: !secret iaqualink_username
-  password: !secret iaqualink_password
+# iaqualink:
+  # username: !secret iaqualink_username
+  # password: !secret iaqualink_password
   
-media_player:
-- platform: kodi
-  host: !secret kodi_ip
+# media_player:
+# - platform: kodi
+#   host: !secret kodi_ip
 
 #Communication protocols
 mqtt:
@@ -174,7 +187,7 @@ duckdns:
   access_token: !secret duckdns_token
 
 #Database recorder
-recorder: !include recorder.yaml
+#recorder: !include recorder.yaml
 
 # logger:
   # default: info

@@ -11,6 +11,64 @@
     name: Request IOS positions
     initial: off
     icon: mdi:map-marker-radius
-
-  outdoor_rain_trigger:
-    name: Outdoor Rain Trigger
+    
+  force_reset_graphs:
+    name: Force Reset Graphs
+    initial: off
+    icon: mdi:trending-up
+    
+  gardenirrigation_start30m:
+    name: Garden Irrigation 30 minutes
+    initial: off
+    icon: mdi:clock-start
+  gardenirrigation_start1h:
+    name: Garden Irrigation 1 hour
+    initial: off
+    icon: mdi:clock-start
+  gardenirrigation_cancel:
+    name: Garden Irrigation Cancel
+    initial: off
+    icon: mdi:clock-start
+    
+  pondfiller_start30m:
+    name: Pond Filler 30 minutes
+    initial: off
+    icon: mdi:clock-start
+  pondfiller_start1h:
+    name: Pond Filler 1 hour
+    initial: off
+    icon: mdi:clock-start
+  pondfiller_start2h:
+    name: Pond Filler 2 hour
+    initial: off
+    icon: mdi:clock-start
+  pondfiller_cancel:
+    name: Pond Filler Cancel
+    initial: off
+    icon: mdi:clock-start
+    
+  control_room_control_reset:
+    name: Control Room Control Reset
+    initial: off
+    icon: mdi:power-cycle
+  pond_control_reset:
+    name: Pond Control Reset
+    initial: off
+    icon: mdi:power-cycle
+  pool_control_reset:
+    name: Pool Control Reset
+    initial: off
+    icon: mdi:power-cycle
+  weather_control_reset:
+    name: Weather Control Reset
+    initial: off
+    icon: mdi:power-cycle
+  
+  pool_running:
+    name: Pool Running
+    icon: mdi:pool
+    
+  pond_running:
+    name: Pond Running
+    icon: mdi:fish
+    

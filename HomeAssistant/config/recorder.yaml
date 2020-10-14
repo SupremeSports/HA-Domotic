@@ -1,46 +1,55 @@
 ####################################################
-# RECORDER                                         #
+# RECORDER / LOGBOOK                               #
 ####################################################
 
   #purge_interval: 0
-  exclude:
-    domains:
-      - automation
-      - binary_sensor
-      - calendar
-      - camera
-      - counter
-      - cover
-      - date_countdown
-      - device_tracker
-      - fan
-      - group
-      - input_select
-      - input_text
-      - input_boolean
-      - input_datetime
-      - input_number
-      - media_player
-      - script
-      - sensor
-      - sun
-      - switch
-      - updater
-      - zone
-    entities:
-      - sensor.date
-      - sensor.dates
-      - sensor.time
-      - sensor.times
-      - sensor.date_time
-      - sensor.time_date
+#   exclude:
+#     domains:
+#       - automation
+#       - binary_sensor
+#       - calendar
+#       - camera
+#       - counter
+#       - cover
+#       - date_countdown
+#       - device_tracker
+#       - fan
+#       - group
+#       - input_select
+#       - input_text
+#       - input_boolean
+#       - input_datetime
+#       - input_number
+#       - media_player
+#       - script
+#       - sensor
+#       - sun
+#       - switch
+#       - updater
+#       - zone
+#     entities:
+#       - sensor.date
+#       - sensor.dates
+#       - sensor.time
+#       - sensor.times
+#       - sensor.date_time
+#       - sensor.time_date
   include:
+    domains:
+      - climate
     entities:
+#Others
+      - sensor.opensky
 #Control Room
       - sensor.water_valve_status
-      - sensor.controlroom_box_humidity
-      - sensor.controlroom_box_temperature
-
+      - sensor.water_heater_status
+      - sensor.cold_storage_humidity
+      - sensor.cold_storage_temperature
+      - sensor.control_room_12v_voltage
+      - sensor.control_room_5v_voltage
+      - sensor.control_room_box_humidity
+      - sensor.control_room_box_temperature
+      
 #People
       - device_tracker.life360_cindy
       - sensor.iphone_de_cindy_battery_level
@@ -52,6 +61,11 @@
 #Computers
       - binary_sensor.jgau_pc
       - binary_sensor.cfor_pc
+      - binary_sensor.main_router
+      - binary_sensor.garage_router
+      - binary_sensor.pool_router
+      - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_package
+      - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_package
 
 #HA Server
       - sensor.server_cpu_used
@@ -67,23 +81,38 @@
       - sensor.speedtest_download
       - sensor.speedtest_ping
       - sensor.speedtest_upload
+      - sensor.ups_battery
+      - sensor.ups_input_voltage
+      - sensor.ups_battery_voltage
+      - sensor.ups_status
 
 #House Status
-      - sensor.garage_cd_status
-      - sensor.garage_fd_status
       - sensor.house_fd_status
       - sensor.house_sd_status
       - sensor.house_bd_status
+      - sensor.pool_fd_status
       - sensor.postal_battery
       - sensor.postal_new
       - sensor.postal_status
       - sensor.master_bed_presence
       - sensor.master_bed_raw
-      - switch.stepper_wall_clock
+      - sensor.stepper_wall_clock
       - binary_sensor.house_fd_bell
       - binary_sensor.house_sd_bell
       - binary_sensor.house_bd_bell
+      
+      - sensor.control_room_control_status
+      
+#HVAC and thermostats
+      - sensor.living_room_temp
+      - sensor.living_room_hum
+      
+#Garage Status
+      - binary_sensor.garage_attic_light
       - binary_sensor.garage_fd_bell
+      - sensor.shed_fd_status
+      - sensor.garage_cd_status
+      - sensor.garage_fd_status
 
 #Power Measurement
       - sensor.ted5000_mtu1_power
@@ -102,6 +131,12 @@
       - sensor.pool_daily_energy
       - sensor.pool_monthly_energy
       
+      - sensor.soldering_station_status
+      - sensor.soldering_station_power
+      
+      - sensor.massage_room_status
+      - sensor.massage_room_power
+      
 #Weather Data
       - sensor.tendency
       - sensor.moon_phases
@@ -114,49 +149,65 @@
       - sensor.outdoor_temperature
       - sensor.outdoor_uv_sensor
       - sensor.outdoor_windchill
+      - sensor.weather_control_input_voltage
+      - sensor.weather_control_5v_voltage
       - sensor.weather_control_box_humidity
       - sensor.weather_control_box_temperature
-      - sensor.weather_station_status
+      - sensor.weather_control_status
       - sensor.outdoor_rain_level
       - sensor.outdoor_rain_sensor
-      - input_boolean.outdoor_rain_trigger
+      - sensor.raining_detect
       - sensor.wind_compass
       - sensor.wind_direction
       - sensor.wind_direction_raw
       - sensor.wind_speed
       - sensor.wind_speed_raw
       - sensor.uv_index
-      
-#Coronavirus
-      - sensor.worldwide_coronavirus_confirmed
-      - sensor.worldwide_coronavirus_current
-      - sensor.worldwide_coronavirus_deaths
-      - sensor.worldwide_coronavirus_recovered
-      - sensor.canada_coronavirus_confirmed
-      - sensor.canada_coronavirus_current
-      - sensor.canada_coronavirus_deaths
-      - sensor.canada_coronavirus_recovered
-      
-#Front Yard
+     
+#Outdoor & Yard
       - binary_sensor.lamppost_status
       - binary_sensor.poweroutlet_status
       - binary_sensor.garagefrontlight_status
       - binary_sensor.garagefrontpower_status
-      
+      - sensor.garage_front_rssi
+      - binary_sensor.frontyardirrigation_status
+      - binary_sensor.backyardirrigation_status
+      - binary_sensor.gardenirrigation_status
+
 #Pool Data
       - binary_sensor.pool_level_high
       - binary_sensor.pool_level_low
       - binary_sensor.poolfiller_status
-      - binary_sensor.poolpump_status
+      - binary_sensor.poolpump_security
+      - sensor.pool_control_status
+      - sensor.test_control_status
+      - sensor.poolpump_status
+      - sensor.pool_heater_status
       - sensor.pool_clock
       - sensor.pool_ph
       - sensor.pool_pressure
       - sensor.pool_temperature
       - sensor.pool_heater_temp
       - sensor.pool_pump_temp
-      - switch.pool_heat_pump
-      
+      - sensor.pool_cabin_humidity
+      - sensor.pool_cabin_temperature
+      - sensor.pool_control_12v_voltage
+      - sensor.pool_control_5v_voltage
+      - sensor.pool_control_box_humidity
+      - sensor.pool_control_box_temperature
+
 #Pond Data
-      - switch.pond_pump
-      - switch.pond_filler_valve
+      - binary_sensor.pond_level_high
+      - binary_sensor.pond_level_low
+      - binary_sensor.pondfiller_status
+      - sensor.pond_control_status
+      - sensor.pondpump_status
+      - sensor.pond_area_temperature
+      - sensor.pond_area_humidity
+      - sensor.pond_control_12v_voltage
+      - sensor.pond_control_5v_voltage
+      - sensor.pond_control_box_humidity
+      - sensor.pond_control_box_temperature
+      - sensor.pond_temperature
+
       

@@ -6,7 +6,6 @@
     sensors:
       distance_jean_cindy:
         friendly_name: Distance between us
-        entity_id: sensor.refresh_1m
         unit_of_measurement: 'km'
         icon_template: >
           mdi:map-marker-distance
@@ -27,7 +26,6 @@
           {% endif %}
       iphone_de_jean_distance_home:
         friendly_name: Distance from home
-        entity_id: sensor.refresh_1m
         unit_of_measurement: 'km'
         icon_template: >
           mdi:map-marker-distance
@@ -48,7 +46,6 @@
           {% endif %}
       iphone_de_cindy_distance_home:
         friendly_name: Distance from home
-        entity_id: sensor.refresh_1m
         unit_of_measurement: 'km'
         icon_template: >
           mdi:map-marker-distance

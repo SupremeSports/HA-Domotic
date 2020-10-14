@@ -6,6 +6,7 @@
   # - Add the two "input_boolean" to trigger list
   # - All the rest is dynamically filled with the trigger source
   - alias: Doors Lock Unlock
+    mode: restart
     trigger:
       - platform: state
         entity_id: 
@@ -44,11 +45,19 @@
   #Needed to set the lock on right or lock on left of powerbolt2 lock devices
   #  Add ALL lock.* in the trigger and add an action for each of them
   - alias: Door Lock Modes
+    mode: restart
     trigger:
       - platform: state
         entity_id: 
           lock.house_fd_lock, lock.house_sd_lock, lock.house_bd_lock, 
           lock.garage_fd_lock
+    condition:
+      condition: or
+      conditions: 
+        - condition: template
+          value_template: '{{ states.automation.door_lock_modes.attributes.last_triggered == none }}'
+        - condition: template
+          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.door_lock_modes.attributes.last_triggered) > 5 }}'
     action:
       - service: mqtt.publish
         data_template:
@@ -64,6 +73,7 @@
           payload: "{mode:left}"
           
   - alias: Garage Door Opener
+    mode: restart
     trigger:
       - platform: state
         entity_id: 
@@ -84,6 +94,7 @@
           entity_id: "{{ trigger.to_state.entity_id|replace('input_boolean.','')|replace('_trigger','') }}"
       
   - alias: Cars Control
+    mode: restart
     trigger:
       - platform: state
         entity_id:
@@ -102,6 +113,7 @@
           entity_id: "{{ trigger.to_state.entity_id }}"
           
   - alias: Lexus Morning Start
+    mode: restart
     trigger:
       - platform: time
         at: "07:25:00"
@@ -116,7 +128,7 @@
           state: 'on'
         - condition: numeric_state
           entity_id: sensor.outdoor_temperature
-          below: 2
+          below: 5
     action:
       - service: input_boolean.turn_on
         entity_id: input_boolean.cars_lexus_start
@@ -125,6 +137,7 @@
           message: "Lexus has been started..."
           
   - alias: Lexus Lock at home
+    mode: restart
     trigger:
       - platform: state
         entity_id: device_tracker.life360_jean
@@ -144,6 +157,7 @@
           message: "Lexus has been locked..."
         
   - alias: Journey Lock at home
+    mode: restart
     trigger:
       - platform: state
         entity_id: device_tracker.life360_cindy

@@ -1,0 +1,16 @@
+
+
+HomeAssistant/config/.cloud
+
+HomeAssistant/config/.storage
+HomeAssistant/config/.vscode
+HomeAssistant/config/.google.token
+HomeAssistant/config/.ios.conf
+HomeAssistant/config/home-assistant_v2.db
+HomeAssistant/config/home-assistant.log
+HomeAssistant/config/secrets.yaml
+HomeAssistant/config/z_Archives
+HomeAssistant/config/known_devices.yaml
+HomeAssistant/config/device_tracker.yaml
+HomeAssistant/config/zones.yaml
+HomeAssistant/config/Sensors/s_anniversaries.yaml

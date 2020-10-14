@@ -5,10 +5,10 @@
   #Spring mode, runs pump all day, stop 4h, run 4h, stop 4h, run 12h
   #Summer mode, runs pump based on day of week (runs longer on fridays/saturdays)
   #Autumn mode, pump not running on peak hours
-  #If temperature below 5°C, run pump
+  #If outisde temperature drops below 5°C, run pump
   #Pool water level has to be above low level since 2 minutes
   - alias: Pool Pump Control
-    initial_state: true
+    mode: restart
     trigger:
       - platform: time_pattern
         seconds: '/5'
@@ -55,7 +55,7 @@
           {% endif %}
         {% endif %}
         
-        {% if not is_state('input_select.poolpump_mode', 'Winter/Off') and states.sensor.outdoor_temperature.state|float < 5.0 %}
+        {% if not is_state('input_select.poolpump_mode', 'Winter/Off') and is_state('binary_sensor.antifreeze_active', 'on') %}
           {% set PP = true %}
         {% endif %}
         
@@ -69,43 +69,89 @@
         {% else %}
           switch.turn_off
         {% endif %}
+        
+######## POOL HEATER ########
 
-  #Pool water level has to be below high level since 2 minutes
-  #Pool pump mode shall not be in Winter mode
-  #Filler valve can't operate more than 1h/day
-  - alias: Pool Filler Control
-    initial_state: true
+  #Auto mode, runs heater whenever temperature is below setpoint + 2°C
+  - alias: Pool Heater Control
+    mode: restart
     trigger:
       - platform: time_pattern
         seconds: '/5'
+      - platform: state
+        entity_id: input_select.poolheat_mode
     action:
-      entity_id: switch.pool_filler_valve
+      entity_id: switch.pool_heater
       service_template: >
-        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed) %}
-        {% set PF = false %}
+        {% set curHour = now().hour %}
+        {% set curWeekday = now().weekday() %}
+        {% set PP = false %}
         
-        {% if lastLevel >= 120 %}
-          {% if is_state('binary_sensor.pool_level_high', 'off') %}
-            {% set PF = true %}
-          {% elif is_state('binary_sensor.pool_level_high', 'on') %}
-            {% set PF = false %}
-          {% endif %}
+        {% if is_state('input_select.poolheat_mode', '24/7') %}
+          {% set PH = true %}
+        {% elif is_state('input_select.poolheat_mode', 'Auto') %}
+          {% set PH = true %}
         {% endif %}
         
-        {% if states.sensor.pool_filler_timer.state|float >= 1.0 %}
-          {% set PF = false %}
-        {% elif is_state('input_select.poolpump_mode', 'Winter/Off') %}
-          {% set PF = false %}
-        {% endif %}
-                
-        {% if PF == true %}
+        {% if PH == true %}
           switch.turn_on
         {% else %}
           switch.turn_off
         {% endif %}
         
+######## POOL REFILL ########
+
+  #Pool water level has to be below high level since 2 minutes
+  #Pool pump mode shall not be in Winter mode
+  #Filler valve can't operate more than 1h/day
+  - alias: Pool Filler Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition:
+      - condition: template
+        value_template: "{{ not is_state('input_select.poolfiller_mode', 'Manual') }}"
+    action:
+      entity_id: switch.pool_filler_valve
+      service_template: >
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed) %}
+        {% set lastStatus = is_state('binary_sensor.pool_level_high', 'off') %}
+        {% set lastSwitch = is_state('switch.pool_filler_valve', 'on') %}
+        {% set lastDay = states('sensor.pool_filler_timer')|float %}
+        {% set poolRunning = is_state('input_boolean.pool_running', 'on') %}
+        {% set PF = false %}
+        
+        {% if lastSwitch %}
+          {% if lastStatus %}
+            {% set PF = true %}
+          {% elif lastLevel <= 300 %}
+            {% set PF = true %}
+          {% endif %}
+        {% elif lastStatus and lastLevel >= 300 and lastDay <= 0.92 %}
+          {% set PF = true %}
+        {% endif %}
+        
+        {% if lastDay >= 1.0 %}
+          {% set PF = false %}
+        {% elif is_state('input_select.poolfiller_mode', 'Winter/Off') or is_state('input_select.poolpump_mode', 'Winter/Off') %}
+          {% set PF = false %}
+        {% elif is_state('binary_sensor.pool_level_high', 'unavailable') %}
+          {% set PF = false %}
+        {% elif is_state('group.irrigation', 'on') %}
+          {% set PF = false %}
+        {% endif %}
+                
+        {% if PF == true and poolRunning %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+######## POOL VALVES ########
+        
   - alias: "Pool Drain Adjust"
-    initial_state: true
+    mode: restart
     trigger:
       platform: state
       entity_id: input_number.pool_drain_percent
@@ -118,7 +164,7 @@
         retain: false
         
   - alias: "Pool Slide Adjust"
-    initial_state: true
+    mode: restart
     trigger:
       platform: state
       entity_id: input_number.pool_slide_percent
@@ -131,7 +177,6 @@
         retain: false
         
   - alias: "Pool Heatpump Adjust"
-    initial_state: true
     trigger:
       platform: state
       entity_id: input_number.pool_heatpump_percent
@@ -147,6 +192,7 @@
         
   #Input Text Changes Trigger
   - alias: Pool Top Text Change
+    mode: restart
     trigger:
       platform: state
       entity_id: input_text.pool_text_top
@@ -159,7 +205,7 @@
         retain: false
         
   - alias: Pool Bottom Text Change
-    initial_state: true
+    mode: restart
     trigger:
       platform: state
       entity_id: input_text.pool_text_bottom
@@ -172,7 +218,7 @@
         retain: false
 
   - alias: "Pool Clock Scroll Speed"
-    initial_state: true
+    mode: restart
     trigger:
       platform: state
       entity_id: input_number.pool_clock_scroll_speed
@@ -185,7 +231,7 @@
         retain: false
         
   - alias: "Pool Clock Transistion Speed"
-    initial_state: true
+    mode: restart
     trigger:
       platform: state
       entity_id: input_number.pool_clock_trans_speed
@@ -199,7 +245,7 @@
 
 #Publish data to device every minute or when a device requests an update (boot up or invalid data detected (by the device))
   - alias: Publish Pool Clock Data
-    initial_state: true
+    mode: restart
     trigger:
       - platform: time_pattern
         minutes: '/1'
@@ -214,3 +260,26 @@
           payload_template: '{"wtemp":"{{states.sensor.pool_temperature.state}}","wph":"{{states.sensor.pool_ph.state}}","otemp":"{{states.sensor.outdoor_temperature.state}}","ohum":"{{states.sensor.outdoor_humidity.state}}"}'
           qos: 0
           retain: false
+
+  - alias: Publish Pool Pressure Data
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: '/1'
+      - platform: state
+        entity_id: sensor.pool_pressure
+      - platform: state
+        entity_id: sensor.pool_fd_status
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Pool/Pressure/Cmd"
+          payload_template: >
+            {% if is_state('sensor.pool_fd_status', 'Unlocked') or is_state('sensor.pool_fd_status', 'Ok') %}
+              {"state":"OFF", "wpsi":"{{states.sensor.pool_pressure.state}}"}
+            {% else %}
+              {"state":"ON", "wpsi":"{{states.sensor.pool_pressure.state}}"}
+            {% endif %}
+          qos: 0
+          retain: false
+          

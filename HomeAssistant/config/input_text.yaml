@@ -26,3 +26,9 @@
     initial: !secret doorlock_passcode_list
     min: 0
     max: 255
+
+  # issues:
+    # name: Sensors that need attention
+    # min: 0
+    # max: 255
+    # mode: text

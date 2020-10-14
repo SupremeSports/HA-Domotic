@@ -54,7 +54,7 @@ Light - Navy Blue:
   label-badge-text-color: "#395274"
   label-badge-red: "#FF8888"
   ### Cards ###
-  paper-card-background-color: "#FFFFFF"
+  #paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -101,7 +101,7 @@ Dark - Blue:
   label-badge-text-color: "#F1F1F1"
   label-badge-red: "#6FA6FE"
   ### Cards ###
-  paper-card-background-color: "#23232E"
+  #paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -148,7 +148,7 @@ Light - Blue:
   label-badge-text-color: "#4D5575"
   label-badge-red: "#6FA6FE"
   ### Cards ###
-  paper-card-background-color: "#FCFCFC"
+  #paper-card-background-color: "#FCFCFC"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -195,7 +195,7 @@ Dark - Orange:
   label-badge-text-color: "#F1F1F1"
   label-badge-red: "#FFA23F"
   ### Cards ###
-  paper-card-background-color: "#23232E"
+  #paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -242,7 +242,7 @@ Light - Orange:
   label-badge-text-color: "#4B4B4D"
   label-badge-red: "#FFA23F"
   ### Cards ###
-  paper-card-background-color: "#FFFFFF"
+  #paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -289,7 +289,7 @@ Dark - Yellow:
   label-badge-text-color: "#EBEBEB"
   label-badge-red: "#515151"
   ### Cards ###
-  paper-card-background-color: "#1A1A1A"
+  #paper-card-background-color: "#1A1A1A"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -336,7 +336,7 @@ Light - Yellow:
   label-badge-text-color: "#141414"
   label-badge-red: "#515151"
   ### Cards ###
-  paper-card-background-color: "#FBFBFB"
+  #paper-card-background-color: "#FBFBFB"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -383,7 +383,7 @@ Navy Blue & Yellow:
   label-badge-text-color: "#FBFBFB"
   label-badge-red: "#252D40"
   ### Cards ###
-  paper-card-background-color: "#252D40"
+  #paper-card-background-color: "#252D40"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -430,7 +430,7 @@ Dark - Green:
   label-badge-text-color: "#FFFFFF"
   label-badge-red: "#343443"
   ### Cards ###
-  paper-card-background-color: "#23232E"
+  #paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -477,7 +477,7 @@ Light - Green:
   label-badge-text-color: "#788083"
   label-badge-red: "#3FEFAC"
   ### Cards ###
-  paper-card-background-color: "#FFFFFF"
+  #paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -524,7 +524,7 @@ Dark - Red:
   label-badge-text-color: "#EAEEF1"
   label-badge-red: "#424242"
   ### Cards ###
-  paper-card-background-color: "#1A1A1A"
+  #paper-card-background-color: "#1A1A1A"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -572,7 +572,7 @@ Gray & Green:
   label-badge-text-color: "#FBFBFB"
   label-badge-red: "#555766"
   ### Cards ###
-  paper-card-background-color: "#555766"
+  #paper-card-background-color: "#555766"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -619,7 +619,7 @@ Dark - Gray:
   label-badge-text-color: "#FFFFFD"
   label-badge-red: "#575757"
   ### Cards ###
-  paper-card-background-color: "#2D2D2D"
+  #paper-card-background-color: "#2D2D2D"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -666,7 +666,7 @@ Dark - Light Red:
   label-badge-text-color: "#F1F1F1"
   label-badge-red: "#6C7B9B"
   ### Cards ###
-  paper-card-background-color: "#252B36"
+  #paper-card-background-color: "#252B36"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -713,7 +713,7 @@ Light - Light Red:
   label-badge-text-color: "#395274"
   label-badge-red: "#395274"
   ### Cards ###
-  paper-card-background-color: "#FFFFFF"
+  #paper-card-background-color: "#FFFFFF"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -760,7 +760,7 @@ Dark - Blue/Purple:
   label-badge-text-color: "#FFFFFF"
   label-badge-red: "#3B4C8B"
   ### Cards ###
-  paper-card-background-color: "#1E2747"
+  #paper-card-background-color: "#1E2747"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -807,7 +807,7 @@ Dark - Cyan:
   label-badge-text-color: "#F7F8FA"
   label-badge-red: "#444459"
   ### Cards ###
-  paper-card-background-color: "#23232E"
+  #paper-card-background-color: "#23232E"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -854,7 +854,7 @@ Light - Cyan:
   label-badge-text-color: "#6D7A8C"
   label-badge-red: "#BCC5D1"
   ### Cards ###
-  paper-card-background-color: "#FBFBFD"
+  #paper-card-background-color: "#FBFBFD"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -901,7 +901,7 @@ Dark - Purple:
   label-badge-text-color: "#F7F8FA"
   label-badge-red: "#323346"
   ### Cards ###
-  paper-card-background-color: "#2E2F40"
+  #paper-card-background-color: "#2E2F40"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)
@@ -948,7 +948,7 @@ Light - Purple:
   label-badge-text-color: "#2E2F40"
   label-badge-red: "#AFB0C5"
   ### Cards ###
-  paper-card-background-color: "#FBFBFD"
+  #paper-card-background-color: "#FBFBFD"
   paper-listbox-background-color: var(--primary-background-color)
   data-table-background-color: var(--primary-background-color)
   material-background-color: var(--primary-background-color)

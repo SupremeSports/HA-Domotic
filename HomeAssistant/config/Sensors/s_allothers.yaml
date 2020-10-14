@@ -8,10 +8,22 @@
     name: TED5000
     scan_interval: 5
     
+#   - platform: hydroquebec
+#     username: "username"
+#     password: "password"
+#     contract: 'contract'
+#     monitored_variables:
+#      - period_total_bill
+#      - period_length
+#      - period_total_days
+    
   - platform: openexchangerates
     api_key: !secret openexchange_key
     scan_interval: 5
     quote: CAD
+    
+  - platform: opensky
+    radius: 10
     
   # - platform: ebox
     # username: !secret ebox_username
@@ -25,16 +37,22 @@
     name: Main Power Usage
     source: sensor.ted5000_mtu1_power
     unit_prefix: k
+    unit_time: h
+    unit: kWh
     round: 2
   - platform: integration
     name: Garage Power Usage
     source: sensor.ted5000_mtu2_power
     unit_prefix: k
+    unit_time: h
+    unit: kWh
     round: 2
   - platform: integration
     name: Pool Power Usage
     source: sensor.ted5000_mtu3_power
     unit_prefix: k
+    unit_time: h
+    unit: kWh
     round: 2
     
   - platform: mqtt
@@ -52,8 +70,6 @@
     sensors:
       postal_status:
         friendly_name: Postal Status
-        entity_id:
-          - switch.postal_status
         icon_template: >
           mdi:mailbox
         value_template: >
@@ -75,7 +91,6 @@
           
       last_postal_arrival:
         friendly_name: Last Postal Arrival Time
-        entity_id: input_datetime.last_postal_arrival
         icon_template: >
           mdi:clock-in
         #device_class: timestamp  //Makes display on minutes since...
@@ -83,7 +98,6 @@
         
       last_postal_removal:
         friendly_name: Last Postal Removal Time
-        entity_id: input_datetime.last_postal_removal
         icon_template: >
           mdi:clock-out
         #device_class: timestamp  //Makes display on minutes since...
@@ -125,9 +139,6 @@
     sensors:
       nixie_clock:
         friendly_name: Nixie Clock
-        entity_id:
-          - light.nixie_clock
-          - sensor.nixie_clock_status
         value_template: "{{ states('sensor.nixie_clock_status') }}"
         availability_template: "{{ not is_state('sensor.nixie_clock_status', 'unavailable') }}"
         entity_picture_template: >

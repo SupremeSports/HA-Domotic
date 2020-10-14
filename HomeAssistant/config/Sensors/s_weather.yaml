@@ -7,11 +7,11 @@
     scan_interval: 300
     
   # Weather prediction
-  - platform: yr
+  #- platform: yr
   
 ######### WEATHER STATION - BASIC DATA #########
   - platform: mqtt
-    name: "Weather Station Status"
+    name: "Weather Control Status"
     icon: mdi:wind-turbine
     state_topic: "Outside/WStation/Json"
     availability_topic: "Outside/WStation/LWT"
@@ -53,22 +53,36 @@
     unit_of_measurement: 'V'
     icon: mdi:flash
     state_topic: "Outside/WStation/Json"
-    value_template: "{{ value_json.Vin | float | round(1) }}"
     availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
+    value_template: >
+      {% set RV = value_json.Vin | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
       
   - platform: mqtt
     name: "Weather Control 5V Voltage"
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
     state_topic: "Outside/WStation/Json"
-    value_template: "{{ value_json.Vcc | float | round(1) }}"
     availability_topic: "Outside/WStation/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
 
 ######### UV SENSOR - VEML6070 #########
 
@@ -87,8 +101,9 @@
     sensors:
       uv_index:
         friendly_name: UV index
+        unit_of_measurement: 'UV'
         value_template: >
-          {% set IT = 4|int %}
+          {% set IT = 2|int %}
           {% set mult = (0.0053/IT) | float %}
           
           {% if is_state('sun.sun','above_horizon') %}
@@ -120,15 +135,14 @@
             {% if is_state('sensor.uv_index','unavailable') %}
               {% set uv = -1|int %}
             {% else %}
-              {% set uv = states('sensor.uv_sensor')|int %}
+              {% set uv = states('sensor.uv_index')|int %}
             {% endif %}
-            {% set IT = 4|int %}
-            {% set Low = 0|int * IT %}
-            {% set Med = 561|int * IT %}
-            {% set Hi = 1121|int * IT %}
-            {% set VHi = 1495|int * IT %}
-            {% set Ext = 2055|int * IT %}
-            {% set Lim = 3000|int * IT %}
+            {% set Low = 0|int%}
+            {% set Med = 3|int %}
+            {% set Hi = 6|int %}
+            {% set VHi = 8|int %}
+            {% set Ext = 11|int %}
+            {% set Lim = 13|int %}
             {% if Low <= uv < Med %}
               Low
             {% elif Med <= uv < Hi %}
@@ -248,6 +262,8 @@
           {% else %}
             mdi:weather-pouring
           {% endif %}
+        attribute_templates:
+          raw_in: "{{ states('sensor.rain_sensor') }}"
           
       outdoor_rain_level:
         friendly_name: "Outdoor Rain Level"
@@ -257,16 +273,35 @@
           {% set rain = states('sensor.rain_count')|float * 0.13 %}
 
           {{- (rain|float) | round(2) -}}
+          
+      raining_detect:
+        friendly_name: "Raining Detection"
+        icon_template: mdi:weather-pouring
+        value_template: >
+          {% set rain = is_state('sensor.outdoor_rain_sensor', 'Raining') or is_state('sensor.outdoor_rain_sensor', 'Pouring') %}
+          {% if rain %}
+            On
+          {% else %}
+            Off
+          {% endif %}
     
   - platform: history_stats
     name: Rain Count
-    entity_id: input_boolean.outdoor_rain_trigger
-    state: 'on'
+    entity_id: sensor.rain_level_toggle
+    state: 'ON'
     type: count
-    #start: '{{ as_timestamp( now() ) - 3600 }}'
     end: '{{ now() }}'
     duration:
       hours: 1
+      
+  - platform: history_stats
+    name: Raining Timer
+    entity_id: sensor.raining_detect
+    state: 'On'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
     
 ######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
 
@@ -328,14 +363,18 @@
         unit_of_measurement: 'kPa'
         icon_template: mdi:altimeter
         value_template: >
+          {% set ok = false %}
           {% if not is_state('sensor.outdoor_pressure_raw','unavailable') %}
             {% set P = states('sensor.outdoor_pressure_raw')|float %}
             {% set ok = true %}
-          {% elif not is_state('weather.dolbeau','unknown') %}
-            {% set P = state_attr('weather.dolbeau', 'pressure')|float / 10.0 %}
-            {% set ok = true %}
           {% else %}
-            {% set ok = false %}
+            {% if states('weather.dolbeau') != 'unknown' %}
+              {% set P = state_attr('weather.dolbeau', 'pressure')|float / 10.0 %}
+              {% set ok = true %}
+            {% elif states('weather.home') != 'unknown' %}
+              {% set P = state_attr('weather.home', 'pressure')|float / 10.0 %}
+              {% set ok = true %}
+            {% endif %}
           {% endif %}
           
           {% if ok == true %}
@@ -343,6 +382,10 @@
           {% else %}
             unavailable
           {% endif %}
+        attribute_templates:
+          bme: "{{ states('sensor.outdoor_pressure_raw')|float|round(1) }}"
+          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'pressure')|float|round(1) }}"
+          weather_home: "{{ state_attr('weather.dolbeau', 'pressure')|float|round(1) }}"
     
   - platform: template
     sensors:
@@ -350,17 +393,21 @@
         friendly_name: "Outdoor Temperature"
         unit_of_measurement: '°C'
         value_template: >
+          {% set ok = false %}
           {% if (-99.0 < states('sensor.outdoor_temperature_dht')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_dht','unavailable') %}
             {% set T = states('sensor.outdoor_temperature_dht') | float %}
             {% set ok = true %}
           {% elif (-99.0 < states('sensor.outdoor_temperature_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_bme','unavailable') %}
             {% set T = states('sensor.outdoor_temperature_bme') | float %}
             {% set ok = true %}
-          {% elif is_state('sensor.outdoor_temperature_dht','unavailable') and is_state('sensor.outdoor_temperature_bme','unavailable') %}
-            {% set T = state_attr('weather.dolbeau', 'temperature')|float %}
-            {% set ok = true %}
-          {% else %}
-            {% set ok = false %}
+          {% else%}
+            {% if states('weather.dolbeau') != 'unknown' %}
+              {% set T = state_attr('weather.dolbeau', 'temperature')|float %}
+              {% set ok = true %}
+            {% elif states('weather.home') != 'unknown' %}
+              {% set T = state_attr('weather.home', 'temperature')|float %}
+              {% set ok = true %}
+            {% endif %}
           {% endif %}
           
           {% if ok == true %}
@@ -368,22 +415,39 @@
           {% else %}
             unavailable
           {% endif %}
+        attribute_templates:
+          dht: "{{ states('sensor.outdoor_temperature_dht')|float|round(1) }}"
+          bme: "{{ states('sensor.outdoor_temperature_bme')|float|round(1) }}"
+          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'temperature')|float|round(1) }}"
+          weather_home: "{{ state_attr('weather.dolbeau', 'temperature')|float|round(1) }}"
 
       outdoor_humidity:
         friendly_name: "Outdoor Humidity"
         unit_of_measurement: '%'
         value_template: >
+          {% set ok = false %}
           {% if (0.0 < states('sensor.outdoor_humidity_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_bme','unavailable') %}
             {% set H = states('sensor.outdoor_humidity_bme') | float %}
             {% set ok = true %}
           {% elif (0.0 < states('sensor.outdoor_humidity_dht')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_dht','unavailable') %}
             {% set H = states('sensor.outdoor_humidity_dht') | float %}
             {% set ok = true %}
-          {% elif is_state('sensor.outdoor_humidity_dht','unavailable') and is_state('sensor.outdoor_humidity_bme','unavailable') %}
+          {% else %}
+            {% if states('weather.dolbeau') != 'unknown' %}
+              {% set H = state_attr('weather.dolbeau', 'humidity')|float %}
+              {% set ok = true %}
+            {% elif states('weather.home') != 'unknown' %}
+              {% set H = state_attr('weather.home', 'humidity')|float %}
+              {% set ok = true %}
+            {% endif %}
+          {% endif %}
+          
+          {% if states('weather.dolbeau') != 'unknown' %}
             {% set H = state_attr('weather.dolbeau', 'humidity')|float %}
             {% set ok = true %}
-          {% else %}
-            {% set ok = false %}
+          {% elif states('weather.home') != 'unknown' %}
+            {% set H = state_attr('weather.home', 'humidity')|float %}
+            {% set ok = true %}
           {% endif %}
           
           {% if ok == true %}
@@ -391,6 +455,12 @@
           {% else %}
             unavailable
           {% endif %}
+        attribute_templates:
+          dht: "{{ states('sensor.outdoor_humidity_dht')|float|round(1) }}"
+          bme: "{{ states('sensor.outdoor_humidity_bme')|float|round(1) }}"
+          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'humidity')|float|round(1) }}"
+          weather_home: "{{ state_attr('weather.dolbeau', 'humidity')|float|round(1) }}"
+          
 
       outdoor_dewpoint:
         friendly_name: "Outdoor Dew Point"
@@ -592,14 +662,18 @@
         unit_of_measurement: 'km/h'
         icon_template: mdi:weather-windy
         value_template: >
+          {% set ok = false %}
           {% if not is_state('sensor.wind_speed_raw','unavailable') %}
             {% set WS = states('sensor.wind_speed_average')|float %}
             {% set ok = true %}
-          {% elif not is_state('weather.dolbeau','unknown') %}
-            {% set WS = state_attr('weather.dolbeau', 'wind_speed')|float %}
-            {% set ok = true %}
           {% else %}
-            {% set ok = false %}
+            {% if states('weather.dolbeau') != 'unknown' %}
+              {% set WS = state_attr('weather.dolbeau', 'wind_speed')|float %}
+              {% set ok = true %}
+            {% elif states('weather.home') != 'unknown' %}
+              {% set WS = state_attr('weather.home', 'wind_speed')|float %}
+              {% set ok = true %}
+            {% endif %}
           {% endif %}
           
           {% if ok == true %}
