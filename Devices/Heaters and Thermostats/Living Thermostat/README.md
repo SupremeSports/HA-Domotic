@@ -2,7 +2,7 @@
 
 #### Status: In developement ####
 
-#### Devices: ESP8266-07, HLK-PM03, DHT22, AZ-Touch####
+#### Devices: ESP8266-07, HLK-PM03, DHT22, AZ-Touch ####
 
 ### Description: ###
 Needed a thermostat to read room temperature in order to control the HVAC accordingly.
