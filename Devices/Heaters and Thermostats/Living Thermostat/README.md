@@ -31,7 +31,8 @@ Images to come...
 - More to come...
 
 #### Outcome ####
-Bench tests are very impressive, waiting for my order to come in (not ordered yet :'( )
+Bench tests are very impressive, waiting for my order to come in - Not ordered yet :'(
+
 To come...
 
 ### Home Assistant Link: ###
