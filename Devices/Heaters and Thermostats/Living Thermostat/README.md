@@ -10,7 +10,7 @@ The 2.4" TFT touchscreen replaces the HVAC remote control and communicates with 
 It also replicates [Home Assistant climate](https://www.home-assistant.io/integrations/climate/) options onto the screen.
 The basics is from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/) and I simply used parts of their code in order to make mine. Many features added, some others removed.
 
-Images to come...
+Pictures/screenshots from TFT to come...
 <!-- ![alt text](images/AddedControl.jpg "Control Board")
 
 ![alt text](images/IRdiode.jpg "IR LED setup")
