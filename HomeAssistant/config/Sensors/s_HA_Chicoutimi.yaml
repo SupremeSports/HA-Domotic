@@ -90,7 +90,7 @@
     
   - platform: rest
     name: Chicoutimi home_assistant_v2_db
-    resource: http://IP_ADDRESS:8123/api/states/sensor.home_assistant_v2_db
+    resource: IP_ADDRESS:8123/api/states/sensor.home_assistant_v2_db
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
