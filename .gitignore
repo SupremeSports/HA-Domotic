@@ -14,3 +14,4 @@ HomeAssistant/config/known_devices.yaml
 HomeAssistant/config/device_tracker.yaml
 HomeAssistant/config/zones.yaml
 HomeAssistant/config/Sensors/s_anniversaries.yaml
+HomeAssistant/config/Sensors/s_HA_Chicoutimi.yaml
