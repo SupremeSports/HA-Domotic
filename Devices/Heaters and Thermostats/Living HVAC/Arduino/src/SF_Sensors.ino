@@ -17,7 +17,8 @@ void initSensors()
 void readSensors()
 {
   outputAirTemp = readOutputAirTemp();
-  return;
+
+  readThermData();
 }
 
 //OUTPUTS
@@ -31,6 +32,18 @@ float readOutputAirTemp()
   int temp = analogRead(tempPin);
   
   return temp_ax2*pow(float(temp), 2) + temp_bx*temp + temp_c;
+}
+
+void readThermData()
+{
+  lastKeepAlive += 5; //Add 5s to counter
+  thermAlive = lastKeepAlive<keepAlive;
+
+  if (!thermAlive)
+  {
+    roomAirTemp = initValue;
+    roomAirHum = initValue;
+  }
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -59,16 +72,8 @@ void flashBoardLed(int delayFlash, int qtyFlash)
 //Short flash every 5 seconds when everything is ok
 void flashEvery5sec()
 {
-  if (millis()-ledFlashDelay < 5000)
-    return;
-
   if (networkActive)
     flashBoardLed(2, 1);
-    
-  ledFlashDelay = millis();
-
-  readSensors();
-  sendSensors();
 }
 
 //float kelvinToFahrenheit(float kelvin)
