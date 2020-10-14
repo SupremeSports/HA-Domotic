@@ -25,7 +25,7 @@ Pictures/screenshots from TFT to come...
 - Extra screen to show information (WiFi SSID, rssi, voltage, etc.)
 - Communicated with Home assistant AND HVAC directly through the MQTT browser
 
-- Top row 
+- Top row:
     - Displays WiFi status, HVAC on/off status, ECO mode, user logged in and notifications icons
     - Displays time
 - More to come...
