@@ -4,7 +4,7 @@
 
   - platform: rest
     name: Chicoutimi Update Available
-    resource: http://blackmagics.duckdns.org:8123/api/states/binary_sensor.ha_update_available
+    resource: IP_ADDRESS:8123/api/states/binary_sensor.ha_update_available
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
@@ -19,7 +19,7 @@
       
   - platform: rest
     name: Chicoutimi UUN Entities
-    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.uun_ordered
+    resource: IP_ADDRESS:8123/api/states/sensor.uun_ordered
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
@@ -36,7 +36,7 @@
       
 #   - platform: rest
 #     name: Chicoutimi Last Boot
-#     resource: http://blackmagics.duckdns.org:8123/api/states/sensor.last_boot
+#     resource: IP_ADDRESS:8123/api/states/sensor.last_boot
 #     method: GET
 #     headers: 
 #       Authorization: !secret ha_chicoutimi_token
@@ -63,7 +63,7 @@
 
   - platform: rest
     name: Chicoutimi Last Boot
-    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.last_boot
+    resource: IP_ADDRESS:8123/api/states/sensor.last_boot
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
@@ -77,7 +77,7 @@
       
   - platform: rest
     name: Chicoutimi Time Online
-    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.time_online
+    resource: IP_ADDRESS:8123/api/states/sensor.time_online
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
@@ -90,7 +90,7 @@
     
   - platform: rest
     name: Chicoutimi home_assistant_v2_db
-    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.home_assistant_v2_db
+    resource: http://IP_ADDRESS:8123/api/states/sensor.home_assistant_v2_db
     method: GET
     headers: 
       Authorization: !secret ha_chicoutimi_token
@@ -103,12 +103,3 @@
       - bytes
       - icon
     unit_of_measurement: MB
-
-      
-# to test GET
-# curl -X GET -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJlMzAxZDMyOTVmNmM0NzEyOGEzYTU5OGFhZGE0ODM0YSIsImlhdCI6MTYwMDQ3ODA2NSwiZXhwIjoxOTE1ODM4MDY1fQ.1VU-K_fwQk_A7mFOzkXqJpPVVnfL8y2twjiJR9-RWUA" \
-#     -H "Content-Type: application/json" \
-#     http://blackmagics.duckdns.org:8123/api/states/sensor.uun_ordered
-    
-# https://community.home-assistant.io/t/json-attribute/62564/2
-# https://www.home-assistant.io/integrations/http/
