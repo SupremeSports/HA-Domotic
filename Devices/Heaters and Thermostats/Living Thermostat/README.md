@@ -6,7 +6,7 @@
 
 ### Description: ###
 Needed a thermostat to read room temperature in order to control the HVAC accordingly.
-The 2.4" TFT touchscreen replaces the HVAC remote control and communicates with [Living HVAC](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Heaters%20and%20Thermostats/Living%20HVAC).
+The 2.4" TFT touchscreen replaces the HVAC remote control and communicates with my [Living HVAC](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Heaters%20and%20Thermostats/Living%20HVAC).
 It also replicates [Home Assistant climate](https://www.home-assistant.io/integrations/climate/) options onto the screen.
 The basics is from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/) and I simply used parts of their code in order to make mine. Many features added, some others removed.
 
