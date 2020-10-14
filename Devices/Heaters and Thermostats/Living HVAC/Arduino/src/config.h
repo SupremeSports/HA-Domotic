@@ -3,8 +3,6 @@
 // ----------------------------------------------------------------------------------------------------
 //You must put your own settings in here
 
-const char* ssid                      = "yourSSID";
-const char* password                  = "yourPassword";
 const int   ssid_qty                  = 4;
 const char* ssid[ssid_qty]            = {"yourSSID1", "yourSSID2", "yourSSID3", "yourSSID"};
 const char* password[ssid_qty]        = {"yourPassword1", "yourPassword2", "yourPassword3", "yourPassword4"};
