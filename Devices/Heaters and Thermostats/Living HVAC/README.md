@@ -5,7 +5,7 @@
 #### Devices: ESP8266-07, HLK-PM03, 10k NTC ####
 
 ### Description: ###
-My HVAC remote control is always out of hand and often misplaced, also I wanted to be able to control temperature from HA as well as automating everyheater/HVAC into a single ecosystem. This will allow to eventually go forward with peak period offsets with the utility company in order to save couple hundred bucks per year...
+My HVAC remote control is always out of hand and often misplaced, also I wanted to be able to control temperature from HA as well as automating every heater/HVAC into a single ecosystem. This will allow to eventually go forward with peak period offsets with the utility company in order to save couple hundred bucks per year...
 
 ![alt text](images/AddedControl.jpg "Control Board")
 
