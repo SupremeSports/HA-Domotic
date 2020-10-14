@@ -24,6 +24,8 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
@@ -35,9 +37,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length)
     message[i] = (char)payload[i];
     
   message[length] = '\0';
-  Sprint(message);
+  Sprintln(message);
 
-  Sprintln();
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  local_delay(5);
 
   mqttReceive(topic, message);
 }
@@ -95,6 +98,8 @@ void mqttReceive(char* topic, char* message)
     processCommandJson(message);
   }
 
+  bool dataFromThermostat = false;
+
   //HVAC settings
   //Integrated POWER ON/OFF into other commands
   /*if (strcmp(topic,mqtt_powerCmd)==0)
@@ -127,6 +132,14 @@ void mqttReceive(char* topic, char* message)
 
     //flashBoardLed(100, 5);
   }
+  else if (strcmp(topic,mqtt_thermJson)==0)
+  {
+    processThermJson(message);
+
+    //flashBoardLed(100, 6);
+
+    dataFromThermostat = true;
+  }
   else
   {
     sendDataToHvac = false;
@@ -134,8 +147,12 @@ void mqttReceive(char* topic, char* message)
     return;
   }
 
-  sendDataToHvac = true;
-  updatePublish = true;
+  if (!dataFromThermostat)
+  {
+    sendDataToHvac = true;
+    updatePublish = true;
+    runEvery10seconds(true);
+  }
 }
 
 //Functions to run while trying to reconnect
@@ -147,11 +164,12 @@ void mqttKeepRunning()
   
   //readSensors();          //Read sensors (buttons, etc.)
 
-  //TODO
+  updateTime();
 
   writeOutputs();           //Set OUTPUTS devices
 
-  flashEvery5sec();
+  runEvery5seconds();
+  runEvery10seconds(false);
 }
 
 void mqttSubscribe()
@@ -159,8 +177,10 @@ void mqttSubscribe()
   mqttClient.subscribe(mqtt_powerCmd);
   mqttClient.subscribe(mqtt_modeCmd);
   mqttClient.subscribe(mqtt_tempCmd);
+  mqttClient.loop();
   mqttClient.subscribe(mqtt_fanCmd);
   mqttClient.subscribe(mqtt_swingCmd);
+  mqttClient.subscribe(mqtt_thermJson);
   mqttClient.loop();
 }
 
@@ -170,7 +190,7 @@ void mqttPublish()
   if (!updatePublish || !networkActive)
     return;
 
-  sendHvacStates();
+  //TODO
     
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 

@@ -27,7 +27,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
  Name:    HVAC Control - Living Room Fujitsu (ARRAH2E)
  Created: 2020/01/19
- Created: 2020/04/04
+ Created: 2020/10/07
  Author:  gauthier_j100@hotmail.com / SupremeSports
  GitHub:  https://github.com/SupremeSports/
 */
@@ -107,8 +107,6 @@ const bool enableBoardLED         = true;         //If true, LED will flash to i
 
 bool newStart                     = false;        //New start detection
 
-long ledFlashDelay                = 0;            //Led flashing delay
-
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
@@ -124,6 +122,9 @@ bool mqttActive                   = false;
 
 long lastSecond                   = 0;
 long lastMinute                   = 0;
+
+uint8_t keepAlive                 = MQTT_KEEPALIVE;
+uint8_t lastKeepAlive             = 0;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
@@ -199,6 +200,14 @@ byte configTempSetpoint           = 21;
 bool sendDataToHvac               = false;
 
 // ----------------------------------------------------------------------------------------------------
+// -------------------------------------- WALL THERMOSTAT CONTROL -------------------------------------
+// ----------------------------------------------------------------------------------------------------
+float roomAirTemp                 = initValue;
+float roomAirHum                  = initValue;
+
+bool thermAlive                   = false;
+
+// ----------------------------------------------------------------------------------------------------
 // ------------------------------------- AIR TEMP STATUS DEFINES --------------------------------------
 // ----------------------------------------------------------------------------------------------------
 const uint8_t tempPin             = A0;           //Temperature voltage pin
@@ -209,6 +218,19 @@ float outputAirTemp               = 0.0;          //Temperature voltage reading
 float temp_ax2                    =  -0.00004;
 float temp_bx                     =   0.09375;
 float temp_c                      = -15.77583;
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ TIME CONTROL --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#include <TimeLib.h>              // TimeLib library is needed https://github.com/PaulStoffregen/Time
+                                  // http://playground.arduino.cc/code/time (Margolis 1.5.0)
+
+//Variables
+uint8_t Second                    = initValue;
+
+bool ONS_1s                       = false;
+bool ONS_5s                       = false;
+bool ONS_10s                      = false;
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- SETUP ------------------------------------------------
@@ -281,13 +303,10 @@ void runEverySecond()
 
   unsigned long loopTime = millis();
 
-  if (sendDataToHvac)
-    sendIRsignal();
+  sendIRsignal();
 
   updatePublish = true;
   mqttPublish();                                  //Publish MQTT data
-
-  sendDataToHvac = false;
 
   lastSecond = millis();
 
@@ -295,6 +314,31 @@ void runEverySecond()
   Sprint("Process time: ");
   Sprint(loopTime);
   Sprintln("ms");
+}
+
+void runEvery5seconds()
+{
+  if (!ONS_5s)
+    return;
+    
+  Sprintln("5 seconds");
+
+  flashEvery5sec();
+  
+  readSensors();
+  local_delay(10);
+  sendSensors();
+}
+
+void runEvery10seconds(bool force)
+{
+  if (!ONS_10s && !force)
+    return;
+    
+  Sprintln("10 seconds");
+  local_delay(100);
+  
+  sendHvacStates();
 }
 
 void runEveryMinute()

@@ -7,7 +7,31 @@ void initWifi()
   //Start WiFi communication
   WiFi.mode(WIFI_STA);
   WiFi.config(ip, gw, sn);           // Disable this line to run on DHCP
-  WiFi.begin(ssid, password);
+
+  int count = 0;
+
+  for (int i = 0; i < ssid_qty; ++i)
+  {
+    count = 0;
+    WiFi.disconnect();
+    WiFi.begin(ssid[i], password[i]);
+    Sprint("SSID #");
+    Sprint(i);
+    Sprint(": ");
+    Sprint(ssid[i]);
+    Sprint(" - ");
+    Sprintln(password[i]);
+    
+    while (WiFi.status() != WL_CONNECTED && count < 5)
+    {
+      flashBoardLed(100, 5);
+      count++;
+      wdtReset();
+    }
+    
+    if (WiFi.status() == WL_CONNECTED)
+      break;    
+  }
 
   long lastReading = millis();
  
@@ -21,7 +45,7 @@ void initWifi()
 
   Sprintln("Connected!");
 
-  networkActive = true;
+  networkActive = checkNetwork();
   
   lastSecond = millis()-10000;
 }
@@ -71,7 +95,7 @@ void initOTA()
   
   ArduinoOTA.setPort(8266);
   ArduinoOTA.setHostname(mqtt_deviceName);
-  ArduinoOTA.setPassword(password);
+  ArduinoOTA.setPassword(password[ssid_qty-1]);
 
   ArduinoOTA.onStart([]()
   {

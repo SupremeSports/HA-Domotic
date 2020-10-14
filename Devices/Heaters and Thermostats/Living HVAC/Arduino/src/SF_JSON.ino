@@ -34,6 +34,33 @@ void processCommandJson(char* message)
   }
 }
 
+void processThermJson(char* message)
+{
+  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+
+  JsonObject& root = jsonBuffer.parseObject(message);
+
+  if (!root.success())
+  {
+    Sprintln(json_parseFailed);
+    return;
+  }
+
+  if (root.containsKey(json_state))
+  {
+    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
+    {
+      lastKeepAlive = 0; //Reset counter
+      thermAlive = true;
+    }
+  }
+
+  if (root.containsKey(json_roomTemp))
+    roomAirTemp = atof(root[json_roomTemp]);
+  if (root.containsKey(json_roomHum))
+    roomAirHum = atof(root[json_roomHum]);
+}
+
 void sendHvacStates()
 {
   StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
@@ -63,17 +90,37 @@ void sendSensors()
 
   root[json_state] = configStateOn ? mqtt_cmdOn : mqtt_cmdOff;
 
+  root[json_therm] = thermAlive ? mqtt_cmdOn : mqtt_cmdOff;
+
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
- 
+
   dtostrf(outputAirTemp, 6, 1, result); // Leave room for too large numbers!
-  root[json_airtemp] = result;
+  root[json_airTemp] = result;
 
-  dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
-  root[json_rssi] = result;
+  if (thermAlive && roomAirTemp != initValue && roomAirHum != initValue)
+  {
+    dtostrf(roomAirTemp, 6, 1, result); // Leave room for too large numbers!
+    root[json_roomTemp] = result;
 
-  dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
-  root[json_rssiPercent] = result;
+    dtostrf(roomAirHum, 6, 1, result); // Leave room for too large numbers!
+    root[json_roomHum] = result;
+  }
+  else
+  {
+    root[json_roomTemp] = "---";
+    root[json_roomHum] = "---";
+  }
+
+  #if defined(ESP32) || defined(ESP8266)
+    root[json_ssid] = WiFi.SSID();
+    
+    dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
+    root[json_rssi] = result;
+  
+    dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
+    root[json_rssiPercent] = result;
+  #endif
 
   char buffer[BUFFER_ARRAY_SIZE];
   root.printTo(buffer, root.measureLength() + 1);
