@@ -4,30 +4,26 @@
         
   - platform: mqtt
     name: Water Valve Opened
-    state_topic: "Home/Control/Json"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
-    value_template: '{{ value_json.water_off }}'
-    qos: 0
-    
-  - platform: mqtt
-    name: Water Valve Closed
-    state_topic: "Home/Control/Json"
+    state_topic: "Home/Control/Sensors/Stts"
     availability_topic: "Home/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     value_template: '{{ value_json.water_on }}'
     qos: 0
     
+  - platform: mqtt
+    name: Water Valve Closed
+    state_topic: "Home/Control/Sensors/Stts"
+    availability_topic: "Home/Control/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    value_template: '{{ value_json.water_off }}'
+    qos: 0
+    
   - platform: template
     sensors:
       water_heater_flow:
         friendly_name: Water Heater Flow
-        entity_id: 
-          - sensor.water_heater_status
-          - sensor.water_heater_temperature
-          - sensor.water_heater_flow
         value_template: >
           {{ state_attr('sensor.water_heater_status', 'flow')|int > 1 }}
         availability_template: >
@@ -36,38 +32,60 @@
           {% if is_state('switch.water_heater', 'off') %}
             mdi:radiator-off
           {% elif state_attr('switch.water_heater', 'flow')|int > 1 %}
-            mdi-radiator
+            mdi:radiator
           {% else %}
             mdi:radiator-disabled
           {% endif %}
 
       poweroutlet_status:
         friendly_name: Power Outlet
-        entity_id: 
-          - switch.power_outlet
-          - input_select.poweroutlet_mode
+        # friendly_name: >-
+        #   {% if is_state('input_select.poweroutlet_mode', 'Halloween Decorations') or is_state('input_select.poweroutlet_mode', 'Christmas Decorations') or is_state('input_select.poweroutlet_mode', 'Fountain') %}
+        #     {{ states.input_select.poweroutlet_mode.state }}
+        #   {% else %}
+        #     Power Outlet
+        #   {% endif %}
         value_template: >
           {{ is_state('switch.power_outlet', 'on') }}
         availability_template: >
           {{ not is_state('switch.power_outlet', 'unavailable') }}
         icon_template: >
-          {% if is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+          {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+            mdi:power-plug
+          {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
             mdi:pumpkin
           {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
             mdi:pine-tree
           {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
             mdi:fountain
-          {% elif is_state('input_select.poweroutlet_mode', '24/7') %}
-            mdi:power-plug
           {% else %}
             mdi:power-plug-off
           {% endif %}
+        attribute_templates:
+          mode: "{{ states('input_select.poweroutlet_mode') }}"
+          schedule: >-
+            {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+              ALWAYS ON
+            {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+              - Sunrise to 10PM
+              {{- '\n' -}}
+              - ALWAYS ON when freezing
+            {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+              - ON 1h before sunset or at 4PM
+                - OFF at 11PM
+              - ON all day from 7AM on Halloween day
+                - OFF at 12AM next morning
+            {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+              - ON 1h before sunset or at 4PM
+                - OFF at 11PM
+              - ON all day from 7AM on Christmas day
+                - OFF at 12AM next morning
+            {% else %}
+              ALWAYS OFF
+            {% endif %}
           
       lamppost_status:
         friendly_name: Lamp Post
-        entity_id: 
-          - switch.lamp_post
-          - input_select.lamppost_mode
         value_template: >
           {{ is_state('switch.lamp_post', 'on') }}
         availability_template: >
@@ -77,5 +95,44 @@
             mdi:lightbulb-off
           {% else %}
             mdi:lightbulb
+          {% endif %}
+          
+      frontyardirrigation_status:
+        friendly_name: Frontyard Irrigation
+        value_template: >
+          {{ is_state('switch.frontyard_irrigation', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.frontyard_irrigation', 'unavailable') }}
+        icon_template: >
+          {% if is_state('input_select.frontyardirrigation_mode', 'Winter/Off') %}
+            mdi:water-off
+          {% else %}
+            mdi:water
+          {% endif %}
+          
+      backyardirrigation_status:
+        friendly_name: Backyard Irrigation
+        value_template: >
+          {{ is_state('switch.backyard_irrigation', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.backyard_irrigation', 'unavailable') }}
+        icon_template: >
+          {% if is_state('input_select.backyardirrigation_mode', 'Winter/Off') %}
+            mdi:water-off
+          {% else %}
+            mdi:water
+          {% endif %}
+          
+      gardenirrigation_status:
+        friendly_name: Garden Irrigation
+        value_template: >
+          {{ is_state('switch.garden_irrigation', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.garden_irrigation', 'unavailable') }}
+        icon_template: >
+          {% if is_state('input_select.gardenirrigation_mode', 'Winter/Off') %}
+            mdi:water-off
+          {% else %}
+            mdi:water
           {% endif %}
           

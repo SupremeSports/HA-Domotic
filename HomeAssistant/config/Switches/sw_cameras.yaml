@@ -1,0 +1,30 @@
+####################################################
+# SWITCHES - CAMERAS                               #
+####################################################
+
+  - platform: mqtt
+    name: Camera IR - PoolArea
+    icon: mdi:flash
+    state_topic: "Camera/Pool/Json"
+    command_topic: "Camera/Pool/Cmd"
+    availability_topic: "Camera/Pool/LWT"
+    value_template: '{{ value_json.ir }}'
+    payload_on: '{"ir":"ON"}'
+    payload_off: '{"ir":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Camera/Pool/Json"
+    
+  - platform: command_line
+    switches:
+      camera_poolarea:
+        friendly_name: Camera - Pool Area
+        command_on: 'curl "http://192.168.1.250:8080/bringonline?ot=2&oid=1"'
+        command_off: 'curl "http://192.168.1.250:8080/takeoffline?ot=2&oid=1"'
+        command_state: 'curl -s http://192.168.1.250:8080/getobjectlist | grep "Pool Area" | cut -d , -f 5'
+        value_template: '{{ value == "Online" }}'
+        
+        

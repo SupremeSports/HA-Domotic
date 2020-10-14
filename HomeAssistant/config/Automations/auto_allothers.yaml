@@ -3,6 +3,7 @@
 ###################################################
 
   - alias: 'Set theme at startup'
+    mode: restart
     trigger:
       platform: homeassistant
       event: start
@@ -22,6 +23,8 @@
       
   #Publish time to all devices every 5 minutes or when a device requests an update (boot up or invalid time detected (by the device))
   - alias: Publish Time
+    mode: queued
+    max: 2
     trigger:
       - platform: time_pattern
         minutes: '/5'
@@ -42,11 +45,11 @@
         topic: "Home/Global/Time"
         #IMPORTANT - Always send a delimiter at the end of the string for parsing to succeed
         payload: "{{ '{:04}:{:02}:{:02}:{:02}:{:02}:{:02}:'.format(now().year, now().month, now().day, now().hour, now().minute, now().second) }}"
-
-  - alias: Daily Backup 3 AM
+        
+  - alias: Daily Backup 2AM
     trigger:
       platform: time
-      at: '3:00:00'
+      at: '2:00:00'
     action:
       service: hassio.snapshot_partial
       data_template:
@@ -66,18 +69,18 @@
 #        - share
 #        - addons_local.tar
 
-  - alias: Purge Database
+  - alias: Purge Database 3AM
     initial_state: True
     trigger:
       platform: time
-      at: '04:00:00'
+      at: '03:00:00'
     action:
       service: recorder.purge
       data:
         keep_days: 2
         repack: true
 
-  - alias: Daily Backup Cleanup
+  - alias: Daily Backup Cleanup 4AM
     trigger: 
       platform: time
       at: '04:00:00'
@@ -105,14 +108,12 @@
         - condition: state
           entity_id: sensor.water_valve_status
           state: 'Opened'
-        # - condition: numeric_state
-          # entity_id: sensor.outdoor_temperature
-          # below: 2
     action:
       service: switch.turn_off
       entity_id: switch.water_valve_open
       
   - alias: Water valve OFF
+    mode: restart
     trigger:
       - platform: state
         entity_id: switch.water_valve_close
@@ -139,6 +140,7 @@
       
   #Force water valve off if the feedback signal fails (prevent water leaks)
   - alias: Water valve Force Off
+    mode: restart
     trigger:
       - platform: state
         entity_id: sensor.water_valve_status
@@ -160,43 +162,50 @@
       service: switch.turn_on
       entity_id: switch.water_valve_close
           
-  - alias: Publish Heartbeat
+  - alias: Heartbeat Seconds
+    mode: restart
     trigger:
       - platform: time_pattern
-        seconds: '/1'
+        seconds: '*'
     action:
-      - service: counter.increment
-        entity_id: counter.heartbeat_counter
-      # - service: modbus.write_register
-        # data_template:
-          # hub: MB_ControlRoom
-          # unit: 1
-          # address: 0
-          # value: "{{ states.counter.heartbeat_counter.state  | int }}"
-          
-  - alias: Reset Heartbeat
-    trigger:
-      - platform: template
-        value_template: '{{ (states.counter.heartbeat_counter.state|int) >= (states.counter.heartbeat_counter.attributes.maximum|int) }}'
-        for: '00:00:01'
-    action:
-      - service: counter.reset
-        entity_id: counter.heartbeat_counter
+      - service: counter.configure
+        entity_id: counter.second_counter
+        data_template:
+          value: "{{ now().second | int }}"
+      - service: homeassistant.update_entity
+        entity_id: sensor.flashing_1s
+      - service: homeassistant.update_entity
+        entity_id: sensor.times
 
-  - alias: Rain Counter
+  - alias: Heartbeat Minutes
+    mode: restart
     trigger:
-      - platform: state
-        entity_id: sensor.rain_level_toggle
-        from: 'OFF'
-        to: 'ON'
-      - platform: state
-        entity_id: sensor.rain_level_toggle
-        from: 'ON'
-        to: 'OFF'
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '*'
     action:
-      - service: script.rain_count
+      - service: counter.configure
+        entity_id: counter.minute_counter
+        data_template:
+          value: "{{ now().minute | int }}"
+      - service: homeassistant.update_entity
+        entity_id: sensor.flashing_1m
+      - service: homeassistant.update_entity
+        entity_id: sensor.dates
+
+  - alias: Heartbeat Hours
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        hours: '*'
+    action:
+      - service: script.update_entities
   
   - alias: Doorchime TF Trigger
+    mode: restart
     trigger:
       - platform: state
         entity_id: binary_sensor.house_fd_bell
@@ -211,3 +220,170 @@
         topic: "Home/Chime/Top/Cmd"
         #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume
         payload: "{state:ON, sound:{{ state_attr('input_select.doorchime_tf_sound','options').index(states('input_select.doorchime_tf_sound'))|int }}, volume: {{ states.input_number.doorchime_tf_volume.state|int }} }"
+
+  - alias: Doorchime BF Trigger
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_bell
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: template
+        value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.doorchime_bf_trigger.attributes.last_triggered) > 2 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Chime/Bottom/Cmd"
+        #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume
+        payload: "{state:ON, sound:{{ state_attr('input_select.doorchime_bf_sound','options').index(states('input_select.doorchime_bf_sound'))|int }}, volume: {{ states.input_number.doorchime_bf_volume.state|int }} }"
+
+  - alias: Shut Soldering Station Warning
+    mode: restart
+    trigger:
+      - platform: template
+        value_template: '{{ states.sensor.soldering_station_status.state == "On" }}'
+        for:
+          minutes: "{{ states('input_number.soldering_station')|int(0) - 5 }}"
+    action:
+      - service: notify.sms_jean
+        data:
+          title: "Soldering Station - Warning"
+          message: "Soldering Station will turned off in 5 minutes"
+          
+  - alias: Shut Soldering Station Shutdown
+    mode: restart
+    trigger:
+      - platform: template
+        value_template: '{{ states.sensor.soldering_station_status.state == "On" }}'
+        for:
+          minutes: "{{ states('input_number.soldering_station')|int(0) }}"
+    action:
+      - service: switch.turn_off
+        entity_id: switch.soldering_station
+      - service: notify.sms_jean
+        data:
+          title: "Soldering Station OFF"
+          message: "Soldering Station has been turned off"
+          
+  - alias: Control Boxes
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          input_boolean.control_room_control_reset, input_boolean.pond_control_reset, input_boolean.pool_control_reset, input_boolean.weather_control_reset
+        to: 'on'
+    condition:
+      condition: state
+      entity_id: script.control_boxes
+      state: 'off'
+    action:
+      - service: script.control_boxes
+        data_template:
+          entity_id: "{% if 'weather' in trigger.to_state.entity_id %}Outside/WStation{% elif 'pond' in trigger.to_state.entity_id %}Pond/Control{% elif 'pool' in trigger.to_state.entity_id %}Pool/Control{% elif 'control_room' in trigger.to_state.entity_id %}Home/Control{%else%}none{%endif%}"
+          
+  - alias: Create Groups
+    trigger:
+      platform: homeassistant
+      event: start
+    action:
+      - service: group.set
+        data:
+          object_id: pool_sensors
+          entities: >-
+            {%- for s in states
+              if ('pool' in s.entity_id) %}
+              {{s.entity_id}}{% if not loop.last %}, {% endif %}
+            {%- endfor %}
+      - service: group.set
+        data:
+          object_id: pond_sensors
+          entities: >-
+            {%- for s in states
+              if ('pond' in s.entity_id) %}
+              {{s.entity_id}}{% if not loop.last %}, {% endif %}
+            {%- endfor %}
+            
+#   - alias: HVAC Thermostat to HVAC
+#     trigger:
+#       - platform: state
+#         entity_id: climate.living_room_therm
+#     condition:
+#       condition: and
+#       conditions:
+#         - condition: template
+#           value_template: "{{ not is_state('climate.living_room_hvac', 'unavailable') }}"
+#         - condition: template
+#           value_template: "{{ not is_state('climate.living_room_therm', 'unavailable') }}"
+#         - condition: or
+#           conditions:
+#             - condition: template
+#               value_template: "{{ state_attr('climate.living_room_hvac', 'temperature')|string != state_attr('climate.living_room_therm', 'temperature')|string  }}"
+#             - condition: template
+#               value_template: "{{ state_attr('climate.living_room_hvac', 'fan_mode')|string != state_attr('climate.living_room_therm', 'fan_mode')|string  }}"
+#             - condition: template
+#               value_template: "{{ state_attr('climate.living_room_hvac', 'hvac_mode')|string != state_attr('climate.living_room_therm', 'hvac_mode')|string  }}"
+#             - condition: template
+#               value_template: "{{ state_attr('climate.living_room_therm', 'swing_mode')|string != state_attr('climate.living_room_therm', 'swing_mode')|string  }}"
+#     action:
+#       - service: climate.set_temperature
+#         data_template:
+#           entity_id: climate.living_room_hvac
+#           temperature: "{{ state_attr('climate.living_room_therm', 'temperature') }}"
+#       - service: climate.set_fan_mode
+#         data_template:
+#           entity_id: climate.living_room_hvac
+#           fan_mode: "{{ state_attr('climate.living_room_therm', 'fan_mode') }}"
+#       - service: climate.set_hvac_mode
+#         data_template:
+#           entity_id: climate.living_room_hvac
+#           hvac_mode: "{{ state_attr('climate.living_room_therm', 'hvac_mode') }}"
+#       - service: climate.set_swing_mode
+#         data_template:
+#           entity_id: climate.living_room_hvac
+#           swing_mode: "{{ state_attr('climate.living_room_therm', 'swing_mode') }}"
+          
+  # - alias: HVAC sync Thermostat
+    # trigger:
+      # - platform: state
+        # entity_id: climate.living_room_hvac
+      # # - platform: state
+        # # entity_id: climate.living_room_therm
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: template
+          # value_template: "{{ not is_state('climate.living_room_hvac', 'unavailable') }}"
+        # - condition: template
+          # value_template: "{{ not is_state('climate.living_room_therm', 'unavailable') }}"
+        # - condition: or
+          # conditions:
+            # - condition: template
+              # value_template: "{{ state_attr('climate.living_room_hvac', 'temperature')|string != state_attr('climate.living_room_therm', 'temperature')|string  }}"
+            # - condition: template
+              # value_template: "{{ state_attr('climate.living_room_hvac', 'fan_mode')|string != state_attr('climate.living_room_therm', 'fan_mode')|string  }}"
+            # - condition: template
+              # value_template: "{{ state_attr('climate.living_room_hvac', 'hvac_mode')|string != state_attr('climate.living_room_therm', 'hvac_mode')|string  }}"
+            # - condition: template
+              # value_template: "{{ state_attr('climate.living_room_therm', 'swing_mode')|string != state_attr('climate.living_room_therm', 'swing_mode')|string  }}"
+    # action:
+      # # - service: script.therm_hvac
+        # # data_template:
+          # # from: "{{ trigger.to_state.entity_id }}"
+          # # to: "{% if 'living_room_hvac' in trigger.to_state.entity_id %}living_room_therm{% elif 'living_room_therm' in trigger.to_state.entity_id %}living_room_hvac{%else%}none{%endif%}"
+      # - service: climate.set_temperature
+        # data_template:
+          # entity_id: climate.living_room_therm
+          # temperature: "{{ state_attr('climate.living_room_hvac', 'temperature') }}"
+      # - service: climate.set_fan_mode
+        # data_template:
+          # entity_id: climate.living_room_therm
+          # fan_mode: "{{ state_attr('climate.living_room_hvac', 'fan_mode') }}"
+      # - service: climate.set_hvac_mode
+        # data_template:
+          # entity_id: climate.living_room_therm
+          # hvac_mode: "{{ state_attr('climate.living_room_hvac', 'hvac_mode') }}"
+      # - service: climate.set_swing_mode
+        # data_template:
+          # entity_id: climate.living_room_therm
+          # swing_mode: "{{ state_attr('climate.living_room_hvac', 'swing_mode') }}"

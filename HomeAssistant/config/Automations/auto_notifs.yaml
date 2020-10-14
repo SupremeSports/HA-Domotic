@@ -2,7 +2,29 @@
 # AUTOMATIONS - NOTIFICATIONS                     #
 ###################################################
 
+  - alias: HA Update Notification
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: binary_sensor.ha_update_available
+        from: 'off'
+        to: 'on'
+    condition:
+      condition: or
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.ha_update_available
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.updater
+          state: 'on'
+    action:
+      - service: script.haupdateavailable
+
 #   - alias: Publish Florida Days
+#     mode: restart
 #     trigger:
 #       - platform: time
 #         at: '09:00:00'
@@ -16,6 +38,7 @@
 #           message: clear_badge
           
   - alias: Publish Postal Arrival
+    mode: restart
     trigger:
       - platform: state
         entity_id: sensor.postal_status
@@ -40,6 +63,7 @@
             {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
           
   - alias: Publish Postal Removal
+    mode: restart
     trigger:
       - platform: state
         entity_id: sensor.postal_status
@@ -64,6 +88,7 @@
             {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
           
   - alias: Lexus Office Start Reminder
+    mode: restart
     trigger:
       - platform: time
         at: '11:45:00'
@@ -77,13 +102,14 @@
           state: 'DO2 Contrôle'
         - condition: numeric_state
           entity_id: sensor.outdoor_temperature
-          below: 2
+          below: 5
     action:
       - service: notify.sms_jean
         data:
           message: "Start the Lexus"
 
   # - alias: Publish Persistent
+    # mode: restart
     # trigger:
       # - platform: time_pattern
         # minutes: '/59'         
@@ -94,6 +120,7 @@
         # title: "Custom subject"
 
   - alias: Publish Collect Notification
+    mode: restart
     trigger:
       platform: time
       at: '7:00:00'
@@ -105,6 +132,9 @@
           state: 'Today'
         - condition: state
           entity_id: sensor.collect_recycle_week
+          state: 'Today'
+        - condition: state
+          entity_id: sensor.collect_compost_week
           state: 'Today'
     action:
       service_template: >
@@ -118,17 +148,26 @@
           notify.sms_jean
         {% endif %}
       data_template:
-        title: "Trash/Recycle day"
+        title: "Collect day"
         message: >
-          {% if is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') %}
-            Put trash AND recycle out for collection today
+          {% if is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
+            Put TRASH, RECYCLE & COMPOST out for collection today
+          {% elif is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') %}
+            Put TRASH & RECYCLE out for collection today
+          {% elif is_state('sensor.collect_recycle_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
+            Put RECYCLE & COMPOST out for collection today
+          {% elif is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
+            Put TRASH & COMPOST out for collection today
           {% elif is_state('sensor.collect_trash_week', 'Today') %}
-            Put trash out for collection today
+            Put TRASH out for collection today
           {% elif is_state('sensor.collect_recycle_week', 'Today') %}
-            Put recycle out for collection today
+            Put RECYCLE out for collection today
+          {% elif is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
+            Put COMPOST out for collection today
           {% endif %}
 
   - alias: Printer3D Job Complete
+    mode: restart
     trigger:
       - platform: state
         entity_id: binary_sensor.octoprint_printing
@@ -147,6 +186,7 @@
           message: "3D Printing Completed"
           
   - alias: Printer3D Job Failed
+    mode: restart
     trigger:
       - platform: state
         entity_id: binary_sensor.octoprint_printing_error
@@ -160,4 +200,22 @@
       - service: notify.sms_jean
         data:
           message: "3D Printing Failed"
+          
+#   - alias: Set new dates for collects
+#     mode: restart
+#     trigger:
+#       platform: time
+#       at: "01:00:00"
+#     condition:
+#       - condition: template
+#         value_template: '{{ now().date()|string == "2020-09-23" }}'
+#     action:
+#       - service: input_select.select_option
+#         data:
+#           entity_id: input_select.collect_trash
+#           option: Odd/Wednesday
+#       - service: input_select.select_option
+#         data:
+#           entity_id: input_select.collect_recycle
+#           option: Even/Wednesday
           

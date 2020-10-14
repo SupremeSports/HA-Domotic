@@ -4,6 +4,7 @@
 #{"topic": "Home/Milight/Cmd/1", "payload": "{\"sync\": \"ON\"}"}
 
   - alias: Milight Controller
+    mode: restart
     trigger:
       - platform: state
         entity_id: input_number.milight_id_sync
@@ -23,6 +24,7 @@
           value: 0
 
   - alias: Nixie Clock
+    mode: restart
     trigger:
       platform: time_pattern
       seconds: '/5'

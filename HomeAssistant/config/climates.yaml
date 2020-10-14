@@ -37,7 +37,16 @@
     swing_mode_state_topic: "Home/Living/Hvac/Stts"
     swing_mode_state_template: "{{ value_json.swing }}"
     current_temperature_topic: "Home/Living/Hvac/Json"
-    current_temperature_template: "{{ value_json.air_temp }}"
+    #current_temperature_template: "{{ value_json.room_temp }}"
+    #current_temperature_template: "{{ value_json.air_temp }}"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set air = value_json.air_temp %}
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {{ air }}
+      {% else %}
+        {{ room }}
+      {% endif %}
     availability_topic: "Home/Living/Hvac/LWT"
     payload_available: "online"
     payload_not_available: "offline"

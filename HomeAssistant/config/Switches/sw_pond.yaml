@@ -1,0 +1,33 @@
+####################################################
+# SWITCHES - POND                                  #
+####################################################
+    
+  - platform: mqtt
+    name: Pond Pump
+    icon: mdi:debug-step-over
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r6 }}'
+    availability_topic: "Pool/Control/LWT"
+    payload_on: '{"r6":"ON"}'
+    payload_off: '{"r6":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+
+  - platform: mqtt
+    name: Pond Filler Valve
+    icon: mdi:debug-step-out
+    state_topic: "Home/Control/Relay/Stts"
+    command_topic: "Home/Control/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    availability_topic: "Home/Control/LWT"
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0

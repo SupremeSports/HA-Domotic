@@ -13,10 +13,12 @@
     - type: entities
       title: TED5000
       show_header_toggle: false
+      #state_color: true
       entities: 
         - sensor.ted5000_mtu1_power
         - sensor.ted5000_mtu2_power
         - sensor.ted5000_mtu3_power
+        - binary_sensor.power_peakperiod
 
     - type: entities
       title: Water Entrance
@@ -31,24 +33,40 @@
                   name: Turn ON
                 - entity: switch.water_valve_close
                   name: Turn OFF
-            - automation.water_valve_force_off
-            - automation.water_valve_off
-            - automation.water_valve_on
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Automations
+              entities:
+                - automation.water_valve_force_off
+                - automation.water_valve_off
+                - automation.water_valve_on
         - type: custom:fold-entity-row
           head: sensor.water_heater_status
           entities:
             - switch.water_heater
             - sensor.water_heater_temperature
             - sensor.water_heater_flow
-
+        
     - type: entities
-      title: Control Room Box
+      title: Control Room Cabinet Status
       show_header_toggle: false
       entities:
-        #- sensor.controlroom_heartbeat
-        - sensor.controlroom_box_temperature
-        - sensor.controlroom_box_humidity
-
+        - type: custom:fold-entity-row
+          head: sensor.control_room_control_status
+          entities:
+            - sensor.cold_storage_temperature
+            - sensor.cold_storage_humidity
+            - sensor.control_room_box_temperature
+            - sensor.control_room_box_humidity
+            - sensor.control_room_12v_voltage
+            - sensor.control_room_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.control_room_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+                  
     - type: entities
       title: Clocks
       show_header_toggle: false

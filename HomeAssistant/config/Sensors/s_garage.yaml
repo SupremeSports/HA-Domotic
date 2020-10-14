@@ -2,3 +2,14 @@
 # SENSORS - GARAGE                                 #
 ####################################################
     
+  - platform: mqtt
+    name: Garage Front Rssi
+    state_topic: "Garage/Lights/Json"
+    value_template: '{{ value_json.wifi_rssi }}'
+    unit_of_measurement: '%'
+    availability_topic: "Garage/Lights/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Garage/Lights/Json"
+    

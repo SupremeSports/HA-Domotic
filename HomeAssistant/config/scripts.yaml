@@ -77,6 +77,15 @@
       - delay: 00:00:01
       - service: input_boolean.turn_off
         entity_id: group.cars
+        
+  control_boxes:
+    alias: Control Boxes Script
+    sequence:
+      - service: mqtt.publish
+        data_template: {"topic": "{{ entity_id }}/Cmd", "payload": "{\"reset\": \"ON\"}"}
+      - delay: 00:00:01
+      - service: input_boolean.turn_off
+        entity_id: group.control_boxes
           
   milightspeed:
     alias: Milight Speed
@@ -105,13 +114,133 @@
             4. Press enter in the box as soon the light turns on
             5. Light will blink
             6. Done!
-          
-  rain_count:
-    alias: Rain Count
+            
+  haupdateavailable:
+    alias: New Home Assistant version
     sequence:
-      - service: input_boolean.turn_on
-        entity_id: input_boolean.outdoor_rain_trigger
-      - delay: 00:00:01
-      - service: input_boolean.turn_off
-        entity_id: input_boolean.outdoor_rain_trigger
+      - service: persistent_notification.create
+        data:
+          title: "New Home Assistant version"
+          message: |
+            New Home Assistant version {{ states.sensor.ha_latest_version.state}} is available for download.
+            
+            You are currently running {{ states.sensor.ha_installed_version.state}}.
+            
+            ## Release Notes
+            https://home-assistant.io/blog/categories/release-notes/
+          
+  # rain_count:
+    # alias: Rain Count
+    # sequence:
+      # - service: input_boolean.turn_on
+        # entity_id: input_boolean.outdoor_rain_trigger
+      # - delay: 00:00:01
+      # - service: input_boolean.turn_off
+        # entity_id: input_boolean.outdoor_rain_trigger
         
+  gardenirrigation_start30m:
+    alias: Garden Irrigation Forced 30m
+    sequence:
+      - service: script.turn_off
+        entity_id: script.gardenirrigation_start1h
+      - service: switch.turn_on
+        entity_id: switch.garden_irrigation
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.gardenirrigation_start1h
+      - delay: 00:30:00
+      - service: script.turn_on
+        entity_id: script.gardenirrigation_cancel
+  gardenirrigation_start1h:
+    alias: Garden Irrigation Forced 1h
+    sequence:
+      - service: script.turn_off
+        entity_id: script.gardenirrigation_start30m
+      - service: switch.turn_on
+        entity_id: switch.garden_irrigation
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.gardenirrigation_start30m
+      - delay: 01:00:00
+      - service: script.turn_on
+        entity_id: script.gardenirrigation_cancel
+  gardenirrigation_cancel:
+    alias: Garden Irrigation Forced Cancel
+    sequence:
+      - service: script.turn_off
+        entity_id: script.gardenirrigation_start30m
+      - service: script.turn_off
+        entity_id: script.gardenirrigation_start1h
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.gardenirrigation_start30m
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.gardenirrigation_start1h
+      - delay: 00:00:02
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.gardenirrigation_cancel
+        
+  pondfiller_start30m:
+    alias: Pond Filler Forced 30m
+    sequence:
+      - service: script.turn_off
+        entity_id: script.pondfiller_start1h
+      - service: script.turn_off
+        entity_id: script.pondfiller_start2h
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start1h
+      - delay: 00:30:00
+      - service: script.turn_on
+        entity_id: script.pondfiller_cancel
+  pondfiller_start1h:
+    alias: Pond Filler Forced 1h
+    sequence:
+      - service: script.turn_off
+        entity_id: script.pondfiller_start30m
+      - service: script.turn_off
+        entity_id: script.pondfiller_start2h
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start30m
+      - delay: 01:00:00
+      - service: script.turn_on
+        entity_id: script.pondfiller_cancel
+  pondfiller_start2h:
+    alias: Pond Filler Forced 2h
+    sequence:
+      - service: script.turn_off
+        entity_id: script.pondfiller_start30m
+      - service: script.turn_off
+        entity_id: script.pondfiller_start1h
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start30m
+      - delay: 02:00:00
+      - service: script.turn_on
+        entity_id: script.pondfiller_cancel
+  pondfiller_cancel:
+    alias: Pond Filler Forced Cancel
+    sequence:
+      - service: script.turn_off
+        entity_id: script.pondfiller_start30m
+      - service: script.turn_off
+        entity_id: script.pondfiller_start1h
+      - service: script.turn_off
+        entity_id: script.pondfiller_start2h
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start30m
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start1h
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start2h
+      - delay: 00:00:02
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_cancel
+        
+  update_entities:
+    alias: Update entities
+    sequence:
+      - service: python_script.issues
+      - service: python_script.count
+      

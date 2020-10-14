@@ -88,9 +88,9 @@
   - platform: mqtt
     schema: json
     name: Pool Clock
-    state_topic: "Pool/Control/Clock/LED/Stts"
-    command_topic: "Pool/Control/Clock/LED/Cmd"
-    availability_topic: "Pool/Control/Clock/LWT"
+    state_topic: "Pool/Clock/LED/Stts"
+    command_topic: "Pool/Clock/LED/Cmd"
+    availability_topic: "Pool/Clock/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     brightness: true

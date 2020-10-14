@@ -1,0 +1,55 @@
+####################################################
+# INPUT NUMBER                                     #
+####################################################
+    
+  milight_id_sync:
+    name: Milight ID to Sync (1-254)
+    icon: mdi:sync
+    mode: box
+    initial: 0
+    min: 0
+    max: 254
+    step: 1
+    
+  doorchime_tf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    
+  doorchime_bf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+    
+  doorchime_gf_volume:
+    name: Volume
+    icon: mdi:volume-high
+    mode: slider
+    #initial: 5
+    min: 0
+    max: 7
+    step: 1
+
+  soldering_station:
+    name: Soldering Station Delay
+    icon: mdi:timer-sand
+    mode: box
+    #initial: 5
+    min: 10
+    max: 300
+    step: 1
+    
+  # issues_count:
+    # name: Sensors that need attention
+    # mode: box
+    # min: 0
+    # max: 9999
+    # step: 1

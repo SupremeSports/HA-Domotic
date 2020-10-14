@@ -1,0 +1,49 @@
+####################################################
+# INPUT NUMBER - POOL                              #
+####################################################
+
+  pool_heater_setpoint:
+    name: Pool Heater Setpoint
+    mode: slider
+    #initial: 85
+    min: 80
+    max: 95
+    step: 1
+
+  pool_drain_percent:
+    name: Pool Drain Percent (Drain / Skim)
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+  pool_heater_percent:
+    name: Pool Heater Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+  pool_slide_percent:
+    name: Pool Slide Percent
+    mode: slider
+    #initial: 50
+    min: 0
+    max: 100
+    step: 10
+    
+  pool_clock_scroll_speed:
+    name: Pool Text Scroll Speed
+    mode: slider
+    initial: 80
+    min: 0
+    max: 100
+    step: 5
+  pool_clock_trans_speed:
+    name: Pool Color Cycle Speed
+    mode: slider
+    initial: 1
+    min: 1
+    max: 10
+    step: 1
+    

@@ -2,6 +2,8 @@
 # SENSORS - ROOMS                                  #
 ####################################################
 
+########## MASSAGE ROOM ##########
+
   - platform: mqtt
     name: "Massage Room Temp"
     icon: mdi:mailbox
@@ -26,6 +28,112 @@
     json_attributes_topic: "Home/Massage/Clock/Json"
     unit_of_measurement: '%'
     
+  - platform: template
+    sensors:
+      massage_room_status:
+        friendly_name: "Massage Room Status"
+        value_template: >
+          {% if is_state('switch.massage_room_appliances', 'on') %}
+            {% if states('sensor.massage_room_power') | float >= 2 %}
+              On
+            {% else %}
+              Off
+            {% endif %}
+          {% else %}
+            Ready
+          {% endif %}
+        availability_template: >
+          {{ not is_state('switch.massage_room_appliances', 'unavailable') }}
+        icon_template: >
+          mdi:pen
+        attribute_templates:
+          state: "{{ states.sensor.massage_room_data.attributes.POWER | round(3) }}"
+          power: "{{ states.sensor.massage_room_power.attributes.ENERGY.Power | round(3) }}"
+          voltage: "{{ states.sensor.massage_room_power.attributes.ENERGY.Voltage | round(0) }}"
+          current: "{{ states.sensor.massage_room_power.attributes.ENERGY.Current | round(1) }}"
+          p_factor: "{{ states.sensor.massage_room_power.attributes.ENERGY.Factor | round(2) }}"
+          today: "{{ states.sensor.massage_room_power.attributes.ENERGY.Today | round(3) }}"
+          yesterday: "{{ states.sensor.massage_room_power.attributes.ENERGY.Yesterday | round(3) }}"
+          total: "{{ states.sensor.massage_room_power.attributes.ENERGY.Total | round(3) }}"
+          wifi_rssi: "{{ states.sensor.massage_room_data.attributes.Wifi.Signal }}"
+          wifi_percent: "{{ states.sensor.massage_room_data.attributes.Wifi.RSSI }}"
+    
+  - platform: mqtt
+    name: "Massage Room Data"
+    state_topic: "Home/Massage/tele/STATE"
+    value_template: "{{ value_json.POWER }}"
+    availability_topic: "Home/Massage/tele/LWT"
+    qos: 1
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    json_attributes_topic: "Home/Massage/tele/STATE"
+    
+  - platform: mqtt
+    name: "Massage Room Power"
+    state_topic: "Home/Massage/tele/SENSOR"
+    value_template: "{{ value_json['ENERGY'].Power }}"
+    unit_of_measurement: "W"
+    availability_topic: "Home/Massage/tele/LWT"
+    qos: 1
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    json_attributes_topic: "Home/Massage/tele/SENSOR"
+    
+########## THINKERING ROOM ##########
+
+  - platform: template
+    sensors:
+      soldering_station_status:
+        friendly_name: "Soldering Station Status"
+        value_template: >
+          {% if is_state('switch.soldering_station', 'on') %}
+            {% if states('sensor.soldering_station_power') | float >= 2 %}
+              On
+            {% else %}
+              Off
+            {% endif %}
+          {% else %}
+            Ready
+          {% endif %}
+        availability_template: >
+          {{ not is_state('switch.soldering_station', 'unavailable') }}
+        icon_template: >
+          mdi:pen
+        attribute_templates:
+          state: "{{ states.sensor.soldering_station_data.attributes.POWER | round(3) }}"
+          power: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Power | round(3) }}"
+          voltage: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Voltage | round(0) }}"
+          current: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Current | round(1) }}"
+          p_factor: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Factor | round(2) }}"
+          today: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Today | round(3) }}"
+          yesterday: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Yesterday | round(3) }}"
+          total: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Total | round(3) }}"
+          wifi_rssi: "{{ states.sensor.soldering_station_data.attributes.Wifi.Signal }}"
+          wifi_percent: "{{ states.sensor.soldering_station_data.attributes.Wifi.RSSI }}"
+
+  - platform: mqtt
+    name: "Soldering Station Data"
+    state_topic: "Home/Soldering/tele/STATE"
+    value_template: "{{ value_json.POWER }}"
+    availability_topic: "Home/Soldering/tele/LWT"
+    qos: 1
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    json_attributes_topic: "Home/Soldering/tele/STATE"
+    
+  - platform: mqtt
+    name: "Soldering Station Power"
+    state_topic: "Home/Soldering/tele/SENSOR"
+    value_template: "{{ value_json['ENERGY'].Power }}"
+    unit_of_measurement: "W"
+    availability_topic: "Home/Soldering/tele/LWT"
+    qos: 1
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    json_attributes_topic: "Home/Soldering/tele/SENSOR"
+
+########## MASTER BEDROOM ##########
+    
   - platform: mqtt
     name: "Master Bed Raw"
     icon: mdi:scale
@@ -42,9 +150,25 @@
     sensors:
       master_bed_presence:
         friendly_name: Master Bed Presence
-        entity_id:
-          - sensor.master_bed_raw
-          - switch.master_bed_tare
+        icon_template: mdi:bed-empty
+        # value_template: >
+        #   {% set weight = states('sensor.master_bed_raw') | float %}
+        #   {% set jean = is_state('person.jean_gauthier', 'home') %}
+        #   {% set cindy = is_state('person.cindy_fortin', 'home') %}
+          
+        #   {% if weight < 30 %}
+        #     Empty
+        #   {% elif weight < 200 %}
+        #     Mi-Loup
+        #   {% elif weight < 900 and cindy %}
+        #     Cindy
+        #   {% elif weight < 1200 and jean %}
+        #     Jean
+        #   {% elif cindy and jean %}
+        #     Cindy & Jean
+        #   {% else %}
+        #     ERROR
+        #   {% endif %}
         value_template: >
           {% set weight = states('sensor.master_bed_raw') | float %}
           {% set jean = is_state('person.jean_gauthier', 'home') %}
@@ -54,14 +178,8 @@
             Empty
           {% elif weight < 200 %}
             Mi-Loup
-          {% elif weight < 900 and cindy %}
-            Cindy
-          {% elif weight < 1200 and jean %}
-            Jean
-          {% elif cindy and jean %}
-            Cindy & Jean
-          {% else %}
-            ERROR
+          {% else%}
+            Someone In Bed
           {% endif %}
         availability_template: "{{ not is_state('sensor.master_bed_raw', 'unavailable') }}"
         attribute_templates:

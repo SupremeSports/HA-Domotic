@@ -39,3 +39,18 @@
       - input_boolean.cars_journey_unlock
       - input_boolean.cars_journey_start
       
+  irrigation:
+    name: Irrigation
+    entities:
+      - switch.backyard_irrigation
+      - switch.frontyard_irrigation
+      - switch.garden_irrigation
+      
+  control_boxes:
+    name: Control Boxes
+    entities:
+      - input_boolean.control_room_control_reset
+      - input_boolean.pond_control_reset
+      - input_boolean.pool_control_reset
+      - input_boolean.weather_control_reset
+

@@ -47,6 +47,12 @@
           head: light.master_bedroom_rgbw
           entities:
             - cover.master_bedroom_rgbw
+        - type: 'custom:text-divider-row'
+          text: Test Row Divider
+          style: |
+            ha-card {
+              --secondary-text-color: var(--primary-text-color);
+            }
         - type: custom:fold-entity-row
           head: light.under_bar_rgbw
           entities:
@@ -59,6 +65,20 @@
         - sensor.massage_room_temp
         - sensor.massage_room_humidity
         - light.massage_clock_rgb
+        - type: custom:fold-entity-row
+          head: sensor.massage_room_status
+          entities:
+            - switch.massage_room_appliances
+            - sensor.massage_room_power
+            - sensor.massage_room_data
+            # - type: custom:fold-entity-row
+              # head:
+                # type: section
+                # label: Automations
+              # entities:
+                # - input_number.massage_room_appliances
+                # - automation.shut_massage_room_warning
+                # - automation.shut_massage_room_shutdown
     - type: light
       entity: light.massage_clock_rgb
         
@@ -68,4 +88,31 @@
         # action: none
       # hold_action:
         # action: none
-      # image: 'http://192.168.1.20/'
+      # image: http://192.168.1.20/
+      
+    - type: entities
+      title: Chicoutimi HA
+      show_header_toggle: false
+      entities:
+        - sensor.chicoutimi_last_boot
+        - sensor.chicoutimi_time_online
+        - sensor.chicoutimi_update_available
+        - sensor.chicoutimi_home_assistant_v2_db
+        - type: custom:fold-entity-row
+          head: sensor.chicoutimi_uun_entities
+          entities:
+            - type: custom:hui-markdown-card
+              style: |
+                ha-card {
+                  box-shadow: none;
+                  margin: 0px 0px 0px 20px;
+                }
+              content: |
+                {% set list = ['icon_color', 'icon', 'friendly_name', '--------------', 'templates', 'hide_attributes'] %}
+                
+                {% for attr in states.sensor.chicoutimi_uun_entities.attributes %}
+                  {% if attr not in list -%}
+                    {{attr}}: {{states.sensor.chicoutimi_uun_entities.attributes[attr]}}
+                  {%- endif  -%}
+                {%- endfor -%}
+        

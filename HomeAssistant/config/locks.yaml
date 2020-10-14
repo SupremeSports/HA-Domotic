@@ -91,7 +91,7 @@
     name: Pool FD Lock
     state_topic: "Pool/Door/Front/Stts"
     command_topic: "Pool/Door/Front/Cmd"
-    availability_topic: "Pool/Door/Front/LWT"
+    availability_topic: "Pool/Control/LWT"
     payload_available: "online"
     payload_not_available: "offline"
     value_template: '{{ value_json.locked }}'
