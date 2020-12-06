@@ -18,8 +18,7 @@ void initSensors()
 //INPUTS
 void readSensors(bool all)
 {
-  runFanButtons();
-  runLmpButtons();
+  runButtons();
 
   if (!all)
     return;
