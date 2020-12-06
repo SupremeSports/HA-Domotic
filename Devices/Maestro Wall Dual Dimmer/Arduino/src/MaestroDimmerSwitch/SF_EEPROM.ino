@@ -26,16 +26,14 @@ void readEEPROM()
   lamp.state = bitRead(lamp.level, STATE_BIT)==1;
   lamp.fade = bitRead(lamp.level, FADE_BIT)==1;
   lamp.full = bitRead(lamp.level, FULL_BIT)==1;
-  //lamp.act = lamp.full ? 7 : lamp.level;
-
+  
   fan.out = value_FAN;
   fan.in = value_FAN;
   fan.level = value_FAN;
   fan.state = bitRead(fan.level, STATE_BIT)==1;
   fan.fade = bitRead(fan.level, FADE_BIT)==1;
   fan.full = bitRead(fan.level, FULL_BIT)==1;
-  //fan.act = fan.full ? 7 : fan.level;
-  
+    
   for (int i=3; i<8; i++) //3 LSBs used for level 0-7
   {
     bitClear(lamp.level, i);

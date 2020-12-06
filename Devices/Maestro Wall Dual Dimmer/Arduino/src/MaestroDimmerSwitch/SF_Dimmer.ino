@@ -48,15 +48,18 @@ void initPWM()
   for (int i=1; i<15; i++)
     pwm.setPin(i, 4095*PWM_MIN, reversePWM);
 
+  pinMode(pwmEnablePin, OUTPUT);
   startupShow = true;
 }
 
 //Calculates values for each led
 void runDimmer()
 {
+  ledFadeDelay = startupShow ? 125 : 250;
   if (millis()-lastFadeDelay < ledFadeDelay)
     return;
 
+  digitalWrite(pwmEnablePin, HIGH);
   lastFadeDelay = millis();
 
   if (startupShow)
@@ -160,6 +163,7 @@ void runFanDimmer()
 void runStartupPWM()
 {
   float ledValue = PWM_OFF;
+
   for (int i=0; i<7; i++)
   {
     ledValue = PWM_OFF;
@@ -168,7 +172,7 @@ void runStartupPWM()
       if (i+1 == startupLevel)
         ledValue = PWM_ON;
     }
- 
+
     pwm.setPin(pin_fanLeds[i], 4095*(ledValue)*PWM_OFFSET, reversePWM);
     pwm.setPin(pin_lmpLeds[i], 4095*(ledValue)*PWM_OFFSET, reversePWM);
   }
@@ -183,6 +187,6 @@ void runStartupPWM()
     startupLevel -= 2;
     startupRev = true;
   }
-  if (startupLevel == 0 && startupRev)
+  if (startupLevel == -2 && startupRev)
     startupShow = false;
 }

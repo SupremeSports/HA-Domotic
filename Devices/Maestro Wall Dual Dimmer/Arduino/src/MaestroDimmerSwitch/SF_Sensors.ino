@@ -11,9 +11,7 @@ void initSensors()
 
   //OUTPUTS
   pinMode(boardLedPin, OUTPUT);
-
-  //Todo LEDs PWM
-
+  
   Sprintln("Sensors Initiated!");
 }
 

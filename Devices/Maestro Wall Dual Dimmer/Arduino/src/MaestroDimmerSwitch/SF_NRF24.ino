@@ -39,10 +39,10 @@ void checkNRF()
   if (newStart)
     return;
 
-  char * dataOut = (char *)buf;
+  char * data = (char *)buf;
 
-  Sprintln(dataOut);
-  parseData(dataOut, strlen(dataOut));
+  Sprintln(data);
+  parseData(data, strlen(data));
 }
 
 //Only send data on value change and after receiving data
@@ -134,8 +134,6 @@ void sendNRF()
 //    O: O is the embedded option bits for [0..7]
 void parseData(char* message, int dataSize)
 {
-  //Sprint("Parsing: ");
-
   char DELIMITER_DATA = ':';
   int maxDelimimters = 10;
   int maxParsedByte = 8;
@@ -145,7 +143,6 @@ void parseData(char* message, int dataSize)
   //Find delimiters
   for (int i = 0; i < dataSize; i++)
   {
-    //Sprint(message[i]);
     if (message[i] == DELIMITER_DATA)
     {
       indexDelim[qtyDelimiters] = i;
@@ -154,7 +151,6 @@ void parseData(char* message, int dataSize)
         break;
     }
   }
-  //Sprintln();
 
   uint16_t parsedData[qtyDelimiters]; // ALWAYS END WITH A DELIMITER
   char data[maxParsedByte];
