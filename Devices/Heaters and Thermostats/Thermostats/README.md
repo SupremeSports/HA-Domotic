@@ -16,32 +16,32 @@ Pictures/screenshots from TFT to come...
 
 
 ### Features: ###
-* HLK-PM03 3.3V 3W power supply directly on 120Vac
-* Passcode protected settings and temperature modification (disables and/or hides buttons)
-* Passcode can be changed through MQTT and saved to EEPROM
-* Logout and screen timeout adjustable through the settings screen
-* Settings screen to adjust screen turn off delay, logout delay, dim level, beeper level
-* Extra screen to show information (WiFi SSID, rssi, voltage, etc.)
-* Communicating with Home Assistant and HVAC directly through the MQTT broker
+- HLK-PM03 3.3V 3W power supply directly on 120Vac
+- Passcode protected settings and temperature modification (disables and/or hides buttons)
+- Passcode can be changed through MQTT and saved to EEPROM
+- Logout and screen timeout adjustable through the settings screen
+- Settings screen to adjust screen turn off delay, logout delay, dim level, beeper level
+- Extra screen to show information (WiFi SSID, rssi, voltage, etc.)
+- Communicating with Home Assistant and HVAC directly through the MQTT broker
 
-* Top row:
-    * Displays WiFi status, HVAC on/off status, ECO mode, user logged in and notifications icons
-    * Displays time
-* Center ring:
-    * Displays set temperature in large
-    * Arrow up/down (disappears when logged out) adjusts temperature
-        * Displayed in red until you let it at new temprature for few seconds, then sends it to MQTT
-* Left gray circle:
-    * Displays actual temperature and humidity as read by the AM2320/DHT22
-* Right gray circle: (not done yet)
-    * Arrow up/down (disappears when logged out) adjusts tilt
-* Symbols row:
-    * Copied directly from the HA symbols for Heat/Cool/Humidity/Fan/Off
-    * Shows in color when selected, grayed out when not
-* Bottom fan:
-    * Displays level for a fan 
-        * Please note that I reused the 5 levels to fit with my HVAC level (Auto/Quiet/Low/Medium/High)
-    * In heater-only mode (not HVAC), it would be for the room ceiling fan [See Maestro dimmer/fan](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Maestro%20Wall%20Dual%20Dimmer)
+- Top row:
+    - Displays WiFi status, HVAC on/off status, ECO mode, user logged in and notifications icons
+    - Displays time
+- Center ring:
+    - Displays set temperature in large
+    - Arrow up/down (disappears when logged out) adjusts temperature
+        - Displayed in red until you let it at new temprature for few seconds, then sends it to MQTT
+- Left gray circle:
+    - Displays actual temperature and humidity as read by the AM2320/DHT22
+- Right gray circle: (not done yet)
+    - Arrow up/down (disappears when logged out) adjusts tilt
+- Symbols row:
+    - Copied directly from the HA symbols for Heat/Cool/Humidity/Fan/Off
+    - Shows in color when selected, grayed out when not
+- Bottom fan:
+    - Displays level for a fan 
+        - Please note that I reused the 5 levels to fit with my HVAC level (Auto/Quiet/Low/Medium/High)
+    - In heater-only mode (not HVAC), it would be for the room ceiling fan [See Maestro dimmer/fan](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Maestro%20Wall%20Dual%20Dimmer)
 
 ![alt text](images/AllScreens.jpg "All screens")
 
@@ -51,8 +51,8 @@ Bench tests are very satisfying, first prototype working, waiting on few more pa
 To come...
 
 ### Home Assistant Link: ###
-* MQTT device with QoS and LWT
+- MQTT device with QoS and LWT
 
 #### Credits & 3D printing
-* Basic code: [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/)
-* 3D printed case : [SupremeSports](https://www.thingiverse.com/supremesports/designs) - To come...
+- Basic code: [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/)
+- 3D printed case : [SupremeSports](https://www.thingiverse.com/supremesports/designs) - To come...
