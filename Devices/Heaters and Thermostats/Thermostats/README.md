@@ -13,11 +13,7 @@ The basics is from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduito
 
 Pictures/screenshots from TFT to come...
 ![alt text](images/FrontBackView.jpg "Front/Back View")
-<!-- ![alt text](images/AddedControl.jpg "Control Board")
 
-![alt text](images/IRdiode.jpg "IR LED setup")
-
-![alt text](images/TempSencor.jpg "Temperature Sensor") -->
 
 ### Features: ###
 - HLK-PM03 3.3V 3W power supply directly on 120Vac
@@ -31,9 +27,23 @@ Pictures/screenshots from TFT to come...
 - Top row:
     - Displays WiFi status, HVAC on/off status, ECO mode, user logged in and notifications icons
     - Displays time
-- More to come...
+- Center ring:
+    - Displays set temperature in large
+    - Arrow up/down (disappears when logged out) adjusts temperature
+        - Displayed in red until you let it at new temprature for few seconds, then sends it to MQTT
+- Left gray circle:
+    - Displays actual temperature and humidity as read by the AM2320/DHT22
+- Right gray circle: (not done yet)
+    - Arrow up/down (disappears when logged out) adjusts tilt
+- Symbols row:
+    - Copied directly from the HA symbols for Heat/Cool/Humidity/Fan/Off
+    - Shows in color when selected, grayed out when not
+- Bottom fan:
+    - Displays level for a fan 
+        - Please note that I reused the 5 levels to fit with my HVAC level (Auto/Quiet/Low/Medium/High)
+    - In heater-only mode (not HVAC), it would be for the room ceiling fan [See Maestro dimmer/fan](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Maestro%20Wall%20Dual%20Dimmer)
 
-
+![alt text](images/AllScreens.jpg "All screens")
 
 
 #### Outcome ####
