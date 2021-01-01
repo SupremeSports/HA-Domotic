@@ -16,8 +16,8 @@ Pictures/screenshots from TFT to come...
 
 
 ### Features: ###
-- HLK-PM03 3.3V 3W power supply directly on 120Vac
-- Passcode protected settings and temperature modification (disables and/or hides buttons)
+* HLK-PM03 3.3V 3W power supply directly on 120Vac
+* Passcode protected settings and temperature modification (disables and/or hides buttons)
 - Passcode can be changed through MQTT and saved to EEPROM
 - Logout and screen timeout adjustable through the settings screen
 - Settings screen to adjust screen turn off delay, logout delay, dim level, beeper level
