@@ -12,7 +12,7 @@ It also replicates [Home Assistant climate](https://www.home-assistant.io/integr
 The basics is from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/) and I simply used parts of their code in order to make mine. Many features added, some others removed.
 
 Pictures/screenshots from TFT to come...
-[alt text](images/FrontView.jpg "Front View")[alt text](images/BackView.jpg "Back View")
+![Front View](images/FrontView.jpg "Front View")![alt text](images/Back View.jpg "Back View")
 <!-- ![alt text](images/AddedControl.jpg "Control Board")
 
 ![alt text](images/IRdiode.jpg "IR LED setup")
