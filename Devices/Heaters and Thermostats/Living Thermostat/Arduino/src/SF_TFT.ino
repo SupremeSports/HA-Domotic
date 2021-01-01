@@ -6,29 +6,32 @@ void initTFT()
   Sprintln("Init TFT...");
 
   tft.begin();
-  //tft.setRotation(6);
+  
+  #ifdef UPSIDE_DOWN
+    // 0 - 0 deg
+    // 1 - 90 deg anti-clockwise (from 0 deg)
+    // 2 - 180 deg anti-clockwise
+    // 3 - 270 deg anti-clockwise
+    // 4 - mirror content, and rotate 180 deg anti-clockwise
+    // 5 - mirror content, and rotate 270 deg anti-clockwise
+    // 6 - mirror content, and rotate 0 deg anti-clockwise
+    // 7 - mirror content, and rotate 90 deg anti-clockwise
+    tft.setRotation(6);
+  #endif
+  
   drawSplashScreen();
 
   Sprintln("Init Touch...");
   touch.begin();
-  #ifdef _debug
+  #ifdef DEBUG
     Sprint("tftx ="); Sprint(tft.width()); Sprint(" tfty ="); Sprintln(tft.height());
-  #endif
-
-  //Beeper configuration
-  Sprintln("Init Beeper...");
-  #ifdef ENABLE_BEEPER
-    ledcSetup(0,1E5,12);
-    ledcAttachPin(21,0);
-  #else
-    Sprintln("Beeper Disabled!");
   #endif
 }
 
 void runTFT()
 {
   //Detect touch event
-  touchPressed = runTouch();
+  touchControls();
 
   //If screen has changed
   if (PrevMode != PMode)
@@ -50,19 +53,9 @@ void runTFT()
   else if (PMode==PM_CLEANING)
     Cleaning_processing();  //Run screen cleaning then restart
   
+  //Return to page #1 of otpions
   if (PMode!=PM_OPTION)
     setOptionScreen = 1;
-
-  //Set all timers when a touch is detected
-  if (touchPressed)
-  {
-    ledMillis = millis() + ledDelayOff*1000;
-    logMillis = millis() + logDelayOff*1000;
-    returnMillis = millis() + returnToMain;
-    
-    sendTempMillis = millis() + SENDDATADELAY;
-    sendFanMillis = millis() + SENDDATADELAY;
-  }
 
   //Adjust logged in detection
   if (logDelayOff == 0)
@@ -74,22 +67,26 @@ void runTFT()
     drawUpDnButtons();  //Hide temperature SET arrows
   }
 
+  /**************************************************/
+  /**************************************************/
+
   // LED screen timeout delay control
   // Option menu timeout after 30 seconds
-  if (ledDelayOff > 0)
+  if (ledDelayOff == 0)
   {
-    screenOff = (millis() > ledMillis);
-    if (screenOff)
+    screenOff = false; //Always on if led off disabled
+    if (millis() > returnMillis)
       PMode = PM_MAIN;
   }
   else
   {
-    screenOff = false;
-    if (millis() > returnMillis)
-      PMode = PM_MAIN;
+    screenOff = (millis() > ledMillis); //False after timeout
+    if (screenOff)
+      PMode = PM_SLEEP;
   }
 
   //Update screen with real data after delay data
+  //  Waits 3 seconds before sending data to HVAC to prevent multiple changes
   if (millis() > sendTempMillis && sendTempWait)
   {
       configTempSetpoint = bufferTempSetpoint != 0 ? bufferTempSetpoint : configTempSetpoint;
@@ -104,6 +101,30 @@ void runTFT()
       updateFanLevel();
       sendCommandFan();
   }
+}
+
+void touchControls()
+{
+  touchPressed = runTouch();
+  if (!touchPressed)
+    return;
+
+  //If touch is pressed while screen is off, reload MAIN screen
+  if (screenOff)
+  {
+    PMode = PM_MAIN;
+    screenOff = false;
+  }
+
+  /**************************************************/
+  //Set all timers when a touch is detected
+  /**************************************************/
+  ledMillis = millis() + ledDelayOff*1000;
+  logMillis = millis() + logDelayOff*1000;
+  returnMillis = millis() + returnToMain;
+  
+  sendTempMillis = millis() + SENDDATADELAY;
+  sendFanMillis = millis() + SENDDATADELAY;
 }
 
 /********************************************************************//**
@@ -129,7 +150,7 @@ void Cleaning_processing()
     tft.setCursor(10, 100);
     tft.setTextSize(0);
     tft.setFont(&FreeSansBold9pt7b);
-    tft.print("Thermostat will restart after cleaning...");
+    tft.print("Restarting...");
   }
   if (Timer_Cleaning)
     Timer_Cleaning -= 10;
@@ -138,8 +159,6 @@ void Cleaning_processing()
     tft.fillScreen(ILI9341_BLACK);
     local_delay(500);
     ESP.restart(); //Restart after cleanup
-    //drawOptionScreen();
-    //PMode = PM_OPTION;
   }
 }
 
@@ -158,11 +177,11 @@ void drawSplashScreen()
 {
   tft.fillScreen(ILI9341_BLACK);
   
-//  if (PMode != PM_BOOT);
-//    return;
-  
+  if (PMode != PM_BOOT)
+    return;
 
   #ifdef ENABLE_SPLASH
+    Sprintln("Draw Splash In Progress...");
     tft.drawRGBBitmap(20,20, HA,200,201);
     local_delay(1);
     tft.drawRGBBitmap(20,250, Espressif,89,18);
@@ -174,11 +193,9 @@ void drawSplashScreen()
     tft.setFont(&FreeSansBold9pt7b);
     tft.setTextSize(0);
     tft.setTextColor(ILI9341_WHITE);
-    //tft.setCursor(180, 310);
     tft.setCursor(5, 14);
     tft.print(version);
   #endif
-  
 }
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ TOUCH CONTROL -------------------------------------------
@@ -192,13 +209,26 @@ bool runTouch()
 {
   p = touch.getPoint();
   local_delay(1);
-  p.x = map(p.x, TS_MINX, TS_MAXX, 320, 0);
-  p.y = map(p.y, TS_MINY, TS_MAXY, 240, 0);
+  
+  #ifdef UPSIDE_DOWN
+    p.x = map(p.x, TS_MINX, TS_MAXX, 0, 320);
+    p.y = map(p.y, TS_MINY, TS_MAXY, 0, 240);
+
+    p.x -= 20;
+    p.x = constrain(p.x, 0, 320);
+  #else
+    p.x = map(p.x, TS_MINX, TS_MAXX, 320, 0);
+    p.y = map(p.y, TS_MINY, TS_MAXY, 240, 0);
+  #endif
+  
   if (p.z > MINPRESSURE)
   {
     X = p.y; Y = p.x; //Vertical screen
+    
+    //One shot touch
     if (!touchPressed)
       detectButtons();
+    //else if (delay_timer_todo) //Long press support)
 
     return true;
   }
@@ -218,6 +248,8 @@ void detectButtons()
   Sprint(", Y = ");
   Sprint(Y);
   Sprintln();
+
+  buttonAckTone(100, 2000);
   
   if (PMode == PM_MAIN)
     detectMainButtons();
@@ -227,12 +259,24 @@ void detectButtons()
     detectOptionsButtons();
 }
 
-
-void buttonAckTone()
+void buttonAckTone(int ms, int freq)
 {
   #ifndef ENABLE_BEEPER
     return;
   #endif
 
-  //TODO
+  if (!beepON)
+    return;
+
+  #ifdef ESP32
+    uint8_t vol = map(beepVolume, 0, 7, 30, 254);
+    ledcWriteTone(BEEPER_CH, BEEPER_FREQ);  //Frequency
+    ledcWrite(BEEPER_CH, vol);              //Duty Cycle
+    local_delay(ms);
+    ledcWriteTone(BEEPER_CH, 0);
+  #elif ESP8266
+    tone(BEEPER, freq);
+    local_delay(ms);
+    noTone(BEEPER);
+  #endif
 }

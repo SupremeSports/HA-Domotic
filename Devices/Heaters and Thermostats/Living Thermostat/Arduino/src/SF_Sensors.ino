@@ -4,6 +4,7 @@
 void initSensors()
 {
   Sprintln("Init Sensors...");
+  
   #ifdef ENABLE_DHT
     setRxTxGpio(false, true);
     local_delay(100);
@@ -16,8 +17,31 @@ void initSensors()
   //TODO
 
   //OUTPUTS
-  pinMode(TFT_LED, OUTPUT);
+  #ifdef ESP32
+    ledcSetup(TFT_LED_CH, TFT_LED_FREQ, TFT_LED_RES);
+    ledcAttachPin(TFT_LED, TFT_LED_CH);
+    #ifdef TFT_LED_HIGH
+      ledcWrite(TFT_LED_CH, 0);
+    #else
+      ledcWrite(TFT_LED_CH, 255); //Invert mapping if active LOW
+    #endif
+  #elif ESP8266
+    pinMode(TFT_LED, OUTPUT);
+  #endif
   writeOutputs();
+
+  //Beeper configuration
+  Sprintln("Init Beeper...");
+  #ifdef ENABLE_BEEPER
+    #ifdef ESP32
+      ledcSetup(BEEPER_CH, BEEPER_FREQ, BEEPER_RES);
+      ledcAttachPin(BEEPER_PIN, BEEPER_CH);
+    #elif ESP8266
+      noTone(BEEPER_PIN);
+    #endif
+  #else
+    Sprintln("Beeper Disabled!");
+  #endif
   
   if (enableBoardLED)
     pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
@@ -50,37 +74,77 @@ void readSensors(bool all)
 //OUTPUTS
 void writeOutputs()
 {
-  //digitalWrite(TFT_LED, screenOff);   // LOW to turn backlight on - pcb version 01-02-00
-  digitalWrite(TFT_LED, !screenOff);    // HIGH to turn backlight on - pcb version 01-01-00
-  return;
+  setScreenBrightness();
 }
 
 //CHANGE PIN FUNCTION  TO GPIO
 // If boolean is true, it will be set as GPIO
 void setRxTxGpio(bool Tx, bool Rx)
 {
-  pinMode(1, Tx ? FUNCTION_3 : FUNCTION_0);
-  pinMode(3, Rx ? FUNCTION_3 : FUNCTION_0);
+  #ifdef ESP8266
+    pinMode(1, Tx ? FUNCTION_3 : FUNCTION_0);
+    pinMode(3, Rx ? FUNCTION_3 : FUNCTION_0);
+  #endif
 }
 
 // ----------------------------------------------------------------------------------------------------
-// ------------------------------------------ ANALOG SENSOR -------------------------------------------
+// ------------------------------------------ TFT BRIGHTNESS ------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void setScreenBrightness()
+{
+  #ifdef ESP32
+    int screenValue = 254;  //Full ON
+    if (screenOff)
+      screenValue = 0;      //Full OFF
+    else if (screenDim)
+    {
+      
+    #ifdef TFT_LED_HIGH
+      screenValue = map(screenDimValue, 0, 7, 30, 255);
+    #else
+      screenValue = map(screenDimValue, 0, 7, 255, 30); //Invert mapping if active LOW
+    #endif
+    }
+  
+    ledcWrite(TFT_LED_CH, screenValue);
+  #elif ESP8266
+    #ifdef TFT_LED_HIGH
+      digitalWrite(TFT_LED, !screenOff);     // HIGH to turn backlight on - pcb version 01-01-00
+    #else
+      digitalWrite(TFT_LED, screenOff);      // LOW to turn backlight on - pcb version 01-02-00
+    #endif
+  #endif
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------- ANALOG SENSOR ------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readAnalogSensors()
 {
+  //touch.getVBat()
+  //touch.getAuxIn()
+  //touch.getTemp()
+  //touch.getTempF()
   return;
 }
 
 void readVoltages()
 {
-  return;
-  uint16_t volt5V = readAn(voltage5V_pin) * 5;
+  #ifdef ENABLE_VOLT_ADC
+    float volt5V = readAn(voltage5V_pin) * 5.5;
 
-  voltage5V = volt5V/1023.0F*voltage5VRatio;
-  
-  Sprint("5V: ");
+    #ifdef ESP32
+      voltage5V = volt5V/4095.0F*voltage5VRatio;
+    #elif ESP8266
+      voltage5V = volt5V/1023.0F*voltage5VRatio;
+    #endif
+  #else
+    voltage5V = touch.getVBat();
+  #endif
+
+  /*Sprint("5V: ");
   Sprint(voltage5V);
-  Sprintln("V");
+  Sprintln("V");*/
 }
 
 uint16_t readAn(uint8_t pinToRead)
@@ -119,7 +183,7 @@ void readDHT()
     Sprintln("%");
     
     local_delay(1);
-  #else
+  #else //Simulate values
     iRoom_temperature += 0.1;
     if (iRoom_temperature > MAX_TEMPERATURE)
       iRoom_temperature = MIN_TEMPERATURE;

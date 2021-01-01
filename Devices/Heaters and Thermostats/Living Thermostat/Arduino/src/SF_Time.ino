@@ -1,17 +1,21 @@
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- TIME FUNCTIONS -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-//IMPORTANT - Always send a delimiter at the of string for parsing to succeed
-//Expected payload: "YYYY:MM:DD:hh:mm:ss:"
+//IMPORTANT - Always send a delimiter at the of string for parsing to succeed (no longer necessary)
+//Expected payload: "YYYY:MM:DD:hh:mm:ss:xx:"
+//    xx: is an optional value for sun below horizon=01
 void parseTime(char* message)
 {
-  int dataSize = 6;
+  
+  uint8_t dataSize = 7;
+  uint8_t lengthString = dataSize*3; //only accept 2 digit options
+    
   uint16_t dateTime[dataSize]; // ALWAYS END WITH A DELIMITER
   char data[5];
 
   dateTime[0] = atoi(strncpy(data, message, 4));
   int k = 1;
-  for (int i=4; i<18; i++)    //dateTime array
+  for (int i=4; i<lengthString; i++)    //dateTime array
   {
     for (int j=0; j<2; j++)   //character array
     {
@@ -24,6 +28,8 @@ void parseTime(char* message)
   }
 
   setTime(dateTime[3], dateTime[4], dateTime[5], dateTime[2], dateTime[1], dateTime[0]);
+
+  screenDim = dateTime[6]==1;
 
   updateTime();
 

@@ -124,21 +124,18 @@ void detectCodeButtons()
     if (Y>205 && Y<255) //If Button 1 is pressed
     {
       Sprintln("Button 1");
-      buttonAckTone();
       Number = Number==0 ? 1 : (Number*10) + 1;//Pressed twice
     }
     
     if (Y>145 && Y<195) //If Button 4 is pressed
     {
       Sprintln("Button 4");
-      buttonAckTone();
       Number = Number==0 ? 4 : (Number*10) + 4;//Pressed twice
     }
     
     if (Y>85 && Y<135) //If Button 7 is pressed
     {
       Sprintln("Button 7");
-      buttonAckTone();
       Number = Number==0 ? 7 : (Number*10) + 7;//Pressed twice
     } 
   }
@@ -148,28 +145,24 @@ void detectCodeButtons()
     if (Y>265)
     {
       Sprintln("Button 0"); //Button 0 is Pressed
-      buttonAckTone();
       Number = Number==0 ? 0 : (Number*10) + 0;//Pressed twice
     }
     
     if (Y>205 && Y<255)
     {
       Sprintln("Button 2");
-      buttonAckTone();
       Number = Number==0 ? 2 : (Number*10) + 2;//Pressed twice
     }
     
      if (Y>145 && Y<195)
     {
       Sprintln("Button 5");
-      buttonAckTone();
       Number = Number==0 ? 5 : (Number*10) + 5;//Pressed twice
     }
     
     if (Y>85 && Y<135)
     {
       Sprintln("Button 8");
-      buttonAckTone();
       Number = Number==0 ? 8 : (Number*10) + 8;//Pressed twice
     }   
   }
@@ -185,21 +178,18 @@ void detectCodeButtons()
     if (Y>205 && Y<255)
     {
       Sprintln("Button 3");
-      buttonAckTone();
       Number = Number==0 ? 3 : (Number*10) + 3;//Pressed twice
     }
     
     if (Y>145 && Y<195)
     {
       Sprintln("Button 6");
-      buttonAckTone();
       Number = Number==0 ? 6 : (Number*10) + 6;//Pressed twice
     }
     
     if (Y>85 && Y<135)
     {
       Sprintln("Button 9");
-      buttonAckTone();
       Number = Number==0 ? 9 : (Number*10) + 9;//Pressed twice
     }
   }
@@ -212,10 +202,8 @@ void detectCodeButtons()
     if (Number == passcode)
     {
       drawResultBox(ILI9341_GREEN,"CODE OK",10);
-      
-      #ifdef ENABLE_BEEPER
-        tone(BEEPER,1000,800);
-      #endif
+
+      buttonAckTone(800, 1000);
       
       //PMode = PM_OPTION;    //Enable this to go to OPTIONS menu once logged in
       PMode = PM_MAIN;        //Enable this to go to MAIN menu once logged in
@@ -227,12 +215,10 @@ void detectCodeButtons()
       drawResultBox(ILI9341_RED, "WRONG",30);
 
       #ifdef ENABLE_BEEPER
-        for (int i=0;i< 3;i++)
+        for (int i=0; i<3; i++)
         {
-          tone(BEEPER,4000);
+          buttonAckTone(100, 4000);
           local_delay(100);
-          noTone(BEEPER);
-          local_delay(50);
         }
       #endif
       

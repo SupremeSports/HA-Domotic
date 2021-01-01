@@ -156,7 +156,7 @@ void mqttPublish()
   if (!updatePublish || !networkActive)
     return;
 
-  if (!localTimeValid && (lastTimeRequestMillis==0 || millis()-lastTimeRequestMillis>5000))
+  if (!localTimeValid && (lastTimeRequestMillis==0 || millis()-lastTimeRequestMillis>3500)) //was 5000, exceptionnaly 3500 due to data coming in every 5 seconds
   {
     Sprintln("Time Request...");
     mqttClient.publish(mqtt_timeRequest, mqtt_cmdOn);

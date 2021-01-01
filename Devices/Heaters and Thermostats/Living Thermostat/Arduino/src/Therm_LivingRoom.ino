@@ -27,19 +27,22 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
   Name:     Thermostat - Living Room
   Created:  2020/10/02
-  Modified: 2020/10/12
+  Modified: 2020/10/13
   Author:   gauthier_j100@hotmail.com / SupremeSports
   GitHub:   https://github.com/SupremeSports/
 */
 
-//#define ESP32                   32
+const char* version               = "v:2.1.2";
+const char* date                  = "2020/10/25";
+
+#define ESP32                       32
 //#define ESP8266                   7
 
-#if defined(ESP32) and defined(ESP8266)
+#if (defined(ESP32) and defined(ESP8266))
   #error "Please select only ONE board type (ESP32 or ESP8266)"
-#elif ESP32
+#elif defined(ESP32)
   #include <WiFi.h>
-#elif ESP8266
+#elif defined(ESP8266)
   #include <ESP8266WiFi.h>
 #else
   #error "Please select ESP32 or ESP8266 board type"
@@ -64,6 +67,8 @@ int rssi                          = 0;            //WiFi signal strength in dBm
 #ifdef ESP32
   hw_timer_t *watchdogTimer       = NULL;         //Watchdog implementation
   #define LWD_TIMEOUT               5000          //WDT Value (ms)
+
+  #include <rom/rtc.h>
 #elif ESP8266
   #include <Ticker.h>
   Ticker lwdTicker;
@@ -87,7 +92,7 @@ int rssi                          = 0;            //WiFi signal strength in dBm
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#define DEBUG
+//#define DEBUG
 
 #ifdef DEBUG
   #define Sprintln(a) (Serial.println(a))
@@ -102,8 +107,14 @@ int rssi                          = 0;            //WiFi signal strength in dBm
 // ----------------------------------------------------------------------------------------------------
 //Used Pins
 const uint8_t boardLedPin         = 2;//LED_BUILTIN;  //Pin 1 on ESP-01, pin 2 on ESP-12E/ESP32
-const bool boardLedPinRevert      = true;         //If true, LED is on when output is low
-const bool enableBoardLED         = false;        //If true, LED will flash to indicate status
+
+#ifdef ESP32
+  const bool boardLedPinRevert    = false;        //If true, LED is on when output is low
+  const bool enableBoardLED       = true;         //If true, LED will flash to indicate status
+#else
+  const bool boardLedPinRevert    = true;         //If true, LED is on when output is low
+  const bool enableBoardLED       = false;        //If true, LED will flash to indicate status
+#endif
 
 //Variables
 #define initValue                   -1            //Initialization value to insure values updates
@@ -150,22 +161,27 @@ int address_PWH                   = 0;
 int address_PWL                   = 1;
 int address_LED                   = 2;
 int address_LCK                   = 3;
-int address_SPR                   = 4;
+int address_DIM                   = 4;
+int address_BIP                   = 5;
+int address_VOL                   = 6;
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- SPECIFIC DEFINES ------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 
 // --------------------------------------- SELF VOLTAGE READING ---------------------------------------
-const uint8_t voltage5V_pin       = A0;
+//#define ENABLE_VOLT_ADC
+
+const uint8_t voltage5V_pin       = A7;
 
 float voltage5V                   = 0.0;
 
-//R1  = 1k
-//R2  = 10k
-//Vr2 = 5.00V @ 5.50V
-//Thorical ratio = 0.90909
-float voltage5VRatio              = 1.13087;        //Voltage divider ratio [0 => 5.5]Vdc
+//R1  = 10k
+//R2  = 15k
+//Vr2 = 3.30V @ 5.50V
+//Theoretical ratio = 0.6
+
+float voltage5VRatio              = 0.99298;        //Voltage divider ratio [0 => 5.5]Vdc
 
 // ---------------------------------------- DHT SENSOR DEFINES ----------------------------------------
 #define ENABLE_DHT
@@ -179,7 +195,7 @@ float voltage5VRatio              = 1.13087;        //Voltage divider ratio [0 =
   //#define DHTTYPE                 DHT21           // DHT 21 (AM2301)
 
   #ifdef ESP32
-    #define DHTPin 39
+    #define DHTPin 17
   #elif ESP8266
     #define DHTPin 3
   #endif
@@ -220,8 +236,7 @@ float iRoom_prevHum               = iRoom_humidity+1.0;
   #warning "Splash screen disabled"
 #endif
 
-const char* version               = "v:2.0.2";
-const char* date                  = "2020/10/13";
+bool screenDim                    = false;
 
 #ifdef ESP32
   Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_RST);
@@ -229,11 +244,14 @@ const char* date                  = "2020/10/13";
   Adafruit_ILI9341 tft = Adafruit_ILI9341(TFT_CS, TFT_DC);
 #endif
 
-uint8_t ledDelayOff               = 30;     //Time in seconds
+uint8_t ledDelayOff               = 30;             //Time in seconds
 long ledMillis                    = 0;
 
-uint16_t returnToMain             = 30000;  //Time in milliseconds
+uint16_t returnToMain             = 30000;          //Time in milliseconds
 long returnMillis                 = 0;
+
+#define DEFAULT_BRIGHTNESS          3              //50% default brightness
+uint8_t screenDimValue            = DEFAULT_BRIGHTNESS;
 
 int setOptionScreen               = 1;
 
@@ -242,15 +260,21 @@ int setOptionScreen               = 1;
 // ----------------------------------------------------------------------------------------------------
 XPT2046_Touchscreen touch(TOUCH_CS, TOUCH_IRQ);
 
+//SPIClass SPI1(VSPI);
+
 int X,Y;
 uint8_t Thermostat_mode           = BOOT;
 
-uint8_t PMode                     = PM_MAIN;          // Program mode
-uint8_t PrevMode                  = PM_BOOT;          // Previous Program mode
+uint8_t PMode                     = INIT;           // Program mode
+uint8_t PrevMode                  = INIT;           // Previous Program mode
 bool touchPressed                 = false;
 uint8_t Timer_Cleaning            = 0;
 
 TS_Point p;
+
+bool beepON                       = false;
+#define DEFAULT_VOLUME              2               // 25% defualt volume
+uint8_t beepVolume                = DEFAULT_VOLUME; 
 
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- CODELOCK DEFINES -----------------------------------------
@@ -265,15 +289,14 @@ String symbol[4][4] =
   { "C", "0", "OK" }
 };
 
-uint16_t passcode                 = DEFAULT_PASSCODE; //You can change the passcode through MQTT JSON command "passcode"
+uint16_t passcode                 = DEFAULT_PASSCODE; //You can change the passcode through MQTT JSON command "passcode" then stored in EEPROM
 
 long Number;
 char action;
-//bool result                      = false;
 
 bool logged                       = false;
 
-uint8_t logDelayOff               = 30;     //Time in seconds
+uint8_t logDelayOff               = 30;             //Time in seconds
 long logMillis                    = 0;
 
 // ----------------------------------------------------------------------------------------------------
@@ -321,8 +344,6 @@ bool tempF                        = false;
 bool stateHVAC                    = false;
 bool notif                        = false;
 bool eco                          = true;
-
-uint8_t sprDelayOff               = 0;
 
 float air_temp                    = initValue;    //Temperature coming out of HVAC fins
 
@@ -461,6 +482,9 @@ void runEvery5seconds()
   Sprintln("5 seconds");
 
   flashEvery5sec();
+
+  //screenDim = !screenDim;
+  //screenDim = true;
   
   readSensors(true);
   local_delay(10);

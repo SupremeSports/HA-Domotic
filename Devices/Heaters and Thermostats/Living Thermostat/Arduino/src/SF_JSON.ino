@@ -35,8 +35,8 @@ void processCommandJson(char* message)
 
   if (root.containsKey(json_passcode))
   {
-    uint16_t value = atoi(root[json_temp]);
-    passcode = constrain(value, 1, 65535);
+    uint16_t value = atoi(root[json_passcode]);
+    passcode = constrain(value, 1, 65534);
     writeEEPROM();
   }
 }
@@ -202,6 +202,9 @@ void sendSensors()
 
   dtostrf(iRoom_humidity, 6, 1, result); // Leave room for too large numbers!
   root[json_roomHum] = result;
+
+  dtostrf(air_temp, 6, 1, result); // Leave room for too large numbers!
+  root[json_airTemp] = result;
 
   dtostrf(voltage5V, 4, 1, result); // Leave room for too large numbers!
   root[json_5v] = result;

@@ -28,7 +28,7 @@ void drawOptionScreen()
       yOffset = 20;
       tft.setFont(&FreeSansBold9pt7b);
       tft.setCursor(10, yOffset);
-      tft.print("Screen delay (0=Never)");
+      tft.print("Screen Delay (0s=Never)");
       tft.setFont(&FreeSansBold24pt7b);
       tft.setCursor(30, yOffset+yOffsetSigns);
       tft.print("-");
@@ -44,7 +44,7 @@ void drawOptionScreen()
       yOffset = 90;
       tft.setFont(&FreeSansBold9pt7b);
       tft.setCursor(10, yOffset);
-      tft.print("Logoff delay (0=Never)");
+      tft.print("Logoff Delay (0s=Never)");
       tft.setFont(&FreeSansBold24pt7b);
       tft.setCursor(30, yOffset+yOffsetSigns);
       tft.print("-");
@@ -54,33 +54,54 @@ void drawOptionScreen()
       updateOptions(2, logDelayOff);
     }
     
-    // Option #3 - Spare adjustment
+    // Option #3 - Dim Value adjustment
     if (OPTION3)
     {
       yOffset = 160;
       tft.setFont(&FreeSansBold9pt7b);
       tft.setCursor(10, yOffset);
-      tft.print("Spare");
+      #ifdef ESP32
+        tft.print("Dim Value (0-7)");
+        tft.setFont(&FreeSansBold24pt7b);
+        tft.setCursor(30, yOffset+yOffsetSigns);
+        tft.print("-");
+        tft.setCursor(190, yOffset+yOffsetSigns);
+        tft.print("+");
+        updateOptions(3, screenDimValue);
+      #else
+        tft.print("Dim Value (ESP32 Only)");
+      #endif
+      
+      tft.drawLine(5,yOffset+yOffsetLine,235,yOffset+yOffsetLine, ILI9341_WHITE);
+    }
+  }
+  else if (setOptionScreen == 2)
+  {
+    // Option #4 - BEEPER ON/OFF
+    if (OPTION4)
+    {
+      yOffset = 20;
+      tft.setFont(&FreeSansBold9pt7b);
+      tft.setCursor(10, yOffset);
+      tft.print("Beeper");
+      tft.drawLine(5,yOffset+yOffsetLine,235,yOffset+yOffsetLine, ILI9341_WHITE);
+
+      updateBooleans(4, beepON);
+    }
+    // Option #5 - BEEPER VOLUME
+    if (OPTION5)
+    {
+      yOffset = 90;
+      tft.setFont(&FreeSansBold9pt7b);
+      tft.setCursor(10, yOffset);
+      tft.print("Beeper Volume (0-7)");
       tft.setFont(&FreeSansBold24pt7b);
       tft.setCursor(30, yOffset+yOffsetSigns);
       tft.print("-");
       tft.setCursor(190, yOffset+yOffsetSigns);
       tft.print("+");
       tft.drawLine(5,yOffset+yOffsetLine,235,yOffset+yOffsetLine, ILI9341_WHITE);
-      updateOptions(3, sprDelayOff);
-    }
-  }
-  else if (setOptionScreen == 2)
-  {
-    // Option #4 - TODO
-    if (OPTION4)
-    {
-      
-    }
-    // Option #5 - TODO
-    if (OPTION5)
-    {
-      
+      updateOptions(5, beepVolume);
     }
     // Option #6 - TODO
     if (OPTION6)
@@ -170,7 +191,7 @@ void drawOptionScreen()
 
 void updateOptions(uint8_t option, uint8_t value)
 {
-  if (option<1 || option>3)
+  if (option<1 || option>3*MAXPAGE)
     return;
   else
   {
@@ -195,6 +216,38 @@ void updateOptions(uint8_t option, uint8_t value)
   tft.print(value);
 }
 
+void updateBooleans(uint8_t option, bool isON)
+{
+  if (option<1 || option>3*MAXPAGE)
+    return;
+  else
+  {
+    option %= 3; //Max 3 options per screen
+    if (option==0) option = 3;
+  }
+
+  int xOffset = (240/4)-45;
+  int yOffset = (option-1)*70;
+
+  //OFF
+  tft.fillRect(0, 30+yOffset, 120, 40, !isON ? ILI9341_WHITE : ILI9341_BLACK);
+  tft.setTextColor(!isON ? ILI9341_BLACK : ILI9341_WHITE);
+  tft.setFont(&FreeSansBold24pt7b);
+  tft.setCursor(xOffset, 65+yOffset);
+  tft.print("OFF");
+
+  //ON
+  xOffset = (240/4)-40 + 240/2;
+  
+  tft.fillRect(120, 30+yOffset, 120, 40, isON ? ILI9341_WHITE : ILI9341_BLACK);
+  tft.setTextColor(isON ? ILI9341_BLACK : ILI9341_WHITE);
+  tft.setFont(&FreeSansBold24pt7b);
+  tft.setCursor(xOffset, 65+yOffset);
+  tft.print("ON");
+
+  tft.setTextColor(ILI9341_WHITE, ILI9341_BLACK);
+}
+
 void updateDots(uint8_t page)
 {
   int yOffset = 245;
@@ -208,6 +261,7 @@ void updateDots(uint8_t page)
   tft.fillTriangle(5,235,25,225,25,245, setOptionScreen>1 ? ILI9341_WHITE : ILI9341_BLACK);
   tft.fillTriangle(235,235,215,225,215,245, setOptionScreen < MAXPAGE ? ILI9341_WHITE : ILI9341_BLACK);
 }
+
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ TOUCH CONTROL -------------------------------------------
@@ -227,12 +281,14 @@ void detectOptionsButtons()
       {
         // Option #1 - LED OFF delay adjustment
         if (ledDelayOff > 0) ledDelayOff--;
-        else ledDelayOff=255;
+        else ledDelayOff=120; //Maximum 2min
         updateOptions(1, ledDelayOff);
       }
       else if (OPTION4 && setOptionScreen==2)
       {
-        //TODO
+        beepON = false;
+
+        updateBooleans(4, beepON);
       }
       else if (OPTION7 && setOptionScreen==3)
       {
@@ -245,12 +301,15 @@ void detectOptionsButtons()
       {
         // Option #2 - LOGOFF delay adjustment
         if (logDelayOff > 0) logDelayOff--;
-        else logDelayOff=255;
+        else logDelayOff=120; //Maximum 2min
         updateOptions(2, logDelayOff);
       }
       else if (OPTION5 && setOptionScreen==2)
       {
-        //TODO
+        // Option #5 - BEEPER VOLUME adjustment
+        if (beepVolume > 0) beepVolume--;
+        else beepVolume=7;
+        updateOptions(5, beepVolume);
       }
       else if (OPTION8 && setOptionScreen==3)
       {
@@ -261,10 +320,12 @@ void detectOptionsButtons()
     {
       if (OPTION3 && setOptionScreen==1)
       {
-        // Option #3 - Spare adjustment
-        if (sprDelayOff > 0) sprDelayOff--;
-        else sprDelayOff=255;
-        updateOptions(3, sprDelayOff);
+        // Option #3 - Dim value adjustment
+        if (screenDimValue > 0) screenDimValue--;
+        else screenDimValue=7;
+        #ifdef ESP32
+          updateOptions(3, screenDimValue);
+        #endif
       }
       else if (OPTION6 && setOptionScreen==2)
       {
@@ -283,7 +344,7 @@ void detectOptionsButtons()
         drawOptionScreen();
       }
     }
-    // Clean/OK Button
+    // Clean/Restart Button
     else if (Y>265)
     {
       tft.fillScreen(ILI9341_BLACK);
@@ -294,7 +355,7 @@ void detectOptionsButtons()
     }
   }
 
-  // Rights buttons
+  // Right buttons
   if(X>130)
   {
     if (Y<70)   
@@ -302,13 +363,15 @@ void detectOptionsButtons()
       if (OPTION1 && setOptionScreen==1)
       {
         // Option #1 - LED OFF delay adjustment
-        if (ledDelayOff < 255) ledDelayOff++;
+        if (ledDelayOff < 120) ledDelayOff++; //Maximum 2min
         else ledDelayOff=0;
         updateOptions(1, ledDelayOff);
       }
       else if (OPTION4 && setOptionScreen==2)
       {
-        //TODO
+        beepON = true;
+
+        updateBooleans(4, beepON);
       }
       else if (OPTION7 && setOptionScreen==3)
       {
@@ -320,13 +383,16 @@ void detectOptionsButtons()
       if (OPTION2 && setOptionScreen==1)
       {
         // Option #2 - LOGOFF delay adjustment
-        if (logDelayOff < 255) logDelayOff++;
+        if (logDelayOff < 120) logDelayOff++; //Maximum 2min
         else logDelayOff=0;
         updateOptions(2, logDelayOff);
       }
       else if (OPTION5 && setOptionScreen==2)
       {
-        //TODO
+        // Option #5 - BEEPER VOLUME adjustment
+        if (beepVolume < 7) beepVolume++;
+        else beepVolume=0;
+        updateOptions(5, beepVolume);
       }
       else if (OPTION8 && setOptionScreen==3)
       {
@@ -337,10 +403,12 @@ void detectOptionsButtons()
     {
       if (OPTION3 && setOptionScreen==1)
       {
-        // Option #3 - Spare adjustment
-        if (sprDelayOff < 255) sprDelayOff++;
-        else sprDelayOff=0;
-        updateOptions(3, sprDelayOff);
+        // Option #3 - Dim Value adjustment
+        if (screenDimValue < 7) screenDimValue++;
+        else screenDimValue=0;
+        #ifdef ESP32
+          updateOptions(3, screenDimValue);
+        #endif
       }
       else if (OPTION6 && setOptionScreen==2)
       {
@@ -359,7 +427,7 @@ void detectOptionsButtons()
         drawOptionScreen();
       }
     }
-    // Clean/OK Button
+    // OK Button
     else if (Y>265)
     {
       Thermostat_mode = BOOT;

@@ -100,10 +100,11 @@ void initOTA()
   #endif
   
   ArduinoOTA.setHostname(mqtt_deviceName);
-  ArduinoOTA.setPassword(password[ssid_qty-1]);
+  ArduinoOTA.setPassword(password[0]);
 
   ArduinoOTA.onStart([]()
   {
+    mqttClient.disconnect(); // Disconnect MQTT
     String type;
     if (ArduinoOTA.getCommand() == U_FLASH)
       type = "sketch";
@@ -146,23 +147,69 @@ void runOTA()
 // ----------------------------------------------------------------------------------------------------
 void checkResetCause()
 {
+  bool screenOn = false;
   Sprintln("Check restart reason...");
-  struct  rst_info  *rtc_info = system_get_rst_info();
   Sprint("reset  reason: ");
-  Sprintln(rtc_info->reason);
+  
+  #ifdef ESP32
+    int Core0 = rtc_get_reset_reason(0);
+    int Core1 = rtc_get_reset_reason(1);
+
+    Sprintln();
+    Sprint("  Core0: ");
+    resetReason(Core0);
+    Sprint("  Core1: ");
+    resetReason(Core1);
+
+    screenOn = (Core0==1 || Core0==16); //Temporarily added 16 as this code always pops
+  #elif ESP8266
+    struct  rst_info  *rtc_info = system_get_rst_info();
+    Sprint("reset  reason: ");
+    Sprintln(rtc_info->reason);
+
+    screenOn = (rtc_info->reason == 6)
+  #endif
 
   //Don't light screen up if it's not booting from a power up event
-  if (rtc_info->reason != 6)
+  if (screenOn)
   {
-    screenOff = true;
-    ledMillis = millis()-1;
-
-    //PMode = PM_MAIN;
+    screenOff = false;
+    ledMillis = millis() + ledDelayOff*1000;
+    PMode = PM_BOOT;
+    Sprintln("Normal Boot");
   }
   else
   {
-    ledMillis = millis() + ledDelayOff*1000;
-    //PMode = PM_BOOT;
+    screenOff = true;
+    ledMillis = millis()-1;
+    //PMode = PM_MAIN;
+    Sprintln("WDT Boot");
+  }
+}
+
+void resetReason(int coreReason)
+{
+  Sprint(coreReason);
+  Sprint(": ");
+ 
+  switch (coreReason)
+  {
+    case 1 : Sprintln ("POWERON_RESET");break;          /**<1,  Vbat power on reset*/
+    case 3 : Sprintln ("SW_RESET");break;               /**<3,  Software reset digital core*/
+    case 4 : Sprintln ("OWDT_RESET");break;             /**<4,  Legacy watch dog reset digital core*/
+    case 5 : Sprintln ("DEEPSLEEP_RESET");break;        /**<5,  Deep Sleep reset digital core*/
+    case 6 : Sprintln ("SDIO_RESET");break;             /**<6,  Reset by SLC module, reset digital core*/
+    case 7 : Sprintln ("TG0WDT_SYS_RESET");break;       /**<7,  Timer Group0 Watch dog reset digital core*/
+    case 8 : Sprintln ("TG1WDT_SYS_RESET");break;       /**<8,  Timer Group1 Watch dog reset digital core*/
+    case 9 : Sprintln ("RTCWDT_SYS_RESET");break;       /**<9,  RTC Watch dog Reset digital core*/
+    case 10 : Sprintln ("INTRUSION_RESET");break;       /**<10, Instrusion tested to reset CPU*/
+    case 11 : Sprintln ("TGWDT_CPU_RESET");break;       /**<11, Time Group reset CPU*/
+    case 12 : Sprintln ("SW_CPU_RESET");break;          /**<12, Software reset CPU*/
+    case 13 : Sprintln ("RTCWDT_CPU_RESET");break;      /**<13, RTC Watch dog Reset CPU*/
+    case 14 : Sprintln ("EXT_CPU_RESET");break;         /**<14, for APP CPU, reseted by PRO CPU*/
+    case 15 : Sprintln ("RTCWDT_BROWN_OUT_RESET");break;/**<15, Reset when the vdd voltage is not stable*/
+    case 16 : Sprintln ("RTCWDT_RTC_RESET");break;      /**<16, RTC Watch dog reset digital core and rtc module*/
+    default : Sprintln ("NO_MEAN");
   }
 }
 

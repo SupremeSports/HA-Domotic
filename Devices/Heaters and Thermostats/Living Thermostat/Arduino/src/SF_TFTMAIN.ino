@@ -13,7 +13,8 @@ void drawMainScreen()
 
   if (PrevMode != PMode)
   {
-    writeEEPROM();
+    if (PrevMode != PM_SLEEP)
+      writeEEPROM();
     Thermostat_mode = BOOT;
   }
 
@@ -23,14 +24,16 @@ void drawMainScreen()
   // Draw temperature up/dwn buttons
   drawUpDnButtons();
 
-  // Draw FAN icons
+  // Draw FAN icons & level
   drawFanIcons();
-  
   updateFanLevel();
 
+  // Draw set temperature and circles
   updateSetTemp();
 
+  // Draw different icons
   drawTopRow();
+  drawModeIcons();
 }
 
 /********************************************************************//**
@@ -41,7 +44,7 @@ void drawMainScreen()
  *********************************************************************/
 void updateRoomTemp()
 {
-  if (PMode != PM_MAIN || screenOff)
+  if (PMode != PM_MAIN)
     return;
 
   bool forceUpdate = PrevMode != PM_MAIN;
@@ -270,6 +273,9 @@ void drawUpDnButtons()
  *********************************************************************/
 void drawFanIcons()
 {
+  if (PMode != PM_MAIN)
+    return;
+    
   //tft.drawRGBBitmap(10,290, fan_blue_24,24,24);
   //tft.drawRGBBitmap(200,282, fan_blue_32,32,32);
   tft.drawBitmap(10,290,fan_24_icon, 24, 24, ILI9341_LIGHTBLUE);
@@ -324,7 +330,7 @@ void updateFanLevel()
  *********************************************************************/
 void drawTopRow()
 {
-  if (PMode != PM_MAIN || screenOff)
+  if (PMode != PM_MAIN)
     return;
 
   bool forceUpdate = PrevMode != PM_MAIN;
@@ -394,7 +400,7 @@ void drawTopRow()
  *********************************************************************/
 void drawModeIcons()
 {
-  if (PMode != PM_MAIN || screenOff)
+  if (PMode != PM_MAIN)
     return;
 
   int iconQty = 5;    // Max of 6 icons can fit
