@@ -14,13 +14,17 @@ The basics are from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduit
 ![alt text](images/FrontBackView.jpg "Front/Back View")
 
 ### Features: ###
-- HLK-PM03 3.3V 3W power supply directly on 120Vac
+- HLK-PM03 3.3V 3W power supply directly on 100-240Vac
+- 3.3/5V protected with
 - Passcode protected settings and temperature modification (disables and/or hides buttons)
 - Passcode can be changed through MQTT and saved to EEPROM
 - Logout and screen timeout adjustable through the settings screen
 - Settings screen to adjust screen turn off delay, logout delay, dim level, beeper level
 - Extra screen to show information (WiFi SSID, rssi, voltage, etc.)
 - Communicating with Home Assistant and HVAC directly through the MQTT broker
+- 5V bus monitoring (if installed with AMS1117-3.3) or 3.3V monitoring if installed with HLK-PM03 with J1 jumped
+- XPT2046_Touchscreen.h library modified to add VBat readin and internal temperature monitoring [waiting on pull request](https://github.com/PaulStoffregen/XPT2046_Touchscreen/pull/37)
+    - In the meantime, please use my included library files
 
 - Top row:
     - Displays WiFi status, HVAC on/off status, ECO mode, user logged in and notifications icons
@@ -59,3 +63,4 @@ To come...
 - Base code: [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/)
 - 3D printed case: [SupremeSports](https://www.thingiverse.com/supremesports/designs) - To come...
 - Thermostat card: [HA Thermostat card](https://www.home-assistant.io/lovelace/thermostat/)
+- Base for touch screen: [XPT2046_Touchscreen](https://github.com/PaulStoffregen/XPT2046_Touchscreen)
