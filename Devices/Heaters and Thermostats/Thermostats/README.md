@@ -14,8 +14,13 @@ The basics are from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduit
 ![alt text](images/FrontBackView.jpg "Front/Back View")
 
 ### Features: ###
-- HLK-PM03 3.3V 3W power supply directly on 100-240Vac
-- 3.3/5V protected with
+- Power supply options
+    - HLK-PM03 3.3V 3W power supply directly on 100-240Vac, VR1 not installed and J1 jumped
+        - 3.3V protected with a 1A 451series nano fuse
+        ~~- SMAJ6.0A TVS diode that will blow the fuse if voltage goes above 6.67-7.37V (breakdown voltage),~~ **so not usefull on this setup**
+    - HLK-PM01 5V 3W power supply directly on 100-240Vac, VR1 installed and J1 not jumped
+        - 3.3V protected with a 500mA 451series nano fuse
+        - SMAJ6.0A TVS diode that will blow the fuse if voltage goes above 6.67-7.37V (breakdown voltage)
 - Passcode protected settings and temperature modification (disables and/or hides buttons)
 - Passcode can be changed through MQTT and saved to EEPROM
 - Logout and screen timeout adjustable through the settings screen
