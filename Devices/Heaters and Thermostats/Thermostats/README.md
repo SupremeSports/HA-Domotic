@@ -9,11 +9,9 @@ Needed a thermostat to read room temperature in order to control the HVAC/Heater
 The 2.4" TFT touchscreen replaces the HVAC remote control and communicates with my [Living HVAC](https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Heaters%20and%20Thermostats/Living%20HVAC).
 The 2.4" TFT touchscreen will be eventually deployed to all my rooms to get temp/humidity and eventually control heaters.
 It also replicates [Home Assistant climate](https://www.home-assistant.io/integrations/climate/) options onto the screen.
-The basics is from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/) and I simply used parts of their code in order to make mine. Many features added, some others removed.
+The basics are from [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/) and I simply used parts of their code in order to make mine. Many features added, some others removed.
 
-Pictures/screenshots from TFT to come...
 ![alt text](images/FrontBackView.jpg "Front/Back View")
-
 
 ### Features: ###
 - HLK-PM03 3.3V 3W power supply directly on 120Vac
@@ -36,7 +34,7 @@ Pictures/screenshots from TFT to come...
 - Right gray circle: (not done yet)
     - Arrow up/down (disappears when logged out) adjusts tilt
 - Symbols row:
-    - Copied directly from the HA symbols for Heat/Cool/Humidity/Fan/Off
+    - Copied directly from the [HA Thermostat card](https://www.home-assistant.io/lovelace/thermostat/) symbols for Heat/Cool/Humidity/Fan/Off
     - Shows in color when selected, grayed out when not
 - Bottom fan:
     - Displays level for a fan 
@@ -50,9 +48,14 @@ Bench tests are very satisfying, first prototype working, waiting on few more pa
 
 To come...
 
+#### Features for future:
+- Modify the code for easy switch between an HVAC and a normal heater preventing maintaining two codes - working on it in next weeks
+- Finalize 3D printed enclosure for perfect finish, look and functionality
+
 ### Home Assistant Link: ###
 - MQTT device with QoS and LWT
 
 #### Credits & 3D printing
-- Basic code: [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/)
-- 3D printed case : [SupremeSports](https://www.thingiverse.com/supremesports/designs) - To come...
+- Base code: [AZ-Touch](https://www.hwhardsoft.de/english/projects/arduitouch-esp/)
+- 3D printed case: [SupremeSports](https://www.thingiverse.com/supremesports/designs) - To come...
+- Thermostat card: [HA Thermostat card](https://www.home-assistant.io/lovelace/thermostat/)
