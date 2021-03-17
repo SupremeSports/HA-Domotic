@@ -1,26 +1,30 @@
 """
 Support gathering ted5000 information.
 
+#### THIS IS A MODIFIED VERSION ####
+
 For more details about this platform, please refer to the documentation at
 https://home-assistant.io/components/sensor.ted5000/
+https://github.com/home-assistant/core/blob/dev/homeassistant/components/ted5000/manifest.json
 """
-import logging
 from datetime import timedelta
+import logging
 
 import requests
 import voluptuous as vol
+import xmltodict
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import (CONF_HOST, CONF_NAME, CONF_PORT)
+from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT, POWER_WATT, VOLT
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
-REQUIREMENTS = ['xmltodict==0.11.0']
+"""REQUIREMENTS = ['xmltodict==0.11.0']"""
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = 'ted'
+DEFAULT_NAME = "ted"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=3)
 
@@ -37,7 +41,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     host = config.get(CONF_HOST)
     port = config.get(CONF_PORT)
     name = config.get(CONF_NAME)
-    url = 'http://{}:{}/api/LiveData.xml'.format(host, port)
+    url = f"http://{host}:{port}/api/LiveData.xml"
 
     gateway = Ted5000Gateway(url)
 
@@ -46,8 +50,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
     dev = []
     for mtu in gateway.data:
-        dev.append(Ted5000Sensor(gateway, name, mtu, 'W'))
-        dev.append(Ted5000Sensor(gateway, name, mtu, 'V'))
+        dev.append(Ted5000Sensor(gateway, name, mtu, POWER_WATT))
+        dev.append(Ted5000Sensor(gateway, name, mtu, VOLT))
 
     add_entities(dev)
     return True
@@ -58,7 +62,7 @@ class Ted5000Sensor(Entity):
 
     def __init__(self, gateway, name, mtu, unit):
         """Initialize the sensor."""
-        units = {'W': 'power', 'V': 'voltage'}
+        units = {POWER_WATT: "power", VOLT: "voltage"}
         self._gateway = gateway
         self._name = '{} mtu{} {}'.format(name, mtu, units[unit])
         self._mtu = mtu
@@ -103,12 +107,12 @@ class Ted5000Gateway:
     def __init__(self, url):
         """Initialize the data object."""
         self.url = url
-        self.data = dict()
+        self.data = {}
 
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Get the latest data from the Ted5000 XML API."""
-        import xmltodict
+        
         try:
             request = requests.get(self.url, timeout=10)
         except requests.exceptions.RequestException as err:
@@ -118,14 +122,10 @@ class Ted5000Gateway:
             mtus = int(doc["LiveData"]["System"]["NumberMTU"])
 
             for mtu in range(1, mtus + 1):
-                power = int(doc["LiveData"]["Power"]["MTU%d" % mtu]
-                            ["PowerNow"])
-                voltage = int(doc["LiveData"]["Voltage"]["MTU%d" % mtu]
-                              ["VoltageNow"])
+                power = int(doc["LiveData"]["Power"]["MTU%d" % mtu]["PowerNow"])
+                voltage = int(doc["LiveData"]["Voltage"]["MTU%d" % mtu]["VoltageNow"])
 
                 if power == 0 and voltage == 0:
-                    self.data[mtu] = {'W': power, 'V': voltage / 10, 
-                                      'A': False}
+                    self.data[mtu] = {POWER_WATT: power, VOLT: voltage / 10, 'A': False}
                 else:
-                    self.data[mtu] = {'W': power, 'V': voltage / 10, 
-                                      'A': True}
+                    self.data[mtu] = {POWER_WATT: power, VOLT: voltage / 10, 'A': True}
