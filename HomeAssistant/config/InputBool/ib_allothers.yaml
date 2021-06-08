@@ -7,6 +7,11 @@
     initial: off
     icon: mdi:autorenew
     
+  running_hass:
+    name: HASS is running
+    initial: off
+    icon: mdi:autorenew
+    
   request_position:
     name: Request IOS positions
     initial: off
@@ -51,6 +56,14 @@
     name: Control Room Control Reset
     initial: off
     icon: mdi:power-cycle
+  garage_main_control_reset:
+    name: Garage Main Reset
+    initial: off
+    icon: mdi:power-cycle
+  garage_slave_control_reset:
+    name: Garage Slave Reset
+    initial: off
+    icon: mdi:power-cycle
   pond_control_reset:
     name: Pond Control Reset
     initial: off
@@ -63,6 +76,10 @@
     name: Weather Control Reset
     initial: off
     icon: mdi:power-cycle
+  shed_control_reset:
+    name: Shed Control Reset
+    initial: off
+    icon: mdi:power-cycle
   
   pool_running:
     name: Pool Running
@@ -71,4 +88,21 @@
   pond_running:
     name: Pond Running
     icon: mdi:fish
+    
+  living_room_hvac_tilt:
+    name: Living Room HVAC Tilt
+    icon: mdi:weather-windy
+    
+  garage_front_heater:
+    name: Garage Front Heater
+  garage_rear_heater:
+    name: Garage Front Heater
+  garage_heaters:
+    name: Garage Heaters
+  garage_air_valve:
+    name: Garage Air Valve
+  house_air_valve:
+    name: House Air Valve
+  air_compressor_purge:
+    name: Air Compressor Purge
     

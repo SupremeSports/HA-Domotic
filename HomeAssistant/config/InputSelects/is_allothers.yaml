@@ -144,3 +144,14 @@
     options:
       - Winter/Off
       - Auto
+
+  workplace_jean:
+    name: Jean's workplace
+    icon: mdi:account-tie
+    options:
+      - Office
+      - Telework
+      - Trip
+      - Away
+      - Vacation
+      

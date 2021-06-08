@@ -47,6 +47,30 @@
     max: 300
     step: 1
     
+  garage_front_setpoint:
+    name: Garage Front Temp Setpoint
+    icon: mdi:timer-sand
+    mode: slider
+    min: 7
+    max: 30
+    step: 1
+    
+  garage_rear_setpoint:
+    name: Garage Rear Temp Setpoint
+    icon: mdi:timer-sand
+    mode: slider
+    min: 7
+    max: 30
+    step: 1
+    
+  air_compressor_purge:
+    name: Air Compressor Purge Hold Time
+    icon: mdi:timer-sand
+    mode: box
+    min: 0.5
+    max: 30
+    step: 0.5
+    
   # issues_count:
     # name: Sensors that need attention
     # mode: box

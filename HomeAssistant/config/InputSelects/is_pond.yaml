@@ -11,3 +11,11 @@
       - Summer
       - Autumn
       - 24/7
+      
+  pondfiller_mode:
+    name: Pool Filler Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+#      - Manual

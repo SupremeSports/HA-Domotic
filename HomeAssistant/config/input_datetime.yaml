@@ -65,3 +65,4 @@
   gardenirrigationaux_stop:
     name: Garden Irrigation Aux Stop
     has_time: true
+    
