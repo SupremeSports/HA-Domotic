@@ -7,14 +7,13 @@
     icon: mdi:mailbox
     state_topic: "Home/Postal/Stts"
     command_topic: "Home/Postal/Cmd"
-    availability_topic: "Home/Transmitter/LWT"
     value_template: '{{ value_json.state }}'
     payload_on: '{"state":"ON"}'
     payload_off: '{"state":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Transmitter/LWT"
     qos: 0
     json_attributes_topic: "Home/Transmitter/Json"
     
@@ -23,14 +22,13 @@
     icon: mdi:lock-clock
     state_topic: "Home/Postal/Stts"
     command_topic: "Home/Postal/Cmd"
-    availability_topic: "Home/Transmitter/LWT"
     value_template: '{{ value_json.delay }}'
     payload_on: '{"delay":"ON"}'
     payload_off: '{"delay":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Transmitter/LWT"
     qos: 0
     
   #Homed status of the hands
@@ -39,14 +37,13 @@
     icon: mdi:clock-start
     state_topic: "Home/WallClock/Stts"
     command_topic: "Home/WallClock/Cmd"
-    availability_topic: "Home/WallClock/LWT"
-    value_template: '{{ value_json.state }}'
-    payload_on: '{"state":"ON"}'
-    payload_off: '{"state":"OFF"}'
+    value_template: '{{ value_json.homed }}'
+    payload_on: '{"homed":"ON"}'
+    payload_off: '{"homed":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/WallClock/LWT"
     qos: 0
     
         

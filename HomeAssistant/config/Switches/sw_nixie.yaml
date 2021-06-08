@@ -29,95 +29,89 @@
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.hrm }}"
     payload_on: '{"hrm":"ON"}'
     payload_off: '{"hrm":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Blank Leading Zero
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.bkl }}"
     payload_on: '{"bkl":"ON"}'
     payload_off: '{"bkl":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Enable Scroll Back
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.scb }}"
     payload_on: '{"scb":"ON"}'
     payload_off: '{"scb":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Suppress ACP
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.acp }}"
     payload_on: '{"acp":"ON"}'
     payload_off: '{"acp":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Use Fading
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.fde }}"
     payload_on: '{"fde":"ON"}'
     payload_off: '{"fde":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Use LDR
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.ldr }}"
     payload_on: '{"ldr":"ON"}'
     payload_off: '{"ldr":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     
   - platform: mqtt
     name: Nixie Slots Mode
     icon: mdi:check-circle
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
     value_template: "{{ value_json.slt }}"
     payload_on: '{"slt":"ON"}'
     payload_off: '{"slt":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    

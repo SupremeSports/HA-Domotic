@@ -8,13 +8,12 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r9 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r9":"ON"}'
     payload_off: '{"r9":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
   
   #Outdoor Relay
@@ -23,27 +22,26 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r10 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r10":"ON"}'
     payload_off: '{"r10":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: Backyard Irrigation
+    #icon: mdi:sprinkler-variant
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r2 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r2":"ON"}'
     payload_off: '{"r2":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -51,13 +49,12 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r3 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r3":"ON"}'
     payload_off: '{"r3":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -66,13 +63,12 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r7 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r7":"ON"}'
     payload_off: '{"r7":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -81,28 +77,26 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r8 }}'
-    availability_topic: "Home/Control/LWT"
     payload_on: '{"r8":"ON"}'
     payload_off: '{"r8":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     json_attributes_topic: "Home/Control/Json"
     
   - platform: mqtt
     name: Water Heater
-    state_topic: "Home/WaterHeater/Stts"
-    command_topic: "Home/WaterHeater/Cmd"
-    value_template: '{{ value_json.state }}'
-    availability_topic: "Home/WaterHeater/LWT"
-    payload_on: '{"state":"ON"}'
-    payload_off: '{"state":"OFF"}'
+    state_topic: "Home/WaterHeater/Relay/Stts"
+    command_topic: "Home/WaterHeater/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
     qos: 0
     json_attributes_topic: "Home/WaterHeater/Json"
     

@@ -7,14 +7,13 @@
     icon: mdi:flash
     state_topic: "Camera/Pool/Json"
     command_topic: "Camera/Pool/Cmd"
-    availability_topic: "Camera/Pool/LWT"
     value_template: '{{ value_json.ir }}'
     payload_on: '{"ir":"ON"}'
     payload_off: '{"ir":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Camera/Pool/LWT"
     qos: 0
     json_attributes_topic: "Camera/Pool/Json"
     

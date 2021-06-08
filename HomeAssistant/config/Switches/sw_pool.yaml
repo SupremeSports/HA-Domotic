@@ -7,13 +7,12 @@
     state_topic: "Pool/Control/Relay/Stts"
     command_topic: "Pool/Control/Relay/Cmd"
     value_template: '{{ value_json.r8 }}'
-    availability_topic: "Pool/Control/LWT"
     payload_on: '{"r8":"ON"}'
     payload_off: '{"r8":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -21,13 +20,12 @@
     state_topic: "Pool/Control/Relay/Stts"
     command_topic: "Pool/Control/Relay/Cmd"
     value_template: '{{ value_json.r7 }}'
-    availability_topic: "Pool/Control/LWT"
     payload_on: '{"r7":"ON"}'
     payload_off: '{"r7":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -35,13 +33,12 @@
     state_topic: "Pool/Control/Relay/Stts"
     command_topic: "Pool/Control/Relay/Cmd"
     value_template: '{{ value_json.r1 }}'
-    availability_topic: "Pool/Control/LWT"
     payload_on: '{"r1":"ON"}'
     payload_off: '{"r1":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     
   - platform: mqtt
@@ -50,12 +47,11 @@
     state_topic: "Pool/Control/Relay/Stts"
     command_topic: "Pool/Control/Relay/Cmd"
     value_template: '{{ value_json.r2 }}'
-    availability_topic: "Pool/Control/LWT"
     payload_on: '{"r2":"ON"}'
     payload_off: '{"r2":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     
