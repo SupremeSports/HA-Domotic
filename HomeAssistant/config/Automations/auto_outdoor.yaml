@@ -14,12 +14,15 @@
       service_template: >
         {% set time = now().hour %}
         {% set LP = false %}
+        {% set GFD = as_timestamp(now()) - as_timestamp(states.lock.garage_fd_lock.last_changed) > 300 and is_state('lock.garage_fd_lock', 'locked') %}
+        {% set HFD = as_timestamp(now()) - as_timestamp(states.lock.house_fd_lock.last_changed) > 300 and is_state('lock.house_fd_lock', 'locked') %}
+        {% set SUN = is_state('sun.sun', 'below_horizon') %}
         {% if is_state('input_select.lamppost_mode', '24/7') %}
           {% set LP = true %}
         {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h')  %}
-          {% set LP = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+          {% set LP = (SUN and time>12 and time<23) or (SUN and not (GFD and HFD)) %}
         {% elif is_state('input_select.lamppost_mode', 'Sunset to Sunrise') %}
-          {% set LP = is_state('sun.sun', 'below_horizon') %}
+          {% set LP = SUN %}
         {% endif %}
         
         {% if LP == true %}
@@ -70,6 +73,22 @@
         {% else %}
           switch.turn_off
         {% endif %}
+        
+  - alias: Front Door Light Control
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: switch.lamp_post
+    action:
+      entity_id: switch.front_door_light
+      service_template: >
+        {% set FDL = is_state('switch.lamp_post', 'on') %}
+        
+        {% if FDL == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
 
   - alias: Garage Front Light Control
     mode: restart
@@ -82,8 +101,9 @@
       entity_id: switch.garage_front_light
       service_template: >
         {% set time = now().hour %}
+        {% set GFD = as_timestamp(now()) - as_timestamp(states.lock.garage_fd_lock.last_changed) > 300 and is_state('lock.garage_fd_lock', 'locked') %}
         {% set GFL = false %}
-        {% set GFP = is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') and is_state('switch.garage_front_power', 'on') %}
+        {% set GFP = is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') and is_state('switch.garage_front_power', 'on') and GFD %}
         {% if is_state('input_select.garagefrontlight_mode', '24/7') %}
           {% set GFL = true %}
         {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to 23h') and not GFP %}

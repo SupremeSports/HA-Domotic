@@ -1,0 +1,266 @@
+###################################################
+# AUTOMATIONS - GARAGE                            #
+###################################################
+
+  - alias: Garage Safety Heartbeat
+    id: auto_garage_safety_heartbeat
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition: 
+      - condition: template
+        value_template: "{{ not is_state('sensor.garage_safety_heartbeat', 'unavailable') }}"
+    action:
+    - service: modbus.write_register
+      data:
+        hub: MB_GarageSafety
+        unit: 1
+        address: 0
+        value: '{{ states.counter.second_counter.state | int }}'
+        
+#Garage heaters
+          
+# If safety is called from safety module --> turn on both
+# If safety_low goes below setpoint-1.5 --> Turn both on (prevents delay if one is faulted)
+# If safety_high goes above setpoint+1.5 --> Turn off (prevents overheating if one is faulted)
+# If other garage heater has run for more than 20 minutes and still requested --> Turn on (prevents delay if other is faulted)
+# If request and it's front turn to run --> Turn on
+# If already on (due to safety), latch on until we get above setpoint
+# If water heater is heating during peak period, stop garage heaters (counter won't increase)
+  - alias: Garage Heaters
+    id: auto_garage_heaters
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_boolean.garage_heaters
+      - platform: state
+        entity_id: binary_sensor.garage_safety_front_active
+      - platform: state
+        entity_id: binary_sensor.garage_safety_rear_active
+    action:
+      - entity_id: switch.garage_front_heater
+        service_template: >
+          {% set safety = is_state('binary_sensor.garage_safety_front_active', 'on') or is_state('binary_sensor.garage_safety_rear_active', 'on') %}
+          {% set safety_low = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float-1.5 %}
+          {% set safety_high = states('sensor.garage_mean_temp')|float > state_attr('climate.garage_heaters', 'temperature')|float+1.5 %}
+          {% set safety_rear = ((as_timestamp(now()) - as_timestamp(states.switch.garage_rear_heater.last_changed))/60)>20 and is_state('switch.garage_rear_heater', 'on') %}
+          {% set safety_run = is_state('sensor.garage_safety_control_status', 'Running...') %}
+          {% set latch_on = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float %}
+          {% set request = is_state('input_boolean.garage_heaters', 'on') %}
+          {% set turn = states('counter.heaters_counter')|int == 2 %}
+          {% set current_state = is_state('switch.garage_front_heater', 'on') %}
+          {% set water_heater = is_state('sensor.water_heater_status', 'Heating') and is_state('binary_sensor.power_peakperiod','on') %}
+          
+          {% set water_heater = false %}
+          {% set out = false %}
+          
+          {% if not safety_run %}
+            {% set out = false %}
+          {% elif safety or safety_low %}
+            {% set out = true %}
+          {% elif water_heater %}
+            {% set out = false %}
+          {% elif safety_high %}
+            {% set out = false %}
+          {% elif safety_rear and request %}
+            {% set out = true %}
+          {% elif request and turn %}
+            {% set out = true %}
+          {% elif current_state and latch_on %}
+            {% set out = true %}
+          {% endif %}
+          
+          {% if out %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+      - entity_id: switch.garage_rear_heater
+        service_template: >
+          {% set safety = is_state('binary_sensor.garage_safety_front_active', 'on') or is_state('binary_sensor.garage_safety_rear_active', 'on') %}
+          {% set safety_low = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float-2 %}
+          {% set safety_high = states('sensor.garage_mean_temp')|float > state_attr('climate.garage_heaters', 'temperature')|float+1.5 %}
+          {% set safety_front = ((as_timestamp(now()) - as_timestamp(states.switch.garage_front_heater.last_changed))/60)>20 and is_state('switch.garage_front_heater', 'on') %}
+          {% set safety_run = is_state('sensor.garage_safety_control_status', 'Running...') %}
+          {% set latch_on = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float %}
+          {% set request = is_state('input_boolean.garage_heaters', 'on') %}
+          {% set turn = states('counter.heaters_counter')|int == 1 %}
+          {% set current_state = is_state('switch.garage_rear_heater', 'on') %}
+          {% set water_heater = is_state('sensor.water_heater_status', 'Heating') and is_state('binary_sensor.power_peakperiod','on') %}
+          
+          {% set water_heater = false %}
+          {% set out = false %}
+          
+          {% if not safety_run %}
+            {% set out = false %}
+          {% elif safety or safety_low %}
+            {% set out = true %}
+          {% elif water_heater %}
+            {% set out = false %}
+          {% elif safety_high %}
+            {% set out = false %}
+          {% elif safety_front and request %}
+            {% set out = true %}
+          {% elif request and turn %}
+            {% set out = true %}
+          {% elif current_state and latch_on %}
+            {% set out = true %}
+          {% endif %}
+          
+          {% if out %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+          
+  - alias: Garage Heaters Counter
+    id: auto_garage_heaters_counter
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: switch.garage_front_heater
+        from: "on"
+        to: "off"
+      - platform: state
+        entity_id: switch.garage_rear_heater
+        from: "on"
+        to: "off"
+    condition:
+      - condition: and
+        conditions:
+          - condition: and
+            conditions:
+              - condition: state
+                entity_id: switch.garage_front_heater
+                state: "off"
+              - condition: state
+                entity_id: switch.garage_rear_heater
+                state: "off"
+          - condition: not
+            conditions:
+              - condition: state
+                entity_id: sensor.water_heater_status
+                state: "Heating"
+    action:
+      - entity_id: counter.heaters_counter
+        service_template: >
+          {% if states('counter.heaters_counter')|int == 1 %}
+            counter.increment
+          {% else %}
+            counter.decrement
+          {% endif %}
+          
+######### GARAGE SLAVE - SENSORS #########
+
+  - alias: Air Compressor Purge
+    mode: single
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: input_boolean.air_compressor_purge
+        from: "off"
+        to: "on"
+      - platform: time
+        at: '02:30:00'
+    condition:
+      - condition: or
+        conditions:
+          - condition: time
+            after: "02:00:00"
+            before: "03:00:00"
+            weekday:
+              - mon
+              - fri
+          - condition: state
+            entity_id: input_boolean.air_compressor_purge
+            state: "on"
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Garage/Slave/Relay/Cmd"
+          payload: '{"r4":"ON","h4":"{{(states.input_number.air_compressor_purge.state|float)}}"}'
+      #Give more time to ensure it has been completed
+      # This switch receives a hold value from the mqtt switch definition and/or this automation
+      # Ensure that this delay is higher than the hold value
+      - delay:
+          seconds: "{{ states('input_number.air_compressor_purge')|int + 1 }}"
+      - service: mqtt.publish
+        data_template:
+          topic: "Garage/Slave/Relay/Cmd"
+          payload: '{"r4":"OFF"}'
+      - entity_id: input_boolean.air_compressor_purge
+        service: input_boolean.turn_off
+
+  - alias: Garage Air Valve
+    mode: single
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: input_boolean.garage_air_valve
+        from: "off"
+        to: "on"
+      - platform: state
+        entity_id: input_boolean.garage_air_valve
+        from: "on"
+        to: "off"
+    action:
+      - entity_id: switch.garage_air_valve_open
+        service_template: >
+          {% if is_state('input_boolean.garage_air_valve', 'on') %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+      #Give time to switch direction
+      - delay:
+          seconds: 1
+      - entity_id: switch.garage_air_valve
+        service: switch.turn_on
+      #Give time to complete movement
+      - delay:
+          seconds: 25
+      - entity_id: switch.garage_air_valve
+        service: switch.turn_off
+      #Give time to snubber to eliminate transients/EMIs
+      - delay:
+          seconds: 2
+      - entity_id: switch.garage_air_valve_open
+        service: switch.turn_off
+        
+  - alias: House Air Valve
+    mode: single
+    max_exceeded: silent
+    trigger:
+      - platform: state
+        entity_id: input_boolean.house_air_valve
+        from: "off"
+        to: "on"
+      - platform: state
+        entity_id: input_boolean.house_air_valve
+        from: "on"
+        to: "off"
+    action:
+      - entity_id: switch.house_air_valve_open
+        service_template: >
+          {% if is_state('input_boolean.house_air_valve', 'on') %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+      #Give time to switch direction
+      - delay:
+          seconds: 1
+      - entity_id: switch.house_air_valve
+        service: switch.turn_on
+      #Give time to complete movement
+      - delay:
+          seconds: 25
+      - entity_id: switch.house_air_valve
+        service: switch.turn_off
+      #Give time to snubber to eliminate transients/EMIs
+      - delay:
+          seconds: 2
+      - entity_id: switch.house_air_valve_open
+        service: switch.turn_off

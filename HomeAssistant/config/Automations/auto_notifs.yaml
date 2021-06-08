@@ -122,50 +122,53 @@
   - alias: Publish Collect Notification
     mode: restart
     trigger:
-      platform: time
-      at: '7:00:00'
+      # - platform: time
+        # at: '7:00:00'
+      - platform: time
+        at: '18:00:00'
     condition:
       condition: or
       conditions:
+        # - condition: state
+          # entity_id: sensor.collect_trash_week
+          # state: 'Today'
+        # - condition: state
+          # entity_id: sensor.collect_recycle_week
+          # state: 'Today'
+        # - condition: state
+          # entity_id: sensor.collect_compost_week
+          # state: 'Today'
         - condition: state
           entity_id: sensor.collect_trash_week
-          state: 'Today'
+          state: 'Tomorrow'
         - condition: state
           entity_id: sensor.collect_recycle_week
-          state: 'Today'
+          state: 'Tomorrow'
         - condition: state
           entity_id: sensor.collect_compost_week
-          state: 'Today'
+          state: 'Tomorrow'
     action:
       service_template: >
-        {% if is_state('device_tracker.life360_jean', 'home') and is_state('device_tracker.life360_cindy', 'home') %}
+        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 75 or is_state('device_tracker.life360_jean', 'home') %}
+        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 75 or is_state('device_tracker.life360_cindy', 'home') %}
+        {% if jean and cindy %}
           notify.sms_notify_all
-        {% elif is_state('device_tracker.life360_jean', 'home') %}
+        {% elif jean %}
           notify.sms_jean
-        {% elif is_state('device_tracker.life360_cindy', 'home') %}
+        {% elif cindy %}
           notify.sms_cindy
         {% else %}
           notify.sms_jean
         {% endif %}
       data_template:
         title: "Collect day"
-        message: >
-          {% if is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
-            Put TRASH, RECYCLE & COMPOST out for collection today
-          {% elif is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_recycle_week', 'Today') %}
-            Put TRASH & RECYCLE out for collection today
-          {% elif is_state('sensor.collect_recycle_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
-            Put RECYCLE & COMPOST out for collection today
-          {% elif is_state('sensor.collect_trash_week', 'Today') and is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
-            Put TRASH & COMPOST out for collection today
-          {% elif is_state('sensor.collect_trash_week', 'Today') %}
-            Put TRASH out for collection today
-          {% elif is_state('sensor.collect_recycle_week', 'Today') %}
-            Put RECYCLE out for collection today
-          {% elif is_state('sensor.collect_compost_week', 'Today') and state_attr('sensor.dates', 'dayofyear')|int >= 300 %}
-            Put COMPOST out for collection today
-          {% endif %}
-
+        message: >-
+          {% for device in states.sensor if 'collect_' in device.entity_id and '_week' in device.entity_id if device.attributes.tomorrow == 'on' %}
+             {%- if loop.first -%}{{'Put '}}{% elif loop.last %}{{' & '}}{% else %}{{', '}}{% endif -%}
+             {{ device.attributes['displayName'] }}
+          {%- endfor -%}
+          {{' out for collection tomorrow'}}
+          
   - alias: Printer3D Job Complete
     mode: restart
     trigger:
@@ -201,6 +204,75 @@
         data:
           message: "3D Printing Failed"
           
+  - alias: Garage Attic Light ON Repetitive
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: '/10'        
+    condition:
+      - condition: state
+        entity_id: binary_sensor.garage_attic_light
+        state: "on"
+      - condition: state
+        entity_id: sensor.garage_fd_status
+        state: "Ok"
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "Attic Light Still On"
+          
+  - alias: Garage Attic Light ON Immediate
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: lock.garage_fd_lock
+        from: 'unlocked'
+        to: 'locked'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.garage_attic_light
+        state: "on"
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "Attic Light Remained On"
+          
+  - alias: Garage Heaters Safety Notif
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: state
+        entity_id: binary_sensor.garage_safety_front_active
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.garage_safety_rear_active
+        from: 'off'
+        to: 'on'
+    condition:
+      condition: or
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.garage_safety_front_active
+          state: "on"
+          for:
+            seconds: 15
+        - condition: state
+          entity_id: binary_sensor.garage_safety_rear_active
+          state: "on"
+          for:
+            seconds: 15
+        - condition: state
+          entity_id: sensor.garage_safety_control_status
+          state: "ERROR"
+          for:
+            minutes: 1
+    action:
+      - service: notify.sms_jean
+        data:
+          message: "ALARM - Garage Safety Temperature"
+          
 #   - alias: Set new dates for collects
 #     mode: restart
 #     trigger:
@@ -218,4 +290,144 @@
 #         data:
 #           entity_id: input_select.collect_recycle
 #           option: Even/Wednesday
+
+  - alias: Cold Storage Light ON Repetitive
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/10'        
+    condition:
+      condition: and
+      conditions:
+        - condition: template
+          value_template: >-
+            '{{ as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) | int > 120 and 
+            as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) | int < 3600 and 
+            as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) != None }}'
+        - condition: template
+          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_repetitive.attributes.last_triggered) | int > 300 }}'
+        - condition: or
+          conditions:
+            - condition: state
+              entity_id: binary_sensor.control_room_light
+              state: "on"
+              for:
+                minutes: 5
+            - condition: and
+              conditions:
+                - condition: state
+                  entity_id: binary_sensor.control_room_light
+                  state: "on"
+                  for:
+                    seconds: 30
+                - condition: state
+                  entity_id: binary_sensor.control_room_door
+                  state: "off"
+                  for:
+                    seconds: 30
+    action:
+      service_template: >
+        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 15 or is_state('device_tracker.life360_jean', 'home') %}
+        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 15 or is_state('device_tracker.life360_cindy', 'home') %}
+        {% if jean and cindy %}
+          notify.sms_notify_all
+        {% elif jean %}
+          notify.sms_jean
+        {% elif cindy %}
+          notify.sms_cindy
+        {% else %}
+          notify.sms_jean
+        {% endif %}
+      data:
+        message: "Cold Storage Light Still On"
           
+  - alias: Cold Storage Light ON Immediate
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.control_room_light
+        to: "on"
+        for:
+           minutes: 5
+    action:
+      service_template: >
+        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 15 or is_state('device_tracker.life360_jean', 'home') %}
+        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 15 or is_state('device_tracker.life360_cindy', 'home') %}
+        {% if jean and cindy %}
+          notify.sms_notify_all
+        {% elif jean %}
+          notify.sms_jean
+        {% elif cindy %}
+          notify.sms_cindy
+        {% else %}
+          notify.sms_jean
+        {% endif %}
+      data:
+        message: "Cold Storage Light Remained On"
+          
+
+############################################
+#######TEST ACTIONNABLE NOTIFICATIONS#######
+############################################
+          
+          
+  - alias: Doors unlocked notification
+    mode: restart
+    trigger:
+      - platform: time
+        at: "22:00:00"
+      - platform: time
+        at: "23:00:00"
+      - platform: time
+        at: "00:00:00"
+      - platform: time
+        at: "01:00:00"
+    condition:
+      - condition: state
+        entity_id: group.all_locks
+        state: "unlocked"
+    action:
+      - alias: "Set up variables for the actions"
+        variables:
+          # Including an id in the action allows us to identify this script run
+          # and not accidentally trigger for other notification actions
+          action_lock: "{{ 'LOCK_' ~ context.id }}"
+          action_ignore: "{{ 'IGNORE_' ~ context.id }}"
+      - alias: "Ask to lock the doors"
+        service: notify.ios_notify_parents
+        data:
+          message: "The doors are not all locked, lock all now?"
+          data:
+            ttl: 0
+            priority: high
+            actions:
+              - action: "{{ action_lock }}"
+                title: LOCK ALL DOORS
+                destructive: false
+              - action: "{{ action_ignore }}"
+                title: DISMISS
+                destructive: true
+      - alias: "Wait for a response"
+        wait_for_trigger:
+          - platform: event
+            event_type: mobile_app_notification_action
+            event_data:
+              # waiting for the specific action avoids accidentally continuing
+              # for another script/automation's notification action
+              action: "{{ action_lock }}"
+          - platform: event
+            event_type: mobile_app_notification_action
+            event_data:
+              action: "{{ action_ignore }}"
+      - alias: "Perform the action"
+        choose:
+          - conditions: "{{ wait.trigger.event.data.action == action_lock }}"
+            sequence:
+              - service: input_boolean.turn_on
+                target:
+                  entity_id: input_boolean.lock_all
+          - conditions: "{{ wait.trigger.event.data.action == action_ignore }}"
+            sequence:
+              - service: input_boolean.turn_off
+                target:
+                  entity_id: input_boolean.lock_all

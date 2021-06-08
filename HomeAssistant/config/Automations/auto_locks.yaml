@@ -124,6 +124,9 @@
           entity_id: device_tracker.life360_jean
           state: 'home'
         - condition: state
+          entity_id: input_select.workplace_jean
+          state: 'Office'
+        - condition: state
           entity_id: binary_sensor.workday_jean
           state: 'on'
         - condition: numeric_state

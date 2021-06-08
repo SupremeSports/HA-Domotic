@@ -70,61 +70,89 @@
           switch.turn_off
         {% endif %}
 
-  #Pond water level has to be below high level since 2 minutes
+######## POND REFILL ########
+
+  #Pond water level has to be below high level since 'delayStart' minutes
   #Pond pump mode shall not be in Winter mode
-  #Filler valve can't operate more than 1h/day
+  #Filler valve can't operate more than 'maxDailyTime' per 24h period
+    #Unless it is set to 0 or -1, then there's unlimited daily time
+  #Filler will start 'delayStart' minutes after level been below the high level and stop 'delayStop' minutes after it has been reached and maintained
+    #If you want to stop it, simply turn off filler valve (high level sensor MUST be ON otherwise filler valve will turn on again)
   - alias: Pond Filler Control
     mode: restart
     trigger:
       - platform: time_pattern
         seconds: '/5'
+      - platform: state
+        entity_id: input_boolean.pondfiller_cancel
+        to: 'on'
     condition:
-      condition: and
+      condition: or
       conditions:
+        - condition: and
+          conditions:
+            - condition: state
+              entity_id: 'script.pondfiller_start30m'
+              state: 'off'
+            - condition: state
+              entity_id: 'script.pondfiller_start1h'
+              state: 'off'
+            - condition: state
+              entity_id: 'script.pondfiller_start2h'
+              state: 'off'
         - condition: state
-          entity_id: 'script.pondfiller_start30m'
-          state: 'off'
-        - condition: state
-          entity_id: 'script.pondfiller_start1h'
-          state: 'off'
-        - condition: state
-          entity_id: 'script.pondfiller_start2h'
-          state: 'off'
+          entity_id: 'input_select.pondfiller_mode'
+          state: 'Winter/Off'
     action:
-      entity_id: switch.pond_filler_valve
-      service_template: >
-        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pond_level_high.last_changed) %}
-        {% set lastStatus = is_state('binary_sensor.pond_level_high', 'off') %}
-        {% set lastSwitch = is_state('switch.pond_filler_valve', 'on') %}
-        {% set lastDay = states('sensor.pond_filler_timer')|float %}
-        {% set pondRunning = is_state('input_boolean.pond_running', 'on') %}
-        {% set PF = false %}
-        
-        {% if lastSwitch %}
-          {% if lastStatus %}
-            {% set PF = true %}
-          {% elif lastLevel <= 120 %}
+      - service_template: >
+          {% if is_state('input_select.pondfiller_mode', 'Winter/Off') and (is_state('input_boolean.pondfiller_start30m', 'on') or is_state('input_boolean.pondfiller_start1h', 'on') or is_state('input_boolean.pondfiller_start2h', 'on')) %}
+            script.pondfiller_cancel
+          {% else %}
+            script.none
+          {% endif %}
+      - entity_id: switch.pond_filler_valve
+        service_template: >
+          {% set lastLevel = (as_timestamp(now()) - as_timestamp(states.binary_sensor.pond_level_high.last_changed))/60 %}
+          {% set lastStateOff = is_state('binary_sensor.pond_level_high', 'off') %}
+          {% set lastSwitch = is_state('switch.pond_filler_valve', 'on') %}
+          {% set lastDay = states('sensor.pond_filler_timer')|float %}
+          {% set pondRunning = is_state('input_boolean.pond_running', 'on') %}
+          {% set delayStart = states('input_number.pond_filler_start')|int %}
+          {% set delayStop = states('input_number.pond_filler_stop')|int %}
+          
+          {% if states('input_number.pond_filler_runtime')|int <= 0 %}
+            {% set maxDailyTime = 25 %}
+          {% else %}
+            {% set maxDailyTime = states('input_number.pond_filler_runtime')|int/60 %}
+          {% endif %}
+          
+          {% set PF = false %}
+          
+          {% if lastSwitch %}
+            {% if lastStateOff %}
+              {% set PF = true %}
+            {% elif lastLevel <= delayStop %}
+              {% set PF = true %}
+            {% endif %}
+          {% elif lastStateOff and lastLevel >= delayStart and lastDay <= ((maxDailyTime*60-delayStop)/60) %}
             {% set PF = true %}
           {% endif %}
-        {% elif lastStatus and lastLevel >= 120 and lastDay <= 0.92 %}
-          {% set PF = true %}
-        {% endif %}
-        
-        {% if lastDay >= 1.0 %}
-          {% set PF = false %}
-        {% elif is_state('input_select.pondpump_mode', 'Winter/Off') %}
-          {% set PF = false %}
-        {% elif is_state('binary_sensor.pond_level_high', 'unavailable') %}
-          {% set PF = false %}
-        {% elif is_state('group.irrigation', 'on') %}
-          {% set PF = false %}
-        {% endif %}
-                
-        {% if PF == true and pondRunning %}
-          switch.turn_on
-        {% else %}
-          switch.turn_off
-        {% endif %}
+          
+          {% if lastDay >= maxDailyTime %}
+            {% set PF = false %}
+          {% elif is_state('input_select.pondfiller_mode', 'Winter/Off') or is_state('input_select.pondpump_mode', 'Winter/Off') %}
+            {% set PF = false %}
+          {% elif is_state('binary_sensor.pond_level_high', 'unavailable') %}
+            {% set PF = false %}
+          {% elif is_state('group.irrigation', 'on') %}
+            {% set PF = false %}
+          {% endif %}
+                  
+          {% if PF == true and pondRunning %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
 
   - alias: Pond Filler Force Start
     mode: restart
@@ -142,5 +170,16 @@
         entity_id: input_boolean.pondfiller_cancel
         to: 'on'
     action:
-      - service_template: script.{% if '30m' in trigger.to_state.entity_id %}pondfiller_start30m{% elif '1h' in trigger.to_state.entity_id %}pondfiller_start1h{% elif '2h' in trigger.to_state.entity_id %}pondfiller_start2h{% else %}pondfiller_cancel{% endif %}
-      
+      #- service_template: script.{% if '30m' in trigger.to_state.entity_id %}pondfiller_start30m{% elif '1h' in trigger.to_state.entity_id %}pondfiller_start1h{% elif '2h' in trigger.to_state.entity_id %}pondfiller_start2h{% else %}pondfiller_cancel{% endif %}
+      - service_template: >
+          {% if is_state('input_select.pondfiller_mode', 'Winter/Off') %}
+            script.pondfiller_cancel
+          {% elif trigger.to_state.entity_id == 'input_boolean.pondfiller_start30m' %}
+            script.pondfiller_start30m
+          {% elif trigger.to_state.entity_id == 'input_boolean.pondfiller_start1h' %}
+            script.pondfiller_start1h
+          {% elif trigger.to_state.entity_id == 'input_boolean.pondfiller_start2h' %}
+            script.pondfiller_start2h
+          {% else %}
+            script.pondfiller_cancel
+          {% endif %}
