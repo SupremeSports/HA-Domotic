@@ -1,6 +1,9 @@
 ##########################################
 # GLOBAL CUSTOMIZATIONS - ALL OTHERS     #
 ##########################################
+# IF THERE'S ISSUES WITH THE HIDE ATTRIBUTES:
+#   https://github.com/Mariusthvdb/custom-ui
+#   Update custom-ui.js
 
 ######### SWITCHES #########
         

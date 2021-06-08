@@ -39,6 +39,7 @@
     icon: mdi:shield-lock
     templates:
       icon_color: >
+        if (entities['input_boolean.running_hass'].state === 'off') return 'var(--state-icon-color)';
         if (entities['sensor.lock_passcode_ok'].state === 'on') return 'var(--label-badge-green)';
         return 'var(--state-icon-color)';
   
