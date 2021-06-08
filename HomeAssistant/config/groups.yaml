@@ -4,11 +4,14 @@
       
   all_locks:
     name: Lock All
+    all: true
     entities:
       - lock.house_fd_lock
-      - lock.house_sd_lock
-      - lock.house_bd_lock
+      #- lock.house_sd_lock
+      #- lock.house_bd_lock
       - lock.garage_fd_lock
+      #- lock.shed_fd_lock
+      #- lock.pool_fd_lock
 
   locks:
     name: Locks
@@ -21,6 +24,10 @@
       - input_boolean.house_bd_unlock
       - input_boolean.garage_fd_lock
       - input_boolean.garage_fd_unlock
+      - input_boolean.shed_fd_lock
+      - input_boolean.shed_fd_unlock
+      - input_boolean.pool_fd_lock
+      - input_boolean.pool_fd_unlock
       - input_boolean.lock_all
       
   garagedoors:
@@ -53,4 +60,7 @@
       - input_boolean.pond_control_reset
       - input_boolean.pool_control_reset
       - input_boolean.weather_control_reset
+      - input_boolean.garage_main_control_reset
+      - input_boolean.garage_slave_control_reset
+      - input_boolean.shed_control_reset
 

@@ -4,11 +4,8 @@
 
   - platform: mqtt
     name: House FD Lock
-    state_topic: "Home/Door/Front/Stts"
+    state_topic: "Home/Door/Front/Sensors/Stts"
     command_topic: "Home/Door/Front/Cmd"
-    availability_topic: "Home/Door/Front/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
     value_template: '{{ value_json.locked }}'
     payload_lock: '{"lock": "lock"}'
     payload_unlock: '{"lock": "unlock"}'
@@ -16,16 +13,15 @@
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Home/Door/Front/LWT"
     qos: 0
-    json_attributes_topic: "Home/Door/Front/Json"
+    json_attributes_topic: "Home/Door/Front/Sensors/Stts"
     
   - platform: mqtt
     name: House SD Lock
-    state_topic: "Home/Door/Side/Stts"
+    state_topic: "Home/Door/Side/Sensors/Stts"
     command_topic: "Home/Door/Side/Cmd"
-    availability_topic: "Home/Door/Side/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
     value_template: '{{ value_json.locked }}'
     payload_lock: '{"lock": "lock"}'
     payload_unlock: '{"lock": "unlock"}'
@@ -33,16 +29,15 @@
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Home/Door/Side/LWT"
     qos: 0
-    json_attributes_topic: "Home/Door/Side/Json"
+    json_attributes_topic: "Home/Door/Side/Sensors/Stts"
     
   - platform: mqtt
     name: House BD Lock
-    state_topic: "Home/Door/Back/Stts"
+    state_topic: "Home/Door/Back/Sensors/Stts"
     command_topic: "Home/Door/Back/Cmd"
-    availability_topic: "Home/Door/Back/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
     value_template: '{{ value_json.locked }}'
     payload_lock: '{"lock": "lock"}'
     payload_unlock: '{"lock": "unlock"}'
@@ -50,16 +45,15 @@
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Home/Door/Back/LWT"
     qos: 0
-    json_attributes_topic: "Home/Door/Back/Lock/Json"
+    json_attributes_topic: "Home/Door/Back/Sensors/Stts"
 
   - platform: mqtt
     name: Garage FD Lock
-    state_topic: "Garage/Door/Front/Stts"
+    state_topic: "Garage/Door/Front/Sensors/Stts"
     command_topic: "Garage/Door/Front/Cmd"
-    availability_topic: "Garage/Door/Front/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
     value_template: '{{ value_json.locked }}'
     payload_lock: '{"lock": "lock"}'
     payload_unlock: '{"lock": "unlock"}'
@@ -67,39 +61,39 @@
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Garage/Door/Front/LWT"
     qos: 0
-    json_attributes_topic: "Garage/Door/Front/Json"
+    json_attributes_topic: "Garage/Door/Front/Sensors/Stts"
     
   - platform: mqtt
     name: Shed FD Lock
-    state_topic: "Shed/Door/Front/Stts"
-    command_topic: "Shed/Door/Front/Cmd"
-    availability_topic: "Shed/Door/Front/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Shed/Door/Sensors/Stts"
+    command_topic: "Shed/Door/Cmd"
     value_template: '{{ value_json.locked }}'
-    payload_lock: '{"lock": "lock"}'
-    payload_unlock: '{"lock": "unlock"}'
+    payload_lock: '{"rX":"ON", "hX":"2.0"}'
+    payload_unlock: '{"rY":"ON", "hY":"2.0"}'
     state_locked: "locked"
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Shed/Control/LWT"
     qos: 0
-    json_attributes_topic: "Shed/Door/Front/Json"
+    json_attributes_topic: "Shed/Door/Sensors/Stts"
     
   - platform: mqtt
     name: Pool FD Lock
-    state_topic: "Pool/Door/Front/Stts"
-    command_topic: "Pool/Door/Front/Cmd"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Pool/Control/Sensors/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
     value_template: '{{ value_json.locked }}'
-    payload_lock: '{"lock": "lock"}'
-    payload_unlock: '{"lock": "unlock"}'
+    payload_lock: '{"rX":"ON", "hX":"2.0"}'
+    payload_unlock: '{"rY":"ON", "hY":"2.0"}'
     state_locked: "locked"
     state_unlocked: "unlocked"
     retain: false
     optimistic: false
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
-    json_attributes_topic: "Pool/Door/Front/Json"
+    json_attributes_topic: "Pool/Door/Cabin/Sensors/Stts"

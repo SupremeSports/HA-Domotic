@@ -10,9 +10,8 @@
     name: Master Bedroom RGBW
     state_topic: "Home/Milight/Stts/1"
     command_topic: "Home/Milight/Cmd/1"
-    availability_topic: "Home/Transmitter/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Transmitter/LWT"
     brightness: true
     rgb: true
     white_value: true
@@ -26,9 +25,8 @@
     name: Under Bar RGBW
     state_topic: "Home/Milight/Stts/2"
     command_topic: "Home/Milight/Cmd/2"
-    availability_topic: "Home/Transmitter/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Transmitter/LWT"
     brightness: true
     rgb: true
     white_value: true
@@ -42,9 +40,8 @@
     name: Nixie Clock RGB
     state_topic: "Home/NixieClock/LED/Stts"
     command_topic: "Home/NixieClock/LED/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     brightness: false
     rgb: true
     white_value: false
@@ -58,9 +55,8 @@
     name: Nixie Clock
     state_topic: "Home/NixieClock/Stts"
     command_topic: "Home/NixieClock/Cmd"
-    availability_topic: "Home/NixieClock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/NixieClock/LWT"
     brightness: false
     rgb: false
     white_value: false
@@ -73,9 +69,8 @@
     name: Massage Clock RGB
     state_topic: "Home/Massage/Clock/LED/Stts"
     command_topic: "Home/Massage/Clock/LED/Cmd"
-    availability_topic: "Home/Massage/Clock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Massage/Clock/LWT"
     brightness: true
     rgb: true
     white_value: false
@@ -90,14 +85,43 @@
     name: Pool Clock
     state_topic: "Pool/Clock/LED/Stts"
     command_topic: "Pool/Clock/LED/Cmd"
-    availability_topic: "Pool/Clock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Clock/LWT"
     brightness: true
     rgb: true
     white_value: false
     effect: true
     effect_list: [Default, RainbowCycle, TextColor, Spoon, VertRainbowCycle, HorizRainbowCycle, TextChaser, AllEffectsRolling]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Maestro Dimmer
+    state_topic: "Home/Maestro/Switch/LMP/Stts"
+    command_topic: "Home/Maestro/Switch/LMP/Cmd"
+    availability:
+      - topic: "Home/Maestro/Switch/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
+    name: Maestro Fan
+    state_topic: "Home/Maestro/Switch/FAN/Stts"
+    command_topic: "Home/Maestro/Switch/FAN/Cmd"
+    availability:
+      - topic: "Home/Maestro/Switch/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
     optimistic: false
     qos: 0
     

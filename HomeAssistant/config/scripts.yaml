@@ -1,7 +1,13 @@
 ####################################################
 # SCRIPTS                                          #
 ####################################################
-          
+
+  none:
+    alias: Dummy Script
+    sequence:
+      - delay:
+          milliseconds: 1
+      
   clear_lock:
     alias: Clear Lock Script
     sequence:
@@ -180,42 +186,48 @@
   pondfiller_start30m:
     alias: Pond Filler Forced 30m
     sequence:
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
       - service: script.turn_off
         entity_id: script.pondfiller_start1h
       - service: script.turn_off
         entity_id: script.pondfiller_start2h
-      - service: switch.turn_on
-        entity_id: switch.pond_filler_valve
       - service: input_boolean.turn_off
         entity_id: input_boolean.pondfiller_start1h
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start2h
       - delay: 00:30:00
       - service: script.turn_on
         entity_id: script.pondfiller_cancel
   pondfiller_start1h:
     alias: Pond Filler Forced 1h
     sequence:
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
       - service: script.turn_off
         entity_id: script.pondfiller_start30m
       - service: script.turn_off
         entity_id: script.pondfiller_start2h
-      - service: switch.turn_on
-        entity_id: switch.pond_filler_valve
       - service: input_boolean.turn_off
         entity_id: input_boolean.pondfiller_start30m
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start2h
       - delay: 01:00:00
       - service: script.turn_on
         entity_id: script.pondfiller_cancel
   pondfiller_start2h:
     alias: Pond Filler Forced 2h
     sequence:
+      - service: switch.turn_on
+        entity_id: switch.pond_filler_valve
       - service: script.turn_off
         entity_id: script.pondfiller_start30m
       - service: script.turn_off
         entity_id: script.pondfiller_start1h
-      - service: switch.turn_on
-        entity_id: switch.pond_filler_valve
       - service: input_boolean.turn_off
         entity_id: input_boolean.pondfiller_start30m
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.pondfiller_start1h
       - delay: 02:00:00
       - service: script.turn_on
         entity_id: script.pondfiller_cancel
