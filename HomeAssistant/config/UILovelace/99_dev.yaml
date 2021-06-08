@@ -97,10 +97,12 @@
         - sensor.chicoutimi_last_boot
         - sensor.chicoutimi_time_online
         - sensor.chicoutimi_update_available
-        - sensor.chicoutimi_home_assistant_v2_db
+        #- sensor.chicoutimi_home_assistant_v2_db
+        - sensor.chicoutimi_mariadb
         - type: custom:fold-entity-row
           head: sensor.chicoutimi_uun_entities
           entities:
+            - sensor.chicoutimi_entities
             - type: custom:hui-markdown-card
               style: |
                 ha-card {
@@ -109,6 +111,14 @@
                 }
               content: |
                 {% set list = ['icon_color', 'icon', 'friendly_name', '--------------', 'templates', 'hide_attributes'] %}
+                
+                {% for attr in states.sensor.chicoutimi_entities.attributes %}
+                  {% if attr not in list -%}
+                    {{attr}}: {{states.sensor.chicoutimi_entities.attributes[attr]}}
+                  {%- endif  -%}
+                {%- endfor -%}
+                
+                -------------
                 
                 {% for attr in states.sensor.chicoutimi_uun_entities.attributes %}
                   {% if attr not in list -%}

@@ -10,11 +10,9 @@
   badges:
     - sensor.time
     - input_boolean.restart_hass
-    - sensor.time_online
-    - sensor.server_cpu_temperature_temp
+    - sensor.server_cpu_temperature_temperature
     - sensor.server_used_percent
     - binary_sensor.ha_update_available
-    - sensor.ha_installed_version
   cards:
     - type: entities
       title: Health Data
@@ -24,6 +22,7 @@
         - sensor.last_boot
         - sensor.time_online
         - binary_sensor.ha_update_available
+        #- sensor.ha_latest_version
         - binary_sensor.remote_ui
         - !include /config/UILovelaceCards/entities.yaml
         
@@ -44,16 +43,16 @@
       show_header_toggle: false
       entities:
         - type: custom:fold-entity-row
-          head: sensor.server_cpu_temperature_temp
+          head: sensor.server_cpu_temperature_temperature
           entities:
-            - sensor.server_k8temp_1_temp
-            - sensor.server_k8temp_2_temp
-            - sensor.server_k8temp_3_temp
-            - sensor.server_k8temp_4_temp
+            - sensor.server_k8temp_1_temperature
+            - sensor.server_k8temp_2_temperature
+            - sensor.server_k8temp_3_temperature
+            - sensor.server_k8temp_4_temperature
         - type: custom:fold-entity-row
-          head: sensor.server_mb_temperature_temp
+          head: sensor.server_mb_temperature_temperature
           entities:
-            - sensor.server_mb_temperature_temp
+            - sensor.server_mb_temperature_temperature
         - type: custom:fold-entity-row
           head: sensor.server_running
           entities:
@@ -81,6 +80,7 @@
       show_header_toggle: false
       entities:
         - sensor.home_assistant_v2_db
+        - sensor.mariadb_size
         - type: custom:fold-entity-row
           head: sensor.server_used_percent
           entities:

@@ -46,6 +46,16 @@
                     "off": "mdi:garage"
                 - entity: input_boolean.garage_cd_trigger
                   icon: "mdi:arrow-up-down-bold-outline"
+        - type: custom:fold-entity-row
+          head: sensor.garage_bd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_bd_opened
+                  icon: "mdi:door"
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"   
     - type: entities
       title: Lights
       show_header_toggle: false
@@ -54,9 +64,245 @@
           head: binary_sensor.garagefrontlight_status
           entities:
             - input_select.garagefrontlight_mode
-            - sensor.garage_front_rssi
         - type: custom:fold-entity-row
           head: binary_sensor.garagefrontpower_status
           entities:
             - input_select.garagefrontpower_mode
-        - binary_sensor.garage_attic_light
+        - type: custom:fold-entity-row
+          head: binary_sensor.garage_attic_light
+          entities:
+            - automation.garage_attic_light_on_immediate
+            - automation.garage_attic_light_on_repetitive
+    - type: entities
+      title: Air Supply
+      show_header_toggle: false
+      entities:
+        - sensor.air_compressor_pressure
+        - switch.garage_air_compressor
+        - type: custom:fold-entity-row
+          head: switch.air_compressor_purge
+          entities:
+            - input_boolean.air_compressor_purge
+            - input_number.air_compressor_purge
+        - type: custom:fold-entity-row
+          head: sensor.garage_air_valve
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_air_valve_closed
+                  icon: "mdi:valve"
+                  state_icons:
+                    "on": "mdi:valve-closed"
+                    "off": "mdi:valve-open"
+                  state_styles:
+                    "off":
+                      color: var(--state-icon-active-color)
+                    "on":
+                      color: var(--state-icon-color)
+                - entity: input_boolean.garage_air_valve
+                  icon: "mdi:toggle-switch"
+                  state_icons:
+                    "on": "mdi:toggle-switch"
+                    "off": "mdi:toggle-switch-off"
+            - switch.garage_air_valve
+            - switch.garage_air_valve_open
+        - type: custom:fold-entity-row
+          head: sensor.house_air_valve
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.house_air_valve_closed
+                  icon: "mdi:valve"
+                  state_icons:
+                    "on": "mdi:valve-closed"
+                    "off": "mdi:valve-open"
+                  state_styles:
+                    "off":
+                      color: var(--state-icon-active-color)
+                    "on":
+                      color: var(--state-icon-color)
+                - entity: input_boolean.house_air_valve
+                  icon: "mdi:toggle-switch"
+                  state_icons:
+                    "on": "mdi:toggle-switch"
+                    "off": "mdi:toggle-switch-off"
+            - switch.house_air_valve
+            - switch.house_air_valve_open
+    - type: entities
+      title: Power usage
+      show_header_toggle: false
+      entities: 
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu2_power
+          entities:
+            - sensor.ted5000_mtu2_power
+            - sensor.ted5000_mtu2_voltage
+            - sensor.garage_power_usage
+            - sensor.garage_daily_energy
+            - sensor.garage_monthly_energy
+        - binary_sensor.power_peakperiod
+    - type: entities
+      title: Garage Cabinets Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.garage_main_control_status
+          entities:
+            - sensor.garage_main_box_temperature
+            - sensor.garage_main_box_humidity
+            #- sensor.garage_main_12v_voltage
+            - sensor.garage_main_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_main_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_slave_control_status
+          entities:
+            - sensor.garage_slave_box_temperature
+            - sensor.garage_slave_box_humidity
+            #- sensor.garage_slave_12v_voltage
+            - sensor.garage_slave_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_slave_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_safety_control_status
+          entities:
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagefrontheater_error
+            entities:
+              - sensor.garage_safety_front_temperature
+              - binary_sensor.garage_safety_front_active
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagerearheater_error
+            entities:
+              - sensor.garage_safety_rear_temperature
+              - binary_sensor.garage_safety_rear_active
+              
+    - type: history-graph
+      title: Garage Temperatures
+      entities:
+        - entity: sensor.garage_mean_temp
+          name: Garage Mean Temperature
+        - entity: sensor.garage_front_temp
+          name: Garage Front Temperature
+        - entity: sensor.garage_rear_temp
+          name: Garage Rear Temperature
+              
+    # - type: vertical-stack
+      # title: Garage Front Heater
+      # cards:
+        # - type: horizontal-stack
+          # cards:
+            # - type: thermostat
+              # entity: climate.garage_front_hvac
+              # name: ""
+            # - type: thermostat
+              # entity: climate.garage_front_heater
+              # name: ""
+        # - type: entities
+          # show_header_toggle: false
+          # entities:
+            # - type: custom:fold-entity-row
+              # head: switch.garage_front_heater
+              # entities:
+                # - input_boolean.garage_front_heater
+                # - sensor.garage_front_heater_time
+                # - sensor.garage_front_heater_count
+            # - type: custom:fold-entity-row
+              # head: sensor.garage_front_temp
+              # entities:
+                # - sensor.garage_front_temp
+                # - sensor.garage_front_hum
+                # - type: custom:hui-element
+                  # card_type: markdown
+                  # content: |
+                    # Room Temperature:   {{states.climate.garage_front_hvac.attributes.room_temp}} °C
+                    # Room Humidty:       {{states.climate.garage_front_hvac.attributes.room_hum}} %
+                    
+    # - type: vertical-stack
+      # title: Garage Rear Heater
+      # cards:
+        # - type: horizontal-stack
+          # cards:
+            # - type: thermostat
+              # entity: climate.garage_rear_hvac
+              # name: ""
+            # - type: thermostat
+              # entity: climate.garage_rear_heater
+              # name: ""
+        # - type: entities
+          # show_header_toggle: false
+          # entities:
+            # - type: custom:fold-entity-row
+              # head: switch.garage_rear_heater
+              # entities:
+                # - input_boolean.garage_rear_heater
+                # - sensor.garage_rear_heater_time
+                # - sensor.garage_rear_heater_count
+            # - type: custom:fold-entity-row
+              # head: sensor.garage_rear_temp
+              # entities:
+                # - sensor.garage_rear_temp
+                # - sensor.garage_rear_hum
+                # - type: custom:hui-element
+                  # card_type: markdown
+                  # content: |
+                    # Room Temperature:   {{states.climate.garage_rear_hvac.attributes.room_temp}} °C
+                    # Room Humidty:       {{states.climate.garage_rear_hvac.attributes.room_hum}} %
+                    
+    - type: vertical-stack
+      title: Garage Heaters
+      cards:
+        - type: horizontal-stack
+          cards:
+            - type: thermostat
+              entity: climate.garage_front_hvac
+              name: ""
+            - type: thermostat
+              entity: climate.garage_heaters
+              name: ""
+            - type: thermostat
+              entity: climate.garage_rear_hvac
+              name: ""
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: custom:fold-entity-row
+              head: switch.garage_front_heater
+              entities:
+                - sensor.garage_front_heater_time
+                - sensor.garage_front_heater_count
+                - input_boolean.garage_heaters
+                - counter.heaters_counter
+                - type: custom:fold-entity-row
+                  head: sensor.garage_front_temp
+                  entities:
+                    - sensor.garage_front_temp
+                    - sensor.garage_front_hum
+                    - type: custom:hui-element
+                      card_type: markdown
+                      content: |
+                        Room Temperature:   {{states.climate.garage_front_hvac.attributes.room_temp}} °C
+                        Room Humidty:       {{states.climate.garage_front_hvac.attributes.room_hum}} %
+            - type: custom:fold-entity-row
+              head: switch.garage_rear_heater
+              entities:
+                - sensor.garage_rear_heater_time
+                - sensor.garage_rear_heater_count
+                - input_boolean.garage_heaters
+                - counter.heaters_counter
+                - type: custom:fold-entity-row
+                  head: sensor.garage_rear_temp
+                  entities:
+                    - sensor.garage_rear_temp
+                    - sensor.garage_rear_hum
+                    - type: custom:hui-element
+                      card_type: markdown
+                      content: |
+                        Room Temperature:   {{states.climate.garage_rear_hvac.attributes.room_temp}} °C
+                        Room Humidty:       {{states.climate.garage_rear_hvac.attributes.room_hum}} %

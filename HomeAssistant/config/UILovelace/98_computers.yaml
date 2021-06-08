@@ -93,9 +93,9 @@
                 entities:
                   - sensor.jgau_pc_kingston_sa400s37_240gb_temperatures_temperature
               - type: custom:fold-entity-row
-                head: sensor.jgau_pc_generic_hard_disk_load_used_space
+                head: sensor.jgau_pc_hgst_hts721010a9e630_load_used_space
                 entities:
-                  - sensor.jgau_pc_generic_hard_disk_temperatures_temperature
+                  - sensor.jgau_pc_hgst_hts721010a9e630_temperatures_temperature
             
     - type: conditional
       conditions:

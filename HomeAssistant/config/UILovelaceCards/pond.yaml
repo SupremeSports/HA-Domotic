@@ -8,7 +8,7 @@
     #       - switch.pond_pump
     #       - input_select.pondpump_mode
     
-      type: entities
+    - type: entities
       title: Pond Filling
       show_header_toggle: false
       entities:
@@ -36,7 +36,7 @@
                 name: Stop
                 icon: "mdi:stop"
     
-      type: entities
+    - type: entities
       title: Pond Cabinet Status
       show_header_toggle: false
       entities:

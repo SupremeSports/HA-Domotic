@@ -1,5 +1,5 @@
 ####################################################
-# UILOVELACE - POOL                                #
+# UILOVELACE - POND                                #
 ####################################################
 
 - title: Pond Controls
@@ -60,9 +60,16 @@
             entities:
               - type: "custom:secondaryinfo-entity-row"
                 entity: switch.pond_filler_valve
-                secondary_info: "Time last 24h: [[ sensor.pond_filler_timer.attributes.value ]]"
+                secondary_info: 'Time last 24h: [[ sensor.pond_filler_timer.attributes.value ]] / [[ if(input_number.pond_filler_runtime <= 0, "Unlimites", input_number.pond_filler_runtime) ]] minutes'
+              - input_select.pondfiller_mode
               - binary_sensor.pond_level_low
               - binary_sensor.pond_level_high
+              - type: custom:fold-entity-row
+                head: automation.pond_filler_control
+                entities:
+                  - input_number.pond_filler_runtime
+                  - input_number.pond_filler_start
+                  - input_number.pond_filler_stop
               #- automation.pond_filler_control
               - type: "custom:button-entity-row"
                 buttons:

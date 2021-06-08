@@ -34,10 +34,16 @@
         - sun.sun
         - weather.dolbeau
         - sensor.visibility
+        # - type: custom:fold-entity-row
+        #   head: sensor.outdoor_uv_sensor
+        #   entities:
+        #     - sensor.uv_index
         - type: custom:fold-entity-row
-          head: sensor.outdoor_uv_sensor
+          head: sensor.outdoor_uv_level
           entities:
-            - sensor.uv_index
+            - sensor.outdoor_uv_sensor
+            # - sensor.uv_level
+            # - sensor.uv_index
     
     - type: entities
       title: Wind

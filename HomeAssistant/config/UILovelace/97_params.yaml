@@ -19,6 +19,21 @@
         - sensor.ted5000_mtu2_power
         - sensor.ted5000_mtu3_power
         - binary_sensor.power_peakperiod
+        
+    - type: entities
+      title: Cold Storage
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.control_room_light
+          entities:
+            - automation.cold_storage_light_on_immediate
+            - automation.cold_storage_light_on_repetitive
+        - type: custom:fold-entity-row
+          head: binary_sensor.control_room_door
+          entities:
+            - automation.cold_storage_door_on_immediate
+            - automation.cold_storage_door_on_repetitive
 
     - type: entities
       title: Water Entrance
@@ -66,6 +81,18 @@
                 - entity: input_boolean.control_room_control_reset
                   name: RESET
                   icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.shed_control_status
+          entities:
+            - sensor.shed_box_temperature
+            - sensor.shed_box_humidity
+            - sensor.shed_12v_voltage
+            - sensor.shed_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.shed_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
                   
     - type: entities
       title: Clocks
@@ -74,6 +101,7 @@
         - type: custom:fold-entity-row
           head: sensor.nixie_clock
           entities:
+            - sensor.nixie_clock_case_temp
             - light.nixie_clock
             - light.nixie_clock_rgb
             - switch.nixie_hour_mode

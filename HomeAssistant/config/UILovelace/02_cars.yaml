@@ -11,7 +11,7 @@
     - sensor.time
   cards:
     - type: picture-elements
-      title: Lexus Start
+      title: Lexus Remote
       #icon: 'mdi:car-connected'
       image: /local/images/Remotes/Orbit2350_Remote5.png
       elements:
@@ -77,7 +77,7 @@
               entity_id: input_boolean.cars_lexus_start
 
     - type: picture-elements
-      title: Journey Start  
+      title: Journey Remote  
       #icon: 'mdi:car-connected'
       image: /local/images/Remotes/DodgeJourneyRemote3.png
       elements:

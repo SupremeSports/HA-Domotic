@@ -47,6 +47,10 @@
           entities:
             - input_select.lamppost_mode
         - type: custom:fold-entity-row
+          head: binary_sensor.frontdoorlight_status
+          entities:
+            - switch.front_door_light
+        - type: custom:fold-entity-row
           head: binary_sensor.poweroutlet_status
           entities:
             - input_select.poweroutlet_mode
@@ -54,7 +58,6 @@
           head: binary_sensor.garagefrontlight_status
           entities:
             - input_select.garagefrontlight_mode
-            - sensor.garage_front_rssi
         - type: custom:fold-entity-row
           head: binary_sensor.garagefrontpower_status
           entities:
@@ -97,6 +100,10 @@
         - type: custom:fold-entity-row
           head: device_tracker.life360_jean
           entities:
+            - type: custom:fold-entity-row
+              head: sensor.workplace_jean
+              entities:
+                - input_select.workplace_jean
             - type: custom:fold-entity-row
               head:
                 type: section
@@ -374,6 +381,16 @@
                 - entity: input_boolean.garage_cd_trigger
                   icon: "mdi:arrow-up-down-bold-outline"
         - type: custom:fold-entity-row
+          head: sensor.garage_bd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.garage_bd_opened
+                  icon: "mdi:door"
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"   
+        - type: custom:fold-entity-row
           head: sensor.shed_fd_status
           entities:
             - type: "custom:button-entity-row"
@@ -383,6 +400,16 @@
                   state_icons:
                     "on": "mdi:door-open"
                     "off": "mdi:door"
+                - entity: binary_sensor.shed_ld_opened
+                  icon: "mdi:chevron-left-box"
+                  state_icons:
+                    "on": "mdi:chevron-left-box"
+                    "off": "mdi:chevron-left-box"
+                - entity: binary_sensor.shed_rd_opened
+                  icon: "mdi:chevron-right-box"
+                  state_icons:
+                    "on": "mdi:chevron-right-box"
+                    "off": "mdi:chevron-right-box"
                 - entity: input_boolean.shed_fd_lock
                   icon: "mdi:lock"
                 - entity: input_boolean.shed_fd_unlock
@@ -401,6 +428,18 @@
                   icon: "mdi:lock"
                 - entity: input_boolean.pool_fd_unlock
                   icon: "mdi:lock-open-outline"
+        - type: custom:fold-entity-row
+          head: sensor.pool_gates
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_deck
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_deck == unavailable, "N/A", if(binary_sensor.pool_gate_closed_deck == unknown, "N/A", sensor.pool_gate_count_deck)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_main
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_main == unavailable, "N/A", if(binary_sensor.pool_gate_closed_main == unknown, "N/A", sensor.pool_gate_count_main)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_pond
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_pond == unavailable, "N/A", if(binary_sensor.pool_gate_closed_pond == unknown, "N/A", sensor.pool_gate_count_pond)) ]]'
         - type: "custom:button-entity-row"
           buttons:
             - entity: input_boolean.lock_all

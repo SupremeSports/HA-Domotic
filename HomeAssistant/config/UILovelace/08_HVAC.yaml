@@ -21,6 +21,14 @@
             ha-card {
               box-shadow: 0px -10px 50px blue;
             }
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - input_boolean.living_room_hvac_tilt
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
         - type: custom:fold-entity-row
           head: sensor.living_room_temp
           entities:

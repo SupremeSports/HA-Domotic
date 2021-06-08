@@ -57,11 +57,16 @@
           entities:
           - type: "custom:secondaryinfo-entity-row"
             entity: switch.pool_filler_valve
-            secondary_info: "Time last 24h: [[ sensor.pool_filler_timer.attributes.value ]]"
+            secondary_info: 'Time last 24h: [[ sensor.pool_filler_timer.attributes.value ]] / [[ if(input_number.pool_filler_runtime <= 0, "Unlimites", input_number.pool_filler_runtime) ]] minutes'
           - input_select.poolfiller_mode
           - binary_sensor.pool_level_low
           - binary_sensor.pool_level_high
-          - automation.pool_filler_control
+          - type: custom:fold-entity-row
+            head: automation.pool_filler_control
+            entities:
+              - input_number.pool_filler_runtime
+              - input_number.pool_filler_start
+              - input_number.pool_filler_stop
     
     - type: entities
       title: Pool Valves
@@ -125,6 +130,18 @@
                   icon: "mdi:lock"
                 - entity: input_boolean.pool_fd_unlock
                   icon: "mdi:lock-open-outline"
+        - type: custom:fold-entity-row
+          head: sensor.pool_gates
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_deck
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_deck == unavailable, "N/A", if(binary_sensor.pool_gate_closed_deck == unknown, "N/A", sensor.pool_gate_count_deck)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_main
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_main == unavailable, "N/A", if(binary_sensor.pool_gate_closed_main == unknown, "N/A", sensor.pool_gate_count_main)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_pond
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_pond == unavailable, "N/A", if(binary_sensor.pool_gate_closed_pond == unknown, "N/A", sensor.pool_gate_count_pond)) ]]'
             
     - type: conditional
       conditions:
