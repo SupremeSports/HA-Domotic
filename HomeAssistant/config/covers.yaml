@@ -4,20 +4,22 @@
 
   - platform: mqtt
     name: "Garage CD Opener"
-    command_topic: "Garage/Door/Car/Opener/Cmd"
-    state_topic: "Garage/Door/Car/Opener/Stts"
-    availability_topic: "Garage/Door/Car/Opener/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    #device_class: garage
+    command_topic: "Garage/Door/Car/Cmd"
+    state_topic: "Garage/Door/Car/Sensors/Stts"
+    value_template: '{{ value_json.state }}'
+    availability:
+      - topic: "Garage/Door/Car/LWT"
     qos: 0
     retain: false
-    payload_open: "open"
-    payload_close: "close"
-    payload_stop: "stop"
+    payload_open: '{"open":"ON"}'
+    payload_close: '{"close":"ON"}'
+    payload_stop: '{"stop":"ON"}'
     state_open: "opened"
     state_closed: "closed"
     optimistic: false
-    json_attributes_topic: "Garage/Door/Car/Opener/Json"
+    json_attributes_topic: "Garage/Door/Car/Json"
+
 
 #RGBW Milight Speed Up/Dn
   - platform: template

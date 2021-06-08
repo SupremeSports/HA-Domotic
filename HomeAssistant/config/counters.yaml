@@ -17,3 +17,11 @@
     maximum: 59
     initial: 0
     step: 1
+    
+  heaters_counter:
+    name: Heaters Counter
+    restore: true
+    minimum: 1
+    maximum: 2
+    initial: 1
+    step: 1
