@@ -1,6 +1,7 @@
 {
   "domain": "date_countdown",
   "name": "Date Countdown Component",
+  "version": "1.0.0",
   "documentation": "https://community.home-assistant.io/t/custom-countdown-component/19029",
   "dependencies": [],
   "codeowners": [],

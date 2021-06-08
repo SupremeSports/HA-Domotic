@@ -10,7 +10,6 @@ import aiohttp
 import async_timeout
 from urllib.parse import urlparse
 
-
 from homeassistant.const import (CONF_HOST, CONF_TOKEN)
 import homeassistant.helpers.config_validation as cv
 import voluptuous as vol
@@ -19,21 +18,26 @@ _LOGGER = logging.getLogger(__name__)
 
 DOMAIN = 'clean_up_snapshots_service'
 ATTR_NAME = 'number_of_snapshots_to_keep'
+USE_SSL_IP = 'use_ssl_with_ip_addres'
 DEFAULT_NUM = 0
 
 CONFIG_SCHEMA = vol.Schema({
     DOMAIN: vol.Schema({
         vol.Required(CONF_HOST): cv.string,
         vol.Required(CONF_TOKEN): cv.string,
-        vol.Optional(ATTR_NAME, default=DEFAULT_NUM): int
+        vol.Optional(ATTR_NAME, default=DEFAULT_NUM): int,
+        vol.Optional(USE_SSL_IP, default=False): cv.boolean
     }),
 }, extra=vol.ALLOW_EXTRA)
 
 async def async_setup(hass, config):
     conf = config[DOMAIN]
-    hassio_url = '{}/api/hassio/'.format(conf.get(CONF_HOST))
+    base_url = conf.get(CONF_HOST)
+    api_path = 'api/hassio/'
+    hassio_url = f"{base_url}/{api_path}" if (base_url[-1] != '/') else f"{base_url}{api_path}"
     auth_token = conf.get(CONF_TOKEN)
     num_snapshots_to_keep = conf.get(ATTR_NAME, DEFAULT_NUM)
+    use_ssl_with_ip = conf.get(USE_SSL_IP, False)
     headers = {'authorization': "Bearer {}".format(auth_token)}
 
     async def async_get_snapshots():
@@ -41,7 +45,7 @@ async def async_setup(hass, config):
         async with aiohttp.ClientSession(raise_for_status=True) as session:
             try:
                 with async_timeout.timeout(10, loop=hass.loop):
-                    resp = await session.get(hassio_url + 'snapshots', headers=headers, ssl=not isgoodipv4(urlparse(hassio_url).netloc))
+                    resp = await session.get(hassio_url + 'snapshots', headers=headers, ssl=shouldVerifySsl(hassio_url))
                 data = await resp.json()
                 await session.close()
                 return data['data']['snapshots']
@@ -51,7 +55,7 @@ async def async_setup(hass, config):
             except asyncio.TimeoutError:
                 _LOGGER.error("Client timeout error on get snapshots", exc_info=True)
                 await session.close()
-            except Exception: 
+            except Exception:
                 _LOGGER.error("Unknown exception thrown", exc_info=True)
                 await session.close()
 
@@ -62,7 +66,7 @@ async def async_setup(hass, config):
                 # call hassio API deletion
                 try:
                     with async_timeout.timeout(10, loop=hass.loop):
-                        resp = await session.post(hassio_url + 'snapshots/' + snapshot['slug'] + "/remove", headers=headers, ssl=not isgoodipv4(urlparse(hassio_url).netloc))
+                        resp = await session.post(hassio_url + 'snapshots/' + snapshot['slug'] + "/remove", headers=headers, ssl=shouldVerifySsl(hassio_url))
                     res = await resp.json()
                     if res['result'].lower() == "ok":
                         _LOGGER.info("Deleted snapshot %s", snapshot["slug"])
@@ -71,23 +75,43 @@ async def async_setup(hass, config):
                     else:
                         # log an error
                         _LOGGER.warning("Failed to delete snapshot %s: %s", snapshot["slug"], str(res.status_code))
-            
+
                 except aiohttp.ClientError:
                     _LOGGER.error("Client error on calling delete snapshot", exc_info=True)
                     await session.close()
                 except asyncio.TimeoutError:
                     _LOGGER.error("Client timeout error on delete snapshot", exc_info=True)
                     await session.close()
-                except Exception: 
+                except Exception:
                     _LOGGER.error("Unknown exception thrown on calling delete snapshot", exc_info=True)
                     await session.close()
-    
+
+    def shouldVerifySsl(url):
+        '''
+        This method is used to determine if we want to verify SSL certs
+        https://docs.aiohttp.org/en/stable/client_advanced.html#ssl-control-for-tcp-sockets
+        By default if you are using an IP Address we will not verify the SSL request.
+        This can be overriden using the use_ssl_with_ip_address in the configuration for this component.
+        '''
+        urlPieces = urlparse(url)
+
+        # Check if the url is an IP Address
+        if (isgoodipv4(urlPieces.netloc) and not use_ssl_with_ip):
+            return False
+
+        return urlPieces.scheme == "https"
+
+
     def isgoodipv4(s):
-        if ':' in s: s = s.split(':')[0]
+        if ':' in s:
+            s = s.split(':')[0]
         pieces = s.split('.')
-        if len(pieces) != 4: return False
-        try: return all(0<=int(p)<256 for p in pieces)
-        except ValueError: return False
+        if len(pieces) != 4:
+            return False
+        try:
+            return all(0<=int(p)<256 for p in pieces)
+        except ValueError:
+            return False
 
     async def async_handle_clean_up(call):
         # Allow the service call override the configuration.
@@ -99,7 +123,7 @@ async def async_setup(hass, config):
             return
 
         snapshots = await async_get_snapshots()
-        _LOGGER.info('Snapshots: %s', snapshots) 
+        _LOGGER.info('Snapshots: %s', snapshots)
 
         # filter the snapshots
         if snapshots is not None:
