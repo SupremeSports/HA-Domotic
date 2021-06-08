@@ -1,4 +1,5 @@
 ####################################################
+####################################################
 # CONFIGURATION                                    #
 ####################################################
 
@@ -13,10 +14,12 @@ homeassistant:
   #whitelist_external_dirs:
   allowlist_external_dirs:
     - /config
-
+  external_url: !secret ha_ext_url
+  internal_url: !secret ha_int_url
+  
 #Activate iOS devices
 mobile_app:
-    
+
 #Lovelace personalized interface
 lovelace:
   mode: yaml
@@ -24,23 +27,24 @@ lovelace:
 
 # Enables the frontend
 frontend:
-  themes: !include themes.yaml
-  extra_module_url:
-    - /local/custom-ui/custom-ui.js
+ themes: !include themes.yaml
+ extra_module_url:
+   #- /local/custom-ui/custom-ui-pre-2021.6.js
+   - /local/custom-ui/custom-ui.js
 
 # Custom iframe panels
 panel_iframe:
-  chicoutimi:
-    title: Chicoutimi
-    icon: mdi:account-supervisor-circle
-    url: !secret ha_chicout_url
+ chicoutimi:
+   title: Chicoutimi
+   icon: mdi:account-supervisor-circle
+   url: !secret ha_chicout_url
 
 # Enables configuration UI
 config:
 
 # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 # http:
-  # base_url: !secret ha_base_url
+  # base_url: !secret ha_ext_url
 
 # Checks for available updates
 # Note: This component will send some information about your system to
@@ -76,22 +80,6 @@ sun:
 tts:
   - platform: google_translate
     service_name: google_say
-    
-# google:
-  # # client_id: 203193263929-2qoftcb7mq0k9tvhgmgi98p9h1kf8tfm.apps.googleusercontent.com
-  # # client_secret: iiORyYSvuwrDCdMXAgTg9PGU
-  
-  # client_id: 1056160143124-emgfqkspihb31akkhqk9ql11funjpt60.apps.googleusercontent.com
-  # client_secret: RrV2Km-tZPY0yEB2DvN6n5B4
-  
-# google_assistant:
-  # project_id: home-assistant-ca81e
-  # # service_account: !include SERVICE_ACCOUNT.JSON
-  # # report_state: true
-  # exposed_domains:
-    # - switch
-    # - light
-    # - vacuum
 
 # Cloud
 cloud:
@@ -102,7 +90,8 @@ python_script:
 #Sensors and others
 alarm_control_panel: !include alarm.yaml
 alert: !include alerts.yaml
-automation: !include_dir_merge_list Automations
+#automation: !include_dir_merge_list Automations
+automation: !include automations.yaml
 binary_sensor: !include_dir_merge_list BinarySensors
 climate: !include climates.yaml
 counter: !include counters.yaml
@@ -117,6 +106,7 @@ input_select: !include_dir_merge_named InputSelects
 input_text: !include input_text.yaml
 light: !include lights.yaml
 lock: !include locks.yaml
+modbus: !include_dir_merge_list Modbus
 notify: !include notifications.yaml
 shell_command: !include shell_commands.yaml
 script: !include scripts.yaml
@@ -144,7 +134,7 @@ camera:
     name: Pool Area
     mjpeg_url: !secret cam_pool
     
-#   - platform: mjpeg 
+  # - platform: mjpeg 
     # name: Pool Area
     # still_image_url: !secret img_pool
     # mjpeg_url: !secret cam_pool
@@ -152,7 +142,7 @@ camera:
     
 #Health
 system_health:
-breaking_changes:
+#breaking_changes:
 apcupsd:
 
 speedtestdotnet:
@@ -186,16 +176,13 @@ duckdns:
   domain: !secret duckdns_domain
   access_token: !secret duckdns_token
 
-#Database recorder
-#recorder: !include recorder.yaml
-
 # logger:
   # default: info
   # logs:
     # homeassistant.components.websocket_api: debug
 
 clean_up_snapshots_service:
-  host: !secret ha_base_url
+  host: !secret ha_ext_url
   token: !secret ha_cleanup_token
   number_of_snapshots_to_keep: 10
 
@@ -227,4 +214,3 @@ octoprint:
     name: OctoPrint
     bed: true
     number_of_tools: 1
-    

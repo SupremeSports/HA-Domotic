@@ -4,21 +4,25 @@
 
   - platform: mqtt
     name: Pool Level High
+    device_class: moisture
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     value_template: '{{ value_json.hilvl }}'
     qos: 0
+    json_attributes_topic: "Pool/Control/Sensors/Stts"
+    json_attributes_template: '{{ {"High Level" : value_json.hilvl, "High Raw" : value_json.hiraw} | tojson }}'
     
   - platform: mqtt
     name: Pool Level Low
+    device_class: moisture
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     value_template: '{{ value_json.lolvl }}'
     qos: 0
+    json_attributes_topic: "Pool/Control/Sensors/Stts"
+    json_attributes_template: '{{ {"Low Level" : value_json.lolvl, "Low Raw" : value_json.loraw} | tojson }}'
 
   - platform: template
     sensors:
@@ -29,7 +33,11 @@
         availability_template: >
           {{ not is_state('switch.pool_filler_valve', 'unavailable') }}
         icon_template: >
-          mdi:debug-step-out
+          {% if is_state("input_select.poolfiller_mode", "Winter/Off") %}
+            mdi:water-pump-off
+          {%else%}
+            mdi:water-pump
+          {%endif%}
           
       pool_heater_run:
         friendly_name: "Pool Heater Run"
@@ -49,3 +57,36 @@
         icon_template: >
           mdi:security-network
           
+  - platform: mqtt
+    name: Pool Gate Closed - Deck
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    # payload_off: "ON"
+    # payload_on: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_deck }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Gate Closed - Main
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    # payload_off: "ON"
+    # payload_on: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_main }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Gate Closed - Pond
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    # payload_off: "ON"
+    # payload_on: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_pond }}'
+    qos: 0
+    

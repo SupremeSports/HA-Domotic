@@ -5,19 +5,34 @@
   - platform: mqtt
     name: Water Valve Opened
     state_topic: "Home/Control/Sensors/Stts"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     value_template: '{{ value_json.water_on }}'
     qos: 0
     
   - platform: mqtt
     name: Water Valve Closed
     state_topic: "Home/Control/Sensors/Stts"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     value_template: '{{ value_json.water_off }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Control Room Light
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.crlight }}'
+    qos: 0
+    
+  - platform: mqtt
+    name: Control Room Door
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.crdoor }}'
     qos: 0
     
   - platform: template
@@ -25,13 +40,13 @@
       water_heater_flow:
         friendly_name: Water Heater Flow
         value_template: >
-          {{ state_attr('sensor.water_heater_status', 'flow')|int > 1 }}
+          {{ states('sensor.water_heater_flow')|int > 1 }}
         availability_template: >
-          {{ not is_state('switch.water_heater', 'unavailable') }}
+          {{ not is_state('sensor.water_heater_status', 'unavailable') }}
         icon_template: >
           {% if is_state('switch.water_heater', 'off') %}
             mdi:radiator-off
-          {% elif state_attr('switch.water_heater', 'flow')|int > 1 %}
+          {% elif states('sensor.water_heater_flow')|int > 1 %}
             mdi:radiator
           {% else %}
             mdi:radiator-disabled
@@ -65,23 +80,15 @@
           mode: "{{ states('input_select.poweroutlet_mode') }}"
           schedule: >-
             {% if is_state('input_select.poweroutlet_mode', '24/7') %}
-              ALWAYS ON
+              Always ON
             {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
-              - Sunrise to 10PM
-              {{- '\n' -}}
-              - ALWAYS ON when freezing
+              Turns ON at sunrise until 10PM. Will turn ON if outside temperature is freezing
             {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
-              - ON 1h before sunset or at 4PM
-                - OFF at 11PM
-              - ON all day from 7AM on Halloween day
-                - OFF at 12AM next morning
+              Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Halloween night, turns ON at 7AM until midnight
             {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
-              - ON 1h before sunset or at 4PM
-                - OFF at 11PM
-              - ON all day from 7AM on Christmas day
-                - OFF at 12AM next morning
+              Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Christmas night, turns ON at 7AM until midnight
             {% else %}
-              ALWAYS OFF
+              Always OFF
             {% endif %}
           
       lamppost_status:
@@ -96,6 +103,30 @@
           {% else %}
             mdi:lightbulb
           {% endif %}
+        attribute_templates:
+          mode: "{{ states('input_select.lamppost_mode') }}"
+          schedule: >-
+            {% if is_state('input_select.lamppost_mode', '24/7') %}
+              Always ON
+            {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h') %}
+              Turns ON at sunset until 23h
+            {% elif is_state('input_select.lamppost_mode', 'Sunset to Sunrise') %}
+              Turns ON at sunset until sunrise next day
+            {% else %}
+              Always OFF
+            {% endif %}
+            
+      frontdoorlight_status:
+        friendly_name: Front Door Light
+        value_template: >
+          {{ is_state('switch.front_door_light', 'on') }}
+        availability_template: >
+          {{ not is_state('switch.front_door_light', 'unavailable') }}
+        icon_template: >
+          mdi:lightbulb
+        attribute_templates:
+          mode: >-
+            Synch'd on change with the lamp post for now
           
       frontyardirrigation_status:
         friendly_name: Frontyard Irrigation

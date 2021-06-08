@@ -4,19 +4,19 @@
 
   - platform: mqtt
     name: Pond Level High
+    device_class: moisture
     state_topic: "Home/Control/Sensors/Stts"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     value_template: '{{ value_json.hilvl }}'
     qos: 0
     
   - platform: mqtt
     name: Pond Level Low
+    device_class: moisture
     state_topic: "Home/Control/Sensors/Stts"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     value_template: '{{ value_json.lolvl }}'
     qos: 0
 
@@ -28,6 +28,10 @@
           {{ is_state('switch.pond_filler_valve', 'on') }}
         availability_template: >
           {{ not is_state('switch.pond_filler_valve', 'unavailable') and not is_state('input_boolean.pond_running', 'off') }}
-        icon_template: mdi:debug-step-out
-        
+        icon_template: >
+          {% if is_state("input_select.pondfiller_mode", "Winter/Off") %}
+            mdi:water-pump-off
+          {%else%}
+            mdi:water-pump
+          {%endif%}
     
