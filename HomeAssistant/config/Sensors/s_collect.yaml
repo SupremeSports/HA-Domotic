@@ -55,6 +55,8 @@
         icon_template: >
           mdi:trash-can
         attribute_templates:
+          displayName: >
+            TRASH
           summer: >
             {% set year_start = state_attr('input_datetime.collect_trash_start', 'year')|int %}
             {% set month_start = state_attr('input_datetime.collect_trash_start', 'month')|int %}
@@ -81,9 +83,9 @@
             {% set time = '14:00' %}
             {% set now = state_attr('sensor.times', 'short') %}
             
-            {% set tomorrow = is_state('sensor.collect_trash_week', 'Tomorrow') and now> time %}
+            {% set tomorrow = is_state('sensor.collect_trash_week', 'Tomorrow') and now > time %}
             {% set today = is_state('sensor.collect_trash_week', 'Today') and now < time %}
-
+            
             {% if tomorrow or today %}
               on
             {% else %}
@@ -170,6 +172,8 @@
         icon_template: >
           mdi:recycle
         attribute_templates:
+          displayName: >
+            RECYCLE
           summer: >
             {% set year_start = state_attr('input_datetime.collect_recycle_start', 'year')|int %}
             {% set month_start = state_attr('input_datetime.collect_recycle_start', 'month')|int %}
@@ -198,7 +202,7 @@
             
             {% set tomorrow = is_state('sensor.collect_recycle_week', 'Tomorrow') and now > time %}
             {% set today = is_state('sensor.collect_recycle_week', 'Today') and now < time %}
-
+            
             {% if tomorrow or today %}
               on
             {% else %}
@@ -287,6 +291,8 @@
         icon_template: >
           mdi:sprout-outline
         attribute_templates:
+          displayName: >
+            COMPOST
           summer: >
             {% set year_start = state_attr('input_datetime.collect_compost_start', 'year')|int %}
             {% set month_start = state_attr('input_datetime.collect_compost_start', 'month')|int %}
@@ -315,7 +321,7 @@
             
             {% set tomorrow = is_state('sensor.collect_compost_week', 'Tomorrow') and now > time %}
             {% set today = is_state('sensor.collect_compost_week', 'Today') and now < time %}
-
+            
             {% if tomorrow or today %}
               on
             {% else %}

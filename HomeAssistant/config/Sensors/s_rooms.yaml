@@ -8,9 +8,8 @@
     name: "Massage Room Temp"
     icon: mdi:mailbox
     state_topic: "Home/Massage/Clock/Json"
-    availability_topic: "Home/Massage/Clock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Massage/Clock/LWT"
     qos: 0
     value_template: "{{ value_json.temperature | round(1) }}"
     json_attributes_topic: "Home/Massage/Clock/Json"
@@ -20,9 +19,8 @@
     name: "Massage Room Humidity"
     icon: mdi:mailbox
     state_topic: "Home/Massage/Clock/Json"
-    availability_topic: "Home/Massage/Clock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Massage/Clock/LWT"
     qos: 0
     value_template: "{{ value_json.humidity | round(1) }}"
     json_attributes_topic: "Home/Massage/Clock/Json"
@@ -47,25 +45,29 @@
         icon_template: >
           mdi:pen
         attribute_templates:
-          state: "{{ states.sensor.massage_room_data.attributes.POWER | round(3) }}"
-          power: "{{ states.sensor.massage_room_power.attributes.ENERGY.Power | round(3) }}"
-          voltage: "{{ states.sensor.massage_room_power.attributes.ENERGY.Voltage | round(0) }}"
-          current: "{{ states.sensor.massage_room_power.attributes.ENERGY.Current | round(1) }}"
-          p_factor: "{{ states.sensor.massage_room_power.attributes.ENERGY.Factor | round(2) }}"
-          today: "{{ states.sensor.massage_room_power.attributes.ENERGY.Today | round(3) }}"
-          yesterday: "{{ states.sensor.massage_room_power.attributes.ENERGY.Yesterday | round(3) }}"
-          total: "{{ states.sensor.massage_room_power.attributes.ENERGY.Total | round(3) }}"
-          wifi_rssi: "{{ states.sensor.massage_room_data.attributes.Wifi.Signal }}"
-          wifi_percent: "{{ states.sensor.massage_room_data.attributes.Wifi.RSSI }}"
+          state: "{% if states.sensor.massage_room_data.state != 'unavailable' %}{{ states.sensor.massage_room_data.attributes.POWER | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          power: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Power | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          voltage: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Voltage | round(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+          current: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Current | round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          p_factor: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Factor | round(2) }}{% else %}{{ 'unknown' }}{% endif %}"
+          today: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Today | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          yesterday: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Yesterday | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          total: "{% if states.sensor.massage_room_power.state != 'unavailable' %}{{ states.sensor.massage_room_power.attributes.ENERGY.Total | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states.sensor.massage_room_data.state != 'unavailable' %}{{ states.sensor.massage_room_data.attributes.Wifi.Signal }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states.sensor.massage_room_data.state != 'unavailable' %}{{ states.sensor.massage_room_data.attributes.Wifi.RSSI }}{% else %}{{ 'unknown' }}{% endif %}"
     
   - platform: mqtt
     name: "Massage Room Data"
     state_topic: "Home/Massage/tele/STATE"
     value_template: "{{ value_json.POWER }}"
+    # availability:
+      # - topic: "Home/Massage/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
     availability_topic: "Home/Massage/tele/LWT"
-    qos: 1
     payload_available: "Online"
     payload_not_available: "Offline"
+    qos: 1
     json_attributes_topic: "Home/Massage/tele/STATE"
     
   - platform: mqtt
@@ -73,10 +75,14 @@
     state_topic: "Home/Massage/tele/SENSOR"
     value_template: "{{ value_json['ENERGY'].Power }}"
     unit_of_measurement: "W"
+    # availability:
+      # - topic: "Home/Massage/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
     availability_topic: "Home/Massage/tele/LWT"
-    qos: 1
     payload_available: "Online"
     payload_not_available: "Offline"
+    qos: 1
     json_attributes_topic: "Home/Massage/tele/SENSOR"
     
 ########## THINKERING ROOM ##########
@@ -100,23 +106,27 @@
         icon_template: >
           mdi:pen
         attribute_templates:
-          state: "{{ states.sensor.soldering_station_data.attributes.POWER | round(3) }}"
-          power: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Power | round(3) }}"
-          voltage: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Voltage | round(0) }}"
-          current: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Current | round(1) }}"
-          p_factor: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Factor | round(2) }}"
-          today: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Today | round(3) }}"
-          yesterday: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Yesterday | round(3) }}"
-          total: "{{ states.sensor.soldering_station_power.attributes.ENERGY.Total | round(3) }}"
-          wifi_rssi: "{{ states.sensor.soldering_station_data.attributes.Wifi.Signal }}"
-          wifi_percent: "{{ states.sensor.soldering_station_data.attributes.Wifi.RSSI }}"
-
+          state: "{% if states.sensor.soldering_station_data.state != 'unavailable' %}{{ states.sensor.soldering_station_data.attributes.POWER | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          power: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Power | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          voltage: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Voltage | round(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+          current: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Current | round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          p_factor: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Factor | round(2) }}{% else %}{{ 'unknown' }}{% endif %}"
+          today: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Today | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          yesterday: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Yesterday | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          total: "{% if states.sensor.soldering_station_power.state != 'unavailable' %}{{ states.sensor.soldering_station_power.attributes.ENERGY.Total | round(3) }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states.sensor.soldering_station_data.state != 'unavailable' %}{{ states.sensor.soldering_station_data.attributes.Wifi.Signal }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states.sensor.soldering_station_data.state != 'unavailable' %}{{ states.sensor.soldering_station_data.attributes.Wifi.RSSI }}{% else %}{{ 'unknown' }}{% endif %}"
+    
   - platform: mqtt
     name: "Soldering Station Data"
     state_topic: "Home/Soldering/tele/STATE"
     value_template: "{{ value_json.POWER }}"
-    availability_topic: "Home/Soldering/tele/LWT"
     qos: 1
+    # availability:
+      # - topic: "Home/Soldering/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
+    availability_topic: "Home/Soldering/tele/LWT"
     payload_available: "Online"
     payload_not_available: "Offline"
     json_attributes_topic: "Home/Soldering/tele/STATE"
@@ -126,10 +136,14 @@
     state_topic: "Home/Soldering/tele/SENSOR"
     value_template: "{{ value_json['ENERGY'].Power }}"
     unit_of_measurement: "W"
+    # availability:
+      # - topic: "Home/Soldering/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
     availability_topic: "Home/Soldering/tele/LWT"
-    qos: 1
     payload_available: "Online"
     payload_not_available: "Offline"
+    qos: 1
     json_attributes_topic: "Home/Soldering/tele/SENSOR"
 
 ########## MASTER BEDROOM ##########
@@ -137,14 +151,13 @@
   - platform: mqtt
     name: "Master Bed Raw"
     icon: mdi:scale
-    state_topic: "Home/Master/Bed/Stts"
-    availability_topic: "Home/Master/Bed/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    #unit_of_measurement: 'lb'
+    state_topic: "Home/Master/Bed/Sensors/Stts"
+    availability:
+      - topic: "Home/Master/Bed/LWT"
     qos: 0
     value_template: "{{ value_json.scale | round(1) }}"
-    json_attributes_topic: "Home/Master/Bed/Json"
-    #unit_of_measurement: 'lb'
+    json_attributes_topic: "Home/Master/Bed/Sensors/Stts"
     
   - platform: template
     sensors:
@@ -183,7 +196,13 @@
           {% endif %}
         availability_template: "{{ not is_state('sensor.master_bed_raw', 'unavailable') }}"
         attribute_templates:
+          state: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+          version: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+          date: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+          vcc_3v3: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_ssid: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states('switch.master_bed_tare') != 'unavailable' %}{{ state_attr('switch.master_bed_tare', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
           raw_value: "{{ states('sensor.master_bed_raw') }}"
-          calib: "{{ state_attr('sensor.master_bed_raw', 'calib') }}"
-          wifi_rssi: "{{ state_attr('sensor.master_bed_raw', 'wifi_rssi') }}"
-          wifi_percent: "{{ state_attr('sensor.master_bed_raw', 'wifi_percent') }}"
+          calib: "{% if states('sensor.master_bed_raw') != 'unavailable' %}{{ state_attr('sensor.master_bed_raw', 'calib') }}{% else %}{{ 'unknown' }}{% endif %}"
+          

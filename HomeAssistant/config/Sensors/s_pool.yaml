@@ -7,9 +7,8 @@
     name: "Pool Control Status"
     icon: mdi:pool
     state_topic: "Pool/Control/Json"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     value_template: >
       {% set status = value_json.state %}
@@ -24,52 +23,47 @@
     name: "Pool Cabin Temperature"
     unit_of_measurement: '°C'
     state_topic: "Pool/Control/Json"
-    value_template: "{{ value_json.temp_out | float | round(1) }}"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.temp_out | float | round(1) }}"
     
   - platform: mqtt
     name: "Pool Cabin Humidity"
     unit_of_measurement: '%'
     icon: mdi:water-percent
     state_topic: "Pool/Control/Json"
-    value_template: "{{ value_json.hum_out | float | round(1) }}"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.hum_out | float | round(1) }}"
 
   - platform: mqtt
     name: "Pool Control Box Temperature"
     unit_of_measurement: '°C'
     state_topic: "Pool/Control/Json"
-    value_template: "{{ value_json.temp_in | float | round(1) }}"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
     
   - platform: mqtt
     name: "Pool Control Box Humidity"
     unit_of_measurement: '%'
     icon: mdi:water-percent
     state_topic: "Pool/Control/Json"
-    value_template: "{{ value_json.hum_in | float | round(1) }}"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
           
   - platform: mqtt
     name: "Pool Control 5V Voltage"
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
     state_topic: "Pool/Control/Json"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     value_template: >
       {% set RV = value_json.Vcc5V | float %}
@@ -85,9 +79,8 @@
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
     state_topic: "Pool/Control/Json"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     value_template: >
       {% set RV = value_json.Vcc12V | float %}
@@ -162,14 +155,13 @@
     name: "Pool Temperature Raw"
     icon: mdi:thermometer
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     unit_of_measurement: '° F'
     value_template: >
       {% set RT = value_json.wtemp|float %}
-      {% set TF = ((0.16014*RT)-5.69819)+2.0|float %}
+      {% set TF = ((0.16014*RT)-5.69819)+2.4|float %}
       
       {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
         {{ 50.0 | round(1) }}
@@ -180,6 +172,7 @@
   - platform: statistics
     name: "Pool Temperature Stats"
     entity_id: sensor.pool_temperature_raw
+    #sampling_size: 100
     max_age:
       minutes: 10
     precision: 1
@@ -204,9 +197,8 @@
     name: "Pool Heater Temp Raw"
     icon: mdi:thermometer
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     unit_of_measurement: '° F'
     value_template: >
@@ -246,9 +238,8 @@
     name: "Pool Pump Temp Raw"
     icon: mdi:thermometer
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     unit_of_measurement: '°C'
     value_template: >
@@ -283,9 +274,8 @@
     name: "Pool Pressure Raw"
     icon: mdi:gauge
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     unit_of_measurement: 'psi'
     value_template: >
@@ -323,7 +313,7 @@
           {% endif %}
         availability_template: >
           {{ not is_state('sensor.pool_pressure_raw', 'unavailable') }}
-        icon_template: mdi:thermometer
+        icon_template: mdi:gauge
         attribute_templates:
           pres_raw: "{{ states('sensor.pool_pressure_raw') }}"
           
@@ -331,9 +321,8 @@
     name: "Pool PH"
     icon: mdi:flask
     state_topic: "Pool/Control/Sensors/Stts"
-    availability_topic: "Pool/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Control/LWT"
     qos: 0
     unit_of_measurement: 'pH'
     value_template: >
@@ -364,9 +353,8 @@
     name: "Pool Clock Status"
     icon: mdi:clock
     state_topic: "Pool/Clock/Json"
-    availability_topic: "Pool/Clock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Pool/Clock/LWT"
     qos: 0
     value_template: >
       {% set status = value_json.state %}
@@ -380,3 +368,103 @@
       {% endif %}
     json_attributes_topic: "Pool/Clock/Json"
     
+######### POOL CONTROL - GATES #########
+  - platform: template
+    sensors:
+      pool_gates:
+        friendly_name_template: >
+          {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+          {% set main = is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+          {% set pond = is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+          
+          {% set count = 0 %}
+          {% if deck %}
+            {% set count = count+1 %}
+          {% endif %}
+          {% if main %}
+            {% set count = count+1 %}
+          {% endif %}
+          {% if pond %}
+            {% set count = count+1 %}
+          {% endif %}
+          
+          {{-'Pool Gates'-}}
+          
+          {% if count > 0 -%}
+            {% for device in states.binary_sensor if 'pool_gate_closed_' in device.entity_id if device.state == 'on' %}
+               {%- if loop.first -%}{{': '}}{% elif loop.last %}{{' & '}}{% else %}{{', '}}{% endif -%}
+               {{ device.attributes['friendly_name'].replace('Pool Gate Closed - ','') }}
+            {%- endfor -%}
+          {% endif %}
+        value_template: >
+          {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+          {% set pond = is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+          {% set main = is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+          
+          {% set PG = deck and pond and main %}
+          
+          {% if PG %}
+            Ok
+          {% else %}
+            Opened
+          {% endif %}
+        availability_template: >-
+          {{ not is_state('binary_sensor.pool_gate_closed_deck', 'unavailable') and
+             not is_state('binary_sensor.pool_gate_closed_main', 'unavailable') and
+             not is_state('binary_sensor.pool_gate_closed_pond', 'unavailable') }}
+        attribute_templates:
+          deck: >
+            {% if is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+              Closed
+            {% elif is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+              Opened
+            {% else %}
+              NA
+            {% endif %}
+          main: >
+            {% if is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+              Closed
+            {% elif is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+              Opened
+            {% else %}
+              NA
+            {% endif %}
+          pond: >
+            {% if is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+              Closed
+            {% elif is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+              Opened
+            {% else %}
+              NA
+            {% endif %}
+
+  - platform: history_stats
+    name: Pool Gate Count - Deck
+    entity_id: binary_sensor.pool_gate_closed_deck
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+
+  - platform: history_stats
+    name: Pool Gate Count - Main
+    entity_id: binary_sensor.pool_gate_closed_main
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+      
+  - platform: history_stats
+    name: Pool Gate Count - Pond
+    entity_id: binary_sensor.pool_gate_closed_pond
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+      

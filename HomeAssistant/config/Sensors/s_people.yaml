@@ -64,3 +64,23 @@
           {% else %}
             {{ d | round(0) }}
           {% endif %}
+      workplace_jean:
+        friendly_name: Jean's workplace
+        icon_template: >
+          {% set value = states.input_select.workplace_jean.state %}
+          {% if value == 'Office' %}
+            mdi:account-tie
+          {% elif value == 'Telework' %}
+            mdi:account-voice
+          {% elif value == 'Trip' %}
+            mdi:account-hard-hat
+          {% elif value == 'Away' %}
+            mdi:account-settings
+          {% elif value == 'Vacation' %}
+            mdi:beach
+          {% else %}
+            mdi:account-question
+          {% endif %}
+        value_template: >
+          {{ states.input_select.workplace_jean.state }}
+        

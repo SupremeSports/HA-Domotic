@@ -22,8 +22,8 @@
     scan_interval: 5
     quote: CAD
     
-  - platform: opensky
-    radius: 10
+  # - platform: opensky
+    # radius: 10
     
   # - platform: ebox
     # username: !secret ebox_username
@@ -80,14 +80,22 @@
           {% endif %}
         availability_template: "{{ not is_state('switch.postal_status', 'unavailable') }}"
         attribute_templates:
-          state: "{{ state_attr('sensor.postal_status_json', 'state') }}"
-          voltage: "{{ state_attr('sensor.postal_status_json', 'voltage') }}"
-          battery: "{{ state_attr('sensor.postal_status_json', 'battery') }}"
-          id: "{{ state_attr('sensor.postal_status_json', 'id') }}"
-          lora_rssi: "{{ state_attr('sensor.postal_status_json', 'rssi') }}"
-          source: "{{ state_attr('sensor.postal_status_json', 'source') }}"
-          wifi_rssi: "{{ state_attr('switch.postal_status', 'rssi') }}"
-          wifi_percent: "{{ state_attr('switch.postal_status', 'percent') }}"
+          state: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+          bat_voltage: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'voltage') }}{% else %}{{ 'unknown' }}{% endif %}"
+          bat_percent: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+          id: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'id') }}{% else %}{{ 'unknown' }}{% endif %}"
+          lora_rssi: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+          source: "{% if states('sensor.postal_status_json') != 'unavailable' %}{{ state_attr('sensor.postal_status_json', 'source') }}{% else %}{{ 'unknown' }}{% endif %}"
+          version: "{% if states('switch.postal_status') != 'unavailable' %}{{ state_attr('switch.postal_status', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+          date: "{% if states('switch.postal_status') != 'unavailable' %}{{ state_attr('switch.postal_status', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_ssid: "{% if states('switch.postal_status') != 'unavailable' %}{{ state_attr('switch.postal_status', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states('switch.postal_status') != 'unavailable' %}{{ state_attr('switch.postal_status', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states('switch.postal_status') != 'unavailable' %}{{ state_attr('switch.postal_status', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+          
+#tags needs to be replaced rssi and percent and add ssid
+# wifi_ssid: GauthierHA2
+# wifi_rssi: -63.00
+# wifi_percent:  74.00
           
       last_postal_arrival:
         friendly_name: Last Postal Arrival Time
@@ -112,28 +120,37 @@
     payload_not_available: "offline"
     qos: 0
     value_template: >
-      {% if value_json.state == "ON" %}
+      {% if value_json.homed == "ON" %}
         Ok
       {% else %}
         Homing
       {% endif %}
-    json_attributes_topic: "Home/WallClock/Stts"
+    json_attributes_topic: "Home/WallClock/Json"
     
   - platform: mqtt
     name: "Nixie Clock Status"
     icon: mdi:clock
     state_topic: "Home/NixieClock/Stts"
-    availability_topic: "Home/NixieClock/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
-    qos: 0
+    availability:
+      - topic: "Home/NixieClock/LWT"
     value_template: >
       {% if value_json.state == "ON" %}
         On
       {% else %}
         Off
       {% endif %}
+    qos: 0
     json_attributes_topic: "Home/NixieClock/Json"
+    
+  - platform: mqtt
+    name: "Nixie Clock Case Temp"
+    unit_of_measurement: '°C'
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Json"
+    value_template: "{{ value_json.temp_in }}"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    qos: 0
     
   - platform: template
     sensors:
@@ -150,7 +167,12 @@
             /local/images/CustomMDI/nixietubes/dark_48485E.png
           {% endif %}
         attribute_templates:
-          state: "{{ state_attr('sensor.nixie_clock_status', 'state') }}"
-          case_temp: "{{ state_attr('sensor.nixie_clock_status', 'case_temp') }}"
-          wifi_rssi: "{{ state_attr('sensor.nixie_clock_status', 'wifi_rssi') }}"
-          wifi_percent: "{{ state_attr('sensor.nixie_clock_status', 'wifi_percent') }}"
+          state: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+          version: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+          date: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+          case_temp: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'temp_in') }}{% else %}{{ 'unknown' }}{% endif %}"
+          vcc_3v3: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_ssid: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states('sensor.nixie_clock_status') != 'unavailable' %}{{ state_attr('sensor.nixie_clock_status', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+

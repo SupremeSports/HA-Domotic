@@ -13,10 +13,9 @@
   - platform: mqtt
     name: "Weather Control Status"
     icon: mdi:wind-turbine
-    state_topic: "Outside/WStation/Json"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     value_template: >
       {% set status = value_json.state %}
@@ -25,40 +24,37 @@
       {% else %}
         ERROR
       {% endif %}
-    json_attributes_topic: "Outside/WStation/Json"
+    json_attributes_topic: "Weather/Control/Json"
 
   - platform: mqtt
     name: "Weather Control Box Temperature"
     unit_of_measurement: '°C'
-    state_topic: "Outside/WStation/Json"
-    value_template: "{{ value_json.temp | float | round(1) }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Weather Control Box Humidity"
     unit_of_measurement: '%'
     icon: mdi:water-percent
-    state_topic: "Outside/WStation/Json"
-    value_template: "{{ value_json.hum | float | round(1) }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
       
   - platform: mqtt
     name: "Weather Control Input Voltage"
     unit_of_measurement: 'V'
     icon: mdi:flash
-    state_topic: "Outside/WStation/Json"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     value_template: >
-      {% set RV = value_json.Vin | float %}
+      {% set RV = value_json.Vcc12V | float %}
       
       {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
         {{ 0.0 | round(1) }}
@@ -70,13 +66,12 @@
     name: "Weather Control 5V Voltage"
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
-    state_topic: "Outside/WStation/Json"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     value_template: >
-      {% set RV = value_json.Vcc | float %}
+      {% set RV = value_json.Vcc5V | float %}
       
       {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
         {{ 0.0 | round(1) }}
@@ -90,11 +85,10 @@
     name: "UV Sensor"
     icon: mdi:sunglasses
     unit_of_measurement: 'uW/cm2'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.uv }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: template
@@ -126,10 +120,10 @@
           {% else %}
             unavailable
           {% endif %}
-    
-  - platform: template
-    sensors:
+
       uv_level:
+        friendly_name_template: >
+          UV Level
         value_template: >
           {% if is_state('sun.sun','above_horizon') %}
             {% if is_state('sensor.uv_index','unavailable') %}
@@ -160,8 +154,6 @@
             Sun down for maintenance
           {% endif %}
         
-  - platform: template
-    sensors:
       outdoor_uv_sensor:
         friendly_name_template: >
           {% if (0.1 <= states('sensor.uv_index')|float <= 25.0) %}
@@ -175,6 +167,52 @@
           {% else %}
             unavailable
           {% endif %}
+        attribute_templates:
+          raw_in: "{{ states('sensor.uv_sensor') }}"
+          level: "{{ states('sensor.uv_level') }}"
+          index: "{{ states('sensor.uv_index') }}"
+        entity_picture_template: >
+          {% if is_state('sun.sun','above_horizon') %}
+            {% set uvLvl = states('sensor.uv_level') %}
+            {% if is_state('sensor.uv_level','Low') %}
+              /local/images/CustomMDI/uvindexes/00FF00.png
+            {% elif is_state('sensor.uv_level','Moderate') %}
+              /local/images/CustomMDI/uvindexes/FFFF00.png
+            {% elif is_state('sensor.uv_level','High') %}
+              /local/images/CustomMDI/uvindexes/FFA500.png
+            {% elif is_state('sensor.uv_level','Very High') %}
+              /local/images/CustomMDI/uvindexes/FF0000.png
+            {% elif is_state('sensor.uv_level','Extreme') %}
+              /local/images/CustomMDI/uvindexes/A500FF.png
+            {% else %}
+              /local/images/CustomMDI/uvindexes/48485E.png
+            {% endif %}
+          {% else %}
+            {% if is_state('sensor.uv_sensor','unavailable') and is_state('sensor.uv_index_2','unknown') %}
+              /local/images/CustomMDI/uvindexes/48485E.png
+            {% else %}
+              /local/images/CustomMDI/uvindexes/2F7EFD.png
+            {% endif %}
+          {% endif %}
+          
+      outdoor_uv_level:
+        unit_of_measurement: 'UV'
+        friendly_name_template: >
+          {% if (0.1 <= states('sensor.uv_index')|float <= 25.0) %}
+            UV Index - Level: {{ states.sensor.uv_level.state }}
+          {% else %}
+            UV Index
+          {% endif %}
+        value_template: >
+          {% if not is_state('sensor.uv_index','unavailable') %}
+            {{ states.sensor.uv_index.state|float|round(1) }}
+          {% else %}
+            unavailable
+          {% endif %}
+        attribute_templates:
+          raw_in: "{{ states('sensor.uv_sensor') }}"
+          level: "{{ states('sensor.uv_level') }}"
+          index: "{{ states('sensor.uv_index') }}"
         entity_picture_template: >
           {% if is_state('sun.sun','above_horizon') %}
             {% set uvLvl = states('sensor.uv_level') %}
@@ -205,11 +243,10 @@
     name: "AQI Sensor"
     icon: mdi:air-filter
     unit_of_measurement: 'ppm'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.aq }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
 
 ######### RAIN SENSOR/RATE #########
@@ -217,21 +254,19 @@
   - platform: mqtt
     name: "Rain Sensor"
     icon: mdi:weather-pouring
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.rain.s }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Rain Level Toggle"
     icon: mdi:weather-pouring
-    state_topic: "Outside/WStation/Stts"
-    value_template: "{{ value_json.rain.t }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.rain.l }}"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: template
@@ -306,54 +341,61 @@
 ######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
 
   - platform: mqtt
+    name: "Outdoor Temperature NTC"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: >
+      {% set T = ((value_json.ntc.t)|float*(-0.09850)) + 75.80752 %}
+      
+      {{- T|round(1) -}}
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+
+  - platform: mqtt
     name: "Outdoor Temperature DHT"
     unit_of_measurement: '°C'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.dht.t }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Outdoor Humidity DHT"
     unit_of_measurement: '%'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.dht.h }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Outdoor Temperature BME"
     unit_of_measurement: '°C'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.bme.t }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Outdoor Humidity BME"
     unit_of_measurement: '%'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.bme.h }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     
   - platform: mqtt
     name: "Outdoor Pressure Raw"
     icon: mdi:altimeter
     unit_of_measurement: 'kPa'
-    state_topic: "Outside/WStation/Stts"
+    state_topic: "Weather/Sensors/Stts"
     value_template: "{{ value_json.bme.p | float + 1.5 }}"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
       
   - platform: template
@@ -364,7 +406,7 @@
         icon_template: mdi:altimeter
         value_template: >
           {% set ok = false %}
-          {% if not is_state('sensor.outdoor_pressure_raw','unavailable') %}
+          {% if (0.0 < states('sensor.outdoor_pressure_raw')|float <= 100.0 ) and not is_state('sensor.outdoor_pressure_raw','unavailable') %}
             {% set P = states('sensor.outdoor_pressure_raw')|float %}
             {% set ok = true %}
           {% else %}
@@ -384,11 +426,9 @@
           {% endif %}
         attribute_templates:
           bme: "{{ states('sensor.outdoor_pressure_raw')|float|round(1) }}"
-          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'pressure')|float|round(1) }}"
-          weather_home: "{{ state_attr('weather.dolbeau', 'pressure')|float|round(1) }}"
-    
-  - platform: template
-    sensors:
+          weather_dolbeau: "{% if states('weather.dolbeau') is defined and states('weather.dolbeau') != 'unavailable' %}{{ state_attr('weather.dolbeau', 'pressure')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          weather_home: "{% if states('weather.home') is defined and states('weather.home') != 'unavailable' %}{{ state_attr('weather.home', 'pressure')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+
       outdoor_temperature:
         friendly_name: "Outdoor Temperature"
         unit_of_measurement: '°C'
@@ -399,6 +439,9 @@
             {% set ok = true %}
           {% elif (-99.0 < states('sensor.outdoor_temperature_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_bme','unavailable') %}
             {% set T = states('sensor.outdoor_temperature_bme') | float %}
+            {% set ok = true %}
+          {% elif (-99.0 < states('sensor.outdoor_temperature_ntc')|float <= 100.0 ) and not is_state('sensor.outdoor_temperature_ntc','unavailable') %}
+            {% set T = states('sensor.outdoor_temperature_ntc') | float %}
             {% set ok = true %}
           {% else%}
             {% if states('weather.dolbeau') != 'unknown' %}
@@ -418,8 +461,10 @@
         attribute_templates:
           dht: "{{ states('sensor.outdoor_temperature_dht')|float|round(1) }}"
           bme: "{{ states('sensor.outdoor_temperature_bme')|float|round(1) }}"
-          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'temperature')|float|round(1) }}"
-          weather_home: "{{ state_attr('weather.dolbeau', 'temperature')|float|round(1) }}"
+          ntc: "{{ states('sensor.outdoor_temperature_ntc')|float|round(1) }}"
+          weather_dolbeau: "{% if states('weather.dolbeau') is defined and states('weather.dolbeau') != 'unavailable' %}{{ state_attr('weather.dolbeau', 'temperature')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          weather_home: "{% if states('weather.home') is defined and states('weather.home') != 'unavailable' %}{{ state_attr('weather.home', 'temperature')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          envcan_temp: "{{ states('sensor.temperature')|float|round(1) }}"
 
       outdoor_humidity:
         friendly_name: "Outdoor Humidity"
@@ -429,7 +474,7 @@
           {% if (0.0 < states('sensor.outdoor_humidity_bme')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_bme','unavailable') %}
             {% set H = states('sensor.outdoor_humidity_bme') | float %}
             {% set ok = true %}
-          {% elif (0.0 < states('sensor.outdoor_humidity_dht')|float <= 100.0 ) and not is_state('sensor.outdoor_humidity_dht','unavailable') %}
+          {% elif (0.0 < states('sensor.outdoor_humidity_dht')|float <= 99.8 ) and not is_state('sensor.outdoor_humidity_dht','unavailable') %}
             {% set H = states('sensor.outdoor_humidity_dht') | float %}
             {% set ok = true %}
           {% else %}
@@ -442,14 +487,6 @@
             {% endif %}
           {% endif %}
           
-          {% if states('weather.dolbeau') != 'unknown' %}
-            {% set H = state_attr('weather.dolbeau', 'humidity')|float %}
-            {% set ok = true %}
-          {% elif states('weather.home') != 'unknown' %}
-            {% set H = state_attr('weather.home', 'humidity')|float %}
-            {% set ok = true %}
-          {% endif %}
-          
           {% if ok == true %}
             {{- H | round(1) -}}
           {% else %}
@@ -458,10 +495,9 @@
         attribute_templates:
           dht: "{{ states('sensor.outdoor_humidity_dht')|float|round(1) }}"
           bme: "{{ states('sensor.outdoor_humidity_bme')|float|round(1) }}"
-          weather_dolbeau: "{{ state_attr('weather.dolbeau', 'humidity')|float|round(1) }}"
-          weather_home: "{{ state_attr('weather.dolbeau', 'humidity')|float|round(1) }}"
+          weather_dolbeau: "{% if states('weather.dolbeau') is defined and states('weather.dolbeau') != 'unavailable' %}{{ state_attr('weather.dolbeau', 'humidity')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
+          weather_home: "{% if states('weather.home') is defined and states('weather.home') != 'unavailable' %}{{ state_attr('weather.home', 'humidity')|float|round(1) }}{% else %}{{ 'unknown' }}{% endif %}"
           
-
       outdoor_dewpoint:
         friendly_name: "Outdoor Dew Point"
         unit_of_measurement: '°C'
@@ -531,6 +567,8 @@
              or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0)
              or (-99.0 > states('sensor.outdoor_dewpoint')|float > 100.0) %}
             unavailable
+          {% elif H < T %}
+            {{- T | round(1) -}}
           {% else %}
             {{- H | round(1) -}}
           {% endif %}
@@ -552,6 +590,8 @@
              or (-99.0 > states('sensor.outdoor_temperature')|float >= 100.0) 
              or (0.0 > states('sensor.wind_speed')|float > 1000.0) %}
             unavailable
+          {% elif CF > T %}
+            {{- T | round(1) -}}
           {% else %}
             {{- CF | round(1) -}}
           {% endif %}
@@ -579,6 +619,11 @@
           {% else %}
             {{- FL | round(1) -}}
           {% endif %}
+        attribute_templates:
+          wind_chill: "{{ states('sensor.outdoor_windchill')|float|round(1) }}"
+          humidex: "{{ states('sensor.outdoor_humidex')|float|round(1) }}"
+          envcan_chill: "{{ states('sensor.wind_chill')|float|round(0) }}"
+          envcan_humidex: "{{ states('sensor.humidex')|float|round(0) }}"
         entity_picture_template: >
           {% if is_state('sensor.outdoor_feelslike','unavailable') %}
             {% set BI = -99.0 %}
@@ -618,17 +663,20 @@
     name: "Wind Speed Raw"
     icon: mdi:weather-windy
     unit_of_measurement: 'km/h'
-    state_topic: "Outside/WStation/Stts"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     value_template: >
       {% set WSraw = value_json.wind.s|float %}
-      {% if WSraw < 0 or WSraw > 300 %}
+      {% if WSraw < 0 or WSraw > 1000 %}
         {% set WS = 0 %}
       {% else %}
-        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float * 2.0 %}
+        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float %}
+      {% endif %}
+      
+      {% if WS < 0.0 or WS > 90.0 %}
+        {% set WS = 0 %}
       {% endif %}
       
       {{ WS | round(3) }}
@@ -640,20 +688,27 @@
     entities:
       - sensor.wind_speed_raw
       
-  - platform: statistics
-    name: "Wind Speed Stats"
-    entity_id: sensor.wind_speed_raw
-    sampling_size: 60
-    # max_age:
-      # minutes: 1
+  # - platform: average
+    # name: "Wind Gust Average"
+    # duration:
+      # minutes: 30
+    # entities:
+      # - sensor.wind_speed_raw
       
-  - platform: filter
-    name: "Wind Speed Filter"
-    entity_id: sensor.wind_speed_raw
-    filters:
-      - filter: time_simple_moving_average
-        window_size: "00:01"
-        precision: 2
+  # - platform: statistics
+    # name: "Wind Speed Stats"
+    # entity_id: sensor.wind_speed_raw
+    # sampling_size: 60
+    # # max_age:
+      # # minutes: 1
+      
+  # - platform: filter
+    # name: "Wind Speed Filter"
+    # entity_id: sensor.wind_speed_raw
+    # filters:
+      # - filter: time_simple_moving_average
+        # window_size: "00:01"
+        # precision: 2
 
   - platform: template
     sensors:
@@ -683,16 +738,15 @@
           {% endif %}
         attribute_templates:
           raw_value: "{{ states('sensor.wind_speed_raw') }}"
+          envcan_speed: "{{ states('sensor.wind_speed_2')|float|round(0) }}"
 
-  - platform: template
-    sensors:
       wind_speed_gust:
         friendly_name: "Wind Gust" 
         unit_of_measurement: 'km/h'
         icon_template: mdi:weather-windy
         value_template: >
           {% if not is_state('sensor.wind_speed_raw','unavailable') %}
-            {% set WG = state_attr('sensor.wind_speed_stats', 'max_value')|float %}
+            {% set WG = state_attr('sensor.wind_speed_average', 'max_value')|float %}
             {% set ok = true %}
           {% elif not is_state('sensor.wind_gust','unknown') %}
             {% set WG = states('sensor.wind_gust')|float %}
@@ -706,6 +760,8 @@
           {% else %}
             unknown
           {% endif %}
+        attribute_templates:
+          envcan_gust: "{{ states('sensor.wind_gust')|float|round(0) }}"
       
 ######### WIND COMPASS #########
 
@@ -713,17 +769,16 @@
     name: "Wind Direction Raw"
     icon: mdi:arrow-all
     unit_of_measurement: '°'
-    state_topic: "Outside/WStation/Stts"
-    availability_topic: "Outside/WStation/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
     qos: 0
     value_template: >
       {% set WDraw = value_json.wind.d|float %}
       {% if WDraw < 0 %}
         {% set WD = 0.0 | float %}
       {% else %}
-        {% set WD = WDraw + 180.0 | float %}
+        {% set WD = WDraw + 0.0 | float %}
         {% if WD >= 360 %}
           {% set WD = WD - 360.0 | float %}
         {% endif %}
@@ -776,8 +831,6 @@
             unknown
           {% endif %}
 
-  - platform: template
-    sensors: 
       wind_compass_abbreviation:
         value_template: >
           {% set WCA = states('sensor.wind_direction')|float %}
@@ -849,8 +902,6 @@
             Error
           {% endif %}
 
-  - platform: template
-    sensors: 
       wind_compass_name:
         value_template: >
           {% set WCN = states('sensor.wind_direction')|float %}
@@ -931,6 +982,7 @@
           {% endif %}
         attribute_templates:
           raw_value: "{{ states('sensor.wind_direction_raw') }}"
+          envcan_direction: "{{ states('sensor.wind_direction_2') }}"
         friendly_name_template: >
           {% if is_state('sensor.wind_direction','unavailable') %}
             Wind Direction

@@ -7,9 +7,8 @@
     name: "Control Room Control Status"
     icon: mdi:server
     state_topic: "Home/Control/Json"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     value_template: >
       {% set status = value_json.state %}
@@ -22,13 +21,12 @@
     
   - platform: mqtt
     name: "Control Room Box Temperature"
-    state_topic: "Home/Control/Json"
     unit_of_measurement: '°C'
-    value_template: "{{ value_json.temp_in }}"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.temp_in }}"
     json_attributes_topic: "Home/Control/Json"
     
   - platform: mqtt
@@ -36,22 +34,20 @@
     icon: mdi:water-percent
     unit_of_measurement: '%'
     state_topic: "Home/Control/Json"
-    value_template: "{{ value_json.hum_in }}"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.hum_in }}"
     json_attributes_topic: "Home/Control/Json"
     
   - platform: mqtt
     name: "Cold Storage Temperature"
     unit_of_measurement: '°C'
     state_topic: "Home/Control/Json"
-    value_template: "{{ value_json.temp_out }}"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.temp_out }}"
     json_attributes_topic: "Home/Control/Json"
     
   - platform: mqtt
@@ -59,11 +55,10 @@
     icon: mdi:water-percent
     unit_of_measurement: '%'
     state_topic: "Home/Control/Json"
-    value_template: "{{ value_json.hum_out }}"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
+    value_template: "{{ value_json.hum_out }}"
     json_attributes_topic: "Home/Control/Json"
     
   - platform: mqtt
@@ -71,9 +66,8 @@
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
     state_topic: "Home/Control/Json"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     value_template: >
       {% set RV = value_json.Vcc5V | float %}
@@ -89,9 +83,8 @@
     unit_of_measurement: 'V'
     icon: mdi:flash-outline
     state_topic: "Home/Control/Json"
-    availability_topic: "Home/Control/LWT"
-    payload_available: "online"
-    payload_not_available: "offline"
+    availability:
+      - topic: "Home/Control/LWT"
     qos: 0
     value_template: >
       {% set RV = value_json.Vcc12V | float %}
@@ -142,24 +135,32 @@
             {% endif %}
     
 ######### CONTROL ROOM - WATER HEATER #########
+  - platform: mqtt
+    name: "Water Heater Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Home/WaterHeater/Sensors/Stts"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
+    qos: 0
+    value_template: "{{ value_json.wtr_t_out }}"
+    json_attributes_topic: "Home/WaterHeater/Sensors/Stts"
+    #json_attributes_topic: "Home/WaterHeater/Json"
+    
+  - platform: mqtt
+    name: "Water Heater Flow"
+    icon: mdi:water-pump
+    unit_of_measurement: 'l/min'
+    state_topic: "Home/WaterHeater/Sensors/Stts"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
+    qos: 0
+    value_template: "{{ value_json.wtr_flow }}"
+    json_attributes_topic: "Home/WaterHeater/Sensors/Stts"
+    #json_attributes_topic: "Home/WaterHeater/Json"
+    
   - platform: template
-    sensors:
-      water_heater_temperature:
-        friendly_name: "Water Heater Temperature"
-        value_template: "{{ state_attr('switch.water_heater', 'temp_out') | int }}"
-        availability_template: >
-          {{ not is_state('switch.water_heater', 'unavailable') }}
-        unit_of_measurement: '°C'
-        icon_template: mdi:thermometer
-      
-      water_heater_flow:
-        friendly_name: "Water Heater Flow"
-        value_template: "{{ state_attr('switch.water_heater', 'flow') | int }}"
-        availability_template: >
-          {{ not is_state('switch.water_heater', 'unavailable') }}
-        unit_of_measurement: 'l/min'
-        icon_template: mdi:water-pump
-      
+    sensors:      
       water_heater_status:
         friendly_name_template: >
           {% if is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
@@ -186,10 +187,13 @@
             mdi:radiator-disabled
           {% endif %}
         attribute_templates:
-          temp_in: "{{ state_attr('switch.water_heater', 'temp_in') }}"
-          temp_out: "{{ state_attr('switch.water_heater', 'temp_out') }}"
-          flow: "{{ state_attr('switch.water_heater', 'flow') }}"
-          wifi_rssi: "{{ state_attr('switch.water_heater', 'wifi_rssi') }}"
-          wifi_percent: "{{ state_attr('switch.water_heater', 'wifi_percent') }}"
-          
-          
+          state: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+          version: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+          date: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+          #vcc_3v3: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_ssid: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_rssi: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+          wifi_percent: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+          temp_in: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_in') }}{% else %}{{ 'unknown' }}{% endif %}"
+          temp_out: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_out') }}{% else %}{{ 'unknown' }}{% endif %}"
+          flow: "{% if states('sensor.water_heater_flow') != 'unavailable' %}{{ state_attr('sensor.water_heater_flow','wtr_flow') }}{% else %}{{ 'unknown' }}{% endif %}"

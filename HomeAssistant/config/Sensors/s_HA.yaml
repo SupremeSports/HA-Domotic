@@ -6,12 +6,38 @@
   
   #Home Assistant uptime
   - platform: uptime
-    name: Time Online
-    unit_of_measurement: hours
+    name: Uptime
+    #unit_of_measurement: hours
+    
+  - platform: template
+    sensors:
+      time_online:
+        friendly_name: Time Online
+        icon_template: >
+          mdi:clock
+        value_template: >
+          {% set value = states('sensor.uptime') %}
+          {% set last_updated = as_timestamp(strptime(value, "%Y-%m-%d  %H:%M:%S")) %}
+          {% set uptime = now().timestamp() - last_updated %}
+          {% set days = (uptime / 86400) | float %}
+          {% set hours = (days * 24) | float %}
+          {% set minutes = (hours * 60) | float %}
+          
+          {% if days >= 1.0 %}
+            {{ days | round(2) }} days ago
+          {% elif hours >= 1.0 %}
+            {{ hours | round(1) }} hours ago
+          {% else %}
+            {{ minutes | round(0) }} minutes ago
+          {% endif %}
 
   #HA version
-  - platform: version
+  # - platform: version
+    # name: HA Installed Version
+    
+  - platform: command_line
     name: HA Installed Version
+    command: "cat /config/.HA_VERSION"
     
   - platform: command_line
     name: HA Latest Version
@@ -54,6 +80,15 @@
   - platform: filesize
     file_paths:
       - /config/home-assistant_v2.db
+      
+  - platform: sql
+    db_url: !secret db_mysql
+    scan_interval: 60
+    queries:
+      - name: MariaDB Size
+        query: 'SELECT table_schema "database", Round(Sum(data_length + index_length) / 1024 / 1024, 1) "value" FROM information_schema.tables WHERE table_schema="homeassistant" GROUP BY table_schema'
+        column: 'value'
+        unit_of_measurement: MB
     
   #Terminal command for network card name: ifconfig
   - platform: systemmonitor
