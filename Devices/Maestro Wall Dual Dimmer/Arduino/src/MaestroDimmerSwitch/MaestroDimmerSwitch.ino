@@ -28,7 +28,7 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
   Name:     Maestro Dimmer Kit - Wall Switch
   Created:  2020/11/13
   Author:   gauthier_j100@hotmail.com / SupremeSports
-  GitHub:   https://github.com/SupremeSports/
+  GitHub:   https://github.com/SupremeSports/HA-Domotic/blob/master/Devices/Maestro%20Wall%20Dual%20Dimmer
 */
 
 const char* version               = "v:2.3.0";
