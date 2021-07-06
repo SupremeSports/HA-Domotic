@@ -3,48 +3,55 @@
 // ----------------------------------------------------------------------------------------------------
 //You must put your own settings in here
 
-const char* ssid                = "yourSSID";
-const char* password            = "yourPassword";
+const char* ssid                      = "yourSSID";
+const char* password                  = "yourPassword";
 
-const char* mqtt_server         = "192.168.0.xxx";
-const char* mqtt_user           = "yourMQTTcredentials";
-const char* mqtt_password       = "yourMQTTcredentials";
+const char* mqtt_server               = "192.168.0.xxx";
+const char* mqtt_user                 = "yourMQTTcredentials";
+const char* mqtt_password             = "yourMQTTcredentials";
 
-const char* mqtt_deviceName     = "WeatherStation-";
+const char* mqtt_deviceName           = "WeatherStation-";
 
 //Control
-const char* mqtt_controlCmd     = "Outside/WStation/Cmd";
-const char* mqtt_controlStts    = "Outside/WStation/Stts";
+const char* mqtt_controlCmd           = "Weather/Control/Cmd";
+const char* mqtt_controlStts          = "Weather/Control/Stts";
 
-const char* json_state          = "state";
-const char* json_reset          = "reset";
-const char* json_rssi           = "wifi_rssi";
-const char* json_rssiPercent    = "wifi_percent";
+//Analog and Digital inputs
+const char* mqtt_sensorsStts          = "Weather/Sensors/Stts";
+
+const char* json_uv                   = "uv";
+const char* json_mq135                = "aq";
 
 //Sensors
-const char* mqtt_sensorJson     = "Outside/WStation/Json";         //MQTT JSON status data
+const char* mqtt_sensorJson           = "Weather/Control/Json";         //MQTT JSON status data
 
-const char* json_uv             = "uv";
-const char* json_mq135          = "aq";
+const char* json_state                = "state";
+const char* json_version              = "version";
+const char* json_date                 = "date";
 
-const char* json_temp           = "temp";
-const char* json_hum            = "hum";
-const char* json_vin            = "Vin";
-const char* json_vcc            = "Vcc";
+const char* json_tempin               = "temp_in";
+const char* json_humin                = "hum_in";
+const char* json_5v                   = "Vcc5V";
+const char* json_12v                  = "Vcc12V";
+
+const char* json_ssid                 = "wifi_ssid";
+const char* json_rssi                 = "wifi_rssi";
+const char* json_rssiPercent          = "wifi_percent";
 
 //Others
-const char* json_parseFailed    = "parseObject() failed";
-const char* json_resetReq       = "Reset Requested...";
-const char* json_resetReboot    = "Rebooting...";
+const char* json_parseFailed          = "parseObject() failed";
+const char* json_resetReq             = "Reset Requested...";
+const char* json_resetReboot          = "Rebooting...";
+const char* json_reset                = "reset";
 
-const char* mqtt_cmdOn          = "ON";
-const char* mqtt_cmdOff         = "OFF";
+const char* mqtt_cmdOn                = "ON";
+const char* mqtt_cmdOff               = "OFF";
 
-const char* mqtt_willTopic      = "Outside/WStation/LWT";
-const char* mqtt_willOffline    = "offline";
-const char* mqtt_willOnline     = "online";
-const bool  mqtt_willRetain     = false;
-const byte  mqtt_willQoS        = 0;
+const char* mqtt_willTopic            = "Weather/Control/LWT";
+const char* mqtt_willOffline          = "offline";
+const char* mqtt_willOnline           = "online";
+const bool  mqtt_willRetain           = false;
+const byte  mqtt_willQoS              = 0;
 
 //Network settings
 //MQTT Server IP Address
