@@ -52,6 +52,7 @@ const char* date                  = "2021/07/01";
 #define ESP32                       32
 //ADC_MODE(ADC_VCC);                              //Read Vcc on ADC input
 
+//SELECT ONLY ONE
 #define Switch1     //SN: 00001
 //#define Switch2     //SN: 00002
 //#define Switch3     //SN: 00003
