@@ -6,6 +6,10 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
+
+  mqttClient.setKeepAlive(keepAlive);
+  mqttClient.setBufferSize(packetSize);
+  mqttClient.setSocketTimeout(socketTimeout);
 }
 
 bool runMQTT()
@@ -27,6 +31,8 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
@@ -38,9 +44,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length)
     message[i] = (char)payload[i];
 
   message[length] = '\0';
-  Sprint(message);
+  Sprintln(message);
 
-  Sprintln();
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  local_delay(5);
 
   mqttReceive(topic, message);
 }
@@ -53,11 +60,11 @@ void reconnect()
   while (!mqttClient.connected())
   {
     Sprint("Attempting MQTT connection...");
+
+    randomSeed(analogRead(A3));
     
     // Create a random client ID
     String clientId = mqtt_deviceName;
-    clientId += String(switchID);
-    clientId += "-"
     clientId += String(random(0xffff), HEX);
     // Attempt to connect
     if (mqttClient.connect(clientId.c_str(), mqtt_user, mqtt_password, mqtt_willTopic, mqtt_willQoS, mqtt_willRetain, mqtt_willOffline))
@@ -95,9 +102,11 @@ void mqttReceive(char* topic, char* message)
 {
   if (strcmp(topic,mqtt_controlCmd)==0)
   {
-    //flashBoardLed(100, 2);
+    bool dataOk = processCommandJson(message);
 
-    processCommandJson(message);
+    //flashBoardLed(100, 2);
+    
+    newDataMQTT = dataOk;
   }
   
   //Lamp command settings
@@ -125,7 +134,6 @@ void mqttReceive(char* topic, char* message)
     updateMQTT = true;
     compareData();
     lastDataI2C = millis()-10000;
-    lastDataNRF = millis()-9875;
   }
 
   local_delay(5);
@@ -141,13 +149,15 @@ void mqttKeepRunning()
 
   readSensors(false);          //Read sensors (buttons, etc.)
 
+  updateTime();
+  
   checkNRF();
   runI2C();
-  sendNRF();
-
+  
   writeOutputs();           //Set OUTPUTS devices
 
-  flashEvery5sec();
+  runEvery5seconds();
+  runEvery10seconds();
 }
 
 void mqttSubscribe()
@@ -165,7 +175,8 @@ void mqttPublish()
     return;
     
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-
+  mqttClient.loop();
+  
   updatePublish = false;
 }
 
