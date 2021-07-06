@@ -37,9 +37,9 @@ const char* date                  = "2021/06/27";
 #define NANO
 
 //SELECT ONLY ONE
-//#define Switch1     //SN: 00001
+#define Switch1     //SN: 00001
 //#define Switch2     //SN: 00002
-#define Switch3     //SN: 00003
+//#define Switch3     //SN: 00003
 
 bool newPowerON                   = false;
 
