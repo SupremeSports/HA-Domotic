@@ -4,6 +4,12 @@
 void initSensors()
 {
   Sprintln("Init Sensors...");
+  #ifdef EXTERNAL_EN
+    dht.begin();
+  #endif
+  #ifdef INTERNAL_EN  
+    dhtInternal.begin();
+  #endif
 
   //INPUTS
   for (int i=0; i<6; i++)
@@ -24,6 +30,13 @@ void readSensors(bool all)
     return;
 
   readAnalogSensors();
+
+  #ifdef EXTERNAL_EN
+    readDHT();
+  #endif
+  #ifdef INTERNAL_EN
+    readInternalDHT();
+  #endif
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -61,23 +74,79 @@ uint16_t readAn(uint8_t pinToRead)
 }
 
 // ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ DIGITAL SENSOR ------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//TODO
+
+// ----------------------------------------------------------------------------------------------------
+// -------------------------------------------- DHT SENSOR --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#ifdef EXTERNAL_EN
+void readDHT()
+{
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
+
+  //Output values
+  DHTTempOut = isnan(temp) ? initValue : temp;
+  DHTHumOut = isnan(hum) ? initValue : hum;
+  
+  DHTTempOut = constrain(DHTTempOut, 0.0, 99.9);
+  DHTHumOut = constrain(DHTHumOut, 0.0, 99.9);
+
+  Sprint("TempOut: ");
+  Sprint(DHTTempOut);
+  Sprintln("*C");
+  Sprint("HumOut: ");
+  Sprint(DHTHumOut);
+  Sprintln("%");
+  
+  local_delay(1);
+} 
+#endif
+
+#ifdef INTERNAL_EN
+void readInternalDHT()
+{
+  float temp = dhtInternal.readTemperature();
+  float hum = dhtInternal.readHumidity();
+
+  //Output values
+  DHTTempIn = isnan(temp) ? initValue : temp;
+  DHTHumIn = isnan(hum) ? initValue : hum;
+
+  DHTTempOut = constrain(DHTTempOut, 0.0, 99.9);
+  DHTHumOut = constrain(DHTHumOut, 0.0, 99.9);
+
+  Sprint("TempIn: ");
+  Sprint(DHTTempIn);
+  Sprintln("*C");
+  Sprint("HumIn: ");
+  Sprint(DHTHumIn);
+  Sprintln("%");
+
+  local_delay(1);
+}
+#endif
+
+// ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- Utility functions -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void setBoardLED(bool newState)
 {
-  if (!enableBoardLED)
-    newState = LOW;
-
-  digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  if (enableBoardLED)
+    digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  else
+    digitalWrite(boardLedPin, boardLedPinRevert);
 }
 
 void flashBoardLed(int delayFlash, int qtyFlash)
 {
-  for (int i=0; i<qtyFlash; i++)
+  for (int i=0; i < qtyFlash; i++)
   {
-    setBoardLED(!boardLedPinRevert);
+    setBoardLED(HIGH);
     local_delay(delayFlash);
-    setBoardLED(boardLedPinRevert);
+    setBoardLED(LOW);
     local_delay(delayFlash);
   }
 }
