@@ -31,8 +31,15 @@ void parseTime(char* message)
 
 void updateTime()
 {
+  ONS_1s = false;
+  ONS_5s = false;
+  ONS_10s = false;
+  ONS_1m = false;
   if (second() == Second)
     return;
+
+  if (minute() != Minute)
+    ONS_1m = true;
   
   Year = year();
   Month = month();
@@ -43,4 +50,10 @@ void updateTime()
   DOW = weekday()-1;
 
   localTimeValid = (Year>2000);
+
+  ONS_1s = true;
+  ONS_5s = Second%5==0;
+  ONS_10s = Second%10==0;
+
+  PRE_5s = (Second+1)%5==0 || ONS_5s; //Less than a second before next trigger
 }
