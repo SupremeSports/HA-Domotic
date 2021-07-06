@@ -25,12 +25,24 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 */
 
 /*
-  Name:   Weather Station (MQTT)
+  Name:   Weather Station
   Created: 2019/09/29
-  Modified: 2020/03/25
   Author:  gauthier_j100@hotmail.com / SupremeSports
   GitHub:  https://github.com/SupremeSports/HA-Domotic/tree/master/Devices/Weather%20Station
 */
+
+/*
+  ArduinoOTA            1.0.5
+  UIPEthernet           2.0.9
+  PubSubClient          2.8.0
+  ArduinoJson           6.17.2
+  Wire 
+  DHT sensor library    1.4.1
+  Board                 Arduino Mega 2560 (Optiboot)
+*/
+
+const char* version               = "v:2.2.4";
+const char* date                  = "2021/03/25";
 
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- Ethernet DEFINES -----------------------------------------
@@ -54,6 +66,25 @@ IPAddress dnsIp(IP1, IP2, IP3, IP4);              //Put your DNS Server here
 bool networkActive                = false;        //WiFi connectivity status
 
 // ----------------------------------------------------------------------------------------------------
+// ------------------------------------------- WDT DEFINES --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#include <avr/wdt.h>
+
+const bool ENABLE_WDT             = true;
+
+const uint8_t selfReset_pin       = 7;
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------- OTA DEFINES --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#define ENABLE_OTA
+
+#ifdef ENABLE_OTA
+  #define NO_OTA_PORT
+  #include <ArduinoOTA.h>
+#endif
+
+// ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 //#define DEBUG
@@ -66,19 +97,6 @@ bool networkActive                = false;        //WiFi connectivity status
   #define Sprint(a)
 #endif
 
-#ifndef MEGA2560
-  #define MEGA2560
-#endif
-
-// ----------------------------------------------------------------------------------------------------
-// ------------------------------------------- WDT DEFINES --------------------------------------------
-// ----------------------------------------------------------------------------------------------------
-#include <avr/wdt.h>
-
-const uint8_t resetPin            = 7;
-
-const bool ENABLE_WDT             = true;
-
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ OTHER DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
@@ -89,11 +107,15 @@ const bool enableBoardLED         = true;         //If true, LED will flash to i
 //Variables
 #define initValue                   -99           //Initialization value to insure values updates
 
-bool newStart                     = false;        //New start detection
-
-long ledFlashDelay                = 0;            //Led flashing delay
 long lastSecond                   = 0;
-long lastMinute                   = 0;
+
+bool newStart                     = false;        //New start detection
+bool ONS_1s                       = false;
+bool ONS_5s                       = false;
+bool ONS_10s                      = false;
+bool ONS_1m                       = false;
+
+bool PRE_5s                       = false;        //Comes on for the second before ONS_5s comes on
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- MQTT DEFINES -------------------------------------------
@@ -102,132 +124,207 @@ long lastMinute                   = 0;
 
 EthernetClient ethClient;
 PubSubClient mqttClient(ethClient);
+
+const uint16_t keepAlive          = 45;
+const uint16_t packetSize         = 1500;
+const uint16_t socketTimeout      = 60;
+
 long lastMsg                      = 0;
 char msg[50];
 
 bool updatePublish                = false;
 bool mqttActive                   = false;
 
+bool forceMqttUpdate              = false;
+
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- MQTT JSON DEFINES -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 #include <ArduinoJson.h>          // https://github.com/bblanchon/ArduinoJson
 
-const int BUFFER_SIZE             = JSON_OBJECT_SIZE(100);
-const int BUFFER_ARRAY_SIZE       = 255;
+const int BUFFER_SIZE             = JSON_OBJECT_SIZE(200);
+const int BUFFER_ARRAY_SIZE       = 512;
 
 char message[BUFFER_ARRAY_SIZE];
 
 // ----------------------------------------------------------------------------------------------------
-// ----------------------------------------- WEATHER DEFINES ------------------------------------------
+// ---------------------------------------- SPECIFIC DEFINES ------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+const uint8_t sda                 = 20;           //I2C Data pin
+const uint8_t scl                 = 21;           //I2C Clock pin
 
-// --------------------------------------- I2C SENSORS DEFINES ----------------------------------------
-const uint8_t sda             = 20;             //I2C Data pin
-const uint8_t scl             = 21;             //I2C Clock pin
+// -------------------------------------- WIND/RAIN I2C DEFINES ---------------------------------------
+//#include <Wire.h>
+#ifndef I2CDefs_h
+  #define I2CDefs_h
+  #define I2C_SLAVE_ADDR            0x69
+  #define I2C_DATA_SIZE             6
+  #define I2C_PROTOCOL_NUMBER       54
+#endif
 
 // ---------------------------------------- WIND SPEED DEFINES ----------------------------------------
-const uint8_t windSpdPin      = 49;                //Wind speed sensor (pin 49 for FreqMeasure / 47 for FreqCount)
+#define I2C_WINDSPD
 
-long lastWindSpeed            = 0;                 //Delay between readings
+#ifdef I2C_WINDSPD
+  float windSpdOut                = 0;             //Wind speed frequency output to MQTT
+#else
+  const uint8_t windSpdPin        = 49;            //Wind speed sensor (pin 49 for FreqMeasure / 47 for FreqCount)
+  
+  long lastWindSpeed              = 0;             //Delay between readings
+  
+  uint16_t windSpeedBuffer        = 0;             //Wind pulse counter
+  byte windSpeedPrev              = 0;             //Last status of wind sensor
 
-uint16_t windSpeedBuffer      = 0;                 //Wind pulse counter
-byte windSpeedPrev            = 0;                 //Last status of wind sensor
+  uint16_t windSpdOut             = 0;             //Wind speed frequency output to MQTT
+#endif
 
-uint16_t windSpdOut           = 0;                 //Wind speed frequency output to MQTT
+
 
 // -------------------------------------- WIND DIRECTION DEFINES --------------------------------------
-#define WindDirOffset           1                  //Offset angle in degrees
+#define WindDirOffset               1              //Offset angle in degrees
 
-const uint8_t windDir1Pin     = 38;                //Wind direction sensor #1
-const uint8_t windDir2Pin     = 40;                //Wind direction sensor #2
-const uint8_t windDir3Pin     = 44;                //Wind direction sensor #3
-const uint8_t windDir4Pin     = 42;                //Wind direction sensor #4
-const uint8_t windDir5Pin     = 46;                //Wind direction sensor #5
+const uint8_t windDir1Pin         = 38;            //Wind direction sensor #1
+const uint8_t windDir2Pin         = 40;            //Wind direction sensor #2
+const uint8_t windDir3Pin         = 44;            //Wind direction sensor #3
+const uint8_t windDir4Pin         = 42;            //Wind direction sensor #4
+const uint8_t windDir5Pin         = 46;            //Wind direction sensor #5
 
-int16_t windDirOut            = initValue;         //Wind speed frequency output to MQTT
+int16_t windDirOut                = initValue;     //Wind speed frequency output to MQTT
 
 // --------------------------------------- RAIN SENSORS DEFINES ---------------------------------------
-const uint8_t rainSensorPin   = A0;                //Rain sensor
-const uint8_t rainLevelPin    = 43;                //Rain level sensor
+const uint8_t rainSensorPin       = A0;            //Rain sensor
 
-unsigned long lastRainLvl     = 0;                 //Delay between readings
+int16_t RainSnsrOut               = initValue;     //Rain sensor output to MQTT
 
-int16_t rainLvlBuffer         = 0;                 //Rain level counter
-byte rainLvlPrev              = 0;                 //Last status of rain bucket
+// ---------------------------------------- RAIN LEVEL DEFINES ----------------------------------------
+#define I2C_RAINLVL
 
-int16_t RainSnsrOut           = initValue;         //Rain sensor output to MQTT
-int16_t RainLvlOut            = 0;                 //Rain sensor output to MQTT
+#ifdef I2C_RAINLVL
+  //TODO
+#else
+  const uint8_t rainLevelPin      = 43;            //Rain level sensor
+  unsigned long lastRainLvl       = 0;             //Delay between readings
+  
+  int16_t rainLvlBuffer           = 0;             //Rain level counter
+  byte rainLvlPrev                = 0;             //Last status of rain bucket
+#endif
+
+int16_t RainLvlOut                = 0;             //Rain level output to MQTT
+
+// ---------------------------------------- NTC SENSOR DEFINES ----------------------------------------
+#define NTC_EN
+
+#ifdef NTC_EN
+  const uint8_t ntcSensorPin      = A8;            //NTC sensor
+#endif
+
+int16_t NTCTempOut                = initValue;     //NTC temperature output to MQTT
 
 // ---------------------------------------- DHT SENSOR DEFINES ----------------------------------------
 //#include <Wire.h>
 #include "DHT.h"
 
-//#define DHTTYPE               DHT11              // DHT 11
-#define DHTTYPE                 DHT22              // DHT 22 (AM2302), AM2321
-//#define DHTTYPE               DHT21              // DHT 21 (AM2301)
+//#define DHTTYPE                   DHT11          // DHT 11
+#define DHTTYPE                     DHT22          // DHT 22 (AM2302), AM2321
+//#define DHTTYPE                   DHT21          // DHT 21 (AM2301)
 
-const uint8_t DHTPin          = 48;                //DHT Temp/Hum sensor (1-wire)
+#define EXTERNAL_EN
 
-float DHTTempOut              = initValue;         //DHT temperature output to MQTT
-float DHTHumOut               = initValue;         //DHT humidity output to MQTT
+#ifdef EXTERNAL_EN
+  const uint8_t DHTPin            = 48;            //DHT Temp/Hum sensor (1-wire)
 
-DHT dhtExternal(DHTPin, DHTTYPE);                          //Create DHT object
+  DHT dht(DHTPin, DHTTYPE);                        //Create DHT object
+#endif
+
+float DHTTempOut                  = initValue;     //DHT temperature output to MQTT
+float DHTHumOut                   = initValue;     //DHT humidity output to MQTT
 
 // ------------------------------------ DHT INTERNAL SENSOR DEFINES -----------------------------------
-//#include <Wire.h>
-const uint8_t DHTInternalPin  = 41;                //DHT Temp/Hum sensor (1-wire)
+#define INTERNAL_EN
 
-float DHTTempIn               = initValue;         //DHT temperature output to MQTT
-float DHTHumIn                = initValue;         //DHT humidity output to MQTT
+#ifdef INTERNAL_EN
+  const uint8_t DHTInternalPin    = 41;            //DHT Temp/Hum sensor (1-wire)
+  
+  DHT dhtInternal(DHTInternalPin, DHTTYPE);        //Create DHT object
+#endif
 
-DHT dhtInternal(DHTInternalPin, DHTTYPE);          //Create DHT object
-
-
+float DHTTempIn                   = initValue;     //DHT temperature output to MQTT
+float DHTHumIn                    = initValue;     //DHT humidity output to MQTT
 
 // ---------------------------------------- BME SENSOR DEFINES ----------------------------------------
-//#include <Wire.h>
-//#include <Adafruit_Sensor.h>
-#include <Adafruit_BME280.h>
+//#define BME_EN
 
-#define I2CAddress_BME          0x76
+#ifdef BME_EN
+  //#include <Wire.h>
+  //#include <Adafruit_Sensor.h>
+  #include <Adafruit_BME280.h>
+  
+  #define I2CAddress_BME            0x76
+  
+  Adafruit_BME280 bme;                             //Create BME280 object 
+#endif
 
-float BMETempOut              = initValue;         //BME temperature output to MQTT
-float BMEHumOut               = initValue;         //BME humidity output to MQTT
-float BMEBaroOut              = initValue;         //BME barometric output to MQTT
+float BMETempOut                  = initValue;     //BME temperature output to MQTT
+float BMEHumOut                   = initValue;     //BME humidity output to MQTT
+float BMEBaroOut                  = initValue;     //BME barometric output to MQTT
 
-bool BMEreadFailed            = false;
-
-Adafruit_BME280 bme;                               //Create BME280 object 
+bool BMEreadFailed                = false;
 
 // ------------------------------------- VEML6070 SENSOR DEFINES --------------------------------------
-//#include <Wire.h>
-#include "Adafruit_VEML6070.h"
+#define UV_EN
 
-#define VEMLTIMECONST           VEML6070_4_T
+#ifdef UV_EN
+  //#include <Wire.h>
+  #include "Adafruit_VEML6070.h"
+  
+  #define VEMLTIMECONST             VEML6070_4_T
+  
+  Adafruit_VEML6070 uv            = Adafruit_VEML6070();//Create VEML6070 object 
+#endif
 
-int16_t VEMLUVOut             = initValue;         //VEML6070 barometric output to MQTT
-
-Adafruit_VEML6070 uv = Adafruit_VEML6070();        //Create VEML6070 object 
+int16_t VEMLUVOut                 = initValue;     //VEML6070 barometric output to MQTT
 
 // --------------------------------------- MQ135 SENSOR DEFINES ---------------------------------------
-const uint8_t MQ135Pin        = A7;                //MQ135 sensor (1-wire)
+//#define MQ135_EN
+const uint8_t MQ135Pin            = A7;            //MQ135 sensor (1-wire)
 
-int16_t MQ135Out              = initValue;         //MQ135 output to MQTT
+int16_t MQ135Out                  = initValue;     //MQ135 output to MQTT
 
 // --------------------------------------- SELF VOLTAGE READING ---------------------------------------
-const uint8_t inputVoltPin    = A1;                //Power supply voltage
-const uint8_t dcVoltPin       = A2;                //5V dc rail voltage
+const uint8_t voltage5V_pin       = A2;
+const uint8_t voltage12V_pin      = A1;
 
-float inputVoltOut            = 0.0;               //Power supply voltage output to MQTT
-float dcVoltOut               = 0.0;               //5V dc rail voltage output to MQTT
+float voltage12V                  = 0.0;           //Power supply voltage output to MQTT
+float voltage5V                   = 0.0;           //5V dc rail voltage output to MQTT
 
-float inputVoltRatio          = 2.5;               //Voltage divider ratio [0 => 15]Vdc
-float dcVoltRatio             = 1.36;              //Voltage divider ratio [0 => 5.5]Vdc
+//R1  = 1k
+//R2  = 10k
+//Vr2 = 1.00V @ 5.50V
+//Thorical ratio = 0.90909
+float voltage5VRatio              = 1.36;      //Voltage divider ratio [0 => 5.5]Vdc
+
+//R1  = 10k
+//R2  = 5k6
+//Vr2 = 1.00V @ 13.93V
+//Thorical ratio = 2.78571
+float voltage12VRatio             = 2.5;      //Voltage divider ratio [0 => 15]Vdc
+
+// -------------------------------------- DIGITAL SENSORS DEFINES -------------------------------------
+//TODO
 
 // ---------------------------------------- SELF-RESET DEFINES ----------------------------------------
-unsigned long resetDelay      = 0;
-bool resetONS                 = false;
+unsigned long resetDelay          = 0;
+bool resetONS                     = false;
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ TIME CONTROL --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#include <TimeLib.h>              // TimeLib library is needed https://github.com/PaulStoffregen/Time
+                                  // http://playground.arduino.cc/code/time (Margolis 1.5.0)
+
+//Variables
+uint8_t Second                    = initValue;
+uint8_t Minute                    = initValue;
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- SETUP ------------------------------------------------
@@ -244,10 +341,11 @@ void setup()
   initSensors();
 
   initEthernet();
+  initOTA();
+  
   initMQTT();
 
   lastSecond = millis();
-  lastMinute = millis();
 
   local_delay(50);                              //Wait for all data to be ready
 
@@ -274,6 +372,8 @@ void loop()
 void runEveryScan()
 { 
   wdt_reset();
+
+  runOTA();
 
   mqttActive = runMQTT();
   networkActive = checkNetwork();
@@ -305,19 +405,65 @@ void runEverySecond()
   Sprintln("ms");
 }
 
+void runEvery5seconds()
+{
+  if (!ONS_5s)
+    return;
+  
+  ONS_5s = false;
+  PRE_5s = false;
+    
+  Sprintln("5 seconds");
+
+  flashEvery5sec();
+
+  readSensors(5);
+  local_delay(10);
+  sendSensors();
+}
+
+void runEvery10seconds()
+{
+  if (!ONS_10s)
+    return;
+    
+  ONS_10s = false;
+    
+  Sprintln("10 seconds");
+
+  //TODO
+}
+
 void runEveryMinute()
 {
-  if (millis()-lastMinute < 60000)
+  if (!ONS_1m)
     return;
+
+  ONS_1m = false;
 
   unsigned long loopTime = millis();
 
   //Todo
 
-  lastMinute = millis();
-
   loopTime = millis() - loopTime;
   Sprint("Process time (minute): ");
   Sprint(loopTime);
   Sprintln("ms");
+}
+
+void forceUpdateMQTT(bool force)
+{
+  if ((!forceMqttUpdate && !force) || ONS_5s) 
+    return;
+
+  //Do not send data if it is to be sent within the next second
+  if (forceMqttUpdate && PRE_5s)
+  {
+    forceMqttUpdate = false;
+    return;
+  }
+
+  forceMqttUpdate = false;
+
+  //TODO
 }
