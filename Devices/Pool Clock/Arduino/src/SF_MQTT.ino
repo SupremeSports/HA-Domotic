@@ -6,6 +6,10 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
+
+  mqttClient.setKeepAlive(keepAlive);
+  mqttClient.setBufferSize(packetSize);
+  mqttClient.setSocketTimeout(socketTimeout);
 }
 
 bool runMQTT()
@@ -24,6 +28,8 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
@@ -35,9 +41,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length)
     message[i] = (char)payload[i];
 
   message[length] = '\0';
-  Sprint(message);
+  Sprintln(message);
 
-  Sprintln();
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  local_delay(5);
 
   mqttReceive(topic, message);
 }
@@ -61,8 +68,6 @@ void reconnect()
       // Once connected, publish an announcement...
       updatePublish = true;
       mqttPublish();
-      lastMinute = millis();
-      minDelay = 3000;
       // ... and resubscribe
       mqttSubscribe();
     }
@@ -96,8 +101,6 @@ void mqttReceive(char* topic, char* message)
     parseTime(message);
     
     //flashBoardLed(100, 3);
-
-    updatePublish = true;    //Force data update
   }
 
   //Pool Clock settings
@@ -137,7 +140,7 @@ void mqttKeepRunning()
   //Keep updating data even if MQTT is down
   if (localTimeValid)
   {
-    readSensors();            //Read sensors (buttons, etc.)
+    readSensors(false);       //Read sensors (buttons, etc.)
 
     updateTime();             //Update current time
     updateTimeString();       //Display current time
@@ -155,7 +158,8 @@ void mqttKeepRunning()
     
     local_delay(5);           //Give time to receive
 
-    flashEvery5sec();
+    runEvery5seconds();
+    runEvery10seconds();
   
     prevSecond = Second;
     prevMinute = Minute;
@@ -188,7 +192,6 @@ void mqttPublish()
   }
     
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-
   mqttClient.loop();
 
   updatePublish = false;
