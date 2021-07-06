@@ -3,17 +3,15 @@
 // ----------------------------------------------------------------------------------------------------
 void initNRF()
 {
-  if (!nrf24.init())
+  if (!radio.begin())
     Sprintln("NRF24 init failed");
-  // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-  if (!nrf24.setChannel(nrfChannel))
-    Sprintln("NRF24 setChannel failed");
-  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPowerm18dBm))
-    Sprintln("NRF24 setRF failed");
 
-  delay(100);
-  if (newPowerON)
-    software_Reset();  //Call reset on powerup because NRF needs to be configured
+  radio.openWritingPipe(pipes[1]); // Read pipe on dimmer
+  radio.openReadingPipe(1, pipes[0]); // Write pipe on dimmer
+  //RF24_PA_MIN=-18dBm, RF24_PA_LOW=-12dBm, RF24_PA_HIGH=-6dBM, and RF24_PA_MAX=0dBm
+  radio.setPALevel(RF24_PA_LOW);
+  //RF24_250KBPS for 250kbs, RF24_1MBPS for 1Mbps, or RF24_2MBPS for 2Mbps
+  radio.setDataRate(RF24_1MBPS);
 
   Sprintln("NRF24 Init Completed");
 
@@ -25,24 +23,21 @@ void initNRF()
 // ----------------------------------------------------------------------------------------------------
 void checkNRF()
 {
-  if (!nrf24.available())
+  if (!radio.available())
     return;
 
   Sprintln("Data received...");
 
-  setBoardLED(HIGH);
+  setBoardLED(true);
 
   byte buf[RH_NRF24_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
-  nrf24.recv(buf, &len);
-
-  if (newStart)
-    return;
-
+  radio.read(&buf, sizeof(buf));
   char * data = (char *)buf;
 
   Sprintln(data);
   parseData(data, strlen(data));
+
+  setBoardLED(false);
 }
 
 //Only send data on value change and after receiving data
@@ -50,13 +45,12 @@ void sendNRF()
 {
   if (millis() - lastDataNRF < 10000 && !sendDataNRF)
     return;
-
+  
   lastDataNRF = millis();
   //sendDataNRF = false;
 
   char data[RH_NRF24_MAX_MESSAGE_LEN]; // Buffer big enough for 28-character string
   char result[8]; // Buffer big enough for 7-character float
-  char* delim = ":";
 
   uint8_t bufferLvl = 0;
   bufferLvl = lamp.level;
@@ -99,26 +93,27 @@ void sendNRF()
   dtostrf(voltage5V * 100, 1, 0, result);
   strcat(data, result);
   strcat(data, delim);
+  dtostrf(DHTTempOut * 10, 1, 0, result);
+  strcat(data, result);
+  strcat(data, delim);
+  dtostrf(DHTHumOut * 10, 1, 0, result);
+  strcat(data, result);
+  strcat(data, delim);
 
   // Send a message
-  for (int i=0; i<3; i++)
-  {
-    nrf24.send(data, sizeof(data));
-
-    if (hb_buffer > 100)// && i>=1) //If button has been pressed, send only once
-      break;
-
-    local_delay(100); //VERY IMPORTANT - Insure data has been sent properly
-  }
-
-  nrf24.waitPacketSent();
-
-  sendDataNRF = false;
-
+  setBoardLED(true);
+  
+  delay(5);
+  radio.stopListening();
+  radio.write(&data, sizeof(data));
   Sprint("Data sent: ");
   Sprintln(data);
+  delay(5);
+  radio.startListening();
 
-  setBoardLED(LOW);
+  setBoardLED(false);
+  
+  sendDataNRF = false;
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -183,7 +178,7 @@ void parseData(char* message, int dataSize)
   //NOW, EXTRACT DATA
 
   //Validate switch ID to start
-  switchRcvdID = parsedData[1];
+  uint16_t switchRcvdID = parsedData[1];
 
   if (switchRcvdID != switchID) //Accept only correct switchID
     return;
