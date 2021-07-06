@@ -5,13 +5,25 @@ void initClock()
 {
   if (clockHomed || updatePublish)
     return;
+
+  //Prevent clock from rotating while unconnected to MQTT broker
+  // Clock will home once, and will not rehome each and every subsequent reset
+  if (!mqttClient.connected() || !networkActive)
+  {
+    bool HourHallSignal = readHallSensor(HourHall);
+    bool MinHallSignal = readHallSensor(MinHall);
+    bool SecHallSignal = readHallSensor(SecHall);
+
+    if (HourHallSignal && MinHallSignal && SecHallSignal)
+      return;
+  }
     
   Sprintln("Init Clock...");
 
   while (!findZero(STEPPER_ALL))
     local_delay(10);
 
-  local_delay(10);
+  local_delay(5);
 
   updatePublish = true;
 }
@@ -86,9 +98,9 @@ boolean findZero(int hand)
     Sprintln("Find zero complete");
     clockHomed = true;
     
-    lastMillis = millis();
+    lastSecond = millis();
     
-    while (millis() - lastMillis < 2000)
+    while (millis() - lastSecond < 2000)
       flashBoardLed(100, 1);
 
     return true;
@@ -221,6 +233,7 @@ void tickStepper(int motor)
 
   uint16_t delayPulse = clockHomed ? STEPPER_SPEED : STEPPER_SPEED/2;
 
+  //Pulse sequence
   digitalWrite(StepEnable, LOW); 
   delayMicroseconds(delayPulse);
   digitalWrite(handPulsePin, HIGH);
