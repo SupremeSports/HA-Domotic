@@ -35,7 +35,7 @@ void compareData()
 
   sendLightState();
   sendFanState();
-  lastMinute = millis();
+  //ONS_1m = true;
   
   newDataNRF = false;
   updateNRF = false;
