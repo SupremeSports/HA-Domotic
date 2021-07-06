@@ -8,25 +8,36 @@
 // ----------------------------------------------------------------------------------------------------
 void processCommandJson(char* message)
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  DeserializationError error = deserializeJson(doc, message);
 
-  JsonObject& root = jsonBuffer.parseObject(message);
-
-  if (!root.success())
+  if (error)
   {
     Sprintln(json_parseFailed);
     return;
   }
 
-  if (root.containsKey(json_state))
+  if (doc[json_reset])
   {
-    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
-      clockHomed = true;
-    else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
-      clockHomed = false;
+    mqttClient.publish(mqtt_controlStts, json_resetReq);
+    
+    if (strcmp(doc[json_reset], mqtt_cmdOn) != 0)
+      return;
 
-    Sprint("Homed: ");
-    Sprintln(clockHomed ? mqtt_cmdOn : mqtt_cmdOff);
+    mqttClient.publish(mqtt_controlStts, json_resetReboot);
+      
+    Sprint(json_resetReq);
+    local_delay(500);
+    Sprintln(json_resetReboot);
+    ESP.restart();
+  }
+
+  if (doc[json_homed])
+  {
+    if (strcmp(doc[json_homed], mqtt_cmdOn) == 0)
+      clockHomed = true;
+    else if (strcmp(doc[json_state], mqtt_cmdOff) == 0)
+      clockHomed = false;
 
     if (!clockHomed)
     {
@@ -35,21 +46,23 @@ void processCommandJson(char* message)
       initialSecOns = false;
     }
   }
+}
 
-  if (root.containsKey(json_reset))
-  {
-    mqttClient.publish(mqtt_clockStts, "Reset Requested...", false);
-    
-    if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
-      return;
+// ----------------------------------------------------------------------------------------------------
+// --------------------------------------- SEND DIG/AN SENSORS ----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendDigAnStates()
+{
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
-    mqttClient.publish(mqtt_clockStts, "Rebooting...", false);
-      
-    Sprint("Reset Requested...");
-    local_delay(500);
-    Sprintln(" rebooting...");
-    ESP.restart();
-  }
+  root[json_homed] = clockHomed ? mqtt_cmdOn : mqtt_cmdOff;
+
+  char buffer[BUFFER_ARRAY_SIZE];
+  serializeJson(doc, buffer);
+  
+  mqttClient.publish(mqtt_controlStts, buffer);
+  mqttClient.loop();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -57,28 +70,38 @@ void processCommandJson(char* message)
 // ----------------------------------------------------------------------------------------------------
 void sendSensors()
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
-  JsonObject& root = jsonBuffer.createObject();
-  
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt]; 
-  String str = "";
 
-  root[json_state] = clockHomed ? mqtt_cmdOn : mqtt_cmdOff;
+  root[json_state] = mqtt_cmdOn;
+  root[json_version] = version;
+  root[json_date] = date;
 
-  str = String(rssi);
-  str.toCharArray(result,chrLngt);
-  root[json_rssi] = result;
+  dtostrf(voltage5V, 1, 1, result);
+  if (voltage5V>3.8)
+    root[json_5v] = result;
+  else
+    root[json_3v3] = result;
 
-  str = String(rssiPercent);
-  str.toCharArray(result,chrLngt);
-  root[json_rssiPercent] = result;
+//  dtostrf(voltage12V, 1, 1, result); // Leave room for too large numbers!
+//  root[json_12v] = result;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  #if defined(ESP32) || defined(ESP8266)
+    root[json_ssid] = WiFi.SSID();
+    
+    dtostrf(rssi, 1, 2, result); // Leave room for too large numbers!
+    root[json_rssi] = result;
+  
+    dtostrf(rssiPercent, 1, 2, result); // Leave room for too large numbers!
+    root[json_rssiPercent] = result;
+  #endif
 
-  Sprintln(buffer);
+  char buffer[BUFFER_ARRAY_SIZE];
+  serializeJson(doc, buffer);
 
-  mqttClient.publish(mqtt_clockStts, buffer, false);
+  mqttClient.publish(mqtt_sensorJson, buffer);
+  mqttClient.loop();
 }
