@@ -27,13 +27,12 @@
 /*
   Name:     Maestro Dimmer Kit - Dimmer Canopy
   Created:  2020/11/09
-  Modified: 2020/11/30
   Author:   gauthier_j100@hotmail.com / SupremeSports
-  GitHub:   https://github.com/SupremeSports/
+  GitHub:   https://github.com/SupremeSports/HA-Domotic/blob/master/Devices/Maestro%20Wall%20Dual%20Dimmer
 */
 
-const char* version               = "v:3.0.2";
-const char* date                  = "2020/12/02";
+const char* version               = "v:3.2.0";
+const char* date                  = "2021/05/07";
 
 #define NANO
 
@@ -42,7 +41,9 @@ bool newPowerON                   = false;
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ DEBUG DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
-#define DEBUG
+//Can't remove DEBUG as it prevents the board from working - ISSUE TO FIX
+//  Seems to be fixed with a 100ms delay inside runEveryScan() function
+//#define DEBUG 
 
 #ifdef DEBUG
 #define Sprintln(a) (Serial.println(a))
@@ -103,6 +104,9 @@ bool irq_ons                      = false;
 uint8_t optionData                = 0;
 #define LED_BIT                     0                             //Enable/Disable onboard LED 1=ON
 
+const char* DELIMITER_DATA = ':';
+char msgBuf[MAX_I2C_LENGTH];
+
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- WATCHDOG DEFINES -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
@@ -110,7 +114,7 @@ uint8_t optionData                = 0;
 
 #define ENABLE_WDT
 
-#define WDT_DELAY                   WDTO_1S //WDTO_500MS is too short
+#define WDT_DELAY                   WDTO_2S //WDTO_500MS is too short
 const int wdtDelays[]             = {15, 30, 60, 120, 250, 500, 1, 2, 4, 8};
 
 //Self-reset function
@@ -196,6 +200,8 @@ void runEveryScan()
   runI2C();
 
   #ifndef DEBUG
-    //local_delay(100); //Compensate Sprint delays
+    local_delay(100); //Compensate Sprint delays
+  #else
+    local_delay(1); //Compensate Sprint delays
   #endif
 }
