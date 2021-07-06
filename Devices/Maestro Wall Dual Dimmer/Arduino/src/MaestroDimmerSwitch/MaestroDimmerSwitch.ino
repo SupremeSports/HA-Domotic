@@ -27,15 +27,19 @@ CONSEQUENTIAL DAMAGES(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE G
 /*
   Name:     Maestro Dimmer Kit - Wall Switch
   Created:  2020/11/13
-  Modified: 2020/12/05
   Author:   gauthier_j100@hotmail.com / SupremeSports
   GitHub:   https://github.com/SupremeSports/
 */
 
-const char* version               = "v:2.2.1";
-const char* date                  = "2020/12/05";
+const char* version               = "v:2.3.0";
+const char* date                  = "2021/06/27";
 
 #define NANO
+
+//SELECT ONLY ONE
+//#define Switch1     //SN: 00001
+//#define Switch2     //SN: 00002
+#define Switch3     //SN: 00003
 
 bool newPowerON                   = false;
 
@@ -84,20 +88,34 @@ int address_PWM                   = 2;  //LEDs PWM level 20-100%
 // ------------------------------------------ NRF24 DEFINES -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 #include <SPI.h>
-#include <RH_NRF24.h>
+#include <nRF24L01.h>
+#include <RF24.h>
 
-// Singleton instance of the radio driver
-RH_NRF24 nrf24(9, 10); //(CE, CSN);
+#define RH_NRF24_MAX_MESSAGE_LEN    28
 
-uint8_t nrfChannel                = 2;
-uint16_t switchID                 = 0x0003;
-uint16_t switchRcvdID             = 0;
+RF24 radio(9, 10); // CE, CSN
+
+#if defined(Switch1)
+const byte pipes[][6] = {"00001","00002"};                        //Pipes should be unique and switchID should be equal to [0]
+uint16_t switchID                 = 0x01;                         //Pipes should be unique and switchID should be equal to [0]
+#elif defined(Switch2)
+const byte pipes[][6] = {"00003","00004"};                        //Pipes should be unique and switchID should be equal to [0]
+uint16_t switchID                 = 0x03;                         //Pipes should be unique and switchID should be equal to [0]
+#elif defined(Switch3)
+const byte pipes[][6] = {"00005","00006"};                        //Pipes should be unique and switchID should be equal to [0]
+uint16_t switchID                 = 0x05;                         //Pipes should be unique and switchID should be equal to [0]
+#else
+#error You MUST define a SwitchID
+#endif
+
+const char* delim                 = ":";
 
 long lastDataNRF                  = 0;
 uint8_t heartbeatOut              = 0;
 uint8_t heartbeatIn               = 0;
 
 bool sendDataNRF                  = false;
+bool permissionSendNRF            = false;                        //Prevent operation before reading EEPROM from switch
 
 uint8_t optionData                = 0;
 #define LED_BIT                     0                             //Enable/Disable onboard LED 1=ON
@@ -109,8 +127,8 @@ uint8_t optionData                = 0;
 #include <Adafruit_PWMServoDriver.h>
 
 const float PWM_ON                = 1.0;        //% When dimmer is ON at this level
-const float PWM_DIM               = 0.15;        //% When dimmer is OFF at this level
-const float PWM_OFF               = 0.008;       //% When dimmer in NOT at this level
+const float PWM_DIM               = 0.15;       //% When dimmer is OFF at this level
+const float PWM_OFF               = 0.008;      //% When dimmer in NOT at this level
 
 const float PWM_MIN               = PWM_OFF;
 const float PWM_MAX               = 1.0;
@@ -122,7 +140,7 @@ bool reversePWM                   = true;
 uint8_t ledFadeDelay              = 250;
 long lastFadeDelay                = 0;
 
-uint8_t pin_lmpLeds[7]            = {7, 6, 5, 4, 3, 2, 1};
+uint8_t pin_lmpLeds[7]            = {7, 6, 5, 4, 2, 3, 1};
 uint8_t act_lmpLeds[7];
 
 uint8_t pin_fanLeds[7]            = {14, 13, 12, 11, 10, 9, 8};
@@ -191,6 +209,38 @@ PinButton btnLmpDN(buttonPin[5]);
 
 bool buttonPressed                = false;
 
+// ---------------------------------------- DHT SENSOR DEFINES ----------------------------------------
+#include <Wire.h>
+#include "DHT.h"
+
+//#define DHTTYPE                   DHT11         // DHT 11
+#define DHTTYPE                     DHT22         // DHT 22 (AM2302), AM2321
+//#define DHTTYPE                   DHT21         // DHT 21 (AM2301)
+
+#define EXTERNAL_EN
+
+#ifdef EXTERNAL_EN
+  const uint8_t DHTPin              = 8;            //DHT Temp/Hum sensor (1-wire)
+  
+  float DHTTempOut                  = 0;//initValue;    //DHT temperature output to MQTT
+  float DHTHumOut                   = 0;//initValue;    //DHT humidity output to MQTT
+  
+  DHT dht(DHTPin, DHTTYPE);                         //Create DHT object
+#endif
+
+// ------------------------------------ DHT INTERNAL SENSOR DEFINES -----------------------------------
+//#define INTERNAL_EN
+
+#ifdef INTERNAL_EN
+  const uint8_t DHTInternal_pin     = 49;           //DHT Temp/Hum sensor (1-wire)
+  
+  float DHTTempIn                   = 0;//initValue;    //DHT temperature output to MQTT
+  float DHTHumIn                    = 0;//initValue;    //DHT humidity output to MQTT
+  
+  DHT dhtInternal(DHTInternal_pin, DHTTYPE);        //Create DHT object
+#endif
+
+
 // --------------------------------------- SELF VOLTAGE READING ---------------------------------------
 #define ENABLE_VOLT
 
@@ -246,7 +296,7 @@ void runEveryScan()
 
 void runEverySecond()
 {
-  if (millis()-lastSecond < voltage5V>0 ? 5000 : 1000)
+  if (millis()-lastSecond < (voltage5V>0 ? 5000 : 1000))
     return;
 
   #ifdef DEBUG
