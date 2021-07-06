@@ -197,6 +197,8 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
 
         loopIndex = 0;
 
+        sendLightColorsState();
+
         Sprintln("Initialization completed...");
       }
       break;
@@ -205,4 +207,15 @@ void colorChangingSequences(String timeStringOutput, String tempStringOutput)
       displayFeature = 0;
       break;
   }
+}
+
+void setLightLevel()
+{
+  int level = defaultBrightness;
+  if (!initDisplays)
+    level = map(brightness, 0, 255, 0, 100);
+  level = constrain(level, 0, 100);
+
+  timeDisplay.SetBrightness(level);
+  tempDisplay.SetBrightness(level);
 }
