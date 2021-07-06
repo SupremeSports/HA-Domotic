@@ -11,7 +11,7 @@ void initArduino()
   checkResetCause();
 
   pinMode(boardLedPin, OUTPUT);                    // Initialize the LED pin as an output
-  setBoardLED(LOW);
+  setBoardLED(false);
 
   Sprintln("Pro Mini Init Completed!");
 }
@@ -34,7 +34,7 @@ void checkResetCause()
 }
 
 // Restarts program from beginning but does not reset the peripherals and registers
-void software_Reset() 
+void software_Reset()
 {
   asm volatile ("  jmp 0");  
 }
@@ -93,15 +93,15 @@ void local_delay(unsigned long millisecs)
 // ----------------------------------------------------------------------------------------------------
 void setBoardLED(bool newState)
 {
-  if (!enableBoardLED)
-    newState = LOW;
-
-  digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  if (enableBoardLED)
+    digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  else
+    digitalWrite(boardLedPin, boardLedPinRevert);
 }
 
 void flashBoardLed(int delayFlash, int qtyFlash)
 {
-  for (int i=0; i<qtyFlash; i++)
+  for (int i=0; i < qtyFlash; i++)
   {
     setBoardLED(HIGH);
     local_delay(delayFlash);
