@@ -8,21 +8,20 @@
 // ----------------------------------------------------------------------------------------------------
 void processCommandJson(char* message)
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  DeserializationError error = deserializeJson(doc, message);
 
-  JsonObject& root = jsonBuffer.parseObject(message);
-
-  if (!root.success())
+  if (error)
   {
     Sprintln(json_parseFailed);
     return;
   }
 
-  if (root.containsKey(json_reset))
+  if (doc[json_reset])
   {
     mqttClient.publish(mqtt_controlStts, json_resetReq);
     
-    if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
+    if (strcmp(doc[json_reset], mqtt_cmdOn) != 0)
       return;
   
     mqttClient.publish(mqtt_controlStts, json_resetReboot);
@@ -31,56 +30,72 @@ void processCommandJson(char* message)
     local_delay(500);
     Sprintln(json_resetReboot);
 
-    forceReset();
+    if (ENABLE_WDT)
+      forceReset();
   }
 }
 
-void sendCommandStatus()
+// ----------------------------------------------------------------------------------------------------
+// -------------------------------------- PROCESS JSON SENSORS ----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendDigAnStates()
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-
-  JsonObject& root = jsonBuffer.createObject();
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
 
-  JsonObject& wind = root.createNestedObject("wind");
-  dtostrf(windSpdOut, 4, 0, result);    // Leave room for too large numbers!
+  JsonObject wind = doc.createNestedObject("wind");
+  #ifdef I2C_WINDSPD
+    dtostrf(windSpdOut, 1, 2, result);
+  #else
+    dtostrf(windSpdOut, 1, 0, result);
+  #endif
   wind["s"] = result;
-  dtostrf(windDirOut, 3, 0, result);    // Leave room for too large numbers!
+  dtostrf(windDirOut, 1, 0, result);
   wind["d"] = result;
 
-  JsonObject& dht = root.createNestedObject("dht");
-  dtostrf(DHTTempOut, 5, 1, result);    // Leave room for too large numbers!
+  JsonObject ntc = doc.createNestedObject("ntc");
+  dtostrf(NTCTempOut, 1, 0, result);
+  ntc["t"] = result;
+
+  JsonObject dht = doc.createNestedObject("dht");
+  dtostrf(DHTTempOut, 1, 1, result);
   dht["t"] = result;
-  dtostrf(DHTHumOut, 5, 1, result);     // Leave room for too large numbers!
+  dtostrf(DHTHumOut, 1, 1, result);
   dht["h"] = result;
-  
-  JsonObject& bme = root.createNestedObject("bme");
-  dtostrf(BMETempOut, 5, 1, result);    // Leave room for too large numbers!
+
+  JsonObject bme = doc.createNestedObject("bme");
+  dtostrf(BMETempOut, 1, 1, result);
   bme["t"] = result;
-  dtostrf(BMEHumOut, 5, 1, result);     // Leave room for too large numbers!
+  dtostrf(BMEHumOut, 1, 1, result);
   bme["h"] = result;
-  dtostrf(BMEBaroOut, 5, 1, result);    // Leave room for too large numbers!
+  dtostrf(BMEBaroOut, 1, 1, result);
   bme["p"] = result;
 
-  JsonObject& rain = root.createNestedObject("rain");
-  dtostrf(RainSnsrOut, 4, 0, result); // Leave room for too large numbers!
+  JsonObject rain = doc.createNestedObject("rain");
+  dtostrf(RainSnsrOut, 1, 0, result);
   rain["s"] = result;
-  dtostrf(RainLvlOut, 3, 0, result);    // Leave room for too large numbers!
+  dtostrf(RainLvlOut, 1, 0, result);
   rain["l"] = result;
-  rain["t"] = rainLvlPrev==0 ? mqtt_cmdOff : mqtt_cmdOn; //Is bucket ON or OFF
+  #ifdef I2C_RAINLVL
+    RainLvlOut = 0;
+  #else
+    rain["t"] = rainLvlPrev==0 ? mqtt_cmdOff : mqtt_cmdOn; //Is bucket ON or OFF
+  #endif
 
-  dtostrf(VEMLUVOut, 4, 0, result);     // Leave room for too large numbers!
+  dtostrf(VEMLUVOut, 1, 0, result);
   root[json_uv] = result;                 //Raw value [0 => 9999]mW/m2
 
-  dtostrf(MQ135Out, 4, 0, result);      // Leave room for too large numbers!
+  dtostrf(MQ135Out, 1, 0, result);
   root[json_mq135] = result;              //Raw value [0 => 9999]ppm
 
   char buffer[BUFFER_ARRAY_SIZE];
-  root.printTo(buffer, root.measureLength() + 1);
-
-  mqttClient.publish(mqtt_controlStts, buffer);
+  serializeJson(doc, buffer);
+  
+  mqttClient.publish(mqtt_sensorsStts, buffer);
+  mqttClient.loop();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -88,29 +103,53 @@ void sendCommandStatus()
 // ----------------------------------------------------------------------------------------------------
 void sendSensors()
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-
-  JsonObject& root = jsonBuffer.createObject();
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
 
   root[json_state] = mqtt_cmdOn;
+  root[json_version] = version;
+  root[json_date] = date;
 
-  dtostrf(DHTTempIn, 5, 1, result);     // Leave room for too large numbers!
-  root[json_temp] = result;
+#ifdef INTERNAL_EN
+  dtostrf(DHTTempIn, 1, 1, result);
+  root[json_tempin] = result;
 
-  dtostrf(DHTHumIn, 5, 1, result);     // Leave room for too large numbers!
-  root[json_hum] = result;
+  dtostrf(DHTHumIn, 1, 1, result);
+  root[json_humin] = result;
+#endif
+//External DHT is not a room sensor but used for weather station
+//#ifdef EXTERNAL_EN
+//  dtostrf(DHTTempOut, 1, 1, result);
+//  root[json_tempout] = result;
+//
+//  dtostrf(DHTHumOut, 1, 1, result);
+//  root[json_humout] = result;
+//#endif
+
+  mqttClient.loop();
   
-  dtostrf(inputVoltOut, 4, 1, result);  // Leave room for too large numbers!
-  root[json_vin] = result;
+  dtostrf(voltage12V, 1, 1, result);
+  root[json_12v] = result;
 
-  dtostrf(dcVoltOut, 4, 1, result);     // Leave room for too large numbers!
-  root[json_vcc] = result;
+  dtostrf(voltage5V, 1, 1, result);
+  root[json_5v] = result;
+
+  #if defined(ESP32) || defined(ESP8266)
+    root[json_ssid] = WiFi.SSID();
+    
+    dtostrf(rssi, 1, 2, result);
+    root[json_rssi] = result;
+  
+    dtostrf(rssiPercent, 1, 2, result);
+    root[json_rssiPercent] = result;
+  #endif
 
   char buffer[BUFFER_ARRAY_SIZE];
-  root.printTo(buffer, root.measureLength() + 1);
+  serializeJson(doc, buffer);
 
   mqttClient.publish(mqtt_sensorJson, buffer);
+  mqttClient.loop();
 }
