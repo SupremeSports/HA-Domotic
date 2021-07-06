@@ -13,9 +13,22 @@ void initSensors()
 }
 
 //INPUTS
-void readSensors()
+void readSensors(bool all)
 {
   setLightLevel();
+
+  if (!all)
+    return;
+
+  readAnalogSensors();
+  readVoltages();
+
+  #ifdef EXTERNAL_EN
+    readDHT();
+  #endif
+  #ifdef INTERNAL_EN
+    readInternalDHT();
+  #endif
   
   return;
 }
@@ -26,35 +39,83 @@ void writeOutputs()
   return;
 }
 
-void setLightLevel()
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ ANALOG SENSOR -------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void readAnalogSensors()
 {
-  int level = defaultBrightness;
-  if (!initDisplays)
-    level = map(brightness, 0, 255, 0, 100);
-  level = constrain(level, 0, 100);
-
-  timeDisplay.SetBrightness(level);
-  tempDisplay.SetBrightness(level);
+  local_delay(1);
+  return;
 }
+
+uint16_t readAn(uint8_t pinToRead)
+{
+  analogRead(pinToRead); //Dump first reading
+  local_delay(10);
+  return(analogRead(pinToRead));
+}
+
+float readAnAvg(uint8_t pinToRead, uint16_t iterations)
+{
+  uint16_t samples[iterations];
+  analogRead(pinToRead); //Dump first reading
+  for (int i=0; i<iterations; i++)
+  {
+    samples[i] = analogRead(pinToRead);
+    delay(10);
+  }
+
+  float average = 0;
+  for (int i=0; i<iterations; i++)
+     average += samples[i];
+
+  average /= iterations;
+  
+  return average; //Return average of values
+}
+
+void readVoltages()
+{
+  #ifdef ESP32
+    float volt5V = ESP.getVcc();
+    voltage5V = volt5V/4095.0F*voltage5VRatio;
+  #elif ESP8266
+    float volt5V = ESP.getVcc();
+    voltage5V = volt5V/1023.0F*voltage5VRatio;
+  #endif
+
+  #ifdef DEBUG
+    Sprint("3V3: ");
+    Sprint(voltage5V);
+    Sprintln("V");
+  #endif
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ DIGITAL SENSOR ------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//TODO
+
+
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- Utility functions -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void setBoardLED(bool newState)
 {
-  if (!enableBoardLED)
-    newState = boardLedPinRevert;
-  
-  digitalWrite(boardLedPin, newState);
+  if (enableBoardLED)
+    digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  else
+    digitalWrite(boardLedPin, boardLedPinRevert);
 }
 
 void flashBoardLed(int delayFlash, int qtyFlash)
 {
   for (int i=0; i < qtyFlash; i++)
   {
-    setBoardLED(!boardLedPinRevert);
+    setBoardLED(HIGH);
     local_delay(delayFlash);
-    setBoardLED(boardLedPinRevert);
+    setBoardLED(LOW);
     local_delay(delayFlash);
   }
 }
@@ -62,16 +123,8 @@ void flashBoardLed(int delayFlash, int qtyFlash)
 //Short flash every 5 seconds when everything is ok
 void flashEvery5sec()
 {
-  if (millis()-ledFlashDelay < 5000)
-    return;
-
   if (networkActive)
     flashBoardLed(2, 1);
-    
-  ledFlashDelay = millis();
-
-  //readSensors();
-  sendSensors();
 }
 
 float kelvinToFahrenheit(float kelvin)
