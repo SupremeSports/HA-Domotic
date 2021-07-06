@@ -3,17 +3,23 @@
 // ----------------------------------------------------------------------------------------------------
 void initWifi()
 {
-  if (!testStandalone)
+  if (testStandalone)
+    standaloneMode = true;
+    
+  if (!standaloneMode)
     Sprintln("Init WiFi...");
     
   //Start WiFi communication
   WiFi.mode(WIFI_STA);
-  WiFi.config(ip, gw, sn);           // Disable this line to run on DHCP
+  //WiFi.config(ip, gw, sn);           // Disable this line to run on DHCP
+  //WiFi.config(ip, dns, gw, sn);           // Disable this line to run on DHCP
+  WiFi.config(ip,  gw, sn, dns1, dns2);           // Disable this line to run on DHCP
 
   long reconnectDelay = millis();
 
   while (WiFi.status() != WL_CONNECTED)
   {
+    wdtReset();
     networkActive = false;
     WiFi.disconnect();
 
@@ -21,8 +27,8 @@ void initWifi()
     Sprint(ssid);
     Sprint(" - ");
     
-    testStandalone = !digitalRead(pinStandalone);
-    if (testStandalone)
+    standaloneMode = !digitalRead(pinStandalone) && !testStandalone;
+    if (standaloneMode || testStandalone)
     {
       WiFi.begin(ssid, passwordWrong);
       Sprintln(passwordWrong);
@@ -42,7 +48,7 @@ void initWifi()
     reconnectDelay = millis();
   }
 
-  if (!testStandalone)
+  if (!standaloneMode)
     Sprintln("WiFi Connected!");
 
   networkActive = checkNetwork();
@@ -50,22 +56,12 @@ void initWifi()
   lastSecond = millis()-10000;
 }
 
-//Standalone running without wifi successful
-void runStandalone()
-{
-  mqttKeepRunning(); 
-  
-  wdtReset();
-  
-  newStart = false;
-}
-
 bool checkNetwork()
 {
-  testStandalone = !digitalRead(pinStandalone);
-  bool networkActive = (WiFi.status() == WL_CONNECTED);// && !testStandalone;
+  standaloneMode = !digitalRead(pinStandalone) && !testStandalone;
+  bool networkActive = (WiFi.status() == WL_CONNECTED);
  
-  if (!networkActive || testStandalone)
+  if (!networkActive || standaloneMode)
     initWifi();
 
   getQuality();
@@ -98,61 +94,79 @@ void getQuality()
   rssi = dBm;
 }
 
+//Standalone running without wifi successful
+void runStandalone()
+{
+  mqttKeepRunning(); 
+  
+  wdtReset();
+  
+  newStart = false;
+}
+
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- OTA SETUP ---------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void initOTA()
 {
-  Sprintln("Init OTA...");
+  #ifdef ENABLE_OTA
+    Sprintln("Init OTA...");
 
-  #ifdef ESP32
-    ArduinoOTA.setPort(3232);
-  #elif ESP8266
-    ArduinoOTA.setPort(8266);
-  #endif
+    #ifdef ESP32
+      ArduinoOTA.setPort(3232);
+    #elif ESP8266
+      ArduinoOTA.setPort(8266);
+    #endif
+
+    ArduinoOTA.setHostname(mqtt_deviceName);
+    ArduinoOTA.setPassword(password);
   
-  ArduinoOTA.setHostname(mqtt_deviceName);
-  ArduinoOTA.setPassword(password);
-
-  ArduinoOTA.onStart([]()
-  {
-    enableBoardLED = true;
-    mqttClient.disconnect(); // Disconnect MQTT
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
-
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    Sprintln("Start updating " + type);
-  });
-  ArduinoOTA.onEnd([]()
-  {
-    Sprintln("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) 
-  {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    wdtReset();  //Keep feeding the dog while uploading data, otherwise it will reboot
-    flashBoardLed(1,1); //Flash led during upload (slows down a little bit, but at least you know it works)
-  });
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-   Serial.printf("Error[%u]: ", error);
-   if (error == OTA_AUTH_ERROR) Sprintln("Auth Failed");
-   else if (error == OTA_BEGIN_ERROR) Sprintln("Begin Failed");
-   else if (error == OTA_CONNECT_ERROR) Sprintln("Connect Failed");
-   else if (error == OTA_RECEIVE_ERROR) Sprintln("Receive Failed");
-   else if (error == OTA_END_ERROR) Sprintln("End Failed");
-  });
-
-  ArduinoOTA.begin();
+    ArduinoOTA.onStart([]()
+    {
+      enableBoardLED = true;
+      mqttClient.disconnect(); // Disconnect MQTT
+      
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+  
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Sprintln("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]()
+    {
+      Sprintln("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) 
+    {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      wdtReset();  //Keep feeding the dog while uploading data, otherwise it will reboot
+      flashBoardLed(1,1); //Flash led during upload (slows down a little bit, but at least you know it works)
+    });
+    ArduinoOTA.onError([](ota_error_t error)
+    {
+     Serial.printf("Error[%u]: ", error);
+     if (error == OTA_AUTH_ERROR) Sprintln("Auth Failed");
+     else if (error == OTA_BEGIN_ERROR) Sprintln("Begin Failed");
+     else if (error == OTA_CONNECT_ERROR) Sprintln("Connect Failed");
+     else if (error == OTA_RECEIVE_ERROR) Sprintln("Receive Failed");
+     else if (error == OTA_END_ERROR) Sprintln("End Failed");
+    });
+  
+    ArduinoOTA.begin();
+  #else
+    Sprintln("OTA Disabled...");
+    #error YOU SHOULD NOT UPLOAD WITHOUT OTA
+  #endif
 }
 
 void runOTA()
 {
-  ArduinoOTA.handle();
+  #ifdef ENABLE_OTA
+    ArduinoOTA.handle();
+  #endif
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -160,7 +174,6 @@ void runOTA()
 // ----------------------------------------------------------------------------------------------------
 void interruptReboot()
 {
-  //writeEEPROM(); //Save latest data before reboot
   Sprintln(json_resetReboot);
   ESP.restart();
 }
