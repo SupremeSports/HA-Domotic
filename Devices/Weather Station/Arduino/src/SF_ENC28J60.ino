@@ -4,7 +4,7 @@
 void initEthernet()
 {
  
-  Sprintln("Init Ethernet...");
+  Sprint("Init Ethernet...");
   //Start Ethernet communication
   Ethernet.begin(mac, ip, dnsIp, gateway, subnet);
  
@@ -33,8 +33,25 @@ bool checkNetwork()
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- OTA SETUP ---------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+void initOTA()
+{
+  #ifdef ENABLE_OTA
+    Sprintln("Init OTA...");
+    Sprintln(Ethernet.localIP());
+    
+    // start the OTEthernet library with internal (flash) based storage
+    ArduinoOTA.begin(Ethernet.localIP(), "arduino", "password", InternalStorage);
+  #else
+    Sprintln("OTA Disabled...");
+  #endif
+}
 
-//TODO
+void runOTA()
+{
+  #ifdef ENABLE_OTA
+    ArduinoOTA.poll();
+  #endif
+}
 
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- WDT SETUP ---------------------------------------------
