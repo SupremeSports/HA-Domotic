@@ -9,7 +9,8 @@ void initSensors()
   //None
   
   //OUTPUTS
-  pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
+  pinMode(boardLedPin, OUTPUT);
+  
   setBoardLED(LOW);
 
   pinMode(pinStandalone, INPUT_PULLUP);
@@ -25,6 +26,7 @@ void readSensors(bool all)
   if (!all)
     return;
 
+  readAnalogSensors();
   readVoltages();
 }
 
@@ -37,18 +39,27 @@ void writeOutputs()
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ ANALOG SENSOR -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+void readAnalogSensors()
+{
+  //TODO
+  local_delay(1);
+  return;
+}
+
 void readVoltages()
 {
   uint16_t volt5V = readAn(voltage5V_pin) * 5;
 
   voltage5VDimmer = volt5V/4095.0F*voltage5VRatio;
-  
-  Sprint("Local 5V: ");
-  Sprint(voltage5VDimmer);
-  Sprintln("V");
-  Sprint("Remote 5V: ");
-  Sprint(voltage5VSwitch);
-  Sprintln("V");
+
+  #ifdef DEBUG
+    Sprint("Local 5V: ");
+    Sprint(voltage5VDimmer);
+    Sprintln("V");
+    Sprint("Remote 5V: ");
+    Sprint(voltage5VSwitch);
+    Sprintln("V");
+  #endif
 }
 
 uint16_t readAn(uint8_t pinToRead)
@@ -58,20 +69,44 @@ uint16_t readAn(uint8_t pinToRead)
   return(analogRead(pinToRead));
 }
 
+float readAnAvg(uint8_t pinToRead, uint16_t iterations)
+{
+  uint16_t samples[iterations];
+  analogRead(pinToRead); //Dump first reading
+  for (int i=0; i<iterations; i++)
+  {
+    samples[i] = analogRead(pinToRead);
+    delay(10);
+  }
+
+  float average = 0;
+  for (int i=0; i<iterations; i++)
+     average += samples[i];
+
+  average /= iterations;
+  
+  return average; //Return average of values
+}
+
+// ----------------------------------------------------------------------------------------------------
+// ------------------------------------------ DIGITAL SENSOR ------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//TODO
+
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- Utility functions -----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void setBoardLED(bool newState)
 {
-  if (!enableBoardLED)
-    newState = LOW;
-
-  digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  if (enableBoardLED)
+    digitalWrite(boardLedPin, boardLedPinRevert ? !newState : newState);
+  else
+    digitalWrite(boardLedPin, boardLedPinRevert);
 }
 
 void flashBoardLed(int delayFlash, int qtyFlash)
 {
-  for (int i=0; i<qtyFlash; i++)
+  for (int i=0; i < qtyFlash; i++)
   {
     setBoardLED(HIGH);
     local_delay(delayFlash);
@@ -83,16 +118,8 @@ void flashBoardLed(int delayFlash, int qtyFlash)
 //Short flash every 5 seconds when everything is ok
 void flashEvery5sec()
 {
-  if (millis()-ledFlashDelay < 5000)
-    return;
-
   if (networkActive)
     flashBoardLed(2, 1);
-    
-  ledFlashDelay = millis();
-
-  readSensors(true);
-  sendSensors();
 }
 
 float kelvinToFahrenheit(float kelvin)
