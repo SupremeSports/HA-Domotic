@@ -8,11 +8,10 @@
 // ----------------------------------------------------------------------------------------------------
 bool processCommandJson(char* message)
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  DeserializationError error = deserializeJson(doc, message);
 
-  JsonObject& root = jsonBuffer.parseObject(message);
-
-  if (!root.success())
+  if (error)
   {
     Sprintln(json_parseFailed);
     return false;
@@ -20,11 +19,11 @@ bool processCommandJson(char* message)
 
   bool ok = false;
 
-  if (root.containsKey(json_reset))
+  if (doc[json_reset])
   {
     mqttClient.publish(mqtt_controlStts, json_resetReq);
     
-    if (strcmp(root[json_reset], mqtt_cmdOn) != 0)
+    if (strcmp(doc[json_reset], mqtt_cmdOn) != 0)
       return false;
   
     mqttClient.publish(mqtt_controlStts, json_resetReboot);
@@ -35,53 +34,53 @@ bool processCommandJson(char* message)
     ESP.restart();
   }
 
-  if (root.containsKey(json_waterTemp))
+  if (doc[json_waterTemp])
   {
-    if (isValidNumber(root[json_waterTemp]))
-      getWaterTemp(root[json_waterTemp]);
+    if (isValidNumber(doc[json_waterTemp]))
+      getWaterTemp(doc[json_waterTemp]);
     else
       getWaterTemp(String(initValue));
   }
   
-  if (root.containsKey(json_waterPH))
+  if (doc[json_waterPH])
   {
-    if (isValidNumber(root[json_waterPH]))
-      getWaterPH(root[json_waterPH]);
+    if (isValidNumber(doc[json_waterPH]))
+      getWaterPH(doc[json_waterPH]);
     else
       getWaterPH(String(initValue));
   }
   
-  if (root.containsKey(json_outTemp))
+  if (doc[json_outTemp])
   {
-    if (isValidNumber(root[json_outTemp]))
-      getOutTemp(root[json_outTemp]);
+    if (isValidNumber(doc[json_outTemp]))
+      getOutTemp(doc[json_outTemp]);
     else
       getOutTemp(String(initValue));
   }
   
-  if (root.containsKey(json_outHum))
+  if (doc[json_outHum])
   {
-    if (isValidNumber(root[json_outHum]))
-      getOutHum(root[json_outHum]);
+    if (isValidNumber(doc[json_outHum]))
+      getOutHum(doc[json_outHum]);
     else
       getOutHum(String(initValue));
   }
   
-  if (root.containsKey(json_timeText))
+  if (doc[json_timeText])
   {
-    timeTextStringBuffer = padString(root[json_timeText], timeDigits);
+    timeTextStringBuffer = padString(doc[json_timeText], timeDigits);
     rollingTimeTextIndex = 1;
   }
   
-  if (root.containsKey(json_tempText))
+  if (doc[json_tempText])
   {
-    tempTextStringBuffer = padString(root[json_tempText], tempDigits);
+    tempTextStringBuffer = padString(doc[json_tempText], tempDigits);
     rollingTempTextIndex = 1;
   }
 
-  if (root.containsKey(json_scroll))
+  if (doc[json_scroll])
   {
-    configScrollSpeed = map(root[json_scroll], 0, 100, 1000, 0);
+    configScrollSpeed = map(doc[json_scroll], 0, 100, 1000, 0);
 
     Sprint("Scroll: ");
     Sprintln(configScrollSpeed);
@@ -94,16 +93,16 @@ bool processCommandJson(char* message)
 
 void sendCommandState()
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-
-  JsonObject& root = jsonBuffer.createObject();
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
   root[json_scroll] = map(configScrollSpeed, 1000, 0, 0, 100);
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  char buffer[BUFFER_ARRAY_SIZE];
+  serializeJson(doc, buffer);
 
   mqttClient.publish(mqtt_controlStts, buffer);//, true);
+  mqttClient.loop();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -111,36 +110,35 @@ void sendCommandState()
 // ----------------------------------------------------------------------------------------------------
 bool processLightColorsJson(char* message)
 {
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  DeserializationError error = deserializeJson(doc, message);
 
-  JsonObject& root = jsonBuffer.parseObject(message);
-
-  if (!root.success())
+  if (error)
   {
     Sprintln(json_parseFailed);
     return false;
   }
 
-  if (root.containsKey(json_state))
+  if (doc[json_state])
   {
-    if (strcmp(root[json_state], mqtt_cmdOn) == 0)
+    if (strcmp(doc[json_state], mqtt_cmdOn) == 0)
       stateOn = true;
-    else if (strcmp(root[json_state], mqtt_cmdOff) == 0)
+    else if (strcmp(doc[json_state], mqtt_cmdOff) == 0)
       stateOn = false;
 
     Sprint("State: ");
     Sprintln(stateOn ? mqtt_cmdOn : mqtt_cmdOff);
   }
 
-  if (root.containsKey(json_transition))
+  if (doc[json_transition])
   {
-    configCycleSpeed = root[json_transition];
+    configCycleSpeed = doc[json_transition];
 
     Sprint("Transition: ");
     Sprintln(configCycleSpeed);
   }
 
-  if (root.containsKey(json_effect) && !initDisplays)
+  if (doc[json_effect] && !initDisplays)
   {
     colorAutoSwitch = false;
     displayFeature = 0;
@@ -148,7 +146,7 @@ bool processLightColorsJson(char* message)
     
     for (int i = EFFECT_MIN; i <= EFFECT_MAX; i++)
     {
-      if (strcmp(root[json_effect], effects[i]) == 0)
+      if (strcmp(doc[json_effect], effects[i]) == 0)
       {
         displayFeature = i;
         local_delay(10);
@@ -168,22 +166,22 @@ bool processLightColorsJson(char* message)
     Sprintln(displayFeature);
   }
   
-  if (root.containsKey(json_brightness))
+  if (doc[json_brightness])
   {
-    brightness = root[json_brightness];
+    brightness = doc[json_brightness];
     Sprint("Brightness: ");
     Sprintln(brightness);
   }
   
-  if (root.containsKey(json_color))
+  if (doc[json_color])
   {
     colorAutoSwitch = false;
     changeColor = true;
     displayFeature = 0;
     
-    configRedCnl = root[json_color]["r"];
-    configGreenCnl = root[json_color]["g"];
-    configBlueCnl = root[json_color]["b"];
+    configRedCnl = doc[json_color]["r"];
+    configGreenCnl = doc[json_color]["g"];
+    configBlueCnl = doc[json_color]["b"];
 
     Sprint("RGB: ");
     Sprint(configRedCnl);
@@ -203,18 +201,17 @@ void sendLightColorsState()
   byte g = (!changeColor || displayFeature != 0 || colorAutoSwitch) ? 205 : configGreenCnl;
   byte b = (!changeColor || displayFeature != 0 || colorAutoSwitch) ? 65 : configBlueCnl;
 
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-
-  JsonObject& root = jsonBuffer.createObject();
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
   root[json_state] = stateOn ? mqtt_cmdOn : mqtt_cmdOff;
   
-  JsonObject& color = root.createNestedObject(json_color);
+  JsonObject color = doc.createNestedObject(json_color);
   color["r"] = r;
   color["g"] = g;
   color["b"] = b;
 
-  root[json_brightness] = brightness;
+  doc[json_brightness] = brightness;
 
   if (displayFeature == 0 || changeColor)
     root[json_effect] = "null";//effects[EFFECT_MIN];   //"Default"
@@ -225,10 +222,28 @@ void sendLightColorsState()
 
   root[json_transition] = configCycleSpeed;
 
-  char buffer[root.measureLength() + 1];
-  root.printTo(buffer, sizeof(buffer));
+  char buffer[BUFFER_ARRAY_SIZE];
+  serializeJson(doc, buffer);
 
   mqttClient.publish(mqtt_ledStts, buffer);//, true);
+}
+
+// ----------------------------------------------------------------------------------------------------
+// --------------------------------------- SEND DIG/AN SENSORS ----------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void sendDigAnStates()
+{
+  return;
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
+
+  //root[json_homed] = clockHomed ? mqtt_cmdOn : mqtt_cmdOff;
+
+  char buffer[BUFFER_ARRAY_SIZE];
+  serializeJson(doc, buffer);
+  
+  mqttClient.publish(mqtt_controlStts, buffer);
+  mqttClient.loop();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -236,27 +251,54 @@ void sendLightColorsState()
 // ----------------------------------------------------------------------------------------------------
 void sendSensors()
 {
-  //return;
-  StaticJsonBuffer<BUFFER_SIZE> jsonBuffer;
-
-  JsonObject& root = jsonBuffer.createObject();
+  StaticJsonDocument<BUFFER_SIZE> doc;
+  JsonObject root = doc.to<JsonObject>();
 
   uint8_t chrLngt = 8;  // Buffer big enough for 7-character float
   char result[chrLngt];
 
   root[json_state] = mqtt_cmdOn;
+  root[json_version] = version;
+  root[json_date] = date;
+
+#ifdef INTERNAL_EN
+  dtostrf(DHTTempIn, 1, 1, result);
+  root[json_tempin] = result;
+
+  dtostrf(DHTHumIn, 1, 1, result);
+  root[json_humin] = result;
+#endif
+#ifdef EXTERNAL_EN
+  dtostrf(DHTTempOut, 1, 1, result);
+  root[json_tempout] = result;
+
+  dtostrf(DHTHumOut, 1, 1, result);
+  root[json_humout] = result;
+#endif
+
+  mqttClient.loop();
+  
+  /*dtostrf(voltage12V, 1, 1, result);
+  root[json_12v] = result;*/
+
+  dtostrf(voltage5V, 1, 1, result);
+  root[json_5v] = result;
   
   #if defined(ESP32) || defined(ESP8266)
-    dtostrf(rssi, 6, 2, result); // Leave room for too large numbers!
+    root[json_ssid] = WiFi.SSID();
+    
+    dtostrf(rssi, 1, 2, result);
     root[json_rssi] = result;
   
-    dtostrf(rssiPercent, 6, 2, result); // Leave room for too large numbers!
+    dtostrf(rssiPercent, 1, 2, result);
     root[json_rssiPercent] = result;
   #endif
 
   char buffer[BUFFER_ARRAY_SIZE];
-  root.printTo(buffer, root.measureLength() + 1);
+  serializeJson(doc, buffer);
 
   mqttClient.publish(mqtt_sensorJson, buffer);
+  mqttClient.loop();
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
+  mqttClient.loop();
 }
