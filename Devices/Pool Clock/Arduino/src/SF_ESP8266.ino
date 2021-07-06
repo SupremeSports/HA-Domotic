@@ -3,11 +3,37 @@
 // ----------------------------------------------------------------------------------------------------
 void initWifi()
 {
-  Sprint("Init WiFi...");
+  Sprintln("Init WiFi with multiple SSIDs...");
   //Start WiFi communication
   WiFi.mode(WIFI_STA);
-  WiFi.config(ip, gw, sn);           // Disable this line to run on DHCP
-  WiFi.begin(ssid, password);
+  //WiFi.config(ip, gw, sn);           // Disable this line to run on DHCP
+  //WiFi.config(ip, dns, gw, sn);           // Disable this line to run on DHCP
+  WiFi.config(ip,  gw, sn, dns1, dns2);           // Disable this line to run on DHCP
+  
+  int count = 0;
+
+  for (int i = 0; i < ssid_qty; ++i)
+  {
+    count = 0;
+    WiFi.disconnect();
+    WiFi.begin(ssid[i], password[i]);
+    Sprint("SSID #");
+    Sprint(i);
+    Sprint(": ");
+    Sprint(ssid[i]);
+    Sprint(" - ");
+    Sprintln(password[i]);
+    
+    while (WiFi.status() != WL_CONNECTED && count < 5)
+    {
+      flashBoardLed(100, 5);
+      count++;
+      wdtReset();
+    }
+    
+    if (WiFi.status() == WL_CONNECTED)
+      break;    
+  }
 
   long lastReading = millis();
  
@@ -67,49 +93,55 @@ void getQuality()
 // ----------------------------------------------------------------------------------------------------
 void initOTA()
 {
-  Sprintln("Init OTA...");
+  #ifdef ENABLE_OTA
+    Sprintln("Init OTA...");
+    
+    ArduinoOTA.setPort(8266);
+    ArduinoOTA.setHostname(mqtt_deviceName);
+    ArduinoOTA.setPassword(password[ssid_qty-1]);
   
-  ArduinoOTA.setPort(8266);
-  ArduinoOTA.setHostname(mqtt_deviceName);
-  ArduinoOTA.setPassword(password);
-
-  ArduinoOTA.onStart([]()
-  {
-    String type;
-    if (ArduinoOTA.getCommand() == U_FLASH)
-      type = "sketch";
-    else // U_SPIFFS
-      type = "filesystem";
-
-    // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
-    Sprintln("Start updating " + type);
-  });
-  ArduinoOTA.onEnd([]()
-  {
-    Sprintln("\nEnd");
-  });
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) 
-  {
-    Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
-    wdtReset();  //Keep feeding the dog while uploading data, otherwise it will reboot
-    flashBoardLed(1,1); //Flash led during upload (slows down a little bit, but at least you know it works)
-  });
-  ArduinoOTA.onError([](ota_error_t error)
-  {
-   Serial.printf("Error[%u]: ", error);
-   if (error == OTA_AUTH_ERROR) Sprintln("Auth Failed");
-   else if (error == OTA_BEGIN_ERROR) Sprintln("Begin Failed");
-   else if (error == OTA_CONNECT_ERROR) Sprintln("Connect Failed");
-   else if (error == OTA_RECEIVE_ERROR) Sprintln("Receive Failed");
-   else if (error == OTA_END_ERROR) Sprintln("End Failed");
-  });
-
-  ArduinoOTA.begin();
+    ArduinoOTA.onStart([]()
+    {
+      String type;
+      if (ArduinoOTA.getCommand() == U_FLASH)
+        type = "sketch";
+      else // U_SPIFFS
+        type = "filesystem";
+  
+      // NOTE: if updating SPIFFS this would be the place to unmount SPIFFS using SPIFFS.end()
+      Sprintln("Start updating " + type);
+    });
+    ArduinoOTA.onEnd([]()
+    {
+      Sprintln("\nEnd");
+    });
+    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) 
+    {
+      Serial.printf("Progress: %u%%\r", (progress / (total / 100)));
+      wdtReset();  //Keep feeding the dog while uploading data, otherwise it will reboot
+      flashBoardLed(1,1); //Flash led during upload (slows down a little bit, but at least you know it works)
+    });
+    ArduinoOTA.onError([](ota_error_t error)
+    {
+     Serial.printf("Error[%u]: ", error);
+     if (error == OTA_AUTH_ERROR) Sprintln("Auth Failed");
+     else if (error == OTA_BEGIN_ERROR) Sprintln("Begin Failed");
+     else if (error == OTA_CONNECT_ERROR) Sprintln("Connect Failed");
+     else if (error == OTA_RECEIVE_ERROR) Sprintln("Receive Failed");
+     else if (error == OTA_END_ERROR) Sprintln("End Failed");
+    });
+  
+    ArduinoOTA.begin();
+  #else
+    Sprintln("OTA Disabled...");
+  #endif
 }
 
 void runOTA()
 {
-  ArduinoOTA.handle();
+  #ifdef ENABLE_OTA
+    ArduinoOTA.handle();
+  #endif
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -121,7 +153,7 @@ void ICACHE_RAM_ATTR interruptReboot(void)
   {
     Sprintln("Rebooting...");
     flashBoardLed(1, 1000);
-    ESP.restart();
+    ESP.restart();  
   }
 }
 
