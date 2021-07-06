@@ -10,32 +10,51 @@ const char* mqtt_server         = "192.168.0.xxx";
 const char* mqtt_user           = "yourMQTTcredentials";
 const char* mqtt_password       = "yourMQTTcredentials";
 
-const char* mqtt_deviceName     = "StepperWallClock-";
+const char* mqtt_deviceName           = "StepperWallClock-";
 
 //Time
-const char* mqtt_timeCmd        = "Home/Global/Time";             //Receive time in format YYYY:MM:DD:HH:MM:SS:
-const char* mqtt_timeRequest    = "Home/Global/Time/Request";     //Request time update
+const char* mqtt_timeCmd              = "Home/Global/Time";             //Receive time in format YYYY:MM:DD:HH:MM:SS:
+const char* mqtt_timeRequest          = "Home/Global/Time/Request";     //Request time update
 
-//Clock
-const char* mqtt_clockStts      = "Home/WallClock/Stts";          //Clock is currently homing
-const char* mqtt_clockCmd       = "Home/WallClock/Cmd";           //Request an homing from HMI
+//Control
+const char* mqtt_controlCmd           = "Home/WallClock/Cmd";           //MQTT JSON command data
+const char* mqtt_controlStts          = "Home/WallClock/Stts";          //MQTT JSON status data
 
-const char* json_state          = "state";
-const char* json_reset          = "reset";
-const char* json_rssi           = "wifi_rssi";
-const char* json_rssiPercent    = "wifi_percent";
+//Analog and Digital inputs
+const char* json_homed                = "homed";
+
+//Sensors
+const char* mqtt_sensorJson           = "Home/WallClock/Json";          //MQTT JSON status data
+
+const char* json_state                = "state";
+const char* json_version              = "version";
+const char* json_date                 = "date";
+
+const char* json_tempin               = "temp_in";
+const char* json_humin                = "hum_in";
+
+const char* json_3v3                  = "Vcc3V3";
+const char* json_5v                   = "Vcc5V";
+const char* json_12v                  = "Vcc12V";
+
+const char* json_ssid                 = "wifi_ssid";
+const char* json_rssi                 = "wifi_rssi";
+const char* json_rssiPercent          = "wifi_percent";
 
 //Others
-const char* json_parseFailed    = "parseObject() failed";
+const char* json_parseFailed          = "parseObject() failed";
+const char* json_resetReq             = "Reset Requested...";
+const char* json_resetReboot          = "Rebooting...";
+const char* json_reset                = "reset";
 
-const char* mqtt_cmdOn          = "ON";
-const char* mqtt_cmdOff         = "OFF";
+const char* mqtt_cmdOn                = "ON";
+const char* mqtt_cmdOff               = "OFF";
 
-const char* mqtt_willTopic      = "Home/WallClock/LWT";
-const char* mqtt_willOffline    = "offline";
-const char* mqtt_willOnline     = "online";
-const bool  mqtt_willRetain     = false;
-const byte  mqtt_willQoS        = 0;
+const char* mqtt_willTopic            = "Home/WallClock/LWT";
+const char* mqtt_willOffline          = "offline";
+const char* mqtt_willOnline           = "online";
+const bool  mqtt_willRetain           = true;
+const byte  mqtt_willQoS              = 0;
 
 //Network settings
 //MQTT Server IP Address
