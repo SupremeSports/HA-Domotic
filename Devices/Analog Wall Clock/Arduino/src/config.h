@@ -3,12 +3,14 @@
 // ----------------------------------------------------------------------------------------------------
 //You must put your own settings in here
 
-const char* ssid                = "yourSSID";
-const char* password            = "yourPassword";
 
-const char* mqtt_server         = "192.168.0.xxx";
-const char* mqtt_user           = "yourMQTTcredentials";
-const char* mqtt_password       = "yourMQTTcredentials";
+const int   ssid_qty                  = 4;
+const char* ssid[ssid_qty]            = {"yourSSID1", "yourSSID2", "yourSSID3", "yourSSID4"};
+const char* password[ssid_qty]        = {"yourPassword1", "yourPassword2", "yourPassword3", "yourPassword4"};
+
+const char* mqtt_server               = "192.168.0.xxx";
+const char* mqtt_user                 = "yourMQTTcredentials";
+const char* mqtt_password             = "yourMQTTcredentials";
 
 const char* mqtt_deviceName           = "StepperWallClock-";
 
