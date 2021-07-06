@@ -323,7 +323,7 @@
             {% endif %}
  
       shed_fd_status:
-        friendly_name: "Shed Door"
+        friendly_name: "Shed Doors"
         value_template: >
           {% set locked = is_state('lock.shed_fd_lock', 'locked') %}
           {% set main = is_state('binary_sensor.shed_fd_opened', 'off') %}
@@ -341,8 +341,8 @@
             Unlocked
           {% elif not closed and not locked %}
             Opened
-          {% elif not (left or right) and not locked %}
-            Opened
+          {% elif not (left and right) and closed and locked %}
+            Sides Opened
           {% else %}
             ERROR
           {% endif %}

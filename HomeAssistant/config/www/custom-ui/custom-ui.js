@@ -1,7 +1,7 @@
 "use strict";
 
 var Name = "Custom-ui";
-var Version = "20210528";
+var Version = "20210617-JG";
 var Description = "adapted for HA 2021.6 + ";
 var Url = "https://github.com/Mariusthvdb/custom-ui";
 console.info(
@@ -215,8 +215,8 @@ console.info(
       try {
         return new Function("hass", "entities", "entity", "attributes", "attribute", "state", r)(e, s, i, n, a, o);
       } catch (t) {
-        if (t instanceof SyntaxError || t instanceof ReferenceError) return
-          console.warn(`${t.name}: ${t.message} in template ${r}`), null;
+//        if (t instanceof SyntaxError || t instanceof ReferenceError) return
+//          console.warn(`${t.name}: ${t.message} in template ${r}`), null;
         throw t;
       }
     }

@@ -26,3 +26,8 @@
       - templates
       - icon_color
     templates: *state_color
+    
+  light:
+    hide_attributes:
+      - templates
+      - icon_color

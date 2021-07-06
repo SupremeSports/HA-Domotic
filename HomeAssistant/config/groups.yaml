@@ -3,14 +3,14 @@
 ####################################################
       
   all_locks:
-    name: Lock All
+    name: All Locks
     all: true
     entities:
       - lock.house_fd_lock
       #- lock.house_sd_lock
       #- lock.house_bd_lock
       - lock.garage_fd_lock
-      #- lock.shed_fd_lock
+      - lock.shed_fd_lock
       #- lock.pool_fd_lock
 
   locks:

@@ -99,22 +99,42 @@
   - platform: template
     sensors:
       water_valve_status:
-        friendly_name: "Water Valve Status"
+        friendly_name: "Water Valve State"
         value_template: >
-          {% if (states.binary_sensor.water_valve_opened.state == 'off') and (states.binary_sensor.water_valve_closed.state == 'on') %}
+          {% set LS_opened = (states.binary_sensor.water_valve_opened.state == 'on') %}
+          {% set LS_closed = (states.binary_sensor.water_valve_closed.state == 'on') %}
+          {% set RL_open = (states.switch.water_valve_open.state == 'on') %}
+          {% set RL_close = (states.switch.water_valve_close.state == 'on') %}
+          
+          {% if LS_opened and not LS_closed %}
             Opened
-          {% elif (states.binary_sensor.water_valve_closed.state == 'off') and (states.binary_sensor.water_valve_opened.state == 'on') %}
+          {% elif LS_closed and not LS_opened %}
             Closed
+          {% elif LS_closed and LS_opened %}
+            ERROR
           {% else %}
-            Unknown
+            {% if RL_open %}
+              Opening
+            {% elif RL_close %}
+              Closing
+            {% else %}
+              ERROR
+            {% endif %}
           {% endif %}
         availability_template: >
           {{ not is_state('binary_sensor.water_valve_opened', 'unavailable') and not is_state('binary_sensor.water_valve_closed', 'unavailable')}}
         icon_template: >
-          {% if (states.binary_sensor.water_valve_opened.state == 'off') and (states.binary_sensor.water_valve_closed.state == 'on') %}
+          {% set LS_opened = (states.binary_sensor.water_valve_opened.state == 'on') %}
+          {% set LS_closed = (states.binary_sensor.water_valve_closed.state == 'on') %}
+          {% set RL_open = (states.switch.water_valve_open.state == 'on') %}
+          {% set RL_close = (states.switch.water_valve_close.state == 'on') %}
+          
+          {% if LS_opened and not LS_closed %}
             mdi:pipe
-          {% elif (states.binary_sensor.water_valve_closed.state == 'off') and (states.binary_sensor.water_valve_opened.state == 'on') %}
+          {% elif LS_closed and not LS_opened %}
             mdi:pipe-disconnected
+          {% elif not LS_closed and not LS_opened and (RL_open or RL_close) %}
+            mdi:valve
           {% elif is_state('binary_sensor.water_valve_opened', 'unavailable') or is_state('binary_sensor.water_valve_closed', 'unavailable') %}
             mdi:pipe-disconnected
           {% else %}
@@ -122,17 +142,9 @@
           {% endif %}
         attribute_templates:
           opened: >
-            {% if is_state('binary_sensor.water_valve_opened', "off") %}
-              on
-            {% else %}
-              off
-            {% endif %}
+            {{ is_state('binary_sensor.water_valve_opened', "on") }}
           closed: >
-            {% if is_state('binary_sensor.water_valve_closed', "off") %}
-              on
-            {% else %}
-              off
-            {% endif %}
+            {{ is_state('binary_sensor.water_valve_closed', "on") }}
     
 ######### CONTROL ROOM - WATER HEATER #########
   - platform: mqtt

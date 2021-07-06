@@ -57,6 +57,18 @@
           head: light.under_bar_rgbw
           entities:
             - cover.under_bar_rgbw
+        - type: custom:fold-entity-row
+          head: light.pool_water_rgb
+          entities:
+            - cover.pool_water_rgb
+            
+    - type: entities
+      title: Shed Lights
+      show_header_toggle: false
+      entities:
+        - switch.shed_door_light
+        - switch.shed_inside_light
+        - switch.shed_pool_light
             
     - type: entities
       title: Massage Room
@@ -125,4 +137,28 @@
                     {{attr}}: {{states.sensor.chicoutimi_uun_entities.attributes[attr]}}
                   {%- endif  -%}
                 {%- endfor -%}
-        
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: Master Bedroom Light/Fan
+          open: true
+          entities:
+            - light.master_bedroom_light
+            - light.master_bedroom_fan
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: 1st Bedroom Light/Fan
+          open: true
+          entities:
+            - light.bedroom_1_light
+            - light.bedroom_1_fan
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: 2nd Bedroom Light/Fan
+          open: true
+          entities:
+            - light.bedroom_2_light
+            - light.bedroom_2_fan
+            

@@ -364,13 +364,9 @@
         {% endif %}
       data:
         message: "Cold Storage Light Remained On"
-          
 
-############################################
-#######TEST ACTIONNABLE NOTIFICATIONS#######
-############################################
-          
-          
+# ACTIONNABLE NOTIFICATIONS
+
   - alias: Doors unlocked notification
     mode: restart
     trigger:

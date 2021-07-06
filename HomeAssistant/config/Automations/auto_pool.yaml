@@ -26,20 +26,20 @@
         {% elif is_state('input_select.poolpump_mode', 'Spring') %}
           {% if curHour >= 8 and curHour < 20 %}
             {% set PP = true %}
-          {% elif curHour >= 0 and curHour < 24 %}
+          {% elif curHour >= 0 and curHour < 4 %}
             {% set PP = true %}
           {% endif %}
         {% elif is_state('input_select.poolpump_mode', 'Summer') %}
           {% if curWeekday in (0,1,2,3,6) %}
-            {% if curHour >= 6 and curHour < 18 %}
+            {% if curHour >= 7 and curHour < 19 %}
               {% set PP = true %}
-            {% elif curHour >= 22 or curHour < 2 %}
+            {% elif curHour >= 23 or curHour < 3 %}
               {% set PP = true %}
             {% endif %}
           {% else %}
             {% if curHour >= 6 and curHour < 23 %}
               {% set PP = true %}
-            {% elif curHour >= 1 or curHour < 4 %}
+            {% elif curHour >= 1 and curHour < 4 %}
               {% set PP = true %}
             {% endif %}
           {% endif %}

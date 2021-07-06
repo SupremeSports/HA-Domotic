@@ -145,9 +145,9 @@ system_health:
 #breaking_changes:
 apcupsd:
 
-speedtestdotnet:
-  scan_interval:
-    minutes: 10
+# speedtestdotnet:
+#   scan_interval:
+#     minutes: 10
     
 #Devices and integrations
 # vacuum:
@@ -180,6 +180,10 @@ duckdns:
   # default: info
   # logs:
     # homeassistant.components.websocket_api: debug
+logger:
+  default: warning
+  logs:
+    homeassistant.helpers.template: error
 
 clean_up_snapshots_service:
   host: !secret ha_ext_url
@@ -203,10 +207,10 @@ life360:
   warning_threshold: 2
   error_threshold: 3
 
-glances:
-  - host: localhost
-    version: 2
-    name: Server
+# glances:
+#   - host: localhost
+#     version: 2
+#     name: Server
 
 octoprint:
   - host: !secret ip_octopi

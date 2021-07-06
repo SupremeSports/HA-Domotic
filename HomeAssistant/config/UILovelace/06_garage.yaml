@@ -80,9 +80,9 @@
         - sensor.air_compressor_pressure
         - switch.garage_air_compressor
         - type: custom:fold-entity-row
-          head: switch.air_compressor_purge
+          head: input_boolean.air_compressor_purge
           entities:
-            - input_boolean.air_compressor_purge
+            - switch.air_compressor_purge
             - input_number.air_compressor_purge
         - type: custom:fold-entity-row
           head: sensor.garage_air_valve

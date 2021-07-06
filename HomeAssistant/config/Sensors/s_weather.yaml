@@ -984,7 +984,7 @@
           raw_value: "{{ states('sensor.wind_direction_raw') }}"
           envcan_direction: "{{ states('sensor.wind_direction_2') }}"
         friendly_name_template: >
-          {% if is_state('sensor.wind_direction','unavailable') %}
+          {% if is_state('sensor.wind_direction','unavailable') or is_state('input_boolean.running_hass','off') %}
             Wind Direction
           {% else %}
             Wind Direction - {{ states.sensor.wind_compass_name.state }}

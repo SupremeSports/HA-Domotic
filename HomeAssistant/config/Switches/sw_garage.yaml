@@ -80,7 +80,7 @@
     value_template: '{{ value_json.r4 }}'
     availability:
       - topic: "Garage/Slave/LWT"
-    #payload_on: '{"r4":"ON","h4": "{{(states.input_number.garage_drain_hold.state|string)}}"}'
+    #payload_on: '{"r4":"ON","h4":"{{(states.input_number.air_compressor_purge.state|float)}}"}' #NOT WORKING
     payload_on: '{"r4":"ON", "h4":"1.0"}'
     payload_off: '{"r4":"OFF"}'
     state_on: "ON"

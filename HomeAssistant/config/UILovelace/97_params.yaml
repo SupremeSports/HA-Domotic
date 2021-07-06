@@ -48,14 +48,14 @@
                   name: Turn ON
                 - entity: switch.water_valve_close
                   name: Turn OFF
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.water_valve_force_off
-                - automation.water_valve_off
-                - automation.water_valve_on
+            # - type: custom:fold-entity-row
+              # head:
+                # type: section
+                # label: Automations
+              # entities:
+                # - automation.water_valve_force_off
+                # - automation.water_valve_off
+                # - automation.water_valve_on
         - type: custom:fold-entity-row
           head: sensor.water_heater_status
           entities:

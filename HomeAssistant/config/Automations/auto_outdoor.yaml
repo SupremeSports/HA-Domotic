@@ -77,12 +77,21 @@
   - alias: Front Door Light Control
     mode: restart
     trigger:
+      - platform: time_pattern
+        seconds: '/5'
       - platform: state
         entity_id: switch.lamp_post
     action:
       entity_id: switch.front_door_light
       service_template: >
-        {% set FDL = is_state('switch.lamp_post', 'on') %}
+        {% set time = now().hour %}
+        {% set lampPost = is_state('switch.lamp_post', 'on') %}
+        
+        {% set FDL = false %}
+        
+        {% if lampPost and time < 23  and time > 12%}
+          {% set FDL = true %}
+        {% endif %}
         
         {% if FDL == true %}
           switch.turn_on
@@ -282,4 +291,24 @@
         to: 'on'
     action:
       - service_template: script.{% if '30m' in trigger.to_state.entity_id %}gardenirrigation_start30m{% elif '1h' in trigger.to_state.entity_id %}gardenirrigation_start1h{% else %}gardenirrigation_cancel{% endif %}
+        
+  - alias: Shed Inside Light
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: sensor.shed_fd_status
+          state: 'Ok'
+          for:
+            minutes: 5
+        - condition: state
+          entity_id: 'switch.shed_inside_light'
+          state: 'on'
+    action:
+      - service: switch.turn_off
+        entity_id: switch.shed_inside_light
         

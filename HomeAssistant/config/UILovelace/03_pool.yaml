@@ -47,6 +47,15 @@
         - sensor.pool_ph
         - binary_sensor.pool_level_low
         - binary_sensor.pool_level_high
+        
+    - type: entities
+      title: Pool Lights Controller
+      show_header_toggle: false
+      entities:     
+        - type: custom:fold-entity-row
+          head: light.pool_water_rgb
+          entities:
+            - cover.pool_water_rgb
     
     - type: entities
       title: Pool Filling

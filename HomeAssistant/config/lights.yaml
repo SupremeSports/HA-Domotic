@@ -37,6 +37,21 @@
     
   - platform: mqtt
     schema: json
+    name: Pool Water RGB
+    state_topic: "Pool/Milight/Stts/3"
+    command_topic: "Pool/Milight/Cmd/3"
+    availability:
+      - topic: "Pool/Control/LWT"
+    brightness: true
+    rgb: true
+    white_value: false
+    effect: true
+    effect_list: [Smooth, WhiteFade, FadeRGB, JumpRainbow, RandomColor, RedEffect, GrnEffect, BluEffect, CycleAll]
+    optimistic: false
+    qos: 0
+    
+  - platform: mqtt
+    schema: json
     name: Nixie Clock RGB
     state_topic: "Home/NixieClock/LED/Stts"
     command_topic: "Home/NixieClock/LED/Cmd"
@@ -95,13 +110,14 @@
     optimistic: false
     qos: 0
     
+### MAESTRO - Master Bedroom ==> SN:00001 ###
   - platform: mqtt
     schema: json
-    name: Maestro Dimmer
-    state_topic: "Home/Maestro/Switch/LMP/Stts"
-    command_topic: "Home/Maestro/Switch/LMP/Cmd"
+    name: Master Bedroom - Light
+    state_topic: "Home/Maestro/S00001/LMP/Stts"
+    command_topic: "Home/Maestro/S00001/LMP/Cmd"
     availability:
-      - topic: "Home/Maestro/Switch/LWT"
+      - topic: "Home/Maestro/S00001/LWT"
     brightness: true
     brightness_scale: 7
     rgb: false
@@ -109,14 +125,15 @@
     effect: false
     optimistic: false
     qos: 0
+    json_attributes_topic: "Home/Maestro/S00001/Json"
     
   - platform: mqtt
     schema: json
-    name: Maestro Fan
-    state_topic: "Home/Maestro/Switch/FAN/Stts"
-    command_topic: "Home/Maestro/Switch/FAN/Cmd"
+    name: Master Bedroom - Fan
+    state_topic: "Home/Maestro/S00001/FAN/Stts"
+    command_topic: "Home/Maestro/S00001/FAN/Cmd"
     availability:
-      - topic: "Home/Maestro/Switch/LWT"
+      - topic: "Home/Maestro/S00001/LWT"
     brightness: true
     brightness_scale: 7
     rgb: false
@@ -124,4 +141,71 @@
     effect: false
     optimistic: false
     qos: 0
+    json_attributes_topic: "Home/Maestro/S00001/Json"
+    
+### MAESTRO - 1st Bedroom ==> SN:00002###
+  - platform: mqtt
+    schema: json
+    name: Bedroom 1 - Light
+    state_topic: "Home/Maestro/S00002/LMP/Stts"
+    command_topic: "Home/Maestro/S00002/LMP/Cmd"
+    availability:
+      - topic: "Home/Maestro/S00002/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Maestro/S00002/Json"
+    
+  - platform: mqtt
+    schema: json
+    name: Bedroom 1 - Fan
+    state_topic: "Home/Maestro/S00002/FAN/Stts"
+    command_topic: "Home/Maestro/S00002/FAN/Cmd"
+    availability:
+      - topic: "Home/Maestro/S00002/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Maestro/S00002/Json"
+    
+### MAESTRO - 2nd Bedroom ==> SN:00003 ###
+  - platform: mqtt
+    schema: json
+    name: Bedroom 2 - Light
+    state_topic: "Home/Maestro/S00003/LMP/Stts"
+    command_topic: "Home/Maestro/S00003/LMP/Cmd"
+    availability:
+      - topic: "Home/Maestro/S00003/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Maestro/S00003/Json"
+    
+  - platform: mqtt
+    schema: json
+    name: Bedroom 2 - Fan
+    state_topic: "Home/Maestro/S00003/FAN/Stts"
+    command_topic: "Home/Maestro/S00003/FAN/Cmd"
+    availability:
+      - topic: "Home/Maestro/S00003/LWT"
+    brightness: true
+    brightness_scale: 7
+    rgb: false
+    white_value: false
+    effect: false
+    optimistic: false
+    qos: 0
+    json_attributes_topic: "Home/Maestro/S00003/Json"
     

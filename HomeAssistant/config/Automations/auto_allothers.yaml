@@ -11,7 +11,7 @@
       service: frontend.set_theme
       data:
         name: Dark - Blue
-        
+
   - alias: Restart HASS
     trigger:
       - platform: state
@@ -94,86 +94,93 @@
     action:
       - service: clean_up_snapshots_service.clean_up
 
-  - alias: Water valve ON
-    trigger:
-      - platform: state
-        entity_id: switch.water_valve_open
-        to: 'on'
-      - platform: state
-        entity_id: switch.water_valve_open
-        to: 'on'
-        for: '00:00:08'
-      - platform: state
-        entity_id: sensor.water_valve_status
-        to: 'Opened'
-    condition:
-      condition: and
-      conditions:
-        - condition: state
-          entity_id: switch.water_valve_open
-          state: 'on'
-        - condition: state
-          entity_id: sensor.water_valve_status
-          state: 'Opened'
-    action:
-      service: switch.turn_off
-      entity_id: switch.water_valve_open
+  # - alias: Water valve ON
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Opened'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_open
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Opened'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_open
       
-  - alias: Water valve OFF
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id: switch.water_valve_close
-        to: 'on'
-      - platform: state
-        entity_id: switch.water_valve_close
-        to: 'on'
-        for: '00:00:08'
-      - platform: state
-        entity_id: sensor.water_valve_status
-        to: 'Closed'
-    condition:
-      condition: and
-      conditions:
-        - condition: state
-          entity_id: switch.water_valve_close
-          state: 'on'
-        - condition: state
-          entity_id: sensor.water_valve_status
-          state: 'Closed'
-    action:
-      service: switch.turn_off
-      entity_id: switch.water_valve_close
+  # - alias: Water valve OFF
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Closed'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_close
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Closed'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_close
       
-  #Force water valve off if the feedback signal fails (prevent water leaks)
-  - alias: Water valve Force Off
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id: sensor.water_valve_status
-        to: 'Unknown'
-        for: '00:00:20'
-      - platform: state
-        entity_id: switch.water_valve_open
-        to: 'off'
-        for: '00:00:20'
-      - platform: state
-        entity_id: switch.water_valve_close
-        to: 'off'
-        for: '00:00:20'
-    condition:
-      - condition: state
-        entity_id: sensor.water_valve_status
-        state: 'Unknown'
-    action:
-      service: switch.turn_on
-      entity_id: switch.water_valve_close
+  # #Force water valve off if the feedback signal fails (prevent water leaks)
+  # - alias: Water valve Force Off
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Unknown'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'off'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'off'
+        # for: '00:00:20'
+    # condition:
+      # - condition: state
+        # entity_id: sensor.water_valve_status
+        # state: 'Unknown'
+    # action:
+      # service: switch.turn_on
+      # entity_id: switch.water_valve_close
           
   - alias: Heartbeat Seconds
     mode: restart
     trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
       - platform: time_pattern
         seconds: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
     action:
       - service: counter.configure
         entity_id: counter.second_counter
@@ -187,10 +194,15 @@
   - alias: Heartbeat Minutes
     mode: restart
     trigger:
-      - platform: homeassistant
-        event: start
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
       - platform: time_pattern
         minutes: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
     action:
       - service: counter.configure
         entity_id: counter.minute_counter
@@ -204,17 +216,47 @@
   - alias: Heartbeat Hours
     mode: restart
     trigger:
-      - platform: homeassistant
-        event: start
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
       - platform: time_pattern
         hours: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
     action:
       - delay: 
           seconds: 5
-      - service: script.update_entities
+        
+  - alias: Home Assistant Started
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '*'
+    action:
+      - delay: 
+          seconds: 5
       - service: input_boolean.turn_on
         entity_id: input_boolean.running_hass
-  
+        
+  - alias: Update entities
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        hours: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: script.update_entities
+
   - alias: Doorchime TF Trigger
     mode: restart
     trigger:

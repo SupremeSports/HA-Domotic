@@ -1,0 +1,72 @@
+###################################################
+# MODBUS - GARAGE SAFETY TEMP                     #
+###################################################
+
+  - name: MB_GarageSafety
+    type: tcp
+    host: !secret modbus0_ip
+    port: !secret modbus_port
+    sensors:
+      - name: Garage Safety Heartbeat
+        scan_interval : 5
+        address: 0
+        input_type: input
+        data_type: uint
+        scale: 1
+        offset: 0
+        precision: 0
+      - name: Garage Safety Front Temperature
+        unit_of_measurement: '°C'
+        scan_interval : 5
+        address: 1
+        input_type: input
+        data_type: uint
+        scale: 0.1
+        offset: 0
+        precision: 1
+      - name: Garage Safety Rear Temperature
+        unit_of_measurement: '°C'
+        scan_interval : 5
+        address: 2
+        input_type: input
+        data_type: uint
+        scale: 0.1
+        offset: 0
+        precision: 1
+      - name: Garage Safety Front Temp Raw
+        unit_of_measurement: '°C'
+        scan_interval : 5
+        address: 3
+        input_type: input
+        data_type: uint
+        scale: -0.09850
+        #offset: 76.20752
+        offset: 75.80752
+        precision: 1
+      - name: Garage Safety Rear Temp Raw
+        unit_of_measurement: '°C'
+        scan_interval : 5
+        address: 4
+        input_type: input
+        data_type: uint
+        scale: -0.09850
+        offset: 76.20752
+        precision: 1
+    binary_sensors:
+      - name: Garage Safety Front Active
+        scan_interval : 5
+        address: 0
+        input_type: coil
+      - name: Garage Safety Rear Active
+        scan_interval : 5
+        address: 1
+        input_type: coil
+      - name: Garage Safety Front Ok
+        scan_interval : 5
+        address: 2
+        input_type: coil
+      - name: Garage Safety Rear Ok
+        scan_interval : 5
+        address: 3
+        input_type: coil
+        

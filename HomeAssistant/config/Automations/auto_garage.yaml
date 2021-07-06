@@ -194,18 +194,14 @@
         service: input_boolean.turn_off
 
   - alias: Garage Air Valve
-    mode: single
+    mode: restart
     max_exceeded: silent
     trigger:
       - platform: state
         entity_id: input_boolean.garage_air_valve
-        from: "off"
-        to: "on"
-      - platform: state
-        entity_id: input_boolean.garage_air_valve
-        from: "on"
-        to: "off"
     action:
+      - entity_id: switch.garage_air_valve
+        service: switch.turn_off
       - entity_id: switch.garage_air_valve_open
         service_template: >
           {% if is_state('input_boolean.garage_air_valve', 'on') %}
@@ -230,18 +226,20 @@
         service: switch.turn_off
         
   - alias: House Air Valve
-    mode: single
+    mode: restart
     max_exceeded: silent
     trigger:
       - platform: state
         entity_id: input_boolean.house_air_valve
-        from: "off"
-        to: "on"
-      - platform: state
-        entity_id: input_boolean.house_air_valve
-        from: "on"
-        to: "off"
+        # from: "off"
+        # to: "on"
+      # - platform: state
+        # entity_id: input_boolean.house_air_valve
+        # from: "on"
+        # to: "off"
     action:
+      - entity_id: switch.house_air_valve
+        service: switch.turn_off
       - entity_id: switch.house_air_valve_open
         service_template: >
           {% if is_state('input_boolean.house_air_valve', 'on') %}
@@ -264,3 +262,4 @@
           seconds: 2
       - entity_id: switch.house_air_valve_open
         service: switch.turn_off
+        

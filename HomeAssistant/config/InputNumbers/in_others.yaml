@@ -40,6 +40,7 @@
 
   soldering_station:
     name: Soldering Station Delay
+    unit_of_measurement: 'min'
     icon: mdi:timer-sand
     mode: box
     #initial: 5
@@ -49,6 +50,7 @@
     
   garage_front_setpoint:
     name: Garage Front Temp Setpoint
+    unit_of_measurement: °C
     icon: mdi:timer-sand
     mode: slider
     min: 7
@@ -57,6 +59,7 @@
     
   garage_rear_setpoint:
     name: Garage Rear Temp Setpoint
+    unit_of_measurement: °C
     icon: mdi:timer-sand
     mode: slider
     min: 7
@@ -65,6 +68,7 @@
     
   air_compressor_purge:
     name: Air Compressor Purge Hold Time
+    unit_of_measurement: 'sec'
     icon: mdi:timer-sand
     mode: box
     min: 0.5

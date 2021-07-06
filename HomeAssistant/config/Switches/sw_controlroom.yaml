@@ -63,7 +63,7 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r7 }}'
-    payload_on: '{"r7":"ON"}'
+    payload_on: '{"r7":"ON", "h7":"8.0"}' #limits the switch to 8 seconds
     payload_off: '{"r7":"OFF"}'
     state_on: "ON"
     state_off: "OFF"
@@ -77,7 +77,7 @@
     state_topic: "Home/Control/Relay/Stts"
     command_topic: "Home/Control/Relay/Cmd"
     value_template: '{{ value_json.r8 }}'
-    payload_on: '{"r8":"ON"}'
+    payload_on: '{"r8":"ON", "h8":"8.0"}' #limits the switch to 8 seconds
     payload_off: '{"r8":"OFF"}'
     state_on: "ON"
     state_off: "OFF"

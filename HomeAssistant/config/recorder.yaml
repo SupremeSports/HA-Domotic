@@ -133,7 +133,6 @@
       
       - binary_sensor.garage_attic_light
       - binary_sensor.garage_fd_bell
-      - sensor.shed_fd_status
       - sensor.garage_cd_status
       - sensor.garage_fd_status
       - sensor.garage_bd_status
@@ -153,6 +152,15 @@
       - switch.air_compressor_purge
       
       - sensor.garage_mean_temp
+      
+#Shed Status
+      - sensor.shed_control_status
+      - sensor.shed_12v_voltage
+      - sensor.shed_5v_voltage
+      - sensor.shed_box_humidity
+      - sensor.shed_box_temperature
+      
+      - sensor.shed_fd_status
       
 #Power Measurement
       - sensor.ted5000_mtu1_power
