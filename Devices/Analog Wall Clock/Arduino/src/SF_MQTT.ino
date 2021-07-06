@@ -7,8 +7,9 @@ void initMQTT()
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
 
-  local_delay(10);
-  mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
+  mqttClient.setKeepAlive(keepAlive);
+  mqttClient.setBufferSize(packetSize);
+  mqttClient.setSocketTimeout(socketTimeout);
 }
 
 bool runMQTT()
@@ -27,23 +28,25 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
-  String data = "";
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
 
-  char message[length + 1];
+  if (length >= BUFFER_ARRAY_SIZE)
+    length = BUFFER_ARRAY_SIZE-1;
+
   for (int i = 0; i < length; i++)
-  {
-    Sprint((char)payload[i]);
-    data += (char)payload[i];
     message[i] = (char)payload[i];
-  }
+
   message[length] = '\0';
+  Sprintln(message);
 
-  Sprintln();
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  local_delay(5);
 
-  mqttReceive(topic, data, message);
+  mqttReceive(topic, message);
 }
 
 void reconnect()
@@ -54,6 +57,8 @@ void reconnect()
   while (!mqttClient.connected())
   {
     Sprint("Attempting MQTT connection...");
+
+    randomSeed(analogRead(0));
     
     // Create a random client ID
     String clientId = mqtt_deviceName;
@@ -86,22 +91,25 @@ void reconnect()
         local_delay(50);
       }
       count++;
+      //Reset board ONLY if clock not homed or time has been lost
+      if (clockHomed && localTimeValid)
+        count = 0;
     }
   }
 }
 
-void mqttReceive(char* topic, String data, char* message)
+void mqttReceive(char* topic, char* message)
 {
   if (strcmp(topic,mqtt_timeCmd)==0)
   {
-    flashBoardLed(100, 1);
+    parseTime(message);
     
-    parseTime(data);
+    //flashBoardLed(100, 3);
   }
   
-  if (strcmp(topic,mqtt_clockCmd)==0)
+  if (strcmp(topic,mqtt_controlCmd)==0)
   {
-    flashBoardLed(100, 2);
+    //flashBoardLed(100, 2);
 
     processCommandJson(message);
   }
@@ -116,7 +124,7 @@ void mqttKeepRunning()
 
   runOTA();
 
-  readSensors();
+  readSensors(false);
 
   initClock();
   
@@ -129,12 +137,13 @@ void mqttKeepRunning()
 
   writeOutputs();
 
-  flashEvery5sec();
+  runEvery5seconds();
+  runEvery10seconds();
 }
 
 void mqttSubscribe()
 {
-  mqttClient.subscribe(mqtt_clockCmd);
+  mqttClient.subscribe(mqtt_controlCmd);
   mqttClient.subscribe(mqtt_timeCmd);
   mqttClient.loop();
 }
@@ -142,19 +151,18 @@ void mqttSubscribe()
 void mqttPublish()
 {
   //Update on request when network available
-  if (!updatePublish || !networkActive)
+  if ((!updatePublish and localTimeValid) || !networkActive)
     return;
 
-  bool retain = true;
-
-  if (!localTimeValid)
+  if (!localTimeValid && (lastTimeRequestMillis==0 || millis()-lastTimeRequestMillis>5000))
+  {
+    Sprintln("Time Request...");
     mqttClient.publish(mqtt_timeRequest, mqtt_cmdOn);
 
-  if (!clockHomed)
-    sendSensors();
+    lastTimeRequestMillis = millis();
+  }
     
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
-
   mqttClient.loop();
 
   updatePublish = false;
