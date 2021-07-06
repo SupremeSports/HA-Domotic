@@ -4,25 +4,13 @@
 void initSensors()
 {
   Sprintln("Init Sensors...");
-  dhtExternal.begin();
-  dhtInternal.begin();
 
-  if (!bme.begin(I2CAddress_BME))
-    Sprintln("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+  //INPUTS
 
-  uv.begin(VEMLTIMECONST);
-
-  initWind();
-}
-
-void initWind()
-{
-  Sprintln("Init Wind Sensors...");
   //Wind speed
-  #ifdef FREQLIBRARIES
-    FreqMeasure.begin();
+  #ifndef I2C_WINDSPD
+    pinMode(windSpdPin, INPUT_PULLUP);
   #endif
-  pinMode(windSpdPin, INPUT_PULLUP);
   
   //Wind direction
   pinMode(windDir1Pin, INPUT_PULLUP);
@@ -32,33 +20,71 @@ void initWind()
   pinMode(windDir5Pin, INPUT_PULLUP);
 
   //Rain level
-  pinMode(rainLevelPin, INPUT_PULLUP);
+  #ifndef I2C_RAINLVL
+    pinMode(rainLevelPin, INPUT_PULLUP);
+  #endif
 
-  //Reset pin is an input until ready to use
-  pinMode(selfResetPin, INPUT_PULLUP);
+  //ACTIVE SENSORS
+  #ifdef EXTERNAL_EN
+    dht.begin();
+  #endif
+  #ifdef INTERNAL_EN  
+    dhtInternal.begin();
+  #endif
+
+  #ifdef BME_EN  
+    if (!bme.begin(I2CAddress_BME))
+      Sprintln("Could not find a valid BME280 sensor, check wiring, address, sensor ID!");
+  #endif
+
+  #ifdef UV_EN
+    uv.begin(VEMLTIMECONST);
+  #endif
+
+  //OUTPUTS
+  if (enableBoardLED)
+    pinMode(boardLedPin, OUTPUT);                    // Initialize the LED_BUILTIN pin as an output
+
+  //pinMode(selfReset_pin, INPUT_PULLUP);                 //Reset pin is an input until ready to use
 }
 
 //INPUTS
-void readSensors(bool all)
+void readSensors(uint8_t select)
 {
-  readWindSpd();
-  readWindDir();
+  if (select >= 5)
+  {
+    Sprintln("Read 5 sec");
+    readRainSnsr();
 
-  readRainLvl();
+    readNTC();
+    readDHT();
+    readBME();
+    readInternalDHT();
+  
+    readVEML6070();
+    readMQ135();
+  
+    readVoltages();
+  }
 
-  if (!all)
-    return;
+  if (select >= 1)
+  {
+    Sprintln("Read 1 sec");
+    readWindDir();
 
-  readRainSnsr();
+    
+    #if defined(I2C_WINDSPD) || defined(I2C_RAINLVL)
+      readWindRainI2C();
+    #endif
+    
+    #ifndef I2C_WINDSPD
+      readWindSpd();
+    #endif
+  }
 
-  readDHT();
-  readBME();
-  readInternalDHT();
-
-  readVEML6070();
-  readMQ135();
-
-  readVoltages();
+  #ifndef I2C_RAINLVL
+    readRainLvl();
+  #endif
 }
 
 //OUTPUTS
@@ -66,10 +92,66 @@ void writeOutputs()
 {
   return;
 }
+// ----------------------------------------------------------------------------------------------------
+// -------------------------------------- WIND/RAIN I2C SENSORS ---------------------------------------
+// ----------------------------------------------------------------------------------------------------
+#if defined(I2C_WINDSPD) || defined(I2C_RAINLVL)
+void readWindRainI2C()
+{
+  int available = Wire.requestFrom(I2C_SLAVE_ADDR, I2C_DATA_SIZE);    // request 6 bytes from slave device #8
+  long value = 0;
+  long configArray[I2C_DATA_SIZE];
+  int idx = 0;
+
+  if (available == I2C_DATA_SIZE)
+  {
+    // IDX - Got protocol header
+    byte receivedByte = Wire.read();
+
+    // IDX - I2C Protocol ERROR! Expected header
+    if (receivedByte != I2C_PROTOCOL_NUMBER)
+      return;
+
+    // IDX 0 - I2C Protocol
+    configArray[idx++] = receivedByte;  // Protocol version
+    
+    // IDX 1 - Rain pulse count
+    receivedByte = Wire.read();
+    configArray[idx++] = receivedByte;
+
+    // IDX 2-3-4-5 - Wind frequency
+    receivedByte = Wire.read();
+    configArray[idx++] = receivedByte;
+    receivedByte = Wire.read();
+    configArray[idx++] = receivedByte;
+    receivedByte = Wire.read();
+    configArray[idx++] = receivedByte;
+    receivedByte = Wire.read();
+    configArray[idx++] = receivedByte;
+
+    value = ((configArray[2] << 0) & 0xFF) + ((configArray[3] << 8) & 0xFFFF) + ((configArray[4] << 16) & 0xFFFFFF) + ((configArray[5] << 24) & 0xFFFFFFFF);
+  }
+  
+  #ifdef I2C_RAINLVL
+    RainLvlOut += configArray[1]; //Add up values and clear when sent through MQTT
+    Sprint("I2C Rain count: ");
+    Sprintln(RainLvlOut);
+  #endif
+
+  #ifdef I2C_WINDSPD
+    windSpdOut = float(value)/100.0;
+  
+    Sprint("I2C Wind Speed: ");
+    Sprint(windSpdOut);
+    Sprintln("Hz");
+  #endif
+}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------- WIND SENSORS -------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+#ifndef I2C_WINDSPD
 void readWindSpd()
 {
   if (millis()-lastWindSpeed >= 1000)
@@ -87,6 +169,7 @@ void readWindSpd()
     windSpeedPrev = windSpeedOn;
   }
 }
+#endif
 
 void readWindDir()
 {
@@ -142,76 +225,79 @@ void readWindDir()
 }
 
 // ----------------------------------------------------------------------------------------------------
+// -------------------------------------------- NTC SENSOR --------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+void readNTC()
+{
+  #ifdef NTC_EN
+    NTCTempOut = readAn(ntcSensorPin);
+    Sprint("NTCOut: ");
+    Sprintln(NTCTempOut);
+  #else
+    NTCTempOut = initValue;
+  #endif
+}
+
+// ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- DHT SENSOR --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readDHT()
+#ifdef EXTERNAL_EN
 {
-  float temp = dhtExternal.readTemperature();
-  float hum = dhtExternal.readHumidity();
-
-  if (isnan(temp))
-  {
-    Sprintln("DHT read error");
-    temp = initValue;
-  }
-  else
-  {
-    Sprint(temp);
-    Sprintln("*C");
-  }
-
-  if (isnan(hum))
-  {
-    Sprintln("DHT read error");
-    hum = initValue;
-  }
-  else
-  {
-    Sprint(hum);
-    Sprintln("%");
-  }
+  float temp = dht.readTemperature();
+  float hum = dht.readHumidity();
 
   //Output values
-  DHTTempOut = temp;
-  DHTHumOut = hum;
+  DHTTempOut = isnan(temp) ? initValue : temp;
+  DHTHumOut = isnan(hum) ? initValue : hum;
+
+  Sprint("TempOut: ");
+  Sprint(DHTTempOut);
+  Sprintln("*C");
+  Sprint("HumOut: ");
+  Sprint(DHTHumOut);
+  Sprintln("%");
+  
+  local_delay(1);
 } 
+#else
+{
+  DHTTempOut = initValue;
+  DHTHumOut = initValue;
+}
+#endif
 
 void readInternalDHT()
+#ifdef INTERNAL_EN
 {
   float temp = dhtInternal.readTemperature();
   float hum = dhtInternal.readHumidity();
 
-  if (isnan(temp))
-  {
-    Sprintln("Internal DHT read error");
-    temp = initValue;
-  }
-  else
-  {
-    Sprint(temp);
-    Sprintln("*C");
-  }
-
-  if (isnan(hum))
-  {
-    Sprintln("Internal DHT read error");
-    hum = initValue;
-  }
-  else
-  {
-    Sprint(hum);
-    Sprintln("%");
-  }
-
   //Output values
-  DHTTempIn = temp;
-  DHTHumIn = hum;
+  DHTTempIn = isnan(temp) ? initValue : temp;
+  DHTHumIn = isnan(hum) ? initValue : hum;
+
+  Sprint("TempIn: ");
+  Sprint(DHTTempIn);
+  Sprintln("*C");
+  Sprint("HumIn: ");
+  Sprint(DHTHumIn);
+  Sprintln("%");
+
+  local_delay(1);
 }
+#else
+{
+  DHTTempIn = initValue;
+  DHTHumIn = initValue;
+}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- BME SENSOR --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readBME()
+#ifdef BME_EN
 {
   float temp = bme.readTemperature();
   float hum = bme.readHumidity();
@@ -238,12 +324,20 @@ void readBME()
   BMEHumOut = hum;
   BMEBaroOut = baro;
 }
+#else
+{
+  BMETempOut = initValue;
+  BMEHumOut = initValue;
+  BMEBaroOut = initValue;
+}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // --------------------------------------------- UV SENSOR --------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readVEML6070()
-{
+#ifdef UV_EN
+{  
   VEMLUVOut = uv.readUV();
 
   if (isnan(VEMLUVOut) || VEMLUVOut<0.0)
@@ -252,11 +346,17 @@ void readVEML6070()
   Sprint(VEMLUVOut);
   Sprintln("mW/m2");
 }
+#else
+{
+  VEMLUVOut = initValue;
+}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // ---------------------------------------- AIR QUALITY SENSOR ----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readMQ135()
+#ifdef MQ135_EN
 {
   int16_t AQI = map(analogRead(MQ135Pin), 0, 1023, 1023, 0);
 
@@ -265,13 +365,18 @@ void readMQ135()
   
   MQ135Out = AQI;
 }
+#else
+{
+  MQ135Out = initValue;
+}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // ----------------------------------------- RAIN SENSOR/LEVEL ----------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readRainSnsr()
 {
-  int16_t RainSnsr = analogRead(rainSensorPin);
+  int16_t RainSnsr = readAn(rainSensorPin);
 
   Sprint(float(RainSnsr)/1023.0F*5.0F);
   Sprintln("V (Rain Sensor)");
@@ -279,56 +384,70 @@ void readRainSnsr()
   RainSnsrOut = RainSnsr;
 }
 
+#ifndef I2C_RAINLVL
 void readRainLvl()
 {
-  float millisLvlCounter = millis()-rainLvlMillis;
-  float bucketsPerHour = float(rainLvlCounter) * (millisLvlCounter/1000.0F) * 60.0F;
-
-//  Sprint(millisLvlCounter);
-//  Sprintln("ms");
-//  Sprint(bucketsPerHour);
-//  Sprintln("buckets/min");
+  if (millis()-lastRainLvl >= 60000)
+  {
+    RainLvlOut = rainLvlBuffer;
+    
+    rainLvlBuffer = 0;
+    lastRainLvl = millis();
+  }
   
-  RainLvlOut = bucketsPerHour;
+  byte rainLvlOn = digitalRead(rainLevelPin) ? 1 : 0;
+  if (rainLvlOn != rainLvlPrev)
+  {
+    rainLvlBuffer++;
+    rainLvlPrev = rainLvlOn;
 
-  //Reset values for next reading
-  rainLvlCounter = 0;
-  rainLvlMillis = millis();
+    Sprint("Rain Sensor pulse: ");
+    Sprintln(rainLvlBuffer);
+  }
 }
-
-void readRainLvlFreq()
-{
-  RainLvlStts = digitalRead(rainLevelPin);
-
-  if ((rainLvlMemory != RainLvlStts))
-    rainLvlCounter++;
-
-  rainLvlMemory = RainLvlStts;
-}
+#endif
 
 // ----------------------------------------------------------------------------------------------------
 // ------------------------------------------ VOLTAGE SENSOR ------------------------------------------
 // ----------------------------------------------------------------------------------------------------
 void readVoltages()
 {
-  analogRead(inputVoltPin); //Dump first reading
-  uint16_t voltIn = analogRead(inputVoltPin) * 5;
-  delay(10);
-  analogRead(dcVoltPin); //Dump first reading
-  uint16_t volt5V = analogRead(dcVoltPin) * 5;
+  uint16_t voltIn = readAn(voltage12V_pin) * 5;
+  uint16_t volt5V = readAn(voltage5V_pin) * 5;
 
-  inputVoltOut = (voltIn/1023.0F*inputVoltRatio);
-  dcVoltOut = volt5V/1023.0F*dcVoltRatio;
+  voltage12V = (voltIn/1023.0F*voltage12VRatio);
+  voltage5V = volt5V/1023.0F*voltage5VRatio;
 
-  Sprint(inputVoltOut);
+  Sprint(voltage12V);
   Sprintln("Vin");
-  Sprint(dcVoltOut);
+  Sprint(voltage5V);
   Sprintln("Vout");
+}
+
+uint16_t readAn(uint8_t pinToRead)
+{
+  analogRead(pinToRead); //Dump first reading
+  local_delay(10);
+  return(analogRead(pinToRead));
 }
 
 // ----------------------------------------------------------------------------------------------------
 // -------------------------------------------- RESET PIN ---------------------------------------------
 // ----------------------------------------------------------------------------------------------------
+void forceReset()
+{
+  Sprintln("Forced Reset...");
+  delay(500);
+  resetBoard();
+}
+
+void resetBoard()
+{
+  pinMode(selfReset_pin, OUTPUT);
+  digitalWrite(selfReset_pin, LOW);
+  delay(10000);
+}
+
 void selfReset()
 {
   if (BMEreadFailed)
@@ -350,20 +469,6 @@ void selfReset()
     delay(500);
     resetBoard();
   }
-}
-
-void forceReset()
-{
-  Sprintln("Forced Reset...");
-  delay(500);
-  resetBoard();
-}
-
-void resetBoard()
-{
-  pinMode(selfResetPin, OUTPUT);
-  digitalWrite(selfResetPin, LOW);
-  delay(10000);
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -392,16 +497,8 @@ void flashBoardLed(int delayFlash, int qtyFlash)
 //Short flash every 5 seconds when everything is ok
 void flashEvery5sec()
 {
-  if (millis()-ledFlashDelay < 5000)
-    return;
-
   if (networkActive)
     flashBoardLed(2, 1);
-    
-  ledFlashDelay = millis();
-
-  readSensors(true);
-  sendSensors();
 }
 
 float kelvinToFahrenheit(float kelvin)
