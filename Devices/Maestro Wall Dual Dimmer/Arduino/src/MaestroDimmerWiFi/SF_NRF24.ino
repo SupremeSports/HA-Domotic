@@ -3,19 +3,20 @@
 // ----------------------------------------------------------------------------------------------------
 void initNRF()
 {
-  if (!nrf24.init())
-    Sprintln("init failed");
-  // Defaults after init are 2.402 GHz (channel 2), 2Mbps, 0dBm
-  if (!nrf24.setChannel(nrfChannel))
-    Sprintln("setChannel failed");
-  if (!nrf24.setRF(RH_NRF24::DataRate2Mbps, RH_NRF24::TransmitPower0dBm))
-    Sprintln("setRF failed");
+  if (!radio.begin())
+    Sprintln("NRF24 init failed");
 
-  local_delay(100);
+  radio.openWritingPipe(pipes[0]); // Read pipe on switch
+  radio.openReadingPipe(1, pipes[1]); // Write pipe on switch
+  //RF24_PA_MIN=-18dBm, RF24_PA_LOW=-12dBm, RF24_PA_HIGH=-6dBM, and RF24_PA_MAX=0dBm
+  radio.setPALevel(RF24_PA_HIGH);
+  //RF24_250KBPS for 250kbs, RF24_1MBPS for 1Mbps, or RF24_2MBPS for 2Mbps
+  radio.setDataRate(RF24_1MBPS);
+  
   Sprintln("NRF24 Init Completed");
 
   compareData();
-  sendNRF();
+  radio.startListening();
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -23,42 +24,49 @@ void initNRF()
 // ----------------------------------------------------------------------------------------------------
 void checkNRF()
 {
-  if (!nrf24.available())
+  if (!radio.available())
+  {
+    if (newDataMQTT || updateMQTT || sendDataNRF)
+      sendNRF();
     return;
-    
-  //Sprintln("Data received...");
-  setBoardLED(false);
+  }
+
+  setBoardLED(true);
   
   byte buf[RH_NRF24_MAX_MESSAGE_LEN];
-  uint8_t len = sizeof(buf);
-  nrf24.recv(buf, &len);
+  radio.read(&buf, sizeof(buf));
+  char * data = (char *)buf;
 
   setBoardLED(false);
 
   mqttClient.loop(); //Give time to WiFi/MQTT to run
 
   if (newDataMQTT || updateMQTT || sendDataNRF)
+  {
+    sendNRF();
     return;
+  }
 
-  char * dataOut = (char *)buf;
-  parseData(dataOut, strlen(dataOut));
+  Sprintln("Data received...");
+  Sprintln(data);
+  parseData(data, strlen(data));  
+
+  mqttClient.loop(); //Give time to WiFi/MQTT to run
 }
 
 void sendNRF()
 {
-  //if ((millis()-lastDataNRF < 10000 && !sendDataNRF) || !permissionSendI2C)
-  //  return;
-
   if (!sendDataNRF || !permissionSendI2C)
+  {
+    sendDataNRF = false;
     return;
-
-  lastDataNRF = millis();
+  }
+  
   sendDataNRF = false;
 
   //Prepare data
   char data[RH_NRF24_MAX_MESSAGE_LEN]; // Buffer big enough for 28-character string
   char result[8]; // Buffer big enough for 7-character float
-  char* delim = ":";
 
   compareData();
 
@@ -90,18 +98,13 @@ void sendNRF()
   strcat(data,delim);
 
   // Send a message
-  uint8_t dataOutNRF[sizeof(data)];
-  for (int i=0; i<sizeof(data); i++)
-    dataOutNRF[i] = data[i];
-  
-  for (int i=0; i<1; i++)
-  {
-    mqttClient.loop(); //Give time to WiFi/MQTT to run
-    nrf24.send(dataOutNRF, sizeof(dataOutNRF));
-    local_delay(100);
-  }
-
-  while(!nrf24.waitPacketSent()){}
+  delay(5);
+  radio.stopListening();
+  radio.write(&data, sizeof(data));
+  Sprint("Data sent: ");
+  Sprintln(data);
+  delay(5);
+  radio.startListening();
 
   Sprint("Data sent NRF: ");
   Sprintln(data);
@@ -117,6 +120,8 @@ void sendNRF()
 //    L: L is the lamp level 0-7 and embedded state bits for [3..7]
 //    F: F is the fan level 0-7 and embedded state bits for [3..7]
 //    VVV: is the switch 5V bus voltage
+//    TTT: is the switch room temperature
+//    HHH: is the switch room humidity
 void parseData(char* message, int dataSize)
 {
   char DELIMITER_DATA = ':';
@@ -171,7 +176,7 @@ void parseData(char* message, int dataSize)
   mqttClient.loop(); //Give time to WiFi/MQTT to run
 
   //Validate switch ID to start
-  switchRcvdID = parsedData[1];
+  uint16_t switchRcvdID = parsedData[1];
 
   if (switchRcvdID != switchID) //Accept only correct switchID
     return;
@@ -197,25 +202,27 @@ void parseData(char* message, int dataSize)
   
   lampNRF.level = parsedData[2];
   lampNRF.state = bitRead(lampNRF.level, STATE_BIT)==1;
+  lampNRF.fade = bitRead(lampNRF.level, FADE_BIT) == 1;
   lampNRF.full = bitRead(lampNRF.level, FULL_BIT)==1;
   for (int i=3; i<8; i++) //3 LSBs used for level 0-7
     bitClear(lampNRF.level, i);
     
   fanNRF.level = parsedData[3];
   fanNRF.state = bitRead(fanNRF.level, STATE_BIT)==1;
+  fanNRF.fade = bitRead(fanNRF.level, FADE_BIT) == 1;
   fanNRF.full = bitRead(fanNRF.level, FULL_BIT)==1;
   for (int i=3; i<8; i++) //3 LSBs used for level 0-7
     bitClear(fanNRF.level, i);
 
-  voltage5VSwitch = parsedData[4]/100.0F;
+  voltage5VSwitch = (parsedData[4]/100.0F)*1.25F; //Unknown voltage discrepancy to verify
+
+  DHTTempOut =  (parsedData[5]/10.0F)-5.0F; //Unknown temperature discrepancy to verify
+  DHTHumOut =  parsedData[6]/10.0F;
 
   newDataNRF = true;
   permissionSendI2C = true;
   compareData();
   lastDataI2C = millis()-10000;
-
-  if (millis()-lastDataNRF > 9800) //Insure enough delay between I2C and NRF
-    lastDataNRF = 9797;
 
   mqttClient.loop(); //Give time to WiFi/MQTT to run
 }
