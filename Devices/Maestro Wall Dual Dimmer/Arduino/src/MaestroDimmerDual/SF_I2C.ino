@@ -23,10 +23,8 @@ void initI2C()
 // So to prevent flickering, lets save data and parse it when we have spare time
 void receiveEvent(int howMany)
 {
-  setBoardLED(HIGH);
+  setBoardLED(true);
 
-  char DELIMITER_DATA = ':';
-  char msgBuf[MAX_I2C_LENGTH];
   int i = 0;
   int j = 0;
   
@@ -65,24 +63,28 @@ void runI2C()
   parseDataI2C(message, messageLength);
   messageLength = 0;
   
-  setBoardLED(LOW);
+  setBoardLED(false);
 }
 
 void checkStatusI2C()
 {
   #ifdef USE_SELFRESET
     if (millis()-lastDataI2C > maxDataI2CDelay)
+    {
+      Sprintln("I2C Issues...");
+      Sprintln("Forcing restart...");
       software_Reset();
-  #endif
+    }
+  #else
+    if (millis()-lastDataI2C > maxDataI2CDelay)
+    {
+      Sprintln("I2C Issues...");
+      //TWCR = 0;
+      initI2C();
   
-  if (millis()-lastDataI2C > maxDataI2CDelay)
-  {
-    Sprintln("I2C Issues...");
-    TWCR = 0;
-    initI2C();
-
-    lastDataI2C = millis();
-  }
+      lastDataI2C = millis();
+    }
+  #endif
 }
 
 // ----------------------------------------------------------------------------------------------------
@@ -120,7 +122,7 @@ void parseDataI2C(char* message, int dataSize)
   }
   Sprintln();
 
-  if (qtyDelimiters < 3) //If not enough delimiters found
+  if (qtyDelimiters < 4) //If not enough delimiters found
     return;
   
   uint16_t parsedData[qtyDelimiters]; // ALWAYS END WITH A DELIMITER
