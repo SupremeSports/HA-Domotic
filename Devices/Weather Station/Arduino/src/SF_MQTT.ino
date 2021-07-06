@@ -6,6 +6,10 @@ void initMQTT()
   Sprintln("Init MQTT...");
   mqttClient.setServer(mqtt_server, 1883);
   mqttClient.setCallback(mqttCallback);
+
+  mqttClient.setKeepAlive(keepAlive);
+  mqttClient.setBufferSize(packetSize);
+  mqttClient.setSocketTimeout(socketTimeout);
 }
 
 bool runMQTT()
@@ -24,6 +28,8 @@ bool runMQTT()
 // ----------------------------------------------------------------------------------------------------
 void mqttCallback(char* topic, byte* payload, unsigned int length)
 {
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  
   Sprint("Message arrived [");
   Sprint(topic);
   Sprint("] ");
@@ -35,9 +41,10 @@ void mqttCallback(char* topic, byte* payload, unsigned int length)
     message[i] = (char)payload[i];
 
   message[length] = '\0';
-  Sprint(message);
+  Sprintln(message);
 
-  Sprintln();
+  wdtReset(); //Added to prevent reboot when a bunch of data gets in all at once
+  local_delay(5);
 
   mqttReceive(topic, message);
 }
@@ -50,6 +57,8 @@ void reconnect()
   while (!mqttClient.connected())
   {
     Sprint("Attempting MQTT connection...");
+
+    randomSeed(analogRead(0));
     
     // Create a random client ID
     String clientId = mqtt_deviceName;
@@ -88,7 +97,7 @@ void reconnect()
 
 void mqttReceive(char* topic, char* message)
 {
-  //Relay board control
+  //Main board control
   if (strcmp(topic,mqtt_controlCmd)==0)
   {
     processCommandJson(message);
@@ -104,13 +113,17 @@ void mqttKeepRunning()
 {
   wdt_reset();
 
+  runOTA();
+
   readSensors(0);           //Read sensors (buttons, etc.)
 
+  updateTime();
   //TODO
   
   writeOutputs();           //Write outputs (valves, relays, etc.)
   
-  flashEvery5sec();
+  runEvery5seconds();
+  runEvery10seconds();
 }
 
 void mqttSubscribe()
@@ -125,7 +138,8 @@ void mqttPublish()
   if (!updatePublish || !networkActive)
     return;
 
-  sendCommandStatus();
+  sendDigAnStates();
+  local_delay(5);
 
   mqttClient.publish(mqtt_willTopic, mqtt_willOnline);
 
