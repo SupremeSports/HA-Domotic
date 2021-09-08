@@ -1,0 +1,127 @@
+####################################################
+# SENSORS                                          #
+####################################################
+#See other sensors templates in Templates/t_allothers.yaml
+
+  #Time display
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'time_date'
+      - 'time_utc'
+      - 'beat'
+      
+  - platform: moon
+   
+  - platform: ted5000
+    host: !secret ted_ip
+    port: !secret ted_port
+    name: TED5000
+    scan_interval: 5
+    
+#   - platform: hydroquebec
+#     username: "username"
+#     password: "password"
+#     contract: 'contract'
+#     monitored_variables:
+#      - period_total_bill
+#      - period_length
+#      - period_total_days
+    
+  - platform: openexchangerates
+    api_key: !secret openexchange_key
+    scan_interval: 5
+    quote: CAD
+    
+  # - platform: opensky
+    # radius: 10
+    
+  # - platform: ebox
+    # username: !secret ebox_username
+    # password: !secret ebox_password
+    # monitored_variables:
+     # - download
+     # - upload
+     # - total
+    
+  - platform: integration
+    name: Main Power Usage
+    source: sensor.ted5000_mtu1_power
+    unit_prefix: k
+    unit_time: h
+    unit: kWh
+    round: 2
+  - platform: integration
+    name: Garage Power Usage
+    source: sensor.ted5000_mtu2_power
+    unit_prefix: k
+    unit_time: h
+    unit: kWh
+    round: 2
+  - platform: integration
+    name: Pool Power Usage
+    source: sensor.ted5000_mtu3_power
+    unit_prefix: k
+    unit_time: h
+    unit: kWh
+    round: 2
+    
+  - platform: mqtt
+    name: "Postal Status JSON"
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    value_template: '{{ value_json.state }}'
+    availability_topic: "Home/Transmitter/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Home/Postal/Stts"
+    
+#See other sensors templates in Templates/t_allothers.yaml
+    
+  - platform: mqtt
+    name: "Stepper Wall Clock"
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    #availability_topic: "Home/WallClock/LWT"
+    availability:
+      - topic: "Home/WallClock/LWT"
+    #payload_available: "online"
+    #payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.homed == "ON" %}
+        Ok
+      {% else %}
+        Homing
+      {% endif %}
+    json_attributes_topic: "Home/WallClock/Json"
+    
+  - platform: mqtt
+    name: "Nixie Clock Status"
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Stts"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    value_template: >
+      {% if value_json.state == "ON" %}
+        On
+      {% else %}
+        Off
+      {% endif %}
+    qos: 0
+    json_attributes_topic: "Home/NixieClock/Json"
+    
+  - platform: mqtt
+    name: "Nixie Clock Case Temp"
+    unit_of_measurement: '°C'
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Json"
+    value_template: "{{ value_json.temp_in }}"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    qos: 0
+    
+#See other sensors templates in Templates/t_allothers.yaml

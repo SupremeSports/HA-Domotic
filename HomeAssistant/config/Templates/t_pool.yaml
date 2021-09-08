@@ -1,0 +1,327 @@
+####################################################
+# TEMPLATES - POOL                                 #
+####################################################
+
+######### POOL CONTROL - BASIC DATA #########
+
+  - sensor:
+
+    - unique_id: poolpump_status
+      #name: Pool Pump
+      icon: mdi:pump
+      availability: >
+        {{ not is_state('switch.pool_pump', 'unavailable') }}
+      state: >
+        {% if is_state('switch.pool_pump', 'on') %}
+          {% if is_state('binary_sensor.antifreeze_active', 'on') %}
+            Run Low Temp
+          {% else %}
+            On
+          {% endif %}
+        {% elif is_state('switch.pool_pump', 'off') %}
+          {% if is_state('binary_sensor.pool_level_low', 'off')%}
+            Low Level
+          {% else %}
+            Off
+          {% endif %}
+        {% else %}
+          unknown
+        {% endif %}
+      attributes:
+        friendly_name: Pool Pump
+        mode: "{{ states('input_select.poolpump_mode') }}"
+        schedule1: >-
+          {% if is_state('input_select.poolpump_mode', '24/7') %}
+            ALWAYS ON
+          {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+            8AM to 8PM
+          {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+            8AM to 9PM
+          {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+            2AM to 6AM
+          {% else %}
+            ALWAYS OFF
+          {% endif %}
+        schedule2: >-
+          {% if is_state('input_select.poolpump_mode', '24/7') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+            0AM to 4AM
+          {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+            12AM to 4AM
+          {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+            9AM to 11AM
+          {% else %}
+            N/A
+          {% endif %}
+        schedule3: >-
+          {% if is_state('input_select.poolpump_mode', '24/7') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+            2PM to 4PM
+          {% else %}
+            N/A
+          {% endif %}
+        schedule4: >-
+          {% if is_state('input_select.poolpump_mode', '24/7') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+            9PM to 11PM
+          {% else %}
+            N/A
+          {% endif %}
+        schedule5: >-
+          {% if is_state('input_select.poolpump_mode', '24/7') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+            N/A
+          {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+            Outside peak power from HQ
+          {% else %}
+            N/A
+          {% endif %}
+          
+    - unique_id: pool_heater_status
+      #name: Pool Heater
+      icon: >
+        {% if is_state('switch.pool_heater', 'off') %}
+          mdi:radiator-off
+        {% elif is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+          mdi:radiator
+        {% else %}
+          mdi:radiator-disabled
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.pool_heater', 'unavailable') }}
+      state: >
+        {% if is_state('switch.pool_heater', 'off') %}
+            Off
+          {% elif is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+            Heating
+          {% else %}
+            Ready
+          {% endif %}
+      attributes:
+        friendly_name: >
+          {% if is_state('switch.pool_heater', 'on') and is_state('binary_sensor.pool_heater_run', 'on') %}
+            {% set differential = states('sensor.pool_heater_temp')|float - states('sensor.pool_temperature') | float %}
+            {% if differential < 0.0 %}
+              {% set differential = 0.0 %}
+            {% endif %}
+            Pool Heater Status: +{{ differential|round(1) }}°C
+          {% else %}
+            Pool Heater Status
+          {% endif %}
+        water_in: "{{ states('sensor.pool_temperature') }}"
+        water_out: "{{ states('sensor.pool_heater_temp') }}"
+        heating: "{{ is_state('binary_sensor.pool_heater_run', 'on') }}"
+        Last_24h: "{{ state_attr('sensor.pool_heater_timer_24h','value') }}"
+        Today: "{{ state_attr('sensor.pool_heater_timer_today','value') }}"
+    
+######### POOL CONTROL - SENSORS #########
+
+    - name: Pool Temperature
+      #unique_id: pool_temperature
+      unit_of_measurement: '° F'
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      availability: >
+        {{ not is_state('sensor.pool_temperature_raw', 'unavailable') }}
+      state: >
+        {{ states('sensor.pool_temperature_stats') }}
+      attributes:
+        temp_raw: "{{ states('sensor.pool_temperature_raw') }}"
+        temp_mean: "{{ state_attr('sensor.pool_temperature_stats', 'mean') }}"
+        temp_min: "{{ state_attr('sensor.pool_temperature_stats', 'min_value') }}"
+        temp_max: "{{ state_attr('sensor.pool_temperature_stats', 'max_value') }}"
+        
+    - name: Pool Heater Temp
+      #unique_id: pool_heater_temp
+      unit_of_measurement: '° F'
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      availability: >
+        {{ not is_state('sensor.pool_heater_temp_raw', 'unavailable') }}
+      state: >
+        {{ states('sensor.pool_heater_temp_stats') }}
+      attributes:
+        temp_raw: "{{ states('sensor.pool_heater_temp_raw') }}"
+        temp_mean: "{{ state_attr('sensor.pool_heater_temp_stats', 'mean') }}"
+        temp_min: "{{ state_attr('sensor.pool_heater_temp_stats', 'min_value') }}"
+        temp_max: "{{ state_attr('sensor.pool_heater_temp_stats', 'max_value') }}"
+      
+    - name: Pool Pump Temp
+      #unique_id: pool_pump_temp
+      unit_of_measurement: '°C'
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      availability: >
+        {{ not is_state('sensor.pool_pump_temp_raw', 'unavailable') }}
+      state: >
+        {{ states('sensor.pool_pump_temp_stats') }}
+      attributes:
+        temp_raw: "{{ states('sensor.pool_pump_temp_raw') }}"
+        temp_mean: "{{ state_attr('sensor.pool_pump_temp_stats', 'mean') }}"
+        temp_min: "{{ state_attr('sensor.pool_pump_temp_stats', 'min_value') }}"
+        temp_max: "{{ state_attr('sensor.pool_pump_temp_stats', 'max_value') }}"
+
+    - name: Pool Pressure
+      #unique_id: pool_pressure
+      unit_of_measurement: 'psi'
+      state_class: measurement
+      #device_class: pressure
+      icon: mdi:gauge
+      availability: >
+        {{ not is_state('sensor.pool_pressure_raw', 'unavailable') }}
+      state: >
+        {% set RP = states('sensor.pool_pressure_raw')|float %}
+        {% set min = 0.5|float %} 
+        {% set span = 4.0|float %}
+        {% set presmax = 70.0|float %}
+        
+        {% if RP < 104 and RP > 30 %}
+          {% set RP = 104.0 %}
+        {% endif %}
+        
+        {% set ax = (presmax / span)|float %}
+        {% set b = (ax * min * -1.0)|float %}
+        {% set ax = ((ax * 5.0) / 1023.0)|float %}
+        
+        {% set PV = ((ax*RP)+b)|float %}
+        
+        {% if PV < -0.2 or PV > 50.0 %}
+          {{ "unknown" }}
+        {% elif PV < 1.0 %}
+          {{ 0.0 | round(1) }}
+        {% elif is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+          {{ 0.0 | round(1) }}
+        {% else %}
+          {{ PV | round(1, "half") }}
+        {% endif %}
+      attributes:
+        pres_raw: "{{ states('sensor.pool_pressure_raw') }}"
+          
+######### POOL CONTROL - GATES #########
+
+    - unique_id: pool_gates
+      #name: Pool Gates
+      unit_of_measurement: 'psi'
+      #state_class: measurement
+      #device_class: pressure
+      icon: mdi:gauge
+      availability: >-
+        {{ not is_state('binary_sensor.pool_gate_closed_deck', 'unavailable') and
+           not is_state('binary_sensor.pool_gate_closed_main', 'unavailable') and
+           not is_state('binary_sensor.pool_gate_closed_pond', 'unavailable') }}
+      state: >
+        {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+        {% set pond = is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+        {% set main = is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+        
+        {% set PG = deck and pond and main %}
+        
+        {% if PG %}
+          Ok
+        {% else %}
+          Opened
+        {% endif %}
+      attributes:
+        friendly_name: >
+          {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+          {% set main = is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+          {% set pond = is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+          
+          {% set count = 0 %}
+          {% if deck %}
+            {% set count = count+1 %}
+          {% endif %}
+          {% if main %}
+            {% set count = count+1 %}
+          {% endif %}
+          {% if pond %}
+            {% set count = count+1 %}
+          {% endif %}
+          
+          {{-'Pool Gates'-}}
+          
+          {% if count > 0 -%}
+            {% for device in states.binary_sensor if 'pool_gate_closed_' in device.entity_id if device.state == 'on' %}
+               {%- if loop.first -%}{{': '}}{% elif loop.last %}{{' & '}}{% else %}{{', '}}{% endif -%}
+               {{ device.attributes['friendly_name'].replace('Pool Gate Closed - ','') }}
+            {%- endfor -%}
+          {% endif %}
+        deck: >
+          {% if is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+            Closed
+          {% elif is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+            Opened
+          {% else %}
+            NA
+          {% endif %}
+        main: >
+          {% if is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+            Closed
+          {% elif is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+            Opened
+          {% else %}
+            NA
+          {% endif %}
+        pond: >
+          {% if is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+            Closed
+          {% elif is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+            Opened
+          {% else %}
+            NA
+          {% endif %}
+
+  - binary_sensor:
+  
+    - unique_id: poolfiller_status
+      #name: Pool Filler Valve
+      #device_class: none
+      icon: >
+        {% if is_state("input_select.poolfiller_mode", "Winter/Off") %}
+          mdi:water-pump-off
+        {%else%}
+          mdi:water-pump
+        {%endif%}
+      availability: >
+        {{ not is_state('switch.pool_filler_valve', 'unavailable') and not is_state('input_boolean.pool_running', 'off') }}
+      state: >
+        {{ is_state("switch.pool_filler_valve", "on") }}
+      attributes:
+        friendly_name: Pool Filler Valve
+  
+    - name: Pool Heater Run
+      #unique_id: pool_heater_run
+      #device_class: none
+      icon: mdi:security-network
+      availability: >
+        {{ not is_state('switch.pool_heater', 'unavailable') }}
+      state: >
+        {{ is_state("switch.pool_heater", "on") and states('sensor.ted5000_mtu3_power')|int >= 5000 }}
+
+    - unique_id: poolpump_security
+      #name: Pool Pump Security
+      #device_class: none
+      icon: mdi:flash
+      availability: >
+        {{ not is_state('switch.pool_pump', 'unavailable') }}
+      state: >
+        {{ states('sensor.pool_pump_temp')|float > 0.0 and states('sensor.pool_pump_temp')|float < 70.0 }}
+      attributes:
+        friendly_name: Pool Pump Security

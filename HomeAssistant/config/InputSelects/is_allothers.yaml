@@ -1,0 +1,157 @@
+####################################################
+# INPUT SELECT                                     #
+####################################################
+    
+  poweroutlet_mode:
+    name: Power Outlet Mode
+    icon: mdi:calendar-clock
+    options:
+      - Force Off
+      - Fountain
+      - Halloween Decorations
+      - Christmas Decorations
+      - 24/7
+
+  lamppost_mode:
+    name: Lamp Post Mode
+    icon: mdi:calendar-clock
+    options:
+      - Force Off
+      - Sunset to 23h
+      - Sunset to Sunrise
+      - 24/7
+    
+  garagefrontlight_mode:
+    name: Garage Front Light Mode
+    icon: mdi:calendar-clock
+    options:
+      - Force Off
+      - Sunset to 23h
+      - Sunset to Sunrise
+      - 24/7
+  
+  garagefrontpower_mode:
+    name: Garage Front Power Mode
+    icon: mdi:calendar-clock
+    options:
+      - Force Off
+      - Christmas Decorations
+      - 24/7
+      
+  nixie_date:
+    name: Nixie Date Format
+    icon: mdi:calendar-check
+    options:
+      - YY.MM.DD
+      - YY.MM.DD
+      - YY.MM.DD
+    
+  doorchime_tf_sound:
+    name: Sound Selection
+    icon: mdi:music-note
+    options:
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+      
+  doorchime_bf_sound:
+    name: Sound Selection
+    icon: mdi:music-note
+    options:
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+
+  frontyardirrigation_mode:
+    name: Frontyard Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  backyardirrigation_mode:
+    name: Backyard Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  gardenirrigation_mode:
+    name: Garden Irrigation Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+      - 24/7
+      
+  gardenirrigationaux_mode:
+    name: Garden Irrigation Aux Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+
+  workplace_jean:
+    name: Jean's workplace
+    icon: mdi:account-tie
+    options:
+      - Office
+      - Telework
+      - Trip
+      - Away
+      - Vacation
+      

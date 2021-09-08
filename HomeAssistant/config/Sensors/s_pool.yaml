@@ -1,0 +1,287 @@
+####################################################
+# SENSORS - POOL                                   #
+####################################################
+#See other sensors templates in Templates/t_pool.yaml
+
+######### POOL CONTROL - BASIC DATA #########
+  - platform: mqtt
+    name: "Pool Control Status"
+    icon: mdi:pool
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Pool/Control/Json"
+    
+  - platform: mqtt
+    name: "Pool Cabin Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_out | float | round(1) }}"
+    
+  - platform: mqtt
+    name: "Pool Cabin Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.hum_out | float | round(1) }}"
+
+  - platform: mqtt
+    name: "Pool Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    
+  - platform: mqtt
+    name: "Pool Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+          
+  - platform: mqtt
+    name: "Pool Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - platform: mqtt
+    name: "Pool Control 12V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pool/Control/Json"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+          
+#See other sensors templates in Templates/t_pool.yaml
+    
+######### POOL CONTROL - SENSORS #########
+  - platform: mqtt
+    name: "Pool Temperature Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.wtemp|float %}
+      {% set TF = ((0.16014*RT)-5.69819)+2.4|float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 50.0 | round(1) }}
+      {% else %}
+        {{ TF | round(1) }}
+      {% endif %}
+      
+  - platform: statistics
+    name: "Pool Temperature Stats"
+    entity_id: sensor.pool_temperature_raw
+    #sampling_size: 100
+    max_age:
+      minutes: 10
+    precision: 1
+    
+#See other sensors templates in Templates/t_pool.yaml
+      
+  - platform: mqtt
+    name: "Pool Heater Temp Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set RT = value_json.htemp|float %}
+      {% set TF = ((0.16014*RT)-5.69819)+2.0|float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 50.0 | round(1) }}
+      {% else %}
+        {{ TF | round(1) }}
+      {% endif %}
+      
+  - platform: statistics
+    name: "Pool Heater Temp Stats"
+    entity_id: sensor.pool_heater_temp_raw
+    max_age:
+      minutes: 10
+    precision: 1
+    
+#See other sensors templates in Templates/t_pool.yaml
+      
+  - platform: mqtt
+    name: "Pool Pump Temp Raw"
+    icon: mdi:thermometer
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    unit_of_measurement: '°C'
+    value_template: >
+      {% set RT = value_json.ptemp|float %}
+      {% set TC = ((0.08897*RT)-20.94344)+3.6|float %}
+      {{ TC | round(1) }}
+      
+  - platform: statistics
+    name: "Pool Pump Temp Stats"
+    entity_id: sensor.pool_pump_temp_raw
+    max_age:
+      minutes: 10
+    precision: 1
+    
+#See other sensors templates in Templates/t_pool.yaml
+
+  - platform: mqtt
+    name: "Pool Pressure Raw"
+    icon: mdi:gauge
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    unit_of_measurement: 'psi'
+    value_template: >
+      {{ value_json.wpsi|int }}
+      
+#See other sensors templates in Templates/t_pool.yaml
+          
+  - platform: mqtt
+    name: "Pool PH"
+    icon: mdi:flask
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    unit_of_measurement: 'pH'
+    value_template: >
+      {% set PH = value_json.wph|float %}
+      {% set ax = 0.01369|float %}
+      {% set b = 0.000|float %}
+      
+      {% set PHO = ((ax*PH)+b)|float %}
+      
+      {% set PHO = 0.0|float %}
+      
+      {% if PHO <= 4.0 or PHO >= 9.0 %}
+        {{ "unknown" }}
+      {% else %}
+        {{ PHO | round(1) }}
+      {% endif %}
+
+  - platform: history_stats
+    name: Pool Filler Timer
+    entity_id: binary_sensor.poolfiller_status
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+      
+  - platform: history_stats
+    name: Pool Heater Timer 24h
+    entity_id: sensor.pool_heater_status
+    state: 'Heating'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+  - platform: history_stats
+    name: Pool Heater Timer Today
+    entity_id: sensor.pool_heater_status
+    state: 'Heating'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+        
+  - platform: mqtt
+    name: "Pool Clock Status"
+    icon: mdi:clock
+    state_topic: "Pool/Clock/Json"
+    availability:
+      - topic: "Pool/Clock/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      
+      {% if is_state('light.pool_clock', 'on') %}
+        On
+      {% elif status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Pool/Clock/Json"
+    
+######### POOL CONTROL - GATES #########
+#See other sensors templates in Templates/t_pool.yaml
+
+  - platform: history_stats
+    name: Pool Gate Count - Deck
+    entity_id: binary_sensor.pool_gate_closed_deck
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+
+  - platform: history_stats
+    name: Pool Gate Count - Main
+    entity_id: binary_sensor.pool_gate_closed_main
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+      
+  - platform: history_stats
+    name: Pool Gate Count - Pond
+    entity_id: binary_sensor.pool_gate_closed_pond
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+      

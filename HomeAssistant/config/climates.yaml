@@ -1,0 +1,216 @@
+####################################################
+# CLIMATE                                          #
+####################################################
+
+  - platform: mqtt
+    name: Living Room HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "cool"
+      - "dry"
+      - "fan_only"
+      - "heat"
+    swing_modes:
+      - "On"
+      - "Off"
+    fan_modes:
+      - "Auto"
+      - "High"
+      - "Medium"
+      - "Low"
+      - "Quiet"
+    min_temp: 16
+    max_temp: 30
+    temp_step: 1
+    power_command_topic: "Home/Living/Hvac/Power/Cmd"
+    mode_command_topic: "Home/Living/Hvac/Mode/Cmd"
+    temperature_command_topic: "Home/Living/Hvac/Temp/Cmd"
+    fan_mode_command_topic: "Home/Living/Hvac/Fan/Cmd"
+    swing_mode_command_topic: "Home/Living/Hvac/Swing/Cmd"
+    mode_state_topic: "Home/Living/Hvac/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/Living/Hvac/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    fan_mode_state_topic: "Home/Living/Hvac/Stts"
+    fan_mode_state_template: "{{ value_json.fan }}"
+    swing_mode_state_topic: "Home/Living/Hvac/Stts"
+    swing_mode_state_template: "{{ value_json.swing }}"
+    current_temperature_topic: "Home/Living/Hvac/Json"
+    #current_temperature_template: "{{ value_json.room_temp }}"
+    #current_temperature_template: "{{ value_json.air_temp }}"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set air = value_json.air_temp %}
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {{ air }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    send_if_off: true
+    retain: false
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Living/Hvac/Json"
+    
+  - platform: mqtt
+    name: Garage Front HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 30
+    temp_step: 1
+    power_command_topic: "Garage/Front/Hvac/Power/Cmd"
+    mode_command_topic: "Garage/Front/Hvac/Mode/Cmd"
+    temperature_command_topic: "Garage/Front/Hvac/Temp/Cmd"
+    mode_state_topic: "Garage/Front/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Garage/Front/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Garage/Front/Therm/Json"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set ok = false %}
+      
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {% if states.binary_sensor.garagefrontheater_error.state == 'on' %}
+          {% set room = states.sensor.garage_safety_front_temperature.state|float %}
+          {% set ok = true %}
+        {% endif %}
+      {% else %}
+        {% set ok = true %}
+      {% endif %}
+      
+      {% if ok %}
+        {{ Unknown }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    send_if_off: true
+    retain: false
+    availability:
+      - topic: "Garage/Front/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Front/Therm/Json"
+    
+  - platform: generic_thermostat
+    name:  Garage Front Heater
+    heater: input_boolean.garage_front_heater
+    target_sensor: sensor.garage_mean_temp
+    min_temp: 7
+    max_temp: 30
+    #target_temp: 7.0
+    ac_mode: false
+    min_cycle_duration:
+      minutes: 1
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    keep_alive:
+      seconds: 5
+    initial_hvac_mode: "off"
+    away_temp: 7
+    precision: 0.1
+    
+  - platform: mqtt
+    name: Garage Rear HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 30
+    temp_step: 1
+    power_command_topic: "Garage/Rear/Hvac/Power/Cmd"
+    mode_command_topic: "Garage/Rear/Hvac/Mode/Cmd"
+    temperature_command_topic: "Garage/Rear/Hvac/Temp/Cmd"
+    mode_state_topic: "Garage/Rear/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Garage/Rear/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Garage/Rear/Therm/Json"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set ok = false %}
+      
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {% if states.binary_sensor.garagerearheater_error.state == 'on' %}
+          {% set room = states.sensor.garage_safety_rear_temperature.state|float %}
+          {% set ok = true %}
+        {% endif %}
+      {% else %}
+        {% set ok = true %}
+      {% endif %}
+      
+      {% if ok %}
+        {{ Unknown }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    send_if_off: true
+    retain: false
+    availability:
+      - topic: "Garage/Rear/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Rear/Therm/Json"
+
+  - platform: generic_thermostat
+    name:  Garage Rear Heater
+    heater: input_boolean.garage_rear_heater
+    target_sensor: sensor.garage_mean_temp
+    min_temp: 7
+    max_temp: 30
+    #target_temp: 7.0
+    ac_mode: false
+    min_cycle_duration:
+      minutes: 1
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    keep_alive:
+      seconds: 5
+    initial_hvac_mode: "heat"
+    away_temp: 7
+    precision: 0.1
+    
+  - platform: generic_thermostat
+    name:  Garage Heaters
+    heater: input_boolean.garage_heaters
+    target_sensor: sensor.garage_mean_temp
+    min_temp: 7
+    max_temp: 30
+    #target_temp: 7.0
+    ac_mode: false
+    min_cycle_duration:
+      minutes: 1
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    keep_alive:
+      seconds: 5
+    initial_hvac_mode: "heat"
+    away_temp: 7
+    precision: 0.1
+    
+#   - platform: smart_thermostat
+#     name: Garage Rear Heater
+#     heater: switch.garage_rear_heater
+#     target_sensor: sensor.garage_rear_temp
+#     min_temp: 7
+#     max_temp: 30
+#     ac_mode: false
+#     #target_temp: 17
+#     keep_alive:
+#       seconds: 5
+#     initial_hvac_mode: "heat"
+#     away_temp: 7
+#     kp : 5
+#     ki : 3
+#     kd : 2
+#     #pwm : 10
+#     #autotune : ziegler-nichols
+#     #difference : 100
+#     noiseband : 0.5

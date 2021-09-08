@@ -1,0 +1,21 @@
+####################################################
+# INPUT SELECT - POND                              #
+####################################################
+
+  pondwaterfallpump_mode:
+    name: Pond Waterfall Pump Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Spring
+      - Summer
+      - Autumn
+      - 24/7
+      
+  pondfiller_mode:
+    name: Pool Filler Mode
+    icon: mdi:calendar-clock
+    options:
+      - Winter/Off
+      - Auto
+#      - Manual

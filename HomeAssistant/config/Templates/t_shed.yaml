@@ -1,0 +1,15 @@
+####################################################
+# SENSORS - SHED                                   #
+####################################################
+
+  # - sensor:
+
+    # - name: xxxxxxx
+      # #unique_id: xxxxxxx_yyyyyyyyyyy
+      # #unit_of_measurement: ''
+      # #state_class: measurement
+      # #device_class: none
+      # icon: mdi:xxxxxxx
+      # availability: >
+        # xxxxxxx
+      # state: >

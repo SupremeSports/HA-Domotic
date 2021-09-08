@@ -1,0 +1,70 @@
+####################################################
+# SWITCHES - POOL                                  #
+####################################################
+
+  - platform: mqtt
+    name: Pool Pump
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r8 }}'
+    payload_on: '{"r8":"ON"}'
+    payload_off: '{"r8":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Heater
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r7 }}'
+    payload_on: '{"r7":"ON"}'
+    payload_off: '{"r7":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Filler Valve
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: Pool Control Valves
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r5 }}'
+    payload_on: '{"r5":"ON", "h5":"15.0"}'
+    payload_off: '{"r5":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: Garden Irrigation
+    icon: mdi:flower
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r2 }}'
+    payload_on: '{"r2":"ON"}'
+    payload_off: '{"r2":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    

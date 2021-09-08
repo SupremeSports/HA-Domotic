@@ -1,0 +1,108 @@
+####################################################
+# SENSORS - ROOMS                                  #
+####################################################
+#See other sensors templates in Templates/t_rooms.yaml
+
+########## MASSAGE ROOM ##########
+
+  - platform: mqtt
+    name: "Massage Room Temp"
+    icon: mdi:mailbox
+    state_topic: "Home/Massage/Clock/Json"
+    availability:
+      - topic: "Home/Massage/Clock/LWT"
+    qos: 0
+    value_template: "{{ value_json.temperature | round(1) }}"
+    json_attributes_topic: "Home/Massage/Clock/Json"
+    unit_of_measurement: '°C'
+    
+  - platform: mqtt
+    name: "Massage Room Humidity"
+    icon: mdi:mailbox
+    state_topic: "Home/Massage/Clock/Json"
+    availability:
+      - topic: "Home/Massage/Clock/LWT"
+    qos: 0
+    value_template: "{{ value_json.humidity | round(1) }}"
+    json_attributes_topic: "Home/Massage/Clock/Json"
+    unit_of_measurement: '%'
+    
+#See other sensors templates in Templates/t_rooms.yaml
+    
+  - platform: mqtt
+    name: "Massage Room Data"
+    state_topic: "Home/Massage/tele/STATE"
+    value_template: "{{ value_json.POWER }}"
+    # availability:
+      # - topic: "Home/Massage/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
+    availability_topic: "Home/Massage/tele/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    qos: 1
+    json_attributes_topic: "Home/Massage/tele/STATE"
+    
+  - platform: mqtt
+    name: "Massage Room Power"
+    state_topic: "Home/Massage/tele/SENSOR"
+    value_template: "{{ value_json['ENERGY'].Power }}"
+    unit_of_measurement: "W"
+    # availability:
+      # - topic: "Home/Massage/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
+    availability_topic: "Home/Massage/tele/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    qos: 1
+    json_attributes_topic: "Home/Massage/tele/SENSOR"
+    
+########## THINKERING ROOM ##########
+
+#See other sensors templates in Templates/t_rooms.yaml
+    
+  - platform: mqtt
+    name: "Soldering Station Data"
+    state_topic: "Home/Soldering/tele/STATE"
+    value_template: "{{ value_json.POWER }}"
+    qos: 1
+    # availability:
+      # - topic: "Home/Soldering/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
+    availability_topic: "Home/Soldering/tele/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    json_attributes_topic: "Home/Soldering/tele/STATE"
+    
+  - platform: mqtt
+    name: "Soldering Station Power"
+    state_topic: "Home/Soldering/tele/SENSOR"
+    value_template: "{{ value_json['ENERGY'].Power }}"
+    unit_of_measurement: "W"
+    # availability:
+      # - topic: "Home/Soldering/tele/LWT"
+      # - payload_available: "Online"
+      # - payload_not_available: "Offline"
+    availability_topic: "Home/Soldering/tele/LWT"
+    payload_available: "Online"
+    payload_not_available: "Offline"
+    qos: 1
+    json_attributes_topic: "Home/Soldering/tele/SENSOR"
+
+########## MASTER BEDROOM ##########
+    
+  - platform: mqtt
+    name: "Master Bed Raw"
+    icon: mdi:scale
+    #unit_of_measurement: 'lb'
+    state_topic: "Home/Master/Bed/Sensors/Stts"
+    availability:
+      - topic: "Home/Master/Bed/LWT"
+    qos: 0
+    value_template: "{{ value_json.scale | round(1) }}"
+    json_attributes_topic: "Home/Master/Bed/Sensors/Stts"
+    
+#See other sensors templates in Templates/t_rooms.yaml
+          

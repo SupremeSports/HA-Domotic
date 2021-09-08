@@ -1,0 +1,241 @@
+####################################################
+# TEMPLATES - CONTROL ROOM                         #
+####################################################
+
+  - sensor:
+
+######### CONTROL ROOM - SENSORS #########
+
+    - unique_id: water_valve_status
+      #name: Water Valve State
+      icon: >
+        {% set LS_opened = is_state('binary_sensor.water_valve_opened','on') %}
+        {% set LS_closed = is_state('binary_sensor.water_valve_closed','on') %}
+        {% set RL_open = is_state('switch.water_valve_open','on') %}
+        {% set RL_close = is_state('switch.water_valve_close','on') %}
+        
+        {% if LS_opened and not LS_closed %}
+          mdi:pipe
+        {% elif LS_closed and not LS_opened %}
+          mdi:pipe-disconnected
+        {% elif not LS_closed and not LS_opened and (RL_open or RL_close) %}
+          mdi:valve
+        {% elif is_state('binary_sensor.water_valve_opened', 'unavailable') or is_state('binary_sensor.water_valve_closed', 'unavailable') %}
+          mdi:pipe-disconnected
+        {% else %}
+          mdi:help
+        {% endif %}
+      availability: >
+        {{ not is_state('binary_sensor.water_valve_opened', 'unavailable') and not is_state('binary_sensor.water_valve_closed', 'unavailable') }}
+      state: >
+        {% set LS_opened = is_state('binary_sensor.water_valve_opened','on') %}
+        {% set LS_closed = is_state('binary_sensor.water_valve_closed','on') %}
+        {% set RL_open = is_state('switch.water_valve_open','on') %}
+        {% set RL_close = is_state('switch.water_valve_close','on') %}
+        
+        {% if LS_opened and not LS_closed %}
+          Opened
+        {% elif LS_closed and not LS_opened %}
+          Closed
+        {% elif LS_closed and LS_opened %}
+          ERROR
+        {% else %}
+          {% if RL_open %}
+            Opening
+          {% elif RL_close %}
+            Closing
+          {% else %}
+            ERROR
+          {% endif %}
+        {% endif %}
+      attributes:
+        friendly_name: Water Valve State
+        opened: "{{ is_state('binary_sensor.water_valve_opened', 'on') }}"
+        closed: "{{ is_state('binary_sensor.water_valve_closed', 'on') }}"
+    
+######### CONTROL ROOM - WATER HEATER #########
+ 
+    - unique_id: water_heater_status
+      #name: Water Heater Status
+      icon: >
+        {% if is_state('switch.water_heater', 'off') %}
+          mdi:radiator-off
+        {% elif is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+          mdi:radiator
+        {% else %}
+          mdi:radiator-disabled
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.water_heater', 'unavailable') }}
+      state: >
+        {% if is_state('switch.water_heater', 'off') %}
+          Off
+        {% elif is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+         Heating
+        {% else %}
+          Ready
+        {% endif %}
+      attributes:
+        friendly_name: >
+          {% if is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+            Water Heater Status: {{ states('sensor.water_heater_temperature') }}°C
+          {% else %}
+            Water Heater Status
+          {% endif %}  
+        state: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+        version: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+        date: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+        #vcc_3v3: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_ssid: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_rssi: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_percent: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+        temp_in: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_in') }}{% else %}{{ 'unknown' }}{% endif %}"
+        temp_out: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_out') }}{% else %}{{ 'unknown' }}{% endif %}"
+        flow: "{% if states('sensor.water_heater_flow') != 'unavailable' %}{{ state_attr('sensor.water_heater_flow','wtr_flow') }}{% else %}{{ 'unknown' }}{% endif %}"
+
+  - binary_sensor:
+  
+    - name: Water Heater Flow
+      #unique_id: water_heater_flow
+      #device_class: none
+      icon: >
+        {% if is_state('switch.water_heater', 'off') %}
+          mdi:radiator-off
+        {% elif states('sensor.water_heater_flow')|int > 1 %}
+          mdi:radiator
+        {% else %}
+          mdi:radiator-disabled
+        {% endif %}
+      availability: >
+        {{ not is_state('sensor.water_heater_status', 'unavailable') }}
+      state: >
+        {{ states('sensor.water_heater_flow')|int > 1 }}
+      
+    - unique_id: poweroutlet_status
+      #name: Power Outlet
+      #device_class: none
+      icon: >
+        {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+          mdi:power-plug
+        {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+          mdi:pumpkin
+        {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+          mdi:pine-tree
+        {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+          mdi:fountain
+        {% else %}
+          mdi:power-plug-off
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.power_outlet', 'unavailable') }}
+      state: >
+        {{ is_state('switch.power_outlet', 'on') }}
+      attributes:
+        # friendly_name: >-
+        #   {% if is_state('input_select.poweroutlet_mode', 'Halloween Decorations') or is_state('input_select.poweroutlet_mode', 'Christmas Decorations') or is_state('input_select.poweroutlet_mode', 'Fountain') %}
+        #     {{ states('input_select.poweroutlet_mode') }}
+        #   {% else %}
+        #     Power Outlet
+        #   {% endif %}
+        friendly_name: Power Outlet
+        mode: "{{ states('input_select.poweroutlet_mode') }}"
+        schedule: >-
+          {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+            Always ON
+          {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+            Turns ON at sunrise until 10PM. Will turn ON if outside temperature is freezing
+          {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+            Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Halloween night, turns ON at 7AM until midnight
+          {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+            Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Christmas night, turns ON at 7AM until midnight
+          {% else %}
+            Always OFF
+          {% endif %}
+
+    - unique_id: lamppost_status
+      #name: Lamp Post
+      #device_class: none
+      icon: >
+        {% if is_state('input_select.lamppost_mode', 'Force Off') %}
+          mdi:lightbulb-off
+        {% else %}
+          mdi:lightbulb
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.lamp_post', 'unavailable') }}
+      state: >
+        {{ is_state('switch.lamp_post', 'on') }}
+      attributes:
+        friendly_name: Lamp Post
+        mode: "{{ states('input_select.lamppost_mode') }}"
+        schedule: >-
+          {% if is_state('input_select.lamppost_mode', '24/7') %}
+            Always ON
+          {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h') %}
+            Turns ON at sunset until 23h
+          {% elif is_state('input_select.lamppost_mode', 'Sunset to Sunrise') %}
+            Turns ON at sunset until sunrise next day
+          {% else %}
+            Always OFF
+          {% endif %}
+          
+    - unique_id: frontdoorlight_status
+      #name: Front Door Light
+      #device_class: none
+      icon: mdi:lightbulb
+      availability: >
+        {{ not is_state('switch.front_door_light', 'unavailable') }}
+      state: >
+        {{ is_state('switch.front_door_light', 'on') }}
+      attributes:
+        friendly_name: Front Door Light
+        mode: >-
+          Synch'd on change with the lamp post for now
+          
+    - unique_id: frontyardirrigation_status
+      #name: Frontyard Irrigation
+      #device_class: none
+      icon: >
+        {% if is_state('input_select.frontyardirrigation_mode', 'Winter/Off') %}
+          mdi:water-off
+        {% else %}
+          mdi:water
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.frontyard_irrigation', 'unavailable') }}
+      state: >
+        {{ is_state('switch.frontyard_irrigation', 'on') }}
+      attributes:
+        friendly_name: Frontyard Irrigation
+
+    - unique_id: backyardirrigation_status
+      #name: Backyard Irrigation
+      #device_class: none
+      icon: >
+        {% if is_state('input_select.backyardirrigation_mode', 'Winter/Off') %}
+          mdi:water-off
+        {% else %}
+          mdi:water
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.backyard_irrigation', 'unavailable') }}
+      state: >
+        {{ is_state('switch.backyard_irrigation', 'on') }}
+      attributes:
+        friendly_name: Backyard Irrigation
+
+    - unique_id: gardenirrigation_status
+      #name: Garden Irrigation
+      #device_class: none
+      icon: >
+        {% if is_state('input_select.gardenirrigation_mode', 'Winter/Off') %}
+          mdi:water-off
+        {% else %}
+          mdi:water
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.garden_irrigation', 'unavailable') }}
+      state: >
+        {{ is_state('switch.garden_irrigation', 'on') }}
+      attributes:
+        friendly_name: Garden Irrigation

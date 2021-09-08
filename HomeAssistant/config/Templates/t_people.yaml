@@ -1,0 +1,103 @@
+####################################################
+# TEMPLATES - PEOPLE                               #
+####################################################
+
+  - sensor:
+
+    - unique_id: distance_jean_cindy
+      #name: Distance between us
+      unit_of_measurement: 'km'
+      state_class: measurement
+      #device_class: none
+      icon: mdi:map-marker-distance
+      state: >
+        {% set d = distance('device_tracker.life360_cindy', 'device_tracker.life360_jean')|float %}
+        {% if d < 0.1 %}
+          {% set d = 0.0|float %}
+        {% endif %}
+        
+        {% if d < 10 %}
+          {{ d | round(3) }}
+        {% elif d < 100 %}
+          {{ d | round(2) }}
+        {% elif d < 1000 %}
+          {{ d | round(1) }}
+        {% else %}
+          {{ d | round(0) }}
+        {% endif %}
+      attributes:
+        friendly_name: Distance between us
+        
+    - unique_id: iphone_de_jean_distance_home
+      #name: Distance from home
+      unit_of_measurement: 'km'
+      state_class: measurement
+      #device_class: none
+      icon: mdi:map-marker-distance
+      state: >
+        {% set d = distance('device_tracker.life360_jean')|float %}
+        {% if d < 0.1 %}
+          {% set d = 0.0|float %}
+        {% endif %}
+          
+        {% if d < 10 %}
+          {{ d | round(3) }}
+        {% elif d < 100 %}
+          {{ d | round(2) }}
+        {% elif d < 1000 %}
+          {{ d | round(1) }}
+        {% else %}
+          {{ d | round(0) }}
+        {% endif %}
+      attributes:
+        friendly_name: Distance from home
+
+    - unique_id: iphone_de_cindy_distance_home
+      #name: Distance from home
+      unit_of_measurement: 'km'
+      state_class: measurement
+      #device_class: none
+      icon: mdi:map-marker-distance
+      state: >
+          {% set d = distance('device_tracker.life360_cindy')|float %}
+          {% if d < 0.1 %}
+            {% set d = 0.0|float %}
+          {% endif %}
+            
+          {% if d < 10 %}
+            {{ d | round(3) }}
+          {% elif d < 100 %}
+            {{ d | round(2) }}
+          {% elif d < 1000 %}
+            {{ d | round(1) }}
+          {% else %}
+            {{ d | round(0) }}
+          {% endif %}
+      attributes:
+        friendly_name: Distance from home
+
+    - unique_id: workplace_jean
+      #name: Jean's workplace
+      #unit_of_measurement: ''
+      #state_class: measurement
+      #device_class: none
+      icon: >
+        {% set value = states('input_select.workplace_jean') %}
+        {% if value == 'Office' %}
+          mdi:account-tie
+        {% elif value == 'Telework' %}
+          mdi:account-voice
+        {% elif value == 'Trip' %}
+          mdi:account-hard-hat
+        {% elif value == 'Away' %}
+          mdi:account-settings
+        {% elif value == 'Vacation' %}
+          mdi:beach
+        {% else %}
+          mdi:account-question
+        {% endif %}
+      state: >
+        {{ states('input_select.workplace_jean') }}
+      attributes:
+        friendly_name: Jean's workplace          
+        

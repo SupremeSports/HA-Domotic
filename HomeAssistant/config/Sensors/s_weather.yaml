@@ -1,0 +1,310 @@
+####################################################
+# SENSORS - WEATHER STATION                        #
+####################################################
+
+  #Environnement Canada
+  - platform: environment_canada
+    scan_interval: 300
+    
+  # Weather prediction
+  #- platform: yr
+  
+######### WEATHER STATION - BASIC DATA #########
+  - platform: mqtt
+    name: "Weather Control Status"
+    icon: mdi:wind-turbine
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Weather/Control/Json"
+
+  - platform: mqtt
+    name: "Weather Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Weather Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+      
+  - platform: mqtt
+    name: "Weather Control Input Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+      
+  - platform: mqtt
+    name: "Weather Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+
+######### UV SENSOR - VEML6070 #########
+
+  - platform: mqtt
+    name: "UV Sensor"
+    icon: mdi:sunglasses
+    unit_of_measurement: 'uW/cm2'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.uv }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+
+#See other sensors templates in Templates/t_weather.yaml
+        
+######### AIR QUALITY INDEX SENSOR - MQ135 #########
+
+  - platform: mqtt
+    name: "AQI Sensor"
+    icon: mdi:air-filter
+    unit_of_measurement: 'ppm'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.aq }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+
+######### RAIN SENSOR/RATE #########
+    
+  - platform: mqtt
+    name: "Rain Sensor"
+    icon: mdi:weather-pouring
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.rain.s }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Rain Level Toggle"
+    icon: mdi:weather-pouring
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.rain.l }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+#See other sensors templates in Templates/t_weather.yaml
+    
+  - platform: history_stats
+    name: Rain Count
+    entity_id: sensor.rain_level_toggle
+    state: 'ON'
+    type: count
+    end: '{{ now() }}'
+    duration:
+      hours: 1
+      
+  - platform: history_stats
+    name: Raining Timer
+    entity_id: sensor.raining_detect
+    state: 'On'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+    
+######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
+
+  - platform: mqtt
+    name: "Outdoor Temperature NTC"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: >
+      {% set T = ((value_json.ntc.t)|float*(-0.09850)) + 75.80752 %}
+      
+      {{- T|round(1) -}}
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+
+  - platform: mqtt
+    name: "Outdoor Temperature DHT"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.dht.t }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Humidity DHT"
+    unit_of_measurement: '%'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.dht.h }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Temperature BME"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.t }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Humidity BME"
+    unit_of_measurement: '%'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.h }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - platform: mqtt
+    name: "Outdoor Pressure Raw"
+    icon: mdi:altimeter
+    unit_of_measurement: 'kPa'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.p | float + 1.5 }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+#See other sensors templates in Templates/t_weather.yaml
+ 
+######### WIND SPEED #########
+
+  - platform: mqtt
+    name: "Wind Speed Raw"
+    icon: mdi:weather-windy
+    unit_of_measurement: 'km/h'
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set WSraw = value_json.wind.s|float %}
+      {% if WSraw < 0 or WSraw > 1000 %}
+        {% set WS = 0 %}
+      {% else %}
+        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float %}
+      {% endif %}
+      
+      {% if WS < 0.0 or WS > 90.0 %}
+        {% set WS = 0 %}
+      {% endif %}
+      
+      {{ WS | round(3) }}
+      
+  - platform: average
+    name: "Wind Speed Average"
+    duration:
+      minutes: 1
+    entities:
+      - sensor.wind_speed_raw
+      
+  # - platform: average
+    # name: "Wind Gust Average"
+    # duration:
+      # minutes: 30
+    # entities:
+      # - sensor.wind_speed_raw
+      
+  # - platform: statistics
+    # name: "Wind Speed Stats"
+    # entity_id: sensor.wind_speed_raw
+    # sampling_size: 60
+    # # max_age:
+      # # minutes: 1
+      
+  # - platform: filter
+    # name: "Wind Speed Filter"
+    # entity_id: sensor.wind_speed_raw
+    # filters:
+      # - filter: time_simple_moving_average
+        # window_size: "00:01"
+        # precision: 2
+        
+#See other sensors templates in Templates/t_weather.yaml
+      
+######### WIND COMPASS #########
+
+  - platform: mqtt
+    name: "Wind Direction Raw"
+    icon: mdi:arrow-all
+    unit_of_measurement: '°'
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set WDraw = value_json.wind.d|float %}
+      {% if WDraw < 0 %}
+        {% set WD = 0.0 | float %}
+      {% else %}
+        {% set WD = WDraw + 0.0 | float %}
+        {% if WD >= 360 %}
+          {% set WD = WD - 360.0 | float %}
+        {% endif %}
+      {% endif %}
+      
+      {{ WD | round(3) }}
+    
+  - platform: average
+    name: "Wind Direction Average"
+    duration:
+      seconds: 10
+    entities:
+      - sensor.wind_direction_raw
+      
+  - platform: statistics
+    name: "Wind Direction Stats"
+    entity_id: sensor.wind_direction_raw
+    sampling_size: 30
+    # max_age:
+      # seconds: 10
+      
+  - platform: filter
+    name: "Wind Direction Filter"
+    entity_id: sensor.wind_direction_raw
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:01"
+        precision: 2
+
+#See other sensors templates in Templates/t_weather.yaml

@@ -1,0 +1,121 @@
+####################################################
+# UILOVELACE - WEATHER & FORECASTS                 #
+####################################################
+
+- title: Local Weather Station
+  icon: mdi:weather-sunset
+  # Unique path for direct access /lovelace/${path}
+  path: local_weather
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+    - sensor.moon_phases
+  cards:
+    - type: weather-forecast
+      entity: weather.home
+    
+    - type: weather-forecast
+      entity: weather.dolbeau
+      
+    - type: entities
+      title: Moon
+      show_header_toggle: false
+      entities:
+        - sensor.moon_phases
+        # - sensor.moon_distance
+
+    - type: entities
+      title: Sun
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - sensor.forecast
+        - sun.sun
+        - weather.dolbeau
+        - sensor.visibility
+        # - type: custom:fold-entity-row
+        #   head: sensor.outdoor_uv_sensor
+        #   entities:
+        #     - sensor.uv_index
+        - type: custom:fold-entity-row
+          head: sensor.outdoor_uv_level
+          entities:
+            - sensor.outdoor_uv_sensor
+            # - sensor.uv_level
+            # - sensor.uv_index
+    
+    - type: entities
+      title: Wind
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - type: "custom:secondaryinfo-entity-row"
+          entity: sensor.wind_compass
+          secondary_info: "Wind Direction: [[ sensor.wind_direction_average ]]°"
+        - sensor.wind_speed
+        - sensor.wind_speed_gust
+        
+    - type: entities
+      title: Rain
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - type: "custom:secondaryinfo-entity-row"
+          entity: sensor.outdoor_rain_sensor
+          secondary_info: "Raining last 24h: [[ sensor.raining_timer ]] hours"
+        - sensor.outdoor_rain_level
+        - sensor.chance_of_precip
+        - sensor.precipitation_yesterday
+        - camera.dolbeau
+        
+    - type: entities
+      title: Weather
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - sensor.outdoor_temperature
+        - sensor.outdoor_feelslike
+        - sensor.low_temperature
+        - sensor.high_temperature
+        
+    - type: entities
+      title: Atmospheric
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - sensor.outdoor_humidity
+        - sensor.outdoor_dewpoint
+        - sensor.outdoor_pressure
+        - sensor.tendency
+        #- sensor.aqi_sensor
+        
+    - type: entities
+      title: Messages
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - sensor.warnings
+        - sensor.watches
+        - sensor.advisories
+        - sensor.statements
+        - sensor.endings        
+    
+    - type: entities
+      title: Weather Control Box
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.weather_control_status
+          entities:
+            - sensor.weather_control_box_temperature
+            - sensor.weather_control_box_humidity
+            - sensor.weather_control_input_voltage
+            - sensor.weather_control_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.weather_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+                  

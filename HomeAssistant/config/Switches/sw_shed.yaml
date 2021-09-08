@@ -1,0 +1,43 @@
+####################################################
+# SWITCHES - SHED                                  #
+####################################################
+
+######### SHED MAIN #########
+  - platform: mqtt
+    name: Shed Inside Light
+    state_topic: "Shed/Control/Relay/Stts"
+    command_topic: "Shed/Control/Relay/Cmd"
+    value_template: '{{ value_json.r8 }}'
+    availability:
+      - topic: "Shed/Control/LWT"
+    payload_on: '{"r8":"ON"}'
+    payload_off: '{"r8":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: Shed Door Light
+    state_topic: "Shed/Control/Relay/Stts"
+    command_topic: "Shed/Control/Relay/Cmd"
+    value_template: '{{ value_json.r7 }}'
+    availability:
+      - topic: "Shed/Control/LWT"
+    payload_on: '{"r7":"ON"}'
+    payload_off: '{"r7":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    qos: 0
+    
+  - platform: mqtt
+    name: Shed Pool Light
+    state_topic: "Shed/Control/Relay/Stts"
+    command_topic: "Shed/Control/Relay/Cmd"
+    value_template: '{{ value_json.r6 }}'
+    availability:
+      - topic: "Shed/Control/LWT"
+    payload_on: '{"r6":"ON"}'
+    payload_off: '{"r6":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    qos: 0

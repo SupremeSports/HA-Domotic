@@ -1,0 +1,71 @@
+####################################################
+# UILOVELACE - MAIN                                #
+####################################################
+
+- title: HVACs
+  icon: mdi:thermostat
+  # Unique path for direct access /lovelace/${path}
+  path: hvacs
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+  cards:
+    - type: vertical-stack
+      title: Living Room HVAC
+      cards:
+        - type: thermostat
+          entity: climate.living_room_hvac
+          name: ""
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - input_boolean.living_room_hvac_tilt
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: custom:fold-entity-row
+          head: sensor.living_room_temp
+          entities:
+            - sensor.living_room_temp
+            - sensor.living_room_hum
+            - type: custom:hui-element
+              card_type: markdown
+              # style: |
+                # ha-card {
+                  # box-shadow: 0px 10px 50px blue;
+                  # margin: 0px 0px 0px 0px;
+                # }
+              content: |
+                Air Temperature:    {{states.climate.living_room_hvac.attributes.air_temp}} °C
+                Room Temperature:   {{states.climate.living_room_hvac.attributes.room_temp}} °C
+                Room Humidty:       {{states.climate.living_room_hvac.attributes.room_hum}} %
+
+    # - type: custom:stack-in-card
+    #   title: My Stack In Card
+    #   mode: vertical
+    #   style: |
+    #     ha-card {
+    #       box-shadow: 0px 0px 50px blue;
+    #     }
+    #   cards:
+    #     - type: thermostat
+    #       entity: climate.living_room_hvac
+    #       name: ""
+    #     - type: custom:hui-element
+    #       card_type: markdown
+    #       style: |
+    #         ha-card {
+    #           box-shadow: 0px 0px 50px blue;
+    #           margin: 0px 0px 0px 0px;
+    #         }
+    #       content: |
+    #         Air Temperature:    {{states.climate.living_room_hvac.attributes.air_temp}} °C
+    #         Room Temperature:   {{states.climate.living_room_hvac.attributes.room_temp}} °C
+    #         Room Humidty:       {{states.climate.living_room_hvac.attributes.room_hum}} %
+              

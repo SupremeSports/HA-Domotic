@@ -1,0 +1,197 @@
+####################################################
+# UILOVELACE - POOL                                #
+####################################################
+
+- title: Pool Controls
+  icon: mdi:pool
+  # Unique path for direct access /lovelace/${path}
+  path: pool
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.pool_temperature
+    - sensor.pool_heater_temp
+    - sensor.pool_pump_temp
+    - sensor.pool_pressure
+    - sensor.pool_ph
+    - binary_sensor.pool_level_low
+    - binary_sensor.pool_level_high
+  cards:
+    - type: entities
+      title: Pool pump and heater
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.poolpump_status
+          entities:
+          - input_select.poolpump_mode
+          - binary_sensor.poolpump_security
+        - type: custom:fold-entity-row
+          head: sensor.pool_heater_status
+          entities:
+          - input_select.poolheat_mode
+          - input_number.pool_heater_setpoint
+          - type: "custom:secondaryinfo-entity-row"
+            entity: binary_sensor.pool_heater_run
+            secondary_info: 'Time last 24h: [[ sensor.pool_heater_timer_24h.attributes.value ]]'
+          - type: "custom:secondaryinfo-entity-row"
+            entity: binary_sensor.pool_heater_run
+            secondary_info: 'Time since midnight: [[ sensor.pool_heater_timer_today.attributes.value ]]'
+
+    - type: entities
+      title: Pool Water
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_temperature
+          entities:
+            - sensor.pool_temperature
+            - sensor.pool_heater_temp
+            - sensor.pool_pump_temp
+        - sensor.pool_pressure
+        - sensor.pool_ph
+        - binary_sensor.pool_level_low
+        - binary_sensor.pool_level_high
+        
+    - type: entities
+      title: Pool Lights Controller
+      show_header_toggle: false
+      entities:     
+        - type: custom:fold-entity-row
+          head: light.pool_water_rgb
+          entities:
+            - cover.pool_water_rgb
+    
+    - type: entities
+      title: Pool Filling
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.poolfiller_status
+          entities:
+          - type: "custom:secondaryinfo-entity-row"
+            entity: switch.pool_filler_valve
+            secondary_info: 'Time last 24h: [[ sensor.pool_filler_timer.attributes.value ]] / [[ if(input_number.pool_filler_runtime <= 0, "Unlimites", input_number.pool_filler_runtime) ]] minutes'
+          - input_select.poolfiller_mode
+          - binary_sensor.pool_level_low
+          - binary_sensor.pool_level_high
+          - type: custom:fold-entity-row
+            head: automation.pool_filler_control
+            entities:
+              - input_number.pool_filler_runtime
+              - input_number.pool_filler_start
+              - input_number.pool_filler_stop
+    
+    - type: entities
+      title: Pool Valves
+      show_header_toggle: false
+      entities:
+        - input_number.pool_drain_percent
+        - input_number.pool_heater_percent
+        - input_number.pool_slide_percent
+        - switch.pool_control_valves
+    
+    - type: entities
+      title: Pool Clock Display
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_clock_status
+          entities:
+          - light.pool_clock
+          - input_number.pool_clock_trans_speed
+          - input_text.pool_text_top
+          - input_text.pool_text_bottom
+          - input_number.pool_clock_scroll_speed
+    
+    - type: entities
+      title: Pool Cabin Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.pool_control_status
+          entities:
+            - input_boolean.pool_running
+            - sensor.pool_cabin_temperature
+            - sensor.pool_cabin_humidity
+            - sensor.pool_control_box_temperature
+            - sensor.pool_control_box_humidity
+            - sensor.pool_control_12v_voltage
+            - sensor.pool_control_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.pool_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.ted5000_mtu3_power
+          entities:
+            - sensor.ted5000_mtu3_power
+            - sensor.ted5000_mtu3_voltage
+            - sensor.pool_power_usage
+            - sensor.pool_daily_energy
+            - sensor.pool_monthly_energy
+        - type: custom:fold-entity-row
+          head: sensor.pool_fd_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: binary_sensor.pool_fd_opened
+                  icon: "mdi:door"
+                  state_icons:
+                    "on": "mdi:door-open"
+                    "off": "mdi:door"
+                - entity: input_boolean.pool_fd_lock
+                  icon: "mdi:lock"
+                - entity: input_boolean.pool_fd_unlock
+                  icon: "mdi:lock-open-outline"
+        - type: custom:fold-entity-row
+          head: sensor.pool_gates
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_deck
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_deck == unavailable, "N/A", if(binary_sensor.pool_gate_closed_deck == unknown, "N/A", sensor.pool_gate_count_deck)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_main
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_main == unavailable, "N/A", if(binary_sensor.pool_gate_closed_main == unknown, "N/A", sensor.pool_gate_count_main)) ]]'
+            - type: "custom:secondaryinfo-entity-row"
+              entity: binary_sensor.pool_gate_closed_pond
+              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_pond == unavailable, "N/A", if(binary_sensor.pool_gate_closed_pond == unknown, "N/A", sensor.pool_gate_count_pond)) ]]'
+            
+    - type: conditional
+      conditions:
+        - entity: switch.camera_poolarea
+          state: "on"
+      card:
+        type: vertical-stack
+        cards:          
+          - type: picture-entity
+            entity: camera.pool_area
+            camera_view: live
+            show_state: false
+            show_name: false
+            double_tap_action:
+              action: call-service
+              service: switch.toggle
+              service_data:
+                entity_id: switch.camera_poolarea
+          - type: custom:fold-entity-row
+            head: switch.camera_poolarea
+            entities:
+              - switch.camera_poolarea
+              - switch.camera_ir_poolarea
+              - binary_sensor.camera_motion_poolarea
+              - input_select.camera_mode_poolarea
+                
+    - type: conditional
+      conditions:
+        - entity: switch.camera_poolarea
+          state: "off"
+      card:
+        type: vertical-stack
+        cards:          
+          - type: entities
+            entities:
+              - switch.camera_poolarea
+
+            

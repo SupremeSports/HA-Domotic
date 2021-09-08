@@ -1,0 +1,98 @@
+####################################################
+# TEMPLATES - THERMOSTATS                          #
+####################################################
+
+  - sensor:
+
+    - name: Garage Front Temp
+      #unique_id: garage_front_temp
+      unit_of_measurement: '°C'
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      availability: >
+        {{ not is_state('binary_sensor.garagefrontheater_error', 'unavailable') or not is_state('sensor.garage_front_temp_raw', 'unavailable') }}
+      state: >
+        {% set room = states('sensor.garage_front_temp_raw') %}
+        
+        {% if states.sensor.garage_safety_heartbeat is defined %}
+          {% set heartbeat = ((as_timestamp(now()) - as_timestamp(states.sensor.garage_safety_heartbeat.last_changed))) <= 15 %}
+        {% else %}
+          {% set heartbeat = false %}
+        {% endif %}
+        
+        {% set ok = false %}
+        
+        {% set forceSafety = true %}
+        
+        {% if room|string == '---' or room|string == 'unknown' or room|string == 'unavailable' or room|float == -99.9 or room|float == -1 or forceSafety %}
+          {% if heartbeat %}
+            {% set room = states('sensor.garage_safety_front_temperature')|float %}
+            {% set ok = true %}
+          {% endif %}
+        {% else %}
+          {% set ok = true %}
+        {% endif %}
+        
+        {% if ok %}
+          {{ room | round(1) }}
+        {% else %}
+          {{ "Unknown" }}
+        {% endif %}
+      # attributes:
+        # heartbeat: "{{ states('sensor.garage_safety_heartbeat') }}"
+        # f_temp: "{{ states('sensor.garage_safety_front_temperature') }}"
+        # f_relay: "{{ is_state('binary_sensor.garage_front_safety_active','on') }}"
+        # f_aux: "{{ is_state('binary_sensor.garagefrontheater_ac','on') }}"
+        # f_coil: "{{ is_state('switch.garage_front_heater','on') }}"
+        # r_temp: "{{ states('sensor.garage_safety_rear_temperature') }}"
+        # r_aux: "{{ is_state('binary_sensor.garagerearheater_ac','on') }}"
+        # r_relay: "{{ is_state('binary_sensor.garage_rear_safety_active','on') }}"
+        # r_coil: "{{ is_state('switch.garage_rear_heater','on') }}"
+        
+    - name: Garage Rear Temp
+      #unique_id: garage_rear_temp
+      unit_of_measurement: '°C'
+      state_class: measurement
+      device_class: temperature
+      icon: mdi:thermometer
+      availability: >
+        {{ not is_state('binary_sensor.garagerearheater_error', 'unavailable') or not is_state('sensor.garage_rear_temp_raw', 'unavailable') }}
+      state: >
+        {% set room = states('sensor.garage_rear_temp_raw') %}
+        
+        {% if states.sensor.garage_safety_heartbeat is defined %}
+          {% set heartbeat = ((as_timestamp(now()) - as_timestamp(states.sensor.garage_safety_heartbeat.last_changed))) <= 15 %}
+        {% else %}
+          {% set heartbeat = false %}
+        {% endif %}
+        
+        {% set ok = false %}
+        
+        {% set forceSafety = true %}
+        
+        {% if room|string == '---' or room|string == 'unknown' or room|string == 'unavailable' or room|float == -99.9 or room|float == -1 or forceSafety %}
+          {% if heartbeat %}
+            {% set room = states('sensor.garage_safety_rear_temperature')|float %}
+            {% set ok = true %}
+          {% endif %}
+        {% else %}
+          {% set ok = true %}
+        {% endif %}
+        
+        {% if ok %}
+          {{ room | round(1) }}
+        {% else %}
+          {{ "Unknown" }}
+        {% endif %}
+      # attributes:
+        # heartbeat: "{{ states('sensor.garage_safety_heartbeat') }}"
+        # f_temp: "{{ states('sensor.garage_safety_front_temperature') }}"
+        # f_relay: "{{ is_state('binary_sensor.garage_front_safety_active','on') }}"
+        # f_aux: "{{ is_state('binary_sensor.garagefrontheater_ac','on') }}"
+        # f_coil: "{{ is_state('switch.garage_front_heater','on') }}"
+        # r_temp: "{{ states('sensor.garage_safety_rear_temperature') }}"
+        # r_aux: "{{ is_state('binary_sensor.garagerearheater_ac','on') }}"
+        # r_relay: "{{ is_state('binary_sensor.garage_rear_safety_active','on') }}"
+        # r_coil: "{{ is_state('switch.garage_rear_heater','on') }}"
+  

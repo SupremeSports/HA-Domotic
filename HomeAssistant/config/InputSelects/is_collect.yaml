@@ -1,0 +1,66 @@
+####################################################
+# INPUT SELECT - COLLECTS                          #
+####################################################
+      
+  collect_trash:
+    name: Collect Trash
+    icon: mdi:trash-can
+    options:
+      - Disabled
+      - Odd/Monday
+      - Odd/Tuesday
+      - Odd/Wednesday
+      - Odd/Thursday
+      - Odd/Friday
+      - Even/Monday
+      - Even/Tuesday
+      - Even/Wednesday
+      - Even/Thursday
+      - Even/Friday
+      - All/Monday
+      - All/Tuesday
+      - All/Wednesday
+      - All/Thursday
+      - All/Friday
+      
+  collect_recycle:
+    name: Collect Recycle
+    icon: mdi:recycle
+    options:
+      - Disabled
+      - Odd/Monday
+      - Odd/Tuesday
+      - Odd/Wednesday
+      - Odd/Thursday
+      - Odd/Friday
+      - Even/Monday
+      - Even/Tuesday
+      - Even/Wednesday
+      - Even/Thursday
+      - Even/Friday
+      - All/Monday
+      - All/Tuesday
+      - All/Wednesday
+      - All/Thursday
+      - All/Friday
+      
+  collect_compost:
+    name: Collect Compost
+    icon: mdi:sprout-outline
+    options:
+      - Disabled
+      - Odd/Monday
+      - Odd/Tuesday
+      - Odd/Wednesday
+      - Odd/Thursday
+      - Odd/Friday
+      - Even/Monday
+      - Even/Tuesday
+      - Even/Wednesday
+      - Even/Thursday
+      - Even/Friday
+      - All/Monday
+      - All/Tuesday
+      - All/Wednesday
+      - All/Thursday
+      - All/Friday
