@@ -1,0 +1,117 @@
+####################################################
+# SWITCHES - NIXIE CLOCK                           #
+####################################################
+    
+#   - platform: template
+#     switches:
+#       nixie_clock:
+#         value_template: "{{ is_state('light.nixie_clock', 'on') }}"
+#         turn_on:
+#           service: light.turn_on
+#           data:
+#             entity_id: light.nixie_clock
+#         turn_off:
+#           service: light.turn_off
+#           data:
+#             entity_id: light.nixie_clock
+#         availability_template: "{{ not is_state('light.nixie_clock', 'unavailable') }}"
+#         entity_picture_template: >
+#           {% if is_state('light.nixie_clock','on') %}
+#             /local/images/CustomMDI/nixietubes/dark_FBCD41.png
+#           {% elif is_state('light.nixie_clock','off') %}
+#             /local/images/CustomMDI/nixietubes/dark_007AFF.png
+#           {% else %}
+#             /local/images/CustomMDI/nixietubes/dark_48485E.png
+#           {% endif %}
+    
+  - platform: mqtt
+    name: Nixie Hour Mode
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.hrm }}"
+    payload_on: '{"hrm":"ON"}'
+    payload_off: '{"hrm":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Blank Leading Zero
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.bkl }}"
+    payload_on: '{"bkl":"ON"}'
+    payload_off: '{"bkl":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Enable Scroll Back
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.scb }}"
+    payload_on: '{"scb":"ON"}'
+    payload_off: '{"scb":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Suppress ACP
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.acp }}"
+    payload_on: '{"acp":"ON"}'
+    payload_off: '{"acp":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Use Fading
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.fde }}"
+    payload_on: '{"fde":"ON"}'
+    payload_off: '{"fde":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Use LDR
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.ldr }}"
+    payload_on: '{"ldr":"ON"}'
+    payload_off: '{"ldr":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    
+  - platform: mqtt
+    name: Nixie Slots Mode
+    icon: mdi:check-circle
+    state_topic: "Home/NixieClock/Stts"
+    command_topic: "Home/NixieClock/Cmd"
+    value_template: "{{ value_json.slt }}"
+    payload_on: '{"slt":"ON"}'
+    payload_off: '{"slt":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    

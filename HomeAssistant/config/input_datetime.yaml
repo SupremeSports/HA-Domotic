@@ -1,0 +1,68 @@
+####################################################
+# INPUT DATETIME                                   #
+####################################################
+
+  collect_trash_start:
+    name: Trash Last Normal Day
+    has_date: true
+    has_time: false
+  collect_trash_end:
+    name: Trash Last Summer Day
+    has_date: true
+    has_time: false
+    
+  collect_recycle_start:
+    name: Recycle Last Normal Day
+    has_date: true
+    has_time: false
+  collect_recycle_end:
+    name: Recycle Last Summer Day
+    has_date: true
+    has_time: false
+    
+  collect_compost_start:
+    name: Compost Last Normal Day
+    has_date: true
+    has_time: false
+  collect_compost_end:
+    name: Compost Last Summer Day
+    has_date: true
+    has_time: false
+    
+  last_postal_arrival:
+    name: Last Postal Arrival
+    has_date: true
+    has_time: true
+  last_postal_removal:
+    name: Last Postal Removal
+    has_date: true
+    has_time: true
+    
+  frontyardirrigation_start:
+    name: Frontyard Irrigation Start
+    has_time: true
+  frontyardirrigation_stop:
+    name: Frontyard Irrigation Stop
+    has_time: true
+    
+  backyardirrigation_start:
+    name: Backyard Irrigation Start
+    has_time: true
+  backyardirrigation_stop:
+    name: Backyard Irrigation Stop
+    has_time: true
+    
+  gardenirrigation_start:
+    name: Garden Irrigation Start
+    has_time: true
+  gardenirrigation_stop:
+    name: Garden Irrigation Stop
+    has_time: true
+    
+  gardenirrigationaux_start:
+    name: Garden Irrigation Aux Start
+    has_time: true
+  gardenirrigationaux_stop:
+    name: Garden Irrigation Aux Stop
+    has_time: true
+    

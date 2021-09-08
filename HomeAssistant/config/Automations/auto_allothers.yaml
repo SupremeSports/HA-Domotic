@@ -1,0 +1,391 @@
+###################################################
+# AUTOMATIONS                                     #
+###################################################
+
+  - alias: 'Set theme at startup'
+    mode: restart
+    trigger:
+      platform: homeassistant
+      event: start
+    action:
+      service: frontend.set_theme
+      data:
+        name: Dark - Blue
+
+  - alias: Restart HASS
+    trigger:
+      - platform: state
+        entity_id: input_boolean.restart_hass
+        from: 'off'
+        to: 'on'
+    action:
+      service: homeassistant.restart
+      
+  #Publish time to all devices every 5 minutes or when a device requests an update (boot up or invalid time detected (by the device))
+  - alias: Publish Time
+    mode: queued
+    max: 2
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: mqtt
+        topic: "Home/Global/Time/Request"
+        payload: 'ON'
+        encoding: 'utf-8'
+    condition:
+      condition: or
+      conditions: 
+        - condition: template
+          value_template: '{{ states.automation.publish_time.attributes.last_triggered == none }}'
+        - condition: template
+          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.publish_time.attributes.last_triggered) > 10 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Global/Time"
+        #IMPORTANT - Always send a delimiter at the end of the string for parsing to succeed
+        payload_template: >-
+          {% if is_state('sun.sun', "below_horizon") %}
+            {% set sun = 1 %}
+          {% else %}
+            {% set sun = 0 %}
+          {% endif %}
+          
+          {{ '{:04}:{:02}:{:02}:{:02}:{:02}:{:02}:{:02}:'.format(now().year, now().month, now().day, now().hour, now().minute, now().second, sun) }}
+        
+  - alias: Daily Backup 2AM
+    trigger:
+      platform: time
+      at: '2:00:00'
+    action:
+      service: hassio.snapshot_partial
+      data_template:
+        name: Automated Backup {{ now().strftime('%Y-%m-%d') }}
+        addons:
+        #   - a0d7b954_home-panel
+        #   - a0d7b954_influxdb
+          - a0d7b954_chrony
+          - a0d7b954_grocy
+          - core_configurator
+          - core_samba
+          - core_duckdns
+          - core_mosquitto
+        folders:
+        - homeassistant
+        - ssl
+#        - share
+#        - addons_local.tar
+
+  - alias: Purge Database 3AM
+    initial_state: True
+    trigger:
+      platform: time
+      at: '03:00:00'
+    action:
+      service: recorder.purge
+      data:
+        keep_days: 2
+        repack: true
+
+  - alias: Daily Backup Cleanup 4AM
+    trigger: 
+      platform: time
+      at: '04:00:00'
+    action:
+      - service: clean_up_snapshots_service.clean_up
+
+  # - alias: Water valve ON
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Opened'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_open
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Opened'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_open
+      
+  # - alias: Water valve OFF
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Closed'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_close
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Closed'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_close
+      
+  # #Force water valve off if the feedback signal fails (prevent water leaks)
+  # - alias: Water valve Force Off
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Unknown'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'off'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'off'
+        # for: '00:00:20'
+    # condition:
+      # - condition: state
+        # entity_id: sensor.water_valve_status
+        # state: 'Unknown'
+    # action:
+      # service: switch.turn_on
+      # entity_id: switch.water_valve_close
+          
+  - alias: Heartbeat Seconds
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        seconds: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: counter.configure
+        entity_id: counter.second_counter
+        data_template:
+          value: "{{ now().second | int }}"
+      - service: homeassistant.update_entity
+        entity_id: sensor.flashing_1s
+      - service: homeassistant.update_entity
+        entity_id: sensor.times
+
+  - alias: Heartbeat Minutes
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        minutes: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: counter.configure
+        entity_id: counter.minute_counter
+        data_template:
+          value: "{{ now().minute | int }}"
+      - service: homeassistant.update_entity
+        entity_id: sensor.flashing_1m
+      - service: homeassistant.update_entity
+        entity_id: sensor.dates
+
+  - alias: Heartbeat Hours
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        hours: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - delay: 
+          seconds: 5
+        
+  - alias: Home Assistant Started
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '*'
+    action:
+      - delay: 
+          seconds: 5
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.running_hass
+        
+  - alias: Update entities
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        hours: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: script.update_entities
+
+  - alias: Doorchime TF Trigger
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_bell
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: template
+        value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.doorchime_tf_trigger.attributes.last_triggered) > 2 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Chime/Top/Cmd"
+        #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume
+        payload: '{"state":"ON","sound":"{{ states.input_select.doorchime_tf_sound.attributes.options.index(states.input_select.doorchime_tf_sound.state) }}","volume":"{{ states.input_number.doorchime_tf_volume.state|int }}"}'
+
+  - alias: Doorchime BF Trigger
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.house_fd_bell
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: template
+        value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.doorchime_bf_trigger.attributes.last_triggered) > 2 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Chime/Bottom/Cmd"
+        #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume
+        payload: '{"state":"ON","sound":"{{ states.input_select.doorchime_bf_sound.attributes.options.index(states.input_select.doorchime_bf_sound.state) }}","volume":"{{ states.input_number.doorchime_bf_volume.state|int }}"}'
+
+  - alias: Shut Soldering Station Warning
+    mode: restart
+    trigger:
+      - platform: template
+        value_template: '{{ states.sensor.soldering_station_status.state == "On" }}'
+        for:
+          minutes: "{{ states('input_number.soldering_station')|int(0) - 5 }}"
+    action:
+      - service: notify.sms_jean
+        data:
+          title: "Soldering Station - Warning"
+          message: "Soldering Station will turn off in 5 minutes"
+          
+  - alias: Shut Soldering Station Shutdown
+    mode: restart
+    trigger:
+      - platform: template
+        value_template: '{{ states.sensor.soldering_station_status.state == "On" }}'
+        for:
+          minutes: "{{ states('input_number.soldering_station')|int(0) }}"
+    action:
+      - service: switch.turn_off
+        entity_id: switch.soldering_station
+      - service: notify.sms_jean
+        data:
+          title: "Soldering Station OFF"
+          message: "Soldering Station has been turned off"
+          
+  - alias: Control Boxes
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          - input_boolean.control_room_control_reset
+          - input_boolean.pond_control_reset
+          - input_boolean.pool_control_reset
+          - input_boolean.weather_control_reset
+          - input_boolean.garage_main_control_reset
+          - input_boolean.garage_slave_control_reset
+          - input_boolean.shed_control_reset
+        to: 'on'
+    condition:
+      condition: state
+      entity_id: script.control_boxes
+      state: 'off'
+    action:
+      - service: script.control_boxes
+        data_template:
+          entity_id: 
+            "{% if 'weather' in trigger.to_state.entity_id %}Outside/WStation
+            {% elif 'pond' in trigger.to_state.entity_id %}Pond/Control
+            {% elif 'pool' in trigger.to_state.entity_id %}Pool/Control
+            {% elif 'control_room' in trigger.to_state.entity_id %}Home/Control
+            {% elif 'garage_main' in trigger.to_state.entity_id %}Garage/Control
+            {% elif 'garage_slave' in trigger.to_state.entity_id %}Garage/Slave
+            {% elif 'shed' in trigger.to_state.entity_id %}Shed/Control
+            {%else%}none
+            {%endif%}"
+          
+  - alias: Create Groups
+    trigger:
+      platform: homeassistant
+      event: start
+    action:
+      - service: group.set
+        data:
+          object_id: pool_sensors
+          entities: >-
+            {%- for s in states
+              if ('pool' in s.entity_id) %}
+              {{s.entity_id}}{% if not loop.last %}, {% endif %}
+            {%- endfor %}
+      - service: group.set
+        data:
+          object_id: pond_sensors
+          entities: >-
+            {%- for s in states
+              if ('pond' in s.entity_id) %}
+              {{s.entity_id}}{% if not loop.last %}, {% endif %}
+            {%- endfor %}
+       
+  - alias: Living Room HVAC Tilt
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:  input_boolean.living_room_hvac_tilt
+        to: 'on'
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Home/Living/Hvac/Tilt/Cmd"
+          payload_template: >-
+            {{ "On" }}
+      - delay: 
+          milliseconds: 500
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.living_room_hvac_tilt
+      

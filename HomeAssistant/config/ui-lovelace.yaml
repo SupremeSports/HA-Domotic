@@ -1,0 +1,17 @@
+####################################################
+# UILOVELACE - YAML                                #
+####################################################
+
+## IMPORTANT - You need to edit and resave THIS file 
+## after making a change in the Lovelace folder in
+## order to changes to be refelected after a refresh
+
+title: Cindy & Jean
+preload_cards:
+  - markdown
+  - gauge
+preload_rows:
+  - divider
+  
+views: !include_dir_merge_list UILovelace
+

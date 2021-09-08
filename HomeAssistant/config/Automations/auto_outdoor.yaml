@@ -1,0 +1,314 @@
+###################################################
+# AUTOMATIONS - OUTDOOR & YARD                    #
+###################################################
+
+  - alias: Lamp Post Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.lamppost_mode
+    action:
+      entity_id: switch.lamp_post
+      service_template: >
+        {% set time = now().hour %}
+        {% set LP = false %}
+        {% set GFD = as_timestamp(now()) - as_timestamp(states.lock.garage_fd_lock.last_changed) > 300 and is_state('lock.garage_fd_lock', 'locked') %}
+        {% set HFD = as_timestamp(now()) - as_timestamp(states.lock.house_fd_lock.last_changed) > 300 and is_state('lock.house_fd_lock', 'locked') %}
+        {% set SUN = is_state('sun.sun', 'below_horizon') %}
+        {% if is_state('input_select.lamppost_mode', '24/7') %}
+          {% set LP = true %}
+        {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h')  %}
+          {% set LP = (SUN and time>12 and time<23) or (SUN and not (GFD and HFD)) %}
+        {% elif is_state('input_select.lamppost_mode', 'Sunset to Sunrise') %}
+          {% set LP = SUN %}
+        {% endif %}
+        
+        {% if LP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+      
+  - alias: Power Outlet Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.poweroutlet_mode
+    action:
+      entity_id: switch.power_outlet
+      service_template: >
+        {% set time = now().hour %}
+        {% set date = now().strftime("%m-%d") %}
+        {% set sunset_hour = as_timestamp(states.sun.sun.attributes.next_setting)|int %}
+        {% set sunset_early = ((sunset_hour - 60*60) | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
+        {% set PO = false %}
+        {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+          {% set PO = true %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+          {% if is_state('sun.sun', 'above_horizon') or (time > 12 and time < 22) %}
+            {% set PO = true %}
+          {% elif is_state('binary_sensor.antifreeze_active', 'on') %}
+            {% set PO = true %}
+          {% endif %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set PO = true %}
+          {% elif date == "10-31" and time >= 7 %}
+            {% set PO = true %}
+          {% endif %}
+        {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set PO = true %}
+          {% elif (date == "12-24" and time >= 7) or date == "12-25" %}
+            {% set PO = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if PO == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Front Door Light Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: switch.lamp_post
+    action:
+      entity_id: switch.front_door_light
+      service_template: >
+        {% set time = now().hour %}
+        {% set lampPost = is_state('switch.lamp_post', 'on') %}
+        
+        {% set FDL = false %}
+        
+        {% if lampPost and time < 23  and time > 12%}
+          {% set FDL = true %}
+        {% endif %}
+        
+        {% if FDL == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  - alias: Garage Front Light Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.garagefrontlight_mode
+    action:
+      entity_id: switch.garage_front_light
+      service_template: >
+        {% set time = now().hour %}
+        {% set GFD = as_timestamp(now()) - as_timestamp(states.lock.garage_fd_lock.last_changed) > 300 and is_state('lock.garage_fd_lock', 'locked') %}
+        {% set GFL = false %}
+        {% set GFP = is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') and is_state('switch.garage_front_power', 'on') and GFD %}
+        {% if is_state('input_select.garagefrontlight_mode', '24/7') %}
+          {% set GFL = true %}
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to 23h') and not GFP %}
+          {% set GFL = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to Sunrise') and not GFP %}
+          {% set GFL = is_state('sun.sun', 'below_horizon') %}
+        {% endif %}
+        
+        {% if GFL == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Garage Front Power Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.garagefrontpower_mode
+    action:
+      entity_id: switch.garage_front_power
+      service_template: >
+        {% set time = now().hour %}
+        {% set date = now().strftime("%m-%d") %}
+        {% set sunset_hour = as_timestamp(states.sun.sun.attributes.next_setting)|int %}
+        {% set sunset_hour = sunset_hour - 60*60 %}
+        {% set sunset_early = (sunset_hour | timestamp_custom('%H:%M')) < (as_timestamp(now()) | timestamp_custom('%H:%M')) %}
+        {% set GFP = false %}
+        {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
+          {% set GFP = true %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Sunset to 23h') %}
+          {% set GFP = is_state('sun.sun', 'below_horizon') and time > 12 and time < 23 %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Sunset to Sunrise') %}
+          {% set GFP = is_state('sun.sun', 'below_horizon') %}
+        {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+          {% if (sunset_early or time >= 16) and time < 23 %}
+            {% set GFP = true %}
+          {% elif (date == "12-24" and time >= 7) or date == "12-25" %}
+            {% set GFP = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if GFP == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+
+  - alias: Frontyard Irrigation Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.frontyardirrigation_mode
+      - platform: state
+        entity_id: input_datetime.frontyardirrigation_start
+      - platform: state
+        entity_id: input_datetime.frontyardirrigation_stop
+    action:
+      entity_id: switch.frontyard_irrigation
+      service_template: >
+        {% set FYI = false %}
+        
+        {% if is_state('input_select.frontyardirrigation_mode', '24/7') %}
+          {% set FYI = true %}
+        {% elif is_state('input_select.frontyardirrigation_mode', 'Auto') %}
+          {% set start = states('sensor.time') >= state_attr('input_datetime.frontyardirrigation_start', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+          {% set stop = states('sensor.time') < state_attr('input_datetime.frontyardirrigation_stop', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+        
+          {% if start and stop %}
+            {% set FYI = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if FYI == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Backyard Irrigation Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.backyardirrigation_mode
+      - platform: state
+        entity_id: input_datetime.backyardirrigation_start
+      - platform: state
+        entity_id: input_datetime.backyardirrigation_stop
+    action:
+      entity_id: switch.backyard_irrigation
+      service_template: >
+        {% set BYI = false %}
+        
+        {% if is_state('input_select.backyardirrigation_mode', '24/7') %}
+          {% set BYI = true %}
+        {% elif is_state('input_select.backyardirrigation_mode', 'Auto') %}
+          {% set start = states('sensor.time') >= state_attr('input_datetime.backyardirrigation_start', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+          {% set stop = states('sensor.time') < state_attr('input_datetime.backyardirrigation_stop', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+        
+          {% if start and stop %}
+            {% set BYI = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if BYI == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Garden Irrigation Control
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: state
+        entity_id: input_select.gardenirrigation_mode
+      - platform: state
+        entity_id: input_datetime.gardenirrigation_start
+      - platform: state
+        entity_id: input_datetime.gardenirrigation_stop
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: 'script.gardenirrigation_start30m'
+          state: 'off'
+        - condition: state
+          entity_id: 'script.gardenirrigation_start1h'
+          state: 'off'
+    action:
+      entity_id: switch.garden_irrigation
+      service_template: >
+        {% set GI = false %}
+        
+        {% if is_state('input_select.gardenirrigation_mode', '24/7') %}
+          {% set GI = true %}
+        {% elif is_state('input_select.gardenirrigation_mode', 'Auto') %}
+          {% set start = states('sensor.time') >= state_attr('input_datetime.gardenirrigation_start', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+          {% set stop = states('sensor.time') < state_attr('input_datetime.gardenirrigation_stop', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+          
+          {% if start and stop %}
+            {% set GI = true %}
+          {% elif is_state('input_select.gardenirrigationaux_mode', 'Auto') %}
+            {% set startaux = states('sensor.time') >= state_attr('input_datetime.gardenirrigationaux_start', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+            {% set stopaux = states('sensor.time') < state_attr('input_datetime.gardenirrigationaux_stop', 'timestamp') | int | timestamp_custom('%H:%M', False) %}
+            {% if startaux and stopaux %}
+              {% set GI = true %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        
+        {% if GI == true %}
+          switch.turn_on
+        {% else %}
+          switch.turn_off
+        {% endif %}
+        
+  - alias: Garden Irrigation Force Start
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.gardenirrigation_start1h
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.gardenirrigation_start30m
+        to: 'on'
+      - platform: state
+        entity_id: input_boolean.gardenirrigation_cancel
+        to: 'on'
+    action:
+      - service_template: script.{% if '30m' in trigger.to_state.entity_id %}gardenirrigation_start30m{% elif '1h' in trigger.to_state.entity_id %}gardenirrigation_start1h{% else %}gardenirrigation_cancel{% endif %}
+        
+  - alias: Shed Inside Light
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: sensor.shed_fd_status
+          state: 'Ok'
+          for:
+            minutes: 5
+        - condition: state
+          entity_id: 'switch.shed_inside_light'
+          state: 'on'
+    action:
+      - service: switch.turn_off
+        entity_id: switch.shed_inside_light
+        

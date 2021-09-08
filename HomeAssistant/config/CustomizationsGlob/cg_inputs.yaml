@@ -1,0 +1,41 @@
+##########################################
+# GLOBAL CUSTOMIZATIONS - INPUTS         #
+#     NUMBERS                            #
+#     SELECT                             #
+#     BOOLEANS                           #
+#     TEXT                               #
+##########################################
+
+  input*.*:
+    hide_attributes:
+      - templates
+      - icon_color
+
+#   input_boolean.*:
+#     #state_color: true
+#     templates:
+#       icon_color: >
+#         if (state === 'on') return 'var(--state-icon-active-color)';
+#         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+#         return 'var(--state-icon-color)';
+        
+  input_number.doorchime_*_volume:
+    #state_color: true
+    templates:
+      icon: >
+        if (state >= 6) return 'mdi:volume-high';
+        if (state >= 4) return 'mdi:volume-medium';
+        if (state >= 2) return 'mdi:volume-low';
+        return 'mdi:volume-variant-off';
+        
+  input_boolean.*_air_valve:
+    #state_color: true
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:valve-open';
+        if (state === 'off') return 'mdi:valve-closed';
+        return 'mdi:help';
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';

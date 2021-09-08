@@ -1,0 +1,17 @@
+####################################################
+# INPUT SELECT - CAMERAS                           #
+####################################################
+
+  camera_mode_poolarea:
+    name: Camera Mode - Pool Area
+    icon: mdi:calendar-clock
+    options:
+      - QQVGA 160x120
+      - HQVGA 240x176
+      - QVGA 320x240
+      - CIF 400x296
+      - VGA 640x480
+      - SVGA 800x600
+      - XGA 1024x768
+      - SXGA 1280x1024
+      - UXGA 1600x1200

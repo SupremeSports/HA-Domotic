@@ -1,0 +1,180 @@
+###################################################
+# AUTOMATIONS - LOCKS & DOORS                     #
+###################################################
+
+  #Automation for ALL doors lock/unlock
+  # - Add the two "input_boolean" to trigger list
+  # - All the rest is dynamically filled with the trigger source
+  - alias: Doors Lock Unlock
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: 
+          input_boolean.house_fd_lock, input_boolean.house_fd_unlock, 
+          input_boolean.house_sd_lock, input_boolean.house_sd_unlock, 
+          input_boolean.house_bd_lock, input_boolean.house_bd_unlock, 
+          input_boolean.garage_fd_lock, input_boolean.garage_fd_unlock,
+          input_boolean.shed_fd_lock, input_boolean.shed_fd_unlock,
+          input_boolean.pool_fd_lock, input_boolean.pool_fd_unlock,
+          input_boolean.lock_all
+        to: 'on'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: script.lockall
+          state: 'off'
+        - condition: state
+          entity_id: script.unlock
+          state: 'off'
+        - condition: state
+          entity_id: script.lock
+          state: 'off'
+        - condition: state
+          entity_id: script.clear_lock
+          state: 'off'
+    action:
+    #   - service: notify.ios_jean_iphone
+    #     data_template:
+    #       title: "Request to {% if 'unlock' in trigger.to_state.entity_id %}UNLOCK{% elif 'lock' in trigger.to_state.entity_id %}LOCK{%endif%}"
+    #       message: "Mot de passe {% if is_state('sensor.lock_passcode_ok', 'off') and 'unlock' in trigger.to_state.entity_id %}INCORRECT{% else %}OK{% endif %}!"
+      - service_template: script.{% if 'lock_all' in trigger.to_state.entity_id %}lockall{% elif 'unlock' in trigger.to_state.entity_id and is_state('sensor.lock_passcode_ok', 'on') %}unlock{% elif 'lock' in trigger.to_state.entity_id %}lock{% else %}clear_lock{% endif %}
+        data_template:
+          entity_id: "{{ trigger.to_state.entity_id|replace('input_boolean.','')|replace('_unlock','')|replace('_lock','') }}"
+
+  #Needed to set the lock on right or lock on left of powerbolt2 lock devices
+  #  Add ALL lock.* in the trigger and add an action for each of them
+  - alias: Door Lock Modes
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: 
+          lock.house_fd_lock, lock.house_sd_lock, lock.house_bd_lock, 
+          lock.garage_fd_lock
+    condition:
+      condition: or
+      conditions: 
+        - condition: template
+          value_template: '{{ states.automation.door_lock_modes.attributes.last_triggered == none }}'
+        - condition: template
+          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.door_lock_modes.attributes.last_triggered) > 5 }}'
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Home/Door/Front/Mode"
+          payload: "{mode:right}"
+      - service: mqtt.publish
+        data_template:
+          topic: "Home/Door/Side/Mode"
+          payload: "{mode:right}"
+      - service: mqtt.publish
+        data_template:
+          topic: "Garage/Door/Front/Mode"
+          payload: "{mode:left}"
+          
+  - alias: Garage Door Opener
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: 
+          input_boolean.garage_cd_trigger
+        to: 'on'
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: script.garagedoor
+          state: 'off'
+        - condition: state
+          entity_id: script.clear_garagedoor
+          state: 'off'
+    action:
+      - service_template: script.{% if is_state('cover.garage_cd_opener', 'closed') and is_state('sensor.lock_passcode_ok', 'on') %}garagedoor{% elif not is_state('cover.garage_cd_opener', 'closed') %}garagedoor{% else %}clear_garagedoor{% endif %}
+        data_template:
+          entity_id: "{{ trigger.to_state.entity_id|replace('input_boolean.','')|replace('_trigger','') }}"
+      
+  - alias: Cars Control
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id:
+          input_boolean.cars_lexus_lock, input_boolean.cars_lexus_unlock, input_boolean.cars_lexus_start, input_boolean.cars_lexus_other1,
+          input_boolean.cars_journey_lock, input_boolean.cars_journey_unlock, input_boolean.cars_journey_start
+        to: 'on'
+    condition:
+      condition: state
+      entity_id: script.cars
+      state: 'off'
+    action:
+      - service: script.cars
+        data_template:
+          command: "{% if 'unlock' in trigger.to_state.entity_id %}unlock{% elif 'lock' in trigger.to_state.entity_id %}lock{% elif 'start' in trigger.to_state.entity_id %}start{% elif 'other1' in trigger.to_state.entity_id %}other1{% elif 'other2' in trigger.to_state.entity_id %}other2{% elif 'other3' in trigger.to_state.entity_id %}other3{%else%}none{%endif%}"
+          id: "{% if 'lexus' in trigger.to_state.entity_id %}1{% elif 'journey' in trigger.to_state.entity_id %}2{%else%}0{%endif%}"
+          entity_id: "{{ trigger.to_state.entity_id }}"
+          
+  - alias: Lexus Morning Start
+    mode: restart
+    trigger:
+      - platform: time
+        at: "07:25:00"
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: device_tracker.life360_jean
+          state: 'home'
+        - condition: state
+          entity_id: input_select.workplace_jean
+          state: 'Office'
+        - condition: state
+          entity_id: binary_sensor.workday_jean
+          state: 'on'
+        - condition: numeric_state
+          entity_id: sensor.outdoor_temperature
+          below: 5
+    action:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.cars_lexus_start
+      - service: notify.sms_jean
+        data:
+          message: "Lexus has been started..."
+          
+  - alias: Lexus Lock at home
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: device_tracker.life360_jean
+        to: 'home'
+        for: '00:10:00'
+    condition:
+      condition: template
+      value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('device_tracker.life360_jean', 'at_loc_since'))|int) < 720 }}"
+    action:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.cars_lexus_lock
+      - condition: time
+        after: '08:00:00'
+        before: '22:00:00'
+      - service: notify.sms_jean
+        data:
+          message: "Lexus has been locked..."
+        
+  - alias: Journey Lock at home
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: device_tracker.life360_cindy
+        to: 'home'
+        for: '00:10:00'
+    condition:
+      condition: template
+      value_template: "{{ (as_timestamp(now()) - as_timestamp(state_attr('device_tracker.life360_cindy', 'at_loc_since'))|int) < 720 }}"
+    action:
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.cars_journey_lock
+      - condition: time
+        after: '08:00:00'
+        before: '22:00:00'
+      - service: notify.sms_cindy
+        data:
+          message: "Journey has been locked..."

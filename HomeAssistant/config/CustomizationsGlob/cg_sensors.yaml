@@ -1,0 +1,110 @@
+##########################################
+# GLOBAL CUSTOMIZATIONS - SENSORS        #
+##########################################
+
+  sensor.*:
+    #state_color: true
+    hide_attributes:
+      - templates
+      - icon_color
+    
+  sensor.*_control_status:
+    #state_color: true
+    templates:
+      icon_color: >
+        if (state === 'Running...') return 'var(--state-icon-active-color)';
+        if (state === 'Winterized') return '#00FFFF';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'red';
+        
+  sensor.*_heater_status:
+    templates:
+      icon_color: >
+        if (state === 'Ready') return 'var(--state-icon-color)';
+        if (state === 'Off') return 'var(--state-icon-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-active-color)';
+        
+  sensor.garage_safety_*_temperature:
+      icon_color: >
+        if (state < 6.0 ) return 'blue';
+        if (state > 20.0 ) return 'red';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'green';
+    
+  sensor.ted5000_mtu*_power:
+    icon: mdi:transmission-tower
+    templates:
+      icon_color: >
+        if (state >= 6000)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state >= 5000) return 'red';
+        if (state >= 4000) return '#FFA500';
+        if (state >= 2500) return '#FFFF00';
+        if (state > 0) return '#00FF00';
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.ted5000_mtu*_voltage:
+    icon: mdi:flash
+    templates:
+      icon_color: >  
+        if (state > 250 || state < 230)
+        {
+          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if (state > 245 || state < 235) return 'red';
+        if (state > 0) return '#00FF00'; 
+        return 'var(--state-icon-unavailable-color)';
+
+  sensor.*_*d_status:
+    templates:
+      icon: >
+        if (state === 'Ok') return 'mdi:shield-lock';
+        if (state === 'Unlocked') return 'mdi:shield-remove';
+        if (state === 'Opened') return 'mdi:door-open';
+        return 'mdi:close-octagon';
+      icon_color: >
+        if (state === 'Ok') return 'green';
+        if (state === 'Unlocked') return 'red';
+        if (state === 'Opened') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'red';
+        
+  sensor.*_bed_presence:
+    templates:
+      icon_color: >
+        if (state === 'Empty') return 'var(--state-icon-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-active-color)';
+        
+  sensor.*pump_status:
+    #state_color: true
+    templates:
+      icon_color: >
+        if (state === 'On') return 'var(--state-icon-active-color)';
+        if (state === 'Run Low Temp') return '#1920FF';
+        if (state === 'Low Level') return '#FF0000';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+        
+  sensor.*_air_valve:
+    #state_color: true
+    templates:
+      icon: >
+        if (state === 'Opened') return 'mdi:valve-open';
+        if (state === 'Closed') return 'mdi:valve-closed';
+        if (state === 'Opening') return 'mdi:valve';
+        if (state === 'Closing') return 'mdi:valve';
+        return 'mdi:help';
+      icon_color: >
+        if (state === 'Opened') return 'var(--state-icon-active-color)';
+        if (state === 'Closed') return 'var(--state-icon-color)';
+        if (state === 'Opening') return 'var(--state-icon-active-color)';
+        if (state === 'Closing') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'red';
+        
