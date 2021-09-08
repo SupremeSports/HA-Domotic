@@ -2,6 +2,7 @@
 # BINARY SENSORS - LOCKS and DOORS                 #
 ####################################################
 
+# BELLS
   - platform: mqtt
     name: House FD Bell
     state_topic: "Home/Door/Front/Sensors/Stts"
@@ -41,7 +42,8 @@
     payload_on: "ON"
     payload_off: "OFF"
     qos: 0
-    
+
+# DOOR SENSORS
   - platform: mqtt
     name: House FD Opened
     state_topic: "Home/Door/Front/Sensors/Stts"

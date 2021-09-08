@@ -1,6 +1,7 @@
 ####################################################
 # BINARY SENSORS                                   #
 ####################################################
+#See other sensors templates in Templates/t_allothers.yaml
 
   - platform: workday
     name: Workday Jean
@@ -49,66 +50,3 @@
     entity_id: sensor.outdoor_temperature
     lower: 5.0
     hysteresis: 0.75
-    
-  - platform: template
-    sensors:
-      power_peakperiod:
-        friendly_name: "Hydro-Québec Peak Period"
-        device_class: cold
-        value_template: >
-          {% set month = state_attr('sensor.dates', 'month')|int %}
-          {% set hourmin = state_attr('sensor.times', 'hourmin')|int %}
-          {% set T = states('sensor.outdoor_temperature')|float %}
-          
-          {% if month in (12,1,2,3) and T < -20.0 %}
-            {% if hourmin >= 600 and hourmin <= 900 %}
-              {{ true }}
-            {% elif hourmin >= 1600 and hourmin <= 2000 %}
-              {{ true }}
-            {% else %}
-              {{ false }}
-            {% endif %}
-          {% else %}
-            {{ false }}
-          {% endif %}
-      
-      reset_sensors_graphs:
-        friendly_name: "Reset Sensors Graphs"
-        value_template: >
-          {% if state_attr('sensor.times', 'sec_midnight')|int < 5 %}
-            {{ true }}
-          {% elif is_state('input_boolean.force_reset_graphs', 'on') %}
-            {{ true }}
-          {% else %}
-            {{ false }}
-          {% endif %}
-
-      ha_update_available:
-        friendly_name: "HA Update Available"
-        availability_template: >-
-          {{ states('sensor.ha_installed_version') != 'unavailable' and 
-                states('sensor.ha_installed_version') != 'unknown' and 
-                states('sensor.ha_latest_version') != 'unavailable' and 
-                states('sensor.ha_latest_version') != 'unknown' }}
-        value_template: >
-          {% if states('sensor.ha_installed_version') != states('sensor.ha_latest_version') %}
-            {{ true }}
-          {% else %}
-            {{ false }}
-          {% endif %}
-        icon_template: >
-          {% if states('sensor.ha_installed_version') == 'unavailable' or states('sensor.ha_installed_version') == 'unknown' or states('sensor.ha_latest_version') == 'unavailable' or states('sensor.ha_latest_version') == 'unknown' %}
-            mdi:cloud-question
-          {% elif states('sensor.ha_installed_version') != states('sensor.ha_latest_version') %}
-            mdi:cloud-download
-          {% elif states('sensor.ha_installed_version') == states('sensor.ha_latest_version') %}
-            mdi:cloud-check
-          {% else %}
-            mdi:cloud-question
-          {% endif %}
-        attribute_templates:
-          current: "{{ states('sensor.ha_installed_version') }}"
-          latest: "{{ states('sensor.ha_latest_version') }}"
-          major_update: "{{ states('sensor.ha_latest_version')[5:]|int - states('sensor.ha_installed_version')[5:]|int > 0 }}"
-          breaking_changes: "{{ states('sensor.potential_breaking_changes') }}"
-          

@@ -1,0 +1,28 @@
+###################################################
+# AUTOMATIONS - DATA LOGGING                      #
+###################################################
+  
+  - alias: sensor_values_to_file
+    initial_state: 'on'
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    action:
+      - service: notify.filenotify
+        data_template: 
+          message: >
+            MTU1: {{ states.sensor.ted5000_mtu1_power.state }};{{ states.sensor.ted5000_mtu1_voltage.state }}
+            MTU2: {{ states.sensor.ted5000_mtu2_power.state }};{{ states.sensor.ted5000_mtu2_voltage.state }}
+            MTU3: {{ states.sensor.ted5000_mtu3_power.state }};{{ states.sensor.ted5000_mtu3_voltage.state }}
+            
+            
+  - alias: rename_datalogging_files
+    initial_state: 'on'
+    trigger:
+    - at: '00:00:01'
+      platform: time
+    condition:
+      - condition: template
+        value_template: "{{ now().day == 1 }}"
+    action:
+      service: shell_command.rename_energy_log

@@ -13,7 +13,7 @@
       - platform: time_pattern
         seconds: '/5'
       - platform: state
-        entity_id: input_select.pondpump_mode
+        entity_id: input_select.pondwaterfallpump_mode
     action:
       entity_id: switch.pond_pump
       service_template: >
@@ -21,19 +21,19 @@
         {% set curWeekday = now().weekday() %}
         {% set PP = false %}
         
-        {% if is_state('input_select.pondpump_mode', '24/7') %}
+        {% if is_state('input_select.pondwaterfallpump_mode', '24/7') %}
           {% set PP = true %}
-        {% elif is_state('input_select.pondpump_mode', 'Spring') %}
+        {% elif is_state('input_select.pondwaterfallpump_mode', 'Spring') %}
           {% if curHour >= 8 and curHour < 20 %}
             {% set PP = true %}
           {% elif curHour >= 0 and curHour < 4 %}
             {% set PP = true %}
           {% endif %}
-        {% elif is_state('input_select.pondpump_mode', 'Summer') %}
+        {% elif is_state('input_select.pondwaterfallpump_mode', 'Summer') %}
           {% if curWeekday in (0,1,2,3,6) %}
-            {% if curHour >= 6 and curHour < 18 %}
+            {% if curHour >= 6 and curHour < 21 %}
               {% set PP = true %}
-            {% elif curHour >= 22 or curHour < 2 %}
+            {% elif curHour >= 0 and curHour < 3 %}
               {% set PP = true %}
             {% endif %}
           {% else %}
@@ -43,7 +43,7 @@
               {% set PP = true %}
             {% endif %}
           {% endif %}
-        {% elif is_state('input_select.pondpump_mode', 'Autumn') %}
+        {% elif is_state('input_select.pondwaterfallpump_mode', 'Autumn') %}
           {% if curHour >= 2 and curHour < 6 %}
             {% set PP = true %}
           {% elif curHour >= 9 and curHour < 11 %}
@@ -55,7 +55,7 @@
           {% endif %}
         {% endif %}
         
-        {% if not is_state('input_select.pondpump_mode', 'Winter/Off') and is_state('binary_sensor.antifreeze_active', 'on') %}
+        {% if not is_state('input_select.pondwaterfallpump_mode', 'Winter/Off') and is_state('binary_sensor.antifreeze_active', 'on') %}
           {% set PP = true %}
         {% endif %}
         
@@ -140,7 +140,7 @@
           
           {% if lastDay >= maxDailyTime %}
             {% set PF = false %}
-          {% elif is_state('input_select.pondfiller_mode', 'Winter/Off') or is_state('input_select.pondpump_mode', 'Winter/Off') %}
+          {% elif is_state('input_select.pondfiller_mode', 'Winter/Off') or is_state('input_select.pondwaterfallpump_mode', 'Winter/Off') %}
             {% set PF = false %}
           {% elif is_state('binary_sensor.pond_level_high', 'unavailable') %}
             {% set PF = false %}

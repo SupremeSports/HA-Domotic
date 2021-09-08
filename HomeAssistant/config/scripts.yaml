@@ -256,3 +256,57 @@
       - service: python_script.issues
       - service: python_script.count
       
+  # pool_slide_off:
+    # alias: Turn Slide Off
+    # sequence:
+      # - alias: "Turn ON valve main 24V power"
+        # service: switch.turn_on
+        # entity_id: switch.pool_control_valves
+      # - alias: "Wait for valve to turn ON"
+        # wait_for_trigger:
+          # - platform: state
+            # entity_id: switch.pool_control_valves
+            # to: "on"
+            # for: 1
+      # - alias: "Turn OFF pool pump for slide when turning OFF"
+        # service: input_boolean.turn_on
+        # entity_id: input_boolean.poolpump_force_off
+      # - alias: "Wait for pool pump to stop"
+        # wait_for_trigger:
+          # - platform: state
+            # entity_id: sensor.poolpump_status
+            # to: "Off"
+            # for: 1
+      # - alias: "Move Slide valve to DRAIN position (50%)"
+        # service: mqtt.publish
+        # data_template:
+          # topic: "Pool/Control/Cmd"
+          # payload: '{"slide":50}'
+          # qos: 0
+          # retain: false
+      # - alias: "Wait for piping to drain"
+        # delay: 00:00:15
+      # - alias: "Turn ON valve main 24V power"
+        # service: switch.turn_on
+        # entity_id: switch.pool_control_valves
+      # - alias: "Wait for valve to turn ON again"
+        # wait_for_trigger:
+          # - platform: state
+            # entity_id: switch.pool_control_valves
+            # to: "on"
+            # for: 1
+      # - alias: "Move Slide valve to OFF position (0%)"
+        # service: mqtt.publish
+        # data_template:
+          # topic: "Pool/Control/Cmd"
+          # payload: '{"slide":0}'
+          # qos: 0
+          # retain: false
+      # - alias: "Wait for valve to position"
+        # delay: 00:00:05
+      # - alias: "Turn OFF valve main 24V power"
+        # service: switch.turn_off
+        # entity_id: switch.pool_control_valves
+      # - alias: "Turn pool pump back ON"
+        # service: input_boolean.turn_off
+        # entity_id: input_boolean.poolpump_force_off

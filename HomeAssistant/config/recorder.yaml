@@ -46,6 +46,9 @@
 #Others
       - sensor.opensky
       - sensor.nixie_clock_case_temp
+      
+      - sensor.house_fd_rssi
+      - sensor.house_fd_wifi
 #Control Room
       - binary_sensor.control_room_light
       - binary_sensor.control_room_door

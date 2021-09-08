@@ -1,8 +1,0 @@
-{
-  "domain": "ted5000",
-  "name": "The Energy Detective TED5000",
-  "version": "1.0.0",
-  "documentation": "https://github.com/SupremeSports/HA-Domotic/tree/master/HomeAssistant/config/custom_components/ted5000",
-  "requirements": ["xmltodict==0.12.0"],
-  "codeowners": []
-}

@@ -56,3 +56,13 @@
     services:
       - service: mobile_app_iphone_de_jean
       - service: mobile_app_iphone_de_cindy
+      
+####################################################
+# DATA LOGGING                                     #
+####################################################
+
+  - name: filenotify
+    platform: file
+    filename: /config/datalog/energy-data.csv
+    timestamp: true
+    

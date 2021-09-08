@@ -3,7 +3,7 @@
 ###################################################
 
   - alias: Garage Safety Heartbeat
-    id: auto_garage_safety_heartbeat
+    #id: auto_garage_safety_heartbeat
     trigger:
       - platform: time_pattern
         seconds: '/5'
@@ -28,7 +28,7 @@
 # If already on (due to safety), latch on until we get above setpoint
 # If water heater is heating during peak period, stop garage heaters (counter won't increase)
   - alias: Garage Heaters
-    id: auto_garage_heaters
+    #id: auto_garage_heaters
     mode: restart
     trigger:
       - platform: time_pattern
@@ -116,7 +116,7 @@
           {% endif %}
           
   - alias: Garage Heaters Counter
-    id: auto_garage_heaters_counter
+    #id: auto_garage_heaters_counter
     mode: restart
     trigger:
       - platform: state
@@ -216,7 +216,7 @@
         service: switch.turn_on
       #Give time to complete movement
       - delay:
-          seconds: 25
+          seconds: 30
       - entity_id: switch.garage_air_valve
         service: switch.turn_off
       #Give time to snubber to eliminate transients/EMIs
@@ -254,7 +254,7 @@
         service: switch.turn_on
       #Give time to complete movement
       - delay:
-          seconds: 25
+          seconds: 30
       - entity_id: switch.house_air_valve
         service: switch.turn_off
       #Give time to snubber to eliminate transients/EMIs

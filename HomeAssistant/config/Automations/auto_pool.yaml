@@ -31,15 +31,15 @@
           {% endif %}
         {% elif is_state('input_select.poolpump_mode', 'Summer') %}
           {% if curWeekday in (0,1,2,3,6) %}
-            {% if curHour >= 7 and curHour < 19 %}
+            {% if curHour >= 8 and curHour < 21 %}
               {% set PP = true %}
-            {% elif curHour >= 23 or curHour < 3 %}
+            {% elif curHour >= 0 and curHour < 4 %}
               {% set PP = true %}
             {% endif %}
           {% else %}
-            {% if curHour >= 6 and curHour < 23 %}
+            {% if curHour >= 8 and curHour < 21 %}
               {% set PP = true %}
-            {% elif curHour >= 1 and curHour < 4 %}
+            {% elif curHour >= 0 and curHour < 4 %}
               {% set PP = true %}
             {% endif %}
           {% endif %}
@@ -61,6 +61,10 @@
         
         {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_low.last_changed) %}
         {% if is_state('binary_sensor.pool_level_low', 'off') and lastLevel >= 120 %}
+          {% set PP = false %}
+        {% endif %}
+        
+        {% if is_state('input_boolean.poolpump_force_off', 'on') %}
           {% set PP = false %}
         {% endif %}
         
@@ -161,44 +165,94 @@
         {% endif %}
         
 ######## POOL VALVES ########
-        
-  - alias: "Pool Drain Adjust"
+
+  - alias: "Pool Valves Adjust"
     mode: restart
     trigger:
-      platform: state
-      entity_id: input_number.pool_drain_percent
+      - platform: state
+        entity_id: input_number.pool_drain_percent
+      - platform: state
+        entity_id: input_number.pool_heater_percent
+      - platform: state
+        entity_id: input_number.pool_slide_percent
     action:
     - service: mqtt.publish
       data_template:
         topic: "Pool/Control/Cmd"
-        payload: '{"drain":{{ trigger.to_state.state | int }}}'
+        payload_template: '{"drain":"{{states.input_number.pool_drain_percent.state}}","heatp":"{{states.input_number.pool_heater_percent.state}}","slide":"{{states.input_number.pool_slide_percent.state}}"}'
         qos: 0
         retain: false
         
-  - alias: "Pool Slide Adjust"
-    mode: restart
-    trigger:
-      platform: state
-      entity_id: input_number.pool_slide_percent
-    action:
-    - service: mqtt.publish
-      data_template:
-        topic: "Pool/Control/Cmd"
-        payload: '{"slide":{{ trigger.to_state.state | int }}}'
-        qos: 0
-        retain: false
+  # - alias: "Pool Drain Adjust"
+    # mode: restart
+    # trigger:
+      # platform: state
+      # entity_id: input_number.pool_drain_percent
+    # action:
+    # - service: mqtt.publish
+      # data_template:
+        # topic: "Test/Control/Cmd"
+        # payload: '{"drain":{{ trigger.to_state.state | int }}}'
+        # qos: 0
+        # retain: false
         
-  - alias: "Pool Heatpump Adjust"
-    trigger:
-      platform: state
-      entity_id: input_number.pool_heatpump_percent
-    action:
-    - service: mqtt.publish
-      data_template:
-        topic: "Pool/Control/Cmd"
-        payload: '{"heatp":{{ trigger.to_state.state | int }}}'
-        qos: 0
-        retain: false
+  # - alias: "Pool Heatpump Adjust"
+    # trigger:
+      # platform: state
+      # entity_id: input_number.pool_heater_percent
+    # action:
+    # - service: mqtt.publish
+      # data_template:
+        # topic: "Test/Control/Cmd"
+        # payload: '{"heatp":{{ trigger.to_state.state | int }}}'
+        # qos: 0
+        # retain: false
+        
+  # - alias: "Pool Valves Adjust"
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: input_select.pool_drain_skimmer_mode
+      # - platform: state
+        # entity_id: input_select.pool_heater_mode
+      # - platform: state
+        # entity_id: input_select.pool_slide_mode
+    # action:
+      # - alias: "Turn ON valve main 24V power"
+        # entity_id: switch.pool_control_valves
+        # service: switch.turn_on
+      # - alias: "Wait for valve to turn ON"
+        # wait_for_trigger:
+          # - platform: state
+            # entity_id: switch.pool_control_valves
+            # to: "on"
+            # for: 1
+      # - alias: "Turn OFF pool pump for slide when turning OFF"
+        # entity_id: input_boolean.poolpump_force_off
+        # service_template: >
+          # {% set newOffRequest = is_state('input_select.pool_slide_mode', 'Off') %}
+          # {% set prevState = states('input_number.pool_slide_percent')|int != 0 %}
+          
+          # {% set PFO = false %}
+          
+          # {% if newOffRequest and prevState %}
+            # {% set PFO = true %}
+          # {% endif %}
+                  
+          # {% if PFO == true %}
+            # input_boolean.turn_on
+          # {% else %}
+            # input_boolean.turn_off
+          # {% endif %}
+      # - alias: "Wait until pool pump is stopped"
+        # wait_template: "{{ (is_state('sensor.poolpump_status', 'Off') and is_state('input_select.pool_slide_mode', 'Off')) or is_state('input_select.pool_slide_mode', 'On') or states('input_number.pool_slide_percent')|int == 0}}"
+      # - alias: "Move Slide valve to drain"
+        # service: mqtt.publish
+        # data_template:
+          # topic: "Test/Control/Cmd"
+          # payload: '{"slide":50}'
+          # qos: 0
+          # retain: false
         
 ######## POOL CLOCK ########
         

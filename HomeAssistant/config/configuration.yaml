@@ -1,5 +1,4 @@
 ####################################################
-####################################################
 # CONFIGURATION                                    #
 ####################################################
 
@@ -14,8 +13,15 @@ homeassistant:
   #whitelist_external_dirs:
   allowlist_external_dirs:
     - /config
+  name: Home
   external_url: !secret ha_ext_url
   internal_url: !secret ha_int_url
+  latitude: !secret ha_latitude
+  longitude: !secret ha_longitude
+  elevation: !secret ha_elevation
+  unit_system: metric
+  time_zone: !secret ha_time_zone
+  currency: !secret ha_currency
   
 #Activate iOS devices
 mobile_app:
@@ -90,7 +96,6 @@ python_script:
 #Sensors and others
 alarm_control_panel: !include alarm.yaml
 alert: !include alerts.yaml
-#automation: !include_dir_merge_list Automations
 automation: !include automations.yaml
 binary_sensor: !include_dir_merge_list BinarySensors
 climate: !include climates.yaml
@@ -98,6 +103,7 @@ counter: !include counters.yaml
 cover: !include covers.yaml
 device_tracker: !include device_tracker.yaml
 fan: !include fans.yaml
+#fan: !include_dir_merge_list Fans
 group: !include groups.yaml
 input_boolean: !include_dir_merge_named InputBool
 input_datetime: !include input_datetime.yaml
@@ -113,9 +119,9 @@ script: !include scripts.yaml
 sensor: !include_dir_merge_list Sensors
 switch: !include_dir_merge_list Switches
 #time_counter: !include timecounters.yaml
+template: !include_dir_merge_list Templates
 utility_meter: !include utilities.yaml
 zone: !include zones.yaml
-
 
 #Weather Forecasts from Environement Canada
 weather:
@@ -144,10 +150,6 @@ camera:
 system_health:
 #breaking_changes:
 apcupsd:
-
-# speedtestdotnet:
-#   scan_interval:
-#     minutes: 10
     
 #Devices and integrations
 # vacuum:
