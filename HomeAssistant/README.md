@@ -16,4 +16,4 @@ All devices are to be integrated into the HomeAssistant interface
 
 More details to come...
 
-IMPORTANT NOTE - Be informed that some files/folders are removed as they contain passwords or other personal information; consult .gitignore file to see missing files.
+IMPORTANT NOTE - Please note that some files/folders are removed as they contain passwords or other personal information; consult .gitignore file to see missing files.
