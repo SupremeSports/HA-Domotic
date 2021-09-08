@@ -1,7 +1,0 @@
-{
-  "domain": "openexchangerates2",
-  "name": "Open Exchange Rates 2",
-  "version": "1.0.0",
-  "documentation": "https://www.home-assistant.io/integrations/openexchangerates",
-  "codeowners": []
-}
