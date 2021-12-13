@@ -13,7 +13,7 @@ Based on the neo pixels chips WS2812 5050, I purchased 8m of LED strips with 144
 
 #### Features: ####
 
-- Displays actual time (hh:mm:ss)
+- Displays actual time (hh:mm:ss) and ":" are flashing every second
 - Can display text scrolling instead, but will still display time every minute for 10 seconds (Slots mode)
 - Internal RTC to keep time and updates from MQTT once every 5 minutes
 - Includes actual outdoor temperature/humidity/humidex (°C/°F) using weather station (or other source in HA)
