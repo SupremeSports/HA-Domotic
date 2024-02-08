@@ -1,0 +1,92 @@
+####################################################
+# SENSORS - COMPUTERS                              #
+####################################################
+
+  #JGAU-PC
+  - platform: openhardwaremonitor
+    host: !secret ip_jgau_pc
+    
+  - platform: min_max
+    name: JGAU-PC Intel Core i7-3770 Clocks CPU Cores
+    # Type - min, max, or mean
+    type: max
+    entity_ids:
+      - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_1
+      - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_2
+      - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_3
+      - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_4
+      
+  #CFOR-PC
+  - platform: openhardwaremonitor
+    host: !secret ip_cfor_pc
+    
+  - platform: min_max
+    name: CFOR-PC Intel Core i7-3820 Clocks CPU Cores
+    # Type - min, max, or mean
+    type: max
+    entity_ids:
+      - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_1
+      - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_2
+      - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_3
+      - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_4
+      
+  #SERVER
+  - platform: openhardwaremonitor
+    host: !secret ip_server_lan1
+    # host: !secret ip_server_lan2
+    # host: !secret ip_server_lan3
+    # host: !secret ip_server_lan4
+
+  - platform: min_max
+    name: Server AMD FX-8120 Clocks CPU Cores
+    # Type - min, max, or mean
+    type: max
+    entity_ids:
+      - sensor.server_amd_fx_8120_clocks_cpu_core_1
+      - sensor.server_amd_fx_8120_clocks_cpu_core_2
+      - sensor.server_amd_fx_8120_clocks_cpu_core_3
+      - sensor.server_amd_fx_8120_clocks_cpu_core_4
+      - sensor.server_amd_fx_8120_clocks_cpu_core_5
+      - sensor.server_amd_fx_8120_clocks_cpu_core_6
+      - sensor.server_amd_fx_8120_clocks_cpu_core_7
+      - sensor.server_amd_fx_8120_clocks_cpu_core_8
+      
+  #OWNCLOUD SERVER
+  - platform: rest
+    name: OwnCloud Status
+    resource: !secret owncloud_url
+    scan_interval: 10
+    method: GET
+    username: !secret owncloud_user
+    password: !secret owncloud_pass
+    headers:
+      content-type: "application/json"
+    value_template: "{{ value_json.ocs.meta.status }}"
+    json_attributes_path: "$.ocs.meta"
+    json_attributes:
+      - "statuscode"
+      - "message"
+      
+  - platform: rest
+    name: OwnCloud Server
+    resource: !secret owncloud_url
+    scan_interval: 10
+    method: GET
+    username: !secret owncloud_user
+    password: !secret owncloud_pass
+    headers:
+      content-type: "application/json"
+    value_template: "{{ value_json.ocs.data.version.string }}"
+    json_attributes_path: "$.ocs.data.capabilities.core.status"
+    json_attributes:
+      - "productname"
+      - "hostname"
+      - "version"
+      - "edition"
+      - "installed"
+
+    
+# to test GET
+# curl http://192.168.0.254/ocs/v1.php/cloud/apps/files?format=json --user "jean:Xz2NXd@*BKQK!6grNf69"
+# curl http://supremesports.duckdns.org/ocs/v1.php/cloud/apps/files?format=json --user "jean:Xz2NXd@*BKQK!6grNf69"
+    

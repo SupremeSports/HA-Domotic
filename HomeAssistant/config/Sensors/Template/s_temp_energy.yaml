@@ -1,0 +1,428 @@
+####################################################
+# TEMPLATES - ENERGY                               #
+####################################################
+
+#House MTU0 is calculated as follow: MTU0 = MTU1 - (MTU2 + MTU3 + MTU4 + ... + MTUn)
+  - unique_id: ted5000_mtu0_power
+    #name: House Power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    #icon: mdi:flash
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu1_power', 'unavailable') }}
+    state: >
+      {% set house = states('sensor.ted5000_mtu0_power')|int(0) %}
+      {% set main = states('sensor.ted5000_mtu1_power')|int(0) %}
+      {% set garage = states('sensor.ted5000_mtu2_power')|int(0) %}
+      {% set pool = states('sensor.ted5000_mtu3_power')|int(0) %}
+      
+      {% set output = main - (garage+pool) %}
+      {% set positive = output >= 0 %}
+      
+      {% if positive %}
+          {{ (output|int) | round (0) }}
+      {% else %}
+          {{ (house|int) | round (0) }}
+      {% endif %}
+    attributes:
+      friendly_name: House Power
+      
+  - unique_id: ted5000_mtu0_voltage
+    #name: House Volatge
+    unit_of_measurement: 'V'
+    state_class: measurement
+    device_class: voltage
+    #icon: mdi:flash
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu1_voltage', 'unavailable') }}
+    state: >
+      {% set output = states('sensor.ted5000_mtu1_voltage')|float(0) %}
+      {% set positive = output >= 0 %}
+
+      {% if positive %}
+          {{ (output|int) | round (1) }}
+      {% else %}
+          {{ 0 | round (1) }}
+      {% endif %}
+    attributes:
+      friendly_name: House Voltage
+      
+  - unique_id: ted5000_mtu0_energy_daily_raw
+    #name: House Daily Energy Raw
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    #icon: mdi:flash
+    availability: >
+      {% set error_list = states('input_text.errors_list') %}
+      {{ 
+        states('sensor.ted5000_mtu1_energy_daily') not in error_list and
+        states('sensor.ted5000_mtu2_energy_daily') not in error_list and
+        states('sensor.ted5000_mtu3_energy_daily') not in error_list and
+        is_number(states('sensor.ted5000_mtu1_energy_daily')) and
+        is_number(states('sensor.ted5000_mtu2_energy_daily')) and
+        is_number(states('sensor.ted5000_mtu3_energy_daily')) and 
+        is_number(state_attr('sensor.times','hourmin')) and
+        is_state('input_boolean.running_hass','on')
+      }}
+    state: >
+      {% set dst = is_state_attr('sensor.times','dst',true) %}
+      {% set time = state_attr('sensor.times','hourmin')|int(0) %}
+      {% set house = states('sensor.ted5000_mtu0_energy_daily_raw')|float(0) %}
+      {% set main = states('sensor.ted5000_mtu1_energy_daily')|float(0) %}
+      {% set garage = states('sensor.ted5000_mtu2_energy_daily')|float(0) %}
+      {% set pool = states('sensor.ted5000_mtu3_energy_daily')|float(0) %}
+      {% set daychange = false %}
+      
+      {% if dst %}
+        {% set reset_on = 58 %}
+        {% set reset_off = 105 %}
+        
+        {% if time >= reset_on and time < reset_off %}
+          {% set daychange = true %}
+        {% endif %}
+      {% else %}
+        {% set reset_on = 2358 %}
+        {% set reset_off = 5 %}
+        
+        {% if time >= reset_on or time < reset_off %}
+          {% set daychange = true %}
+        {% endif %}
+      {% endif %}
+      
+      {% set output = main - (garage+pool) %}
+      {% set positive = output >= 0 %}
+      {% set increase = (output > house) %}
+      
+      {% if daychange %}
+        {{ 0|float }}
+      {% elif positive and increase %}
+        {{ output|float }}
+      {% else %}
+        {{ house|float }}
+      {% endif %}
+    attributes:
+      friendly_name: House Daily Energy Raw
+      
+  - unique_id: ted5000_mtu0_energy_monthly
+    #name: House Monthly Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    #icon: mdi:flash
+    availability: >
+      {% set error_list = states('input_text.errors_list') %}
+      {{ 
+        states('sensor.ted5000_mtu1_energy_monthly') not in error_list and
+        states('sensor.ted5000_mtu2_energy_monthly') not in error_list and
+        states('sensor.ted5000_mtu3_energy_monthly') not in error_list and
+        is_number(states('sensor.ted5000_mtu1_energy_monthly')) and
+        is_number(states('sensor.ted5000_mtu2_energy_monthly')) and
+        is_number(states('sensor.ted5000_mtu3_energy_monthly')) and 
+        is_number(state_attr('sensor.times','hourmin')) and
+        is_number(state_attr('sensor.dates', 'day')) and
+        is_state('input_boolean.running_hass','on')
+      }}
+    state: >
+      {% set dst = is_state_attr('sensor.times','dst',true) %}
+      {% set time = state_attr('sensor.times','hourmin')|int(0) %}
+      {% set today = state_attr('sensor.dates', 'day')|int(0) %}
+      {% set lastdayinmonth = state_attr('sensor.dates', 'daysinmonth')|int(0) %}
+      {% set house = states('sensor.ted5000_mtu0_energy_monthly')|float(0) %}
+      {% set main = states('sensor.ted5000_mtu1_energy_monthly')|float(0) %}
+      {% set garage = states('sensor.ted5000_mtu2_energy_monthly')|float(0) %}
+      {% set pool = states('sensor.ted5000_mtu3_energy_monthly')|float(0) %}
+      {% set daychange = false %}
+      
+      {% if dst %}
+        {% set reset_on = 55 %}
+        {% set reset_off = 105 %}
+        
+        {% if today == 1 and time >= reset_on and time < reset_off %}
+          {% set daychange = true %}
+        {% endif %}
+      {% else %}
+        {% set reset_on = 2355 %}
+        {% set reset_off = 5 %}
+        
+        {% if (today == lastdayinmonth and time >= reset_on) or (today == 1 and time < reset_off) %}
+          {% set daychange = true %}
+        {% endif %}
+      {% endif %}
+      
+      {% set output = main - (garage+pool) %}
+      {% set positive = output >= 0 %}
+      {% set increase = (output > house) or daychange or true %}
+      
+      {% if positive and increase %}
+          {{ output|float }}
+      {% else %}
+          {{ house|float }}
+      {% endif %}
+    attributes:
+      friendly_name: House Monthly Energy
+      
+  - unique_id: ted5000_mtu0_power_factor
+    #name: House Power Factor
+    unit_of_measurement: '%'
+    state_class: measurement
+    device_class: power_factor
+    #icon: mdi:angle-acute
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu1_power', 'unavailable') and not is_state('sensor.ted5000_mtu2_power', 'unavailable') and not is_state('sensor.ted5000_mtu3_power', 'unavailable') }}
+    state: >
+      {% set main_w = states('sensor.ted5000_mtu1_power')|int(0) %}
+      {% set main_pf = states('sensor.ted5000_mtu1_power_factor')|float(100) / 100 %}
+      {% set garage_w = states('sensor.ted5000_mtu2_power')|int(0) %}
+      {% set garage_pf = states('sensor.ted5000_mtu2_power_factor')|float(100) / 100 %}
+      {% set pool_w = states('sensor.ted5000_mtu3_power')|int(0) %}
+      {% set pool_pf = states('sensor.ted5000_mtu3_power_factor')|float(100) / 100 %}
+      
+      {% if main_pf > 0 %} {% set main_va = main_w / main_pf %} {% else %} {% set main_va = 0 %} {% endif %}
+      {% if garage_pf > 0 %} {% set garage_va = garage_w / garage_pf  %} {% else %} {% set garage_va = 0 %} {% endif %}
+      {% if pool_pf > 0 %} {% set pool_va = pool_w / pool_pf  %} {% else %} {% set pool_va = 0 %} {% endif %}
+      
+      {% set house_w = main_w - (garage_w+pool_w) %}
+      {% set house_va = main_va - (garage_va+pool_va) %}
+      
+      {% set output = house_w/house_va * 100.0 %}
+      
+      {% if output > 100.0 %}
+        {% set output = 100 %}
+      {% endif %}
+      
+      {{ (output|float) | round (1) }}
+    attributes:
+      friendly_name: House Power Factor
+
+#DAILY COST FOR MTU1
+# It is not generated since it's the overall and not added to energy dashboard
+  - unique_id: ted5000_mtu1_energy_daily_utility_cost
+    #name: Main Energy Daily Cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu0_energy_daily_cost', 'unavailable') and not is_state('sensor.ted5000_mtu2_energy_daily_cost', 'unavailable') and not is_state('sensor.ted5000_mtu3_energy_daily_cost', 'unavailable') }}
+    state: >
+      {% set house = states('sensor.ted5000_mtu0_energy_daily_cost')|float(0) %}
+      {% set garage = states('sensor.ted5000_mtu2_energy_daily_cost')|float(0) %}
+      {% set pool = states('sensor.ted5000_mtu3_energy_daily_cost')|float(0) %}
+      
+      {% set output = house + garage + pool %}
+      
+      {% if output >= 0 %}
+          {{ (output|float) | round (2) }}
+      {% else %}
+          {{ (house|float) | round (2) }}
+      {% endif %}
+    attributes:
+      friendly_name: Main Daily Energy Cost
+
+#CALCULATE APPROXIMATELY THE ACTUAL COST OF EACH SENSOR
+  - unique_id: ted5000_mtu0_energy_actual_cost_raw
+    #name: House Energy Actual Cost
+    unit_of_measurement: '$/h'
+    state_class: measurement
+    #device_class: monetary
+    icon: mdi:cash
+    availability: >
+      {{ not is_state('sensor.ted5000_utility_current_rate', 'unavailable') and not is_state('sensor.ted5000_mtu0_power', 'unavailable') }}
+    state: >
+      {% set power = states('sensor.ted5000_mtu0_power')|float(0) %}
+      {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+      
+      {% set actual_cost = (power/1000) * cost %}
+      
+      {{ (actual_cost|float) | round (5) }}
+    attributes:
+      friendly_name: House Actual Energy Cost
+
+  - unique_id: ted5000_mtu1_energy_actual_cost_raw
+    #name: Main Energy Actual Cost
+    unit_of_measurement: '$/h'
+    state_class: measurement
+    #device_class: monetary
+    icon: mdi:cash
+    availability: >
+      {{ not is_state('sensor.ted5000_utility_currentrate', 'unavailable') and not is_state('sensor.ted5000_mtu1_power', 'unavailable') }}
+    state: >
+      {% set power = states('sensor.ted5000_mtu1_power')|float(0) %}
+      {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+      
+      {% set actual_cost = (power/1000) * cost %}
+      
+      {{ (actual_cost|float) | round (5) }}
+    attributes:
+      friendly_name: Main Actual Energy Cost
+
+  - unique_id: ted5000_mtu2_energy_actual_cost_raw
+    #name: Garage Energy Actual Cost
+    unit_of_measurement: '$/h'
+    state_class: measurement
+    #device_class: monetary
+    icon: mdi:cash
+    availability: >
+      {{ not is_state('sensor.ted5000_utility_current_rate', 'unavailable') and not is_state('sensor.ted5000_mtu2_power', 'unavailable') }}
+    state: >
+      {% set power = states('sensor.ted5000_mtu2_power')|float(0) %}
+      {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+      
+      {% set actual_cost = (power/1000) * cost %}
+      
+      {{ (actual_cost|float) | round (5) }}
+    attributes:
+      friendly_name: Garage Actual Energy Cost
+
+  - unique_id: ted5000_mtu3_energy_actual_cost_raw
+    #name: Pool Energy Actual Cost
+    unit_of_measurement: '$/h'
+    state_class: measurement
+    #device_class: monetary
+    icon: mdi:cash
+    availability: >
+      {{ not is_state('sensor.ted5000_utility_current_rate', 'unavailable') and not is_state('sensor.ted5000_mtu3_power', 'unavailable') }}
+    state: >
+      {% set power = states('sensor.ted5000_mtu3_power')|float(0) %}
+      {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+      
+      {% set actual_cost = (power/1000) * cost %}
+      
+      {{ (actual_cost|float) | round (5) }}
+    attributes:
+      friendly_name: Pool Actual Energy Cost
+
+#CALCULATE ENERGY LEFT IN TIER #1
+  - unique_id: ted5000_energylefttier1
+    #name: Energy Left Tier 1
+    unit_of_measurement: 'kWh'
+    #state_class: measurement
+    device_class: energy
+    icon: mdi:flash
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu1_energy_monthly', 'unavailable') }}
+    state: >
+      {% set energyMonth = states('sensor.ted5000_mtu1_energy_monthly')|float(0) %}
+      {% set energyTier1 = states('input_number.energy_tier2_threshold')|float(0) %}
+      
+      {% if energyTier1 > energyMonth %}
+        {% set energyLeftTier1 = energyTier1 - energyMonth %}
+      {% else %}
+        {% set energyLeftTier1 = 0 %}
+      {% endif %}
+      
+      {{ (energyLeftTier1|float) | round (1) }}
+    attributes:
+      friendly_name: Energy Left Tier 1
+      threshold: "{{ states('input_number.energy_tier2_threshold')|int(0) }} kWh/month"
+      
+  - unique_id: ted5000_energyusedtier1
+    #name: Energy Used Tier 1
+    unit_of_measurement: '%'
+    state_class: measurement
+    #device_class: ''
+    icon: mdi:flash
+    availability: >
+      {{ not is_state('sensor.ted5000_mtu1_energy_monthly', 'unavailable') }}
+    state: >
+      {% set energyMonth = states('sensor.ted5000_mtu1_energy_monthly')|float(0) %}
+      {% set energyTier1 = states('input_number.energy_tier2_threshold')|float(0) %}
+      
+      
+      {% if energyTier1 > energyMonth %}
+        {% set energyUsedTier1 =  energyMonth/energyTier1*100 %}
+      {% else %}
+        {% set energyUsedTier1 = 100.0 %}
+      {% endif %}
+      
+      {{ (energyUsedTier1|float)|round(1) }}
+    attributes:
+      friendly_name: Energy Used Tier 1
+      percent: >
+        {% set energyMonth = states('sensor.ted5000_mtu1_energy_monthly')|float(0) %}
+        {% set energyTier1 = states('input_number.energy_tier2_threshold')|float(0) %}
+  
+        {% set energyUsedTier1 =  energyMonth/energyTier1*100 %}
+        
+        {{ (energyUsedTier1|float)|round(1) }}
+
+  - name: "Utility Tier Change Date"
+    state: "{{ as_timestamp(states('input_datetime.utility_tier_change_date')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+    icon: "mdi:calendar-clock"
+    attributes:
+      last: "{{ as_timestamp(states('input_datetime.utility_tier_change_date')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+      prev1: "{{ as_timestamp(states('input_datetime.utility_tier_change_date_prev1')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+      prev2: "{{ as_timestamp(states('input_datetime.utility_tier_change_date_prev2')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+      prev3: "{{ as_timestamp(states('input_datetime.utility_tier_change_date_prev3')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+      prev4: "{{ as_timestamp(states('input_datetime.utility_tier_change_date_prev4')) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"
+
+#TEMPLATING ENERGY TO ROUND DECIMALS
+  - unique_id: ted5000_mtu0_energy_daily
+    #name: House Daily Energy
+    unit_of_measurement: 'kWh'
+    state_class: total_increasing
+    device_class: energy
+    #icon: mdi:flash
+    state: >
+      {{states('sensor.ted5000_mtu0_energy_daily_utility')|float(0)|round(3) }}
+    attributes:
+      friendly_name: House Daily Energy
+      
+  - unique_id: ted5000_mtu1_energy_daily_cost
+    #name: Main Daily Energy Cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    availability: >
+      {% set error_list = states('input_text.errors_list') %}
+      {{ 
+        states('sensor.ted5000_mtu1_energy_monthly') not in error_list and
+        states('sensor.ted5000_mtu2_energy_monthly') not in error_list and
+        states('sensor.ted5000_mtu3_energy_monthly') not in error_list and
+        is_number(states('sensor.ted5000_mtu1_energy_monthly')) and
+        is_number(states('sensor.ted5000_mtu2_energy_monthly')) and
+        is_number(states('sensor.ted5000_mtu3_energy_monthly')) and 
+        is_number(state_attr('sensor.times','hourmin')) and
+        is_number(state_attr('sensor.dates', 'day')) and
+        is_state('input_boolean.running_hass','on')
+      }}
+    state: >
+      {{states('sensor.ted5000_mtu1_energy_daily_utility_cost')|float(0)|round(2) }}
+    attributes:
+      friendly_name: Main Daily Energy Cost
+      
+  - unique_id: ted5000_mtu0_energy_daily_cost
+    #name: House Daily Energy Cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    state: >
+      {{states('sensor.ted5000_mtu0_energy_daily_utility_cost')|float(0)|round(2) }}
+    attributes:
+      friendly_name: House Daily Energy Cost
+      
+  - unique_id: ted5000_mtu2_energy_daily_cost
+    #name: Garage Daily Energy Cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    state: >
+      {{states('sensor.ted5000_mtu2_energy_daily_utility_cost')|float(0)|round(2) }}
+    attributes:
+      friendly_name: Garage Daily Energy Cost
+
+  - unique_id: ted5000_mtu3_energy_daily_cost
+    #name: Pool Daily Energy Cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    state: >
+      {{states('sensor.ted5000_mtu3_energy_daily_utility_cost')|float(0)|round(2) }}
+    attributes:
+      friendly_name: Pool Daily Energy Cost

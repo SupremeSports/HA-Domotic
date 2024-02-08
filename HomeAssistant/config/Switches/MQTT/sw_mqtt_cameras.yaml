@@ -1,0 +1,17 @@
+####################################################
+# SWITCHES - MQTT - CAMERAS                        #
+####################################################
+
+  - name: Camera IR - PoolArea
+    icon: mdi:flash
+    state_topic: "Camera/Pool/Json"
+    command_topic: "Camera/Pool/Cmd"
+    value_template: '{{ value_json.ir }}'
+    payload_on: '{"ir":"ON"}'
+    payload_off: '{"ir":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Camera/Pool/LWT"
+    qos: 0
+    json_attributes_topic: "Camera/Pool/Json"

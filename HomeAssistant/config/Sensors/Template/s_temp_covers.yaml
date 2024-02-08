@@ -1,0 +1,87 @@
+####################################################
+# TEMPLATES - SENSORS - COVERS                     #
+####################################################
+
+    - name: Dining Room Tulle Curtain
+      #unique_id: dining_room_tulle_curtain
+      #unit_of_measurement: ''
+      #state_class: measurement
+      icon: mdi:curtains
+      availability: >
+        {{ not is_state('cover.dining_room_tulle_curtain', 'unavailable') and not is_state('cover.dining_room_tulle_curtain', 'unkown') }}
+      state: >
+        {% set position = state_attr('cover.dining_room_tulle_curtain','current_position') %}
+        
+        {% if position == 100 %}
+          Fully Open
+        {% elif position == 0 %}
+          Fully Closed
+        {% else %}
+          {{position}} %
+        {% endif %}
+      attributes:
+        state: "{{ states('cover.dining_room_tulle_curtain') }}"
+        position: "{{ state_attr('cover.dining_room_tulle_curtain','current_position') }} %"
+        
+    - name: Dining Room Curtain Curtain
+      #unique_id: dining_room_curtain_curtain
+      #unit_of_measurement: ''
+      #state_class: measurement
+      icon: mdi:curtains
+      availability: >
+        {{ not is_state('cover.dining_room_curtain_curtain', 'unavailable') and not is_state('cover.dining_room_curtain_curtain', 'unkown') }}
+      state: >
+        {% set position = state_attr('cover.dining_room_curtain_curtain','current_position') %}
+        
+        {% if position == 100 %}
+          Fully Open
+        {% elif position == 0 %}
+          Fully Closed
+        {% else %}
+          {{position}} %
+        {% endif %}
+      attributes:
+        state: "{{ states('cover.dining_room_curtain_curtain') }}"
+        position: "{{ state_attr('cover.dining_room_curtain_curtain','current_position') }} %"
+        
+    - name: Patio Door Tulle Curtain
+      #unique_id: patio_door_tulle_curtain
+      #unit_of_measurement: ''
+      #state_class: measurement
+      icon: mdi:curtains
+      availability: >
+        {{ not is_state('cover.patio_door_tulle_curtain', 'unavailable') and not is_state('cover.patio_door_tulle_curtain', 'unkown') }}
+      state: >
+        {% set position = state_attr('cover.patio_door_tulle_curtain','current_position') %}
+        
+        {% if position == 100 %}
+          Fully Open
+        {% elif position == 0 %}
+          Fully Closed
+        {% else %}
+          {{position}} %
+        {% endif %}
+      attributes:
+        state: "{{ states('cover.patio_door_tulle_curtain') }}"
+        position: "{{ state_attr('cover.patio_door_tulle_curtain','current_position') }} %"
+        
+    - name: Patio Door Curtain Curtain
+      #unique_id: patio_door_curtain_curtain
+      #unit_of_measurement: ''
+      #state_class: measurement
+      icon: mdi:curtains
+      availability: >
+        {{ not is_state('cover.patio_door_curtain_curtain', 'unavailable') and not is_state('cover.patio_door_curtain_curtain', 'unkown') }}
+      state: >
+        {% set position = state_attr('cover.patio_door_curtain_curtain','current_position') %}
+        
+        {% if position == 100 %}
+          Fully Open
+        {% elif position == 0 %}
+          Fully Closed
+        {% else %}
+          {{position}} %
+        {% endif %}
+      attributes:
+        state: "{{ states('cover.patio_door_curtain_curtain') }}"
+        position: "{{ state_attr('cover.patio_door_curtain_curtain','current_position') }} %"

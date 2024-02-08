@@ -1,0 +1,90 @@
+###################################################
+# SENSORS - MQTT - CONTROL ROOM                   #
+###################################################
+
+######### CONTROL ROOM - BASIC DATA #########
+  - name: "Control Room Control Status"
+    icon: mdi:server
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: "Control Room Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_in }}"
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: "Control Room Box Humidity"
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.hum_in }}"
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: "Control Room Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_out }}"
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: "Control Room Humidity"
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.hum_out }}"
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: "Control Room 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - name: "Control Room 12V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Home/Control/Json"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    

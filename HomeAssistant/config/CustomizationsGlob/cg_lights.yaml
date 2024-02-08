@@ -10,7 +10,9 @@
         if (state === 'on') return 'var(--state-icon-active-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'var(--state-icon-color)';
-        
+      appliances: >
+        return 'light';
+
   binary_sensor.*_light:
     templates:
       icon: >
@@ -19,7 +21,9 @@
         if (state === 'on') return 'var(--state-icon-active-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'var(--state-icon-color)';
-        
+      appliances: >
+        return 'light';
+
   light.*_light:
     templates:
       icon: >

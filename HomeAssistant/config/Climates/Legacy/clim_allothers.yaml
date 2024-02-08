@@ -1,0 +1,41 @@
+####################################################
+# CLIMATE - ALL OTHERS                             #
+####################################################
+
+  - platform: generic_thermostat
+    name:  Garage Heaters
+    heater: input_boolean.garage_heaters
+    target_sensor: sensor.garage_average_temp
+    min_temp: 7
+    max_temp: 30
+    #target_temp: 7.0
+    ac_mode: false
+    min_cycle_duration:
+      minutes: 1
+    cold_tolerance: 0.0
+    hot_tolerance: 0.5
+    keep_alive:
+      seconds: 5
+    initial_hvac_mode: "heat"
+    away_temp: 9.5
+    precision: 0.1
+    
+#   - platform: smart_thermostat
+#     name: Garage Rear Heater
+#     heater: switch.garage_rear_heater
+#     target_sensor: sensor.garage_rear_temp
+#     min_temp: 7
+#     max_temp: 30
+#     ac_mode: false
+#     #target_temp: 17
+#     keep_alive:
+#       seconds: 5
+#     initial_hvac_mode: "heat"
+#     away_temp: 7
+#     kp : 5
+#     ki : 3
+#     kd : 2
+#     #pwm : 10
+#     #autotune : ziegler-nichols
+#     #difference : 100
+#     noiseband : 0.5

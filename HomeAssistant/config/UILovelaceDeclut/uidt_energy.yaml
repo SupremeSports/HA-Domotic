@@ -1,0 +1,68 @@
+####################################################
+# LOVELACE DECLUTTERING - Energy Monitors          #
+####################################################
+
+mtu:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.ted5000_mtu[[id]]_power
+    entities:
+      - sensor.ted5000_mtu[[id]]_power
+      - sensor.ted5000_mtu[[id]]_voltage
+      - sensor.ted5000_mtu[[id]]_energy_daily
+      - sensor.ted5000_mtu[[id]]_energy_monthly
+      - sensor.ted5000_mtu[[id]]_power_factor
+      - sensor.ted5000_mtu[[id]]_energy_daily_cost
+      - sensor.ted5000_mtu[[id]]_energy_actual_cost_raw
+
+utility:
+  card:
+    type: custom:fold-entity-row
+    head: binary_sensor.power_peakperiod
+    entities:
+      - binary_sensor.power_peakperiod
+      - sensor.ted5000_utility_current_rate
+      - sensor.ted5000_utility_plan_type
+      - sensor.ted5000_utility_current_tier
+      - sensor.ted5000_utility_current_tou_description
+      - sensor.ted5000_utility_days_left_billing_cycle
+      - sensor.ted5000_utility_carbon_rate
+      - sensor.ted5000_utility_meter_read_date
+      - sensor.ted5000_utility_gateway_date_and_time
+      - sensor.ca_qc_co2_intensity
+      - sensor.ca_qc_grid_fossil_fuel_percentage
+      - type: custom:fold-entity-row
+        head: sensor.ted5000_energyusedtier1
+        entities:
+          - sensor.ted5000_energylefttier1
+          - type: custom:secondaryinfo-entity-row
+            entity: input_number.energy_tier2_threshold            
+            secondary_info: ROUNDUP(40*365.25/12)
+            #kWh/m = ROUNDUP(40kWh/d * 365.25d/y / 12m/y)
+          - sensor.utility_tier_change_date
+
+energy_all:
+  card:
+    type: custom:stack-in-card
+    #title: My Stack In Card
+    mode: vertical
+    cards:
+      - type: custom:decluttering-card
+        template: mtu
+        variables: 
+          - id: 1
+      - type: custom:decluttering-card
+        template: mtu
+        variables: 
+          - id: 0
+      - type: custom:decluttering-card
+        template: mtu
+        variables: 
+          - id: 2
+      - type: custom:decluttering-card
+        template: mtu
+        variables: 
+          - id: 3
+      - type: custom:decluttering-card
+        template: utility
+        

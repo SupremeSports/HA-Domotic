@@ -1,0 +1,188 @@
+####################################################
+# UILOVELACE - Energy                              #
+####################################################
+
+- title: Energy Meters
+  icon: mdi:meter-electric
+  # Unique path for direct access /lovelace/${path}
+  path: energy_meters
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.ted5000_mtu1_energy_daily
+    - sensor.ted5000_mtu1_energy_daily_cost
+    - sensor.ted5000_mtu1_power
+    - sensor.ted5000_mtu1_energy_actual_cost_raw
+  cards:
+    - type: vertical-stack
+      title: Energy Meters
+      cards:
+        #- type: energy-distribution
+        #  link_dashboard: true
+        #- type: energy-devices-graph
+              
+        - type: custom:state-switch
+          entity: template
+          template: "{% if is_state_attr('sensor.times', 'dst', true) %} dst {% else %} est {% endif %}"
+          states:
+            dst:
+              type: custom:decluttering-card
+              template: energy_meters
+              variables: 
+                - offset_time: '+61min'
+            est:
+              type: custom:decluttering-card
+              template: energy_meters
+              variables: 
+                - offset_time: '+1min'
+                
+        - type: custom:apexcharts-card
+          show:
+            last_updated: true
+          chart_type: pie
+          header:
+            show: true
+            show_states: true
+            colorize_states: true
+            title: Daily energy consumption in kWh
+          series:
+            - entity: sensor.ted5000_mtu0_energy_daily_raw
+              name: House Daily Energy
+            - entity: sensor.ted5000_mtu2_energy_daily
+              name: Garage Daily Energy
+            - entity: sensor.ted5000_mtu3_energy_daily
+              name: Pool Daily Energy
+        
+        - !include /config/UILovelaceCards/energy_monitor_global.yaml
+
+    - type: vertical-stack
+      title: Power Meters
+      cards:
+        - type: horizontal-stack
+          #title: N/A
+          cards:
+            - type: gauge
+              min: 0
+              entity: sensor.ted5000_mtu1_power
+              name: Current Electricity Usage
+              max: 48000
+              needle: true
+              severity:
+                  green: 0
+                  yellow: 8000
+                  red: 15000
+            - type: gauge
+              min: 0
+              entity: sensor.ted5000_mtu1_energy_actual_cost_raw
+              name: Current Electricity Cost
+              max: 5.00
+              needle: true
+              severity:
+                  green: 0
+                  yellow: 0.80
+                  red: 1.50
+        - !include /config/UILovelaceCards/power_monitor_main.yaml
+        - !include /config/UILovelaceCards/power_monitor_appliances.yaml
+        - !include /config/UILovelaceCards/power_monitor_heating.yaml
+        - !include /config/UILovelaceCards/power_monitor_lights.yaml
+        - !include /config/UILovelaceCards/power_monitor_outdoor.yaml
+        - !include /config/UILovelaceCards/power_monitor_devices.yaml
+
+
+    - type: vertical-stack
+      title: House Heaters
+      cards:
+        - type: history-graph
+          title: House Heaters
+          hours_to_show: 1
+          entities:
+            - name: Living HVAC
+              entity: binary_sensor.living_room_hvac_running
+            - name: RecRoom HVAC
+              entity: binary_sensor.recroom_hvac_running
+            - name: Living
+              entity: binary_sensor.living_room_heater_running
+            - name: Office
+              entity: binary_sensor.office_heater_running
+            - name: RecRoom
+              entity: binary_sensor.recroom_heater_running
+            - name: Bar
+              entity: binary_sensor.bar_heater_running
+            - name: Master Bedroom
+              entity: binary_sensor.master_bedroom_heater_running
+            - name: Massage Room
+              entity: binary_sensor.massage_room_heater_running
+            - name: Training Room
+              entity: binary_sensor.training_room_heater_running
+            - name: Kitchen
+              entity: binary_sensor.kitchen_heater_running
+            - name: Entrance
+              entity: binary_sensor.entrance_heater_running
+            - name: Cold Storage
+              entity: binary_sensor.cold_storage_floor_heater
+            - name: Storage Room
+              entity: binary_sensor.storage_room_floor_heater
+        - type: history-graph
+          title: Other Heaters
+          hours_to_show: 1
+          entities:
+            - name: Garage HVAC
+              entity: binary_sensor.garage_hvac_running
+            - name: Garage Front
+              entity: binary_sensor.garage_front_heater_ac
+            - name: Garage Rear
+              entity: binary_sensor.garage_rear_heater_ac
+        
+    # - type: custom:auto-entities
+    #   card:
+    #     type: custom:bar-card
+    #     # name: > 
+    #     #   [[[ 
+    #     #     return `${ entity.attributes.friendly_name.replace("Energy Daily", "") }`  
+    #     #   ]]]
+    #     positions:
+    #       icon: off
+    #       indicator: off
+    #       name: outside
+    #       value: inside
+    #     min: 0
+    #     #max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+    #     max: ${ states['sensor.ted5000_mtu1_energy_daily'].state }
+    #     width: 50%
+    #     height: 20px
+    #     style: |-
+    #       bar-card-card {
+    #         margin-bottom: -10px;
+    #       }
+    #       bar-card-backgroundbar {
+    #         background: linear-gradient(to right, green 5%, yellow 15%, orange 35%, red 85%);
+    #       }
+    #       bar-card-currentbar {
+    #         background: linear-gradient(to right, green 5%, yellow 15%, orange 35%, red 85%);
+    #         clip-path: polygon(0 0, var(--bar-percent) 0, var(--bar-percent) 100%, 0 100%);
+    #         border-radius: 2.5px;
+    #       }
+    #       bar-card-name,
+    #       bar-card-value {
+    #         font-size: 0.7rem;
+    #         color: #ffffffaa;
+    #       }
+    #       bar-card-max {
+            
+    #       }
+    #   entities: []
+    #   sort:
+    #     method: state
+    #     numeric: true
+    #     reverse: true
+    #   filter:
+    #     include:
+    #       - entity_id: sensor.*_energy_daily
+    #         options:
+    #           card_mod:
+    #             style: |
+    #               :host {
+    #                 {% set battery = states(config.entity) %}
+    #                 background: linear-gradient(to right, rgba(0,255,0,0.5), {{battery}}%, white {{battery}}%);
+    #               }
+                  

@@ -30,25 +30,139 @@
       seconds: '/5'
     action:
       - delay: '00:00:01'
-      - entity_id: light.nixie_clock
+      - data:
+          entity_id: "nixie_clock"
         service_template: >
-          {% set curHour = state_attr('sensor.times', 'hour')|int %}
-          {% set presence = is_state('device_tracker.life360_jean', 'home') or is_state('device_tracker.life360_cindy', 'home') %}
+          {% set curHour = state_attr('sensor.times', 'hour')|int(0) %}
+          {% set presence_jean = is_state('device_tracker.life360_jean', 'home') or is_state('device_tracker.iphone_de_jean', 'home') %}
+          {% set presence_cindy = is_state('device_tracker.life360_cindy', 'home') or is_state('device_tracker.iphone_de_cindy', 'home') %}
           
-          {% if curHour >= 7 and curHour < 23 and presence %}
-            light.turn_on
+          {% set presence = presence_jean or presence_cindy %}
+          
+          {% set output = curHour >= 7 and curHour < 23 and presence %}
+          
+          {% if output %}
+            script.light_turn_on
           {% else %}
-            light.turn_off
+            script.light_turn_off
           {% endif %}
       - delay: '00:00:01'
-      - entity_id: light.nixie_clock_rgb
+      - data:
+          entity_id: "nixie_clock_rgb"
         service_template: >
-          {% set Sun = is_state('sun.sun','below_horizon') %}
+          {% set sun_down = is_state('sun.sun','below_horizon') %}
           {% set presence = is_state('device_tracker.life360_jean', 'home') or is_state('device_tracker.life360_cindy', 'home') %}
           
-          {% if Sun == true and presence %}
-            light.turn_on
+          {% set output = sun_down and presence %}
+          
+          {% if output %}
+            script.light_turn_on
           {% else %}
-            light.turn_off
+            script.light_turn_off
           {% endif %}
           
+  - alias: Cody's Stars
+    mode: restart
+    trigger:
+      platform: time_pattern
+      seconds: '/5'
+    action:
+      - data:
+          entity_id: "massage_room_appliances"
+        service_template: >
+          {% set curHour = state_attr('sensor.times', 'hour')|int(0) %}
+          {% set presence_jean = is_state('device_tracker.life360_jean', 'home') or is_state('device_tracker.iphone_de_jean', 'home') %}
+          {% set presence_cindy = is_state('device_tracker.life360_cindy', 'home') or is_state('device_tracker.iphone_de_cindy', 'home') %}
+          {% set presence_cody = is_state('device_tracker.life360_cody', 'home') %}
+          {% set force = is_state('input_select.cody_presence','Force On') %}
+          
+          {% set presence = (presence_jean or presence_cindy or force) and presence_cody %}
+          
+          {% set output = curHour >= 19 and curHour < 21 and presence %}
+          
+          {% if output %}
+            script.switch_turn_on
+          {% else %}
+            script.switch_turn_off
+          {% endif %}
+
+  - alias: Control Room Auto Light ON
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.control_room_door
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.control_room_door
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.control_room_light_switch
+        state: 'off'
+    action:
+      - delay:
+          seconds: >
+            {{ 10 if (trigger.to_state.state == 'off') else 0 }}
+      - entity_id: switch.control_room_light
+        service_template: >
+          {% if trigger.to_state.state == 'on' %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+          
+  - alias: Cold Storage Auto Light ON
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.cold_storage_door
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.cold_storage_door
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.cold_storage_light_switch
+        state: 'off'
+    action:
+      - delay:
+          seconds: >
+            {{ 10 if (trigger.to_state.state == 'off') else 0 }}
+      - entity_id: switch.cold_storage_light
+        service_template: >
+          {% if trigger.to_state.state == 'on' %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}
+          
+  - alias: Storage Room Auto Light ON
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.storage_room_door
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.storage_room_door
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.storage_room_light_switch
+        state: 'off'
+    action:
+      - delay:
+          seconds: >
+            {{ 10 if (trigger.to_state.state == 'off') else 0 }}
+      - entity_id: switch.storage_room_light
+        service_template: >
+          {% if trigger.to_state.state == 'on' %}
+            switch.turn_on
+          {% else %}
+            switch.turn_off
+          {% endif %}

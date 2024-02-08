@@ -1,0 +1,160 @@
+####################################################
+# SENSORS - ENERGY INTEGRATIONS                    #
+####################################################
+
+#APPLIANCES
+  # See "s_appliances.yaml"
+
+#HVACs
+  - platform: integration
+    name: Living Room HVAC Energy
+    source: sensor.living_room_hvac_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Garage HVAC Energy
+    source: sensor.garage_hvac_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: RecRoom HVAC Energy
+    source: sensor.recroom_hvac_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+#DRAGONS
+  - platform: integration
+    name: Garage Front Heater Energy
+    source: sensor.garage_front_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+        
+  - platform: integration
+    name: Garage Rear Heater Energy
+    source: sensor.garage_rear_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+#CONVECTAIR/HEATERS/BASEBOARDS
+  - platform: integration
+    name: Bar Heater Energy
+    source: sensor.bar_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Entrance Heater Energy
+    source: sensor.entrance_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Kitchen Heater Energy
+    source: sensor.kitchen_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Living Room Heater Energy
+    source: sensor.living_room_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Massage Room Heater Energy
+    source: sensor.massage_room_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Master Bedroom Heater Energy
+    source: sensor.master_bedroom_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Office Heater Energy
+    source: sensor.office_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: RecRoom Heater Energy
+    source: sensor.recroom_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Training Room Heater Energy
+    source: sensor.training_room_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+
+#FLOOR HEATERS
+  - platform: integration
+    name: Cold Storage Floor Heater Energy
+    source: sensor.cold_storage_floor_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Storage Room Floor Heater Energy
+    source: sensor.storage_room_floor_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+#OTHER TYPES OF HEATING
+  - platform: integration
+    name: Tankless Water Heater Energy
+    source: sensor.tankless_water_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+
+#POOL & POND
+  - platform: integration
+    name: Pool Pump Energy
+    source: sensor.pool_pump_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Pool Heater Energy
+    source: sensor.pool_heater_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    name: Pond Waterfall Pump Energy
+    source: sensor.pond_waterfall_pump_power
+    method: left
+    unit_prefix: k
+    round: 4
+    
+#WELL
+  - platform: integration
+    name: Well Energy
+    source: sensor.well_power
+    method: left
+    unit_prefix: k
+    round: 4

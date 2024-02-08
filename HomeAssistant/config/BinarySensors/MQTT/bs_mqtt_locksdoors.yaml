@@ -1,0 +1,218 @@
+####################################################
+# BINARY SENSORS - MQTT - LOCKS and DOORS          #
+####################################################
+
+# BELLS
+  - name: House FD Bell
+    state_topic: "Home/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Front/LWT"
+    <<: &template_bell
+      value_template: '{{ value_json.bell }}'
+      payload_on: "ON"
+      payload_off: "OFF"
+      qos: 0
+    
+  - name: House SD Bell
+    state_topic: "Home/Door/Side/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Side/LWT"
+    <<: *template_bell
+    
+  - name: House BD Bell
+    state_topic: "Home/Door/Back/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Back/LWT"
+    <<: *template_bell
+    
+  - name: Garage FD Bell
+    state_topic: "Garage/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Garage/Door/Front/LWT"
+    <<: *template_bell
+
+# DOOR SENSORS
+  - name: House FD Opened
+    state_topic: "Home/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Front/LWT"
+    json_attributes_topic: "Home/Door/Front/Json"
+    <<: &template_door_value
+      value_template: '{{ value_json.opened }}'
+    <<: &template_door
+      payload_on: "opened"
+      payload_off: "closed"
+      device_class: door
+      qos: 0
+    
+  - name: House SD Opened
+    state_topic: "Home/Door/Side/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Side/LWT"
+    json_attributes_topic: "Home/Door/Side/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: House BD Opened
+    state_topic: "Home/Door/Back/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/Back/LWT"
+    json_attributes_topic: "Home/Door/Back/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: House MBD Opened
+    state_topic: "Home/Door/MasterBack/Sensors/Stts"
+    availability:
+      - topic: "Home/Door/MasterBack/LWT"
+    json_attributes_topic: "Home/Door/MasterBack/Json"
+    <<: *template_door_value
+    <<: *template_door
+
+  - name: Garage FD Opened
+    state_topic: "Garage/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Garage/Door/Front/LWT"
+    json_attributes_topic: "Garage/Door/Front/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: Garage BD Opened
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    value_template: '{{ value_json.rear_closed }}'
+    <<: *template_door
+    
+  - name: Garage CD Opened
+    state_topic: "Garage/Door/Car/Sensors/Stts"
+    value_template: '{{ value_json.closed }}'
+    payload_on: "OFF"
+    payload_off: "ON"
+    availability:
+      - topic: "Garage/Door/Car/LWT"
+    device_class: garage_door
+    qos: 0
+    json_attributes_topic: "Garage/Door/Car/Json"
+    
+  - name: Shed FD Opened
+    state_topic: "Shed/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Shed/Door/Front/LWT"
+    json_attributes_topic: "Shed/Door/Front/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: Shed LD Opened
+    state_topic: "Shed/Control/Sensors/Stts"
+    availability:
+      - topic: "Shed/Control/LWT"
+    # value_template: '{{ value_json.left_doors }}'
+    value_template: >
+      {% set status = value_json.left_doors %}
+      {{ "closed" }}
+    <<: *template_door
+    
+  - name: Shed RD Opened
+    state_topic: "Shed/Control/Sensors/Stts"
+    availability:
+      - topic: "Shed/Control/LWT"
+    # value_template: '{{ value_json.right_doors }}'
+    value_template: >
+      {% set status = value_json.right_doors %}
+      {{ "closed" }}
+    <<: *template_door
+    
+  - name: Glasshouse FD Opened
+    state_topic: "Glass/Door/Front/Sensors/Stts"
+    availability:
+      - topic: "Glass/Door/Front/LWT"
+    json_attributes_topic: "Glass/Door/Front/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: Glasshouse SD Opened
+    state_topic: "Glass/Control/Sensors/Stts"
+    availability:
+      - topic: "Glass/Control/LWT"
+    value_template: '{{ value_json.side_door }}'
+    <<: *template_door
+    
+  - name: Pool FD Opened
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    <<: *template_door_value
+    <<: *template_door
+    
+  - name: Pool TD Opened
+    state_topic: "ExtToilet/Control/Sensors/Stts"
+    availability:
+      - topic: "ExtToilet/Control/LWT"
+    json_attributes_topic: "ExtToilet/Control/Json"
+    <<: *template_door_value
+    <<: *template_door
+    
+# LOCK SENSORS FOR UNAUTOMATED LOCKS
+  - name: Garage CD Locked
+    state_topic: "Garage/Door/Car/Sensors/Stts"
+    availability:
+      - topic: "Garage/Door/Car/LWT"
+    json_attributes_topic: "Garage/Door/Car/Json"
+    payload_on: "OFF"
+    payload_off: "ON"
+    device_class: lock
+    qos: 0
+    <<: &template_lock_value
+      value_template: '{{ value_json.locked }}'
+      
+  - name: Garage BD Locked
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    value_template: '{{ value_json.rear_locked }}'
+    <<: &template_lock
+      payload_on: "unlocked"
+      payload_off: "locked"
+      device_class: lock
+      qos: 0
+    
+  - name: Pool FD Locked
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    <<: *template_lock_value
+    <<: *template_lock
+
+  - name: Pool TD Locked
+    state_topic: "ExtToilet/Control/Sensors/Stts"
+    availability:
+      - topic: "ExtToilet/Control/LWT"
+    <<: *template_lock_value
+    <<: *template_lock
+
+# POOL GATES
+  - name: Pool Gate Closed - Deck
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_deck }}'
+    qos: 0
+    
+  - name: Pool Gate Closed - Main
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_main }}'
+    qos: 0
+    
+  - name: Pool Gate Closed - Pond
+    device_class: door
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.gate_pond }}'
+    qos: 0
+    

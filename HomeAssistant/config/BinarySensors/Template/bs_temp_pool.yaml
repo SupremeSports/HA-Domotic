@@ -1,0 +1,47 @@
+####################################################
+# TEMPLATES - POOL                                 #
+####################################################
+  
+  - unique_id: poolfiller_status
+    #name: Pool Filler Valve
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.poolfiller_mode','Winter/Off') %}
+        mdi:water-pump-off
+      {%else%}
+        mdi:water-pump
+      {%endif%}
+    availability: >
+      {{ not is_state('switch.pool_filler_valve', 'unavailable') and not is_state('input_boolean.pool_running', 'off') }}
+    state: >
+      {{ is_state('switch.pool_filler_valve','on') }}
+    attributes:
+      friendly_name: Pool Filler Valve
+
+  - name: Pool Heater Run
+    #unique_id: pool_heater_run
+    #device_class: none
+    icon: mdi:security-network
+    availability: >
+      {{ not is_state('switch.pool_heater', 'unavailable') }}
+    state: >
+      {{ is_state('switch.pool_heater','on') and states('sensor.ted5000_mtu3_power')|int(0) >= 5000 }}
+    attributes:
+      appliances: heater
+      watts: "{{ state_attr('switch.pool_heater','watts') }}"
+
+  - unique_id: gardenirrigation_status
+    #name: Garden Irrigation
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.gardenirrigation_mode', 'Winter/Off') %}
+        mdi:water-off
+      {% else %}
+        mdi:water
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.garden_irrigation', 'unavailable') or is_state('input_boolean.pool_running','off') }}
+    state: >
+      {{ is_state('switch.garden_irrigation', 'on') }}
+    attributes:
+      friendly_name: Garden Irrigation

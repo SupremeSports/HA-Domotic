@@ -1,0 +1,361 @@
+###################################################
+# AUTOMATIONS - APPLIANCES                        #
+###################################################
+
+#WASHING MACHINE
+  - alias: Washing Machine State Idle
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.washing_machine_running
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.washing_machine_door
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.washing_machine_running
+        state: 'on'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.washing_machine_state
+        data:
+          option: 'Idle'
+
+  - alias: Washing Machine State Running
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: numeric_state
+        entity_id: sensor.washing_machine_power
+        above: 30
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.washing_machine_running
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.washing_machine_door
+          state: 'off'
+        - condition: numeric_state
+          entity_id: sensor.washing_machine_power
+          above: 30
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.washing_machine_state
+        data:
+          option: 'Running'
+
+  - alias: Washing Machine State Load Ready
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.washing_machine_running
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: sensor.washing_machine_state
+        state: 'Running'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.washing_machine_state
+        data:
+          option: 'Load Ready'
+          
+  - alias: Washing Machine State Empty
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.washing_machine_door
+        from: 'off'
+        to: 'on'
+        for:
+          seconds: 30
+    condition:
+      - condition: state
+        entity_id: binary_sensor.washing_machine_running
+        state: 'off'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.washing_machine_state
+        data:
+          option: 'Empty'
+
+  - alias: Washing Machine State Notification
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.washing_machine_state
+        from: 'Running'
+        to: 'Load Ready'
+      - platform: time_pattern
+        minutes: 0
+    condition:
+      - condition: state
+        entity_id: sensor.washing_machine_state
+        state: 'Load Ready'
+    action:
+      - service_template: >
+          {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 15 or is_state('device_tracker.life360_jean', 'home') %}
+          {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 15 or is_state('device_tracker.life360_cindy', 'home') %}
+          
+          {% if (jean and cindy) %}
+            notify.ios_notify_all
+          {% elif jean %}
+            notify.mobile_app_iphone_de_jean
+          {% elif cindy %}
+            notify.mobile_app_iphone_de_cindy
+          {% else %}
+            notify.ios_notify_all
+          {% endif %}
+        data:
+          message: "Washing Machine Cycle Completed"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+
+#DRYING MACHINE
+  - alias: Drying Machine State Idle
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.drying_machine_running
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.drying_machine_door
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.drying_machine_running
+        state: 'on'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.drying_machine_state
+        data:
+          option: 'Idle'
+
+  - alias: Drying Machine State Running
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: numeric_state
+        entity_id: sensor.drying_machine_power
+        above: 50
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.drying_machine_running
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.drying_machine_door
+          state: 'off'
+        - condition: numeric_state
+          entity_id: sensor.drying_machine_power
+          above: 50
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.drying_machine_state
+        data:
+          option: 'Running'
+
+  - alias: Drying Machine State Load Ready
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.drying_machine_running
+        from: 'on'
+        to: 'off'
+    condition:
+      - condition: state
+        entity_id: sensor.drying_machine_state
+        state: 'Running'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.drying_machine_state
+        data:
+          option: 'Load Ready'
+          
+  - alias: Drying Machine State Empty
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.drying_machine_door
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.drying_machine_running
+        state: 'off'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.drying_machine_state
+        data:
+          option: 'Empty'
+          
+  - alias: Drying Machine State Notification
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: sensor.drying_machine_state
+        from: 'Running'
+        to: 'Load Ready'
+      - platform: time_pattern
+        minutes: 0
+    condition:
+      - condition: state
+        entity_id: sensor.drying_machine_state
+        state: 'Load Ready'
+    action:
+      - service_template: >
+          {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 15 or is_state('device_tracker.life360_jean', 'home') %}
+          {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 15 or is_state('device_tracker.life360_cindy', 'home') %}
+          
+          {% if (jean and cindy) %}
+            notify.ios_notify_all
+          {% elif jean %}
+            notify.mobile_app_iphone_de_jean
+          {% elif cindy %}
+            notify.mobile_app_iphone_de_cindy
+          {% else %}
+            notify.ios_notify_all
+          {% endif %}
+        data:
+          message: "Drying Machine Cycle Completed"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+
+#DISHWASHER
+  - alias: Dishwasher State Idle
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.dishwasher_running
+        from: 'off'
+        to: 'on'
+      - platform: state
+        entity_id: binary_sensor.dishwasher_door
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.dishwasher_running
+        state: 'on'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dishwasher_state
+        data:
+          option: 'Idle'
+
+  - alias: Dishwasher State Running
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+      - platform: numeric_state
+        entity_id: sensor.dishwasher_power
+        above: 30
+    condition:
+      condition: and
+      conditions:
+        - condition: state
+          entity_id: binary_sensor.dishwasher_running
+          state: 'on'
+        - condition: state
+          entity_id: binary_sensor.dishwasher_door
+          state: 'off'
+        - condition: numeric_state
+          entity_id: sensor.dishwasher_power
+          above: 30
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dishwasher_state
+        data:
+          option: 'Running'
+
+  - alias: Dishwasher State Load Ready
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.dishwasher_running
+        from: 'on'
+        to: 'off'
+        for:
+          seconds: 30
+    condition:
+      - condition: state
+        entity_id: sensor.dishwasher_state
+        state: 'Running'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dishwasher_state
+        data:
+          option: 'Load Ready'
+      - service_template: >
+          {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 15 or is_state('device_tracker.life360_jean', 'home') %}
+          {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 15 or is_state('device_tracker.life360_cindy', 'home') %}
+          
+          {% if (jean and cindy) %}
+            notify.ios_notify_all
+          {% elif jean %}
+            notify.mobile_app_iphone_de_jean
+          {% elif cindy %}
+            notify.mobile_app_iphone_de_cindy
+          {% else %}
+            notify.ios_notify_all
+          {% endif %}
+        data:
+          message: "Dishwasher Cycle Completed"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+          
+  - alias: Dishwasher State Empty
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.dishwasher_door
+        from: 'off'
+        to: 'on'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.dishwasher_running
+        state: 'off'
+    action:
+      - service: input_select.select_option
+        target:
+          entity_id: input_select.dishwasher_state
+        data:
+          option: 'Empty'

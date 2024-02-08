@@ -1,0 +1,173 @@
+    type: vertical-stack
+    title: Heating & Cooling
+    cards:
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Heating Total Power
+            entity: sensor.heating_total_power
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+            # Replaced with a sensor that changes value every second
+          - sensor.times
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 0
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#a1a1a18a'
+            from: 0
+            to: 0.25
+          - color: '#24ff008a'
+            from: 0.25
+            to: 10
+          - color: '#81e8008a'
+            from: 10
+            to: 100
+          - color: '#acd0008a'
+            from: 100
+            to: 500
+          - color: '#cbb5008a'
+            from: 500
+            to: 1000
+          - color: '#e297008a'
+            from: 1000
+            to: 2000
+          - color: '#f376008a'
+            from: 2000
+            to: 3000
+          - color: '#fc4f008a'
+            from: 3000
+            to: 6000
+          - color: '#ff00008a'
+            from: 6000
+            to: 50000
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+              font-weight: bold;
+            }
+            bar-card-value	{
+              font-weight: bolder;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Garage HVAC
+            entity: sensor.garage_hvac_power
+          - name: Garage Front Heater
+            entity: sensor.garage_front_heater_power
+          - name: Garage Rear Heater
+            entity: sensor.garage_rear_heater_power
+          - name: Cold Storage Floor Heater
+            entity: sensor.cold_storage_floor_heater_power
+          - name: Storage Room Floor Heater
+            entity: sensor.storage_room_floor_heater_power
+          - name: Living Room HVAC
+            entity: sensor.living_room_hvac_power
+          - name: Office Heater
+            entity: sensor.office_heater_power
+          - name: RecRoom Heater
+            entity: sensor.recroom_heater_power
+          - name: RecRoom HVAC
+            entity: sensor.recroom_hvac_power
+          - name: Bar Heater
+            entity: sensor.bar_heater_power
+          - name: Master Bedroom Heater
+            entity: sensor.master_bedroom_heater_power
+          - name: Massage Room Heater
+            entity: sensor.massage_room_heater_power
+          - name: Training Room Heater
+            entity: sensor.training_room_heater_power
+          - name: Kitchen Heater
+            entity: sensor.kitchen_heater_power
+          - name: Living Room Heater
+            entity: sensor.living_room_heater_power
+          - name: Entrance Heater
+            entity: sensor.entrance_heater_power
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+            # Replaced with a sensor that changes value every second
+          - sensor.times
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          #max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          #max: ${ Math.max(...vars.map(v => states['sensor.heating_total_power'].state)) }
+          max: ${ states['sensor.heating_total_power'].state }
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 0
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#a1a1a18a'
+            from: 0
+            to: 0.25
+          - color: '#24ff008a'
+            from: 0.25
+            to: 10
+          - color: '#81e8008a'
+            from: 10
+            to: 100
+          - color: '#acd0008a'
+            from: 100
+            to: 500
+          - color: '#cbb5008a'
+            from: 500
+            to: 1000
+          - color: '#e297008a'
+            from: 1000
+            to: 2000
+          - color: '#f376008a'
+            from: 2000
+            to: 3000
+          - color: '#fc4f008a'
+            from: 3000
+            to: 6000
+          - color: '#ff00008a'
+            from: 6000
+            to: 50000
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }

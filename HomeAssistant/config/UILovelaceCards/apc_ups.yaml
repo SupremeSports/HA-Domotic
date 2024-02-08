@@ -1,0 +1,42 @@
+      type: entities
+      title: Battery Back-UPS
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.ups_status
+          entities:
+            - sensor.ups_startup_time
+            - sensor.ups_status_date
+            - sensor.ups_status_data
+            - sensor.ups_input_voltage
+            - sensor.ups_load
+            - sensor.ups_load_power
+        - type: custom:fold-entity-row
+          head: sensor.ups_battery
+          entities:
+            - sensor.ups_time_left
+            - sensor.ups_shutdown_time
+            - sensor.ups_battery_voltage
+            - sensor.ups_battery_nominal_voltage
+            - sensor.ups_battery_shutdown
+            - sensor.ups_battery_timeout
+        - type: custom:fold-entity-row
+          head: sensor.ups_transfer_count
+          entities:
+            - sensor.ups_time_on_battery
+            - sensor.ups_total_time_on_battery
+            - sensor.ups_transfer_low
+            - sensor.ups_transfer_high
+            - sensor.ups_transfer_from_battery
+            - sensor.ups_last_transfer
+        - type: custom:fold-entity-row
+          head: sensor.ups_model
+          entities:
+            - sensor.ups_name
+            - sensor.ups_hostname
+            - sensor.ups_nominal_input_voltage
+            - sensor.ups_nominal_output_power
+            - sensor.ups_battery_nominal_voltage
+            - sensor.ups_daemon_info
+            - sensor.ups_cable_type
+            - sensor.ups_battery_replaced

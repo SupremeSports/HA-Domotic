@@ -1,0 +1,187 @@
+    type: vertical-stack
+    title: Appliances
+    cards:
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Appliances Total Power
+            entity: sensor.appliances_total_power
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          # - sensor.appliances_total_power
+          - sensor.times
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 0
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#a1a1a18a'
+            from: 0
+            to: 0.25
+          - color: '#24ff008a'
+            from: 0.25
+            to: 10
+          - color: '#81e8008a'
+            from: 10
+            to: 100
+          - color: '#acd0008a'
+            from: 100
+            to: 500
+          - color: '#cbb5008a'
+            from: 500
+            to: 1000
+          - color: '#e297008a'
+            from: 1000
+            to: 2000
+          - color: '#f376008a'
+            from: 2000
+            to: 3000
+          - color: '#fc4f008a'
+            from: 3000
+            to: 6000
+          - color: '#ff00008a'
+            from: 6000
+            to: 50000
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+              font-weight: bold;
+            }
+            bar-card-value	{
+              font-weight: bolder;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Kitchen Fridge
+            entity: sensor.kitchen_refrigerator_power
+          - name: Chest Freezer
+            entity: sensor.chest_freezer_power
+          - name: Dishwasher
+            entity: sensor.dishwasher_power
+          - name: Washing Machine
+            entity: sensor.washing_machine_power
+          - name: Tumble Dryer
+            entity: sensor.drying_machine_power
+          - name: Water Heater
+            entity: sensor.tankless_water_heater_power
+          - name: Water Well
+            entity: sensor.well_power
+            
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          # - sensor.kitchen_refrigerator_power
+          # - sensor.chest_freezer_power
+          # - sensor.dishwasher_power
+          # - sensor.washing_machine_power
+          # - sensor.drying_machine_power
+          # - sensor.tankless_water_heater_power
+          - sensor.times
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          #max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          max: ${ Math.max(...vars.map(v => states['sensor.appliances_total_power'].state))}
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 0
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#a1a1a18a'
+            from: 0
+            to: 0.25
+          - color: '#24ff008a'
+            from: 0.25
+            to: 10
+          - color: '#81e8008a'
+            from: 10
+            to: 100
+          - color: '#acd0008a'
+            from: 100
+            to: 500
+          - color: '#cbb5008a'
+            from: 500
+            to: 1000
+          - color: '#e297008a'
+            from: 1000
+            to: 2000
+          - color: '#f376008a'
+            from: 2000
+            to: 3000
+          - color: '#fc4f008a'
+            from: 3000
+            to: 6000
+          - color: '#ff00008a'
+            from: 6000
+            to: 50000
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }
+            
+            
+            
+          # - color: '#a1a1a18a'
+            # from: 0
+            # to: 2
+          # - color: '#3ea8328a'
+            # from: 2
+            # to: 10
+          # - color: '#85a8328a'
+            # from: 10
+            # to: 50
+          # - color: '#a8a4328a'
+            # from: 50
+            # to: 200
+          # - color: '#a887328a'
+            # from: 200
+            # to: 500
+          # - color: '#a867328a'
+            # from: 500
+            # to: 1000
+          # - color: '#a846328a'
+            # from: 1000
+            # to: 8000
+          # - color: '#a832328a'
+            # from: 8000
+            # to: 50000

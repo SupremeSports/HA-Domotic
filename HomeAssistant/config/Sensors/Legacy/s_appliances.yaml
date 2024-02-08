@@ -1,0 +1,39 @@
+####################################################
+# SENSORS - APPLIANCES                             #
+####################################################
+
+  - platform: integration
+    source: sensor.washing_machine_power
+    name: Washing Machine Energy
+    unit_prefix: k
+    round: 4
+
+  - platform: integration
+    source: sensor.drying_machine_power
+    name: Drying Machine Energy
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    source: sensor.dishwasher_power
+    name: Dishwasher Energy
+    unit_prefix: k
+    round: 4
+
+  - platform: integration
+    source: sensor.kitchen_refrigerator_power
+    name: Kitchen Refrigerator Energy
+    unit_prefix: k
+    round: 4
+      
+  - platform: integration
+    source: sensor.chest_freezer_power
+    name: Chest Freezer Energy
+    unit_prefix: k
+    round: 4
+    
+  - platform: integration
+    source: sensor.ups_load_power
+    name: UPS Load Energy
+    unit_prefix: k
+    round: 4

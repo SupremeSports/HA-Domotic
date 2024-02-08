@@ -1,0 +1,20 @@
+      type: custom:mini-graph-card
+      name: Speedtest
+      align_state: center
+      icon: mdi:speedometer
+      show:
+        extrema: true
+        points: true
+        labels: true
+        labels_secondary: true
+      entities:
+        - name: Download
+          entity: sensor.speedtest_download
+          color: green
+        - name: Upload
+          entity: sensor.speedtest_upload
+          color: red
+        - name: Ping
+          entity: sensor.speedtest_ping
+          color: yellow
+          y_axis: secondary

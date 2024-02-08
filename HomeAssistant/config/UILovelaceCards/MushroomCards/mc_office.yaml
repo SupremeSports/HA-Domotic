@@ -1,0 +1,211 @@
+    type: vertical-stack
+    cards:
+      - type: custom:mushroom-title-card
+        title: Office
+        #subtitle: Floor Heater
+        alignment: justify
+#Comfort
+      # - type: custom:mushroom-chips-card
+        # chips:
+          # # - type: menu
+          # - type: entity
+            # entity: sensor.office_temperature
+            # icon_color: orange
+          # - type: entity
+            # entity: sensor.office_humidity
+            # icon: mdi:water-percent
+            # icon_color: indigo
+          # - type: entity
+            # entity: sensor.office_floor_temperature
+            # icon: mdi:heat-wave
+            # icon_color: red
+#Doors
+
+#Lights
+      # - type: custom:mushroom-chips-card
+        # chips:
+          # - type: template
+            # tap_action:
+              # action: more-info
+            # entity: switch.office_jean_light
+            # icon: |-
+              # {% if is_state('switch.office_jean_light', 'on') %}
+                # mdi:lightbulb-on
+              # {% else %}
+                # mdi:lightbulb-off
+              # {% endif %}
+            # icon_color: |-
+              # {% if is_state('switch.office_jean_light', 'off') %}
+                # grey
+              # {% else %}
+                # yellow
+              # {% endif %}
+            # content: |-
+              # {% if is_state('switch.office_jean_light', 'on') %}
+                # Jean On
+              # {% else %}
+                # Jean Off
+              # {% endif %}
+          # - type: template
+            # tap_action:
+              # action: more-info
+            # entity: switch.office_cindy_light
+            # icon: |-
+              # {% if is_state('switch.office_cindy_light', 'on') %}
+                # mdi:lightbulb-on
+              # {% else %}
+                # mdi:lightbulb-off
+              # {% endif %}
+            # icon_color: |-
+              # {% if is_state('switch.office_cindy_light', 'off') %}
+                # grey
+              # {% else %}
+                # yellow
+              # {% endif %}
+            # content: |-
+              # {% if is_state('switch.office_cindy_light', 'on') %}
+                # Cindy On
+              # {% else %}
+                # Cindy Off
+              # {% endif %}
+#Heaters
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.office_heater_running
+            icon: |-
+              {% if is_state('binary_sensor.office_heater_running','on') %}
+                mdi:radiator
+              {% elif is_state('binary_sensor.office_heater_running','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.office_heater_running', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.office_heater_running', 'on') %}
+                Heater On
+              {% else %}
+                Heater Off
+              {% endif %}
+
+          - type: template
+            icon: mdi:ticket-percent
+            icon_color: blue
+            content: |-
+              {% if state_attr('sensor.office_heater_power','duty_cycle') %}
+                {% set duty = state_attr('sensor.office_heater_power','duty_cycle').split(' ')[0]|float(0) %}
+              {% else %}
+                {% set office_duty = 0 %}
+              {% endif %}
+              
+              Duty Cycle {{ duty|round(1) }} %
+#Energy
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            icon: mdi:transmission-tower
+            content: |-
+              {% set power = states('sensor.office_heater_power')|float(0) %}
+              {{ power|round(5) }} W
+          - type: template
+            icon: mdi:lightning-bolt
+            content: |-
+              {% set energy = states('sensor.office_heater_energy_daily')|float(0) %}
+              {{ energy|round(5) }} kWh
+          - type: template
+            icon: mdi:cash
+            content: |-
+              {% set energy = states('sensor.office_heater_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ (energy*cost)|round(5) }} $
+#Comfort graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.office_temperature
+            # name: Temperature
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: orange
+            # line_color: orange
+          # - type: custom:mini-graph-card
+            # icon: mdi:water-percent
+            # entities:
+              # - sensor.office_humidity
+            # name: Humidity
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: steelblue
+            # line_color: steelblue
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.office_floor_temperature
+            # name: Floor
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: green
+            # line_color: green
+#Comfort thermostat
+      # - type: custom:mushroom-climate-card
+        # entity: climate.office_heater
+        # show_temperature_control: true
+        # hvac_modes:
+          # - 'heat'
+          # - 'off'
+        # icon: mdi:heat-wave
+        # #layout: vertical
+#Energy graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.office_heater_power
+            # name: Power
+            # icon: mdi:transmission-tower
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 0.5
+            # color: green
+            # line_color: green
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.office_heater_energy_daily
+            # name: Energy
+            # icon: mdi:lightning-bolt
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # show:
+              # graph: bar
+            # #bar_spacing: 6
+            # aggregate_func: max
+            # group_by: hour
+            # color_thresholds:
+              # - value: 0
+                # color: "#00ff00f0"
+              # - color: "#6fed00f0"
+              # - color: "#98db00f0"
+              # - color: "#b6c700f0"
+              # - color: "#cdb200f0"
+              # - color: "#df9b00f0"
+              # - color: "#ee8200f0"
+              # - color: "#f86600f0"
+              # - color: "#fe4400f0"
+              # - value: 20
+                # color: "#ff0000f0"

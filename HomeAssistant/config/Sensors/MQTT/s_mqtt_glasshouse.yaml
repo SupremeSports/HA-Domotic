@@ -1,0 +1,69 @@
+####################################################
+# SENSORS - MQTT - GLASSHOUSE                      #
+####################################################
+
+######### GLASSHOUSE - BASIC DATA #########
+  - name: Glasshouse Control Status
+    icon: mdi:server
+    state_topic: "Glass/Control/Json"
+    availability:
+      - topic: "Glass/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Glass/Control/Json"
+    
+  - name: Glasshouse Box Temperature
+    unit_of_measurement: '°C'
+    icon: mdi:thermometer
+    state_topic: "Glass/Control/Json"
+    availability:
+      - topic: "Glass/Control/LWT"
+    value_template: "{{ value_json.temp_in }}"
+    qos: 0
+    
+  - name: Glasshouse Box Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Glass/Control/Json"
+    availability:
+      - topic: "Glass/Control/LWT"
+    value_template: "{{ value_json.hum_in }}"
+    qos: 0
+    
+  - name: Glasshouse 5V Voltage
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Glass/Control/Json"
+    availability:
+      - topic: "Glass/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - name: Glasshouse 12V Voltage
+    icon: mdi:flash-outline
+    unit_of_measurement: 'V'
+    state_topic: "Glass/Control/Json"
+    availability:
+      - topic: "Glass/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}

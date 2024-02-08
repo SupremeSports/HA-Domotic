@@ -1,0 +1,216 @@
+####################################################
+# SENSORS - MQTT - WEATHER STATION                 #
+####################################################
+
+######### WEATHER STATION - BASIC DATA #########
+  - name: "Weather Control Status"
+    icon: mdi:wind-turbine
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Weather/Control/Json"
+
+  - name: "Weather Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Weather Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Weather/Control/Json"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+      
+  - name: "Weather Control Input Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+      
+  - name: "Weather Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Weather/Control/Json"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+
+######### UV SENSOR - VEML6070 #########
+
+  - name: "UV Sensor"
+    icon: mdi:sunglasses
+    unit_of_measurement: 'uW/cm2'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.uv }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+        
+######### AIR QUALITY INDEX SENSOR - MQ135 #########
+
+  - name: "AQI Sensor"
+    icon: mdi:air-filter
+    unit_of_measurement: 'ppm'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.aq }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+
+######### RAIN SENSOR/RATE #########
+    
+  - name: "Rain Sensor"
+    icon: mdi:weather-pouring
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.rain.s }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Rain Level Toggle"
+    icon: mdi:weather-pouring
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.rain.l }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
+
+  - name: "Outdoor Temperature NTC"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: >
+      {% set x = (value_json.ntc.t)|float %}
+      
+      {% set Ta = x * x * x * (-0.000001292158569) %}
+      {% set Tb = x * x * (0.002813487029991) %}
+      {% set Tc = x * (-2.141487158777440) %}
+      {% set Td = (573.037695413217000) %}
+      
+      {% set T = Ta + Tb + Tc + Td %}
+      
+      {{ T|round(1) }}
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    json_attributes_topic: "Weather/Sensors/Stts"
+    json_attributes_template: "{{ value_json.ntc | tojson }}"
+
+  - name: "Outdoor Temperature DHT"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.dht.t }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Outdoor Humidity DHT"
+    unit_of_measurement: '%'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.dht.h }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Outdoor Temperature BME"
+    unit_of_measurement: '°C'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.t }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Outdoor Humidity BME"
+    unit_of_measurement: '%'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.h }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    
+  - name: "Outdoor Pressure Raw"
+    icon: mdi:altimeter
+    unit_of_measurement: 'kPa'
+    state_topic: "Weather/Sensors/Stts"
+    value_template: "{{ value_json.bme.p | float + 1.5 }}"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+ 
+######### WIND SPEED #########
+
+  - name: "Wind Speed Raw"
+    icon: mdi:weather-windy
+    unit_of_measurement: 'km/h'
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set WSraw = value_json.wind.s|float %}
+      {% if WSraw < 0 or WSraw > 1000 %}
+        {% set WS = 0 %}
+      {% else %}
+        {% set WS = ((-0.000001*WSraw**3) + (-0.000002*WSraw**2) + (1.0214*WSraw))|float %}
+      {% endif %}
+      
+      {% if WS < 0.0 or WS > 90.0 %}
+        {% set WS = 0 %}
+      {% endif %}
+      
+      {{ WS | round(3) }}
+
+######### WIND COMPASS #########
+
+  - name: "Wind Direction Raw"
+    icon: mdi:arrow-all
+    unit_of_measurement: '°'
+    state_topic: "Weather/Sensors/Stts"
+    availability:
+      - topic: "Weather/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set WDraw = value_json.wind.d|float %}
+      {% if WDraw < 0 %}
+        {% set WD = 0.0 | float %}
+      {% else %}
+        {% set WD = WDraw + 0.0 | float %}
+        {% if WD >= 360 %}
+          {% set WD = WD - 360.0 | float %}
+        {% endif %}
+      {% endif %}
+      
+      {{ WD | round(3) }}

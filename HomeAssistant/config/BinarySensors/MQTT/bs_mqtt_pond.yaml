@@ -1,0 +1,25 @@
+####################################################
+# BINARY SENSORS - MQTT - POND                     #
+####################################################
+
+  - name: Pond Level High
+    device_class: moisture
+    state_topic: "Pond/Control/Sensors/Stts"
+    availability:
+      - topic: "Pond/Control/LWT"
+    #value_template: '{{ value_json.hilvl }}'
+    value_template: "ON"
+    qos: 0
+    json_attributes_topic: "Pond/Control/Sensors/Stts"
+    # json_attributes_template: '{{ {"High Level" : value_json.hilvl, "High Raw" : value_json.hilvl} | tojson }}'
+    
+  - name: Pond Level Low
+    device_class: moisture
+    state_topic: "Pond/Control/Sensors/Stts"
+    availability:
+      - topic: "Pond/Control/LWT"
+    #value_template: '{{ value_json.lolvl }}'
+    value_template: "ON"
+    qos: 0
+    json_attributes_topic: "Pond/Control/Sensors/Stts"
+    # json_attributes_template: '{{ {"Low Level" : value_json.lolvl, "Low Raw" : value_json.lolvl} | tojson }}'

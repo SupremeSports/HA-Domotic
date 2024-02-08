@@ -1,0 +1,135 @@
+####################################################
+# SWITCHES - MQTT - CONTROL ROOM                   #
+####################################################
+
+  #Outdoor Relay
+  - name: Lamp Post
+    state_topic: "Home/Control/Relay/Stts"
+    command_topic: "Home/Control/Relay/Cmd"
+    value_template: '{{ value_json.r9 }}'
+    payload_on: '{"r9":"ON"}'
+    payload_off: '{"r9":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Control/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "light"' + 
+      ', "watts": 18}' }}
+  
+  #Outdoor Relay
+  - name: Power Outlet
+    state_topic: "Home/Control/Relay/Stts"
+    command_topic: "Home/Control/Relay/Cmd"
+    value_template: '{{ value_json.r10 }}'
+    payload_on: '{"r10":"ON"}'
+    payload_off: '{"r10":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    
+  - name: Water Valve Close
+    icon: mdi:pipe-disconnected
+    state_topic: "Home/Control/Relay/Stts"
+    command_topic: "Home/Control/Relay/Cmd"
+    value_template: '{{ value_json.r7 }}'
+    payload_on: '{"r7":"ON", "h7":"8.0"}' #limits the switch to 8 seconds
+    payload_off: '{"r7":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    
+  - name: Water Valve Open
+    icon: mdi:pipe
+    state_topic: "Home/Control/Relay/Stts"
+    command_topic: "Home/Control/Relay/Cmd"
+    value_template: '{{ value_json.r8 }}'
+    payload_on: '{"r8":"ON", "h8":"8.0"}' #limits the switch to 8 seconds
+    payload_off: '{"r8":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Control/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Control/Json"
+    
+  - name: Water Heater
+    state_topic: "Home/WaterHeater/Relay/Stts"
+    command_topic: "Home/WaterHeater/Relay/Cmd"
+    value_template: '{{ value_json.r1 }}'
+    payload_on: '{"r1":"ON"}'
+    payload_off: '{"r1":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
+    qos: 0
+    json_attributes_topic: "Home/WaterHeater/Json"
+
+  #Interior Lights
+  - name: "Control Room Light"
+    state_topic: "Home/Control/Light/tele/STATE"
+    command_topic: "Home/Control/Light/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Control/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/Control/Light/tele/STATE"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}}','}') + 
+      ', "appliances": "light"' + 
+      ', "watts": 7}' }}
+    
+  - name: "Cold Storage Light"
+    state_topic: "Home/ColdStorage/Light/tele/STATE"
+    command_topic: "Home/ColdStorage/Light/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/ColdStorage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/ColdStorage/Light/tele/STATE"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}}','}') + 
+      ', "appliances": "light"' + 
+      ', "watts": 100}' }}
+    
+  - name: "Storage Room Light"
+    state_topic: "Home/Storage/Light/tele/STATE"
+    command_topic: "Home/Storage/Light/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Storage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/Storage/Light/tele/STATE"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}}','}') + 
+      ', "appliances": "light"' + 
+      ', "watts": 100}' }}
+      

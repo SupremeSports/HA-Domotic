@@ -1,0 +1,19 @@
+####################################################
+# TEMPLATE - BINARY SENSORS - WELL                 #
+####################################################
+
+  - unique_id: frontyardirrigation_status
+    #name: Frontyard Irrigation
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.frontyardirrigation_mode', 'Winter/Off') %}
+        mdi:water-off
+      {% else %}
+        mdi:water
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.frontyard_irrigation', 'unavailable') }}
+    state: >
+      {{ is_state('switch.frontyard_irrigation', 'on') }}
+    attributes:
+      friendly_name: Frontyard Irrigation

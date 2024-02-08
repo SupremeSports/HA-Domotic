@@ -1,0 +1,111 @@
+####################################################
+# UILOVELACE - CAMERAS                             #
+####################################################
+
+- title: Cameras & DVR
+  icon: mdi:monitor-eye
+  # Unique path for direct access /lovelace/${path}
+  path: dvr
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.server_drive_dvr
+  cards:
+    - type: picture-glance
+      title: House - Front Door
+      camera_view: live
+      show_state: false
+      camera_image: camera.agentdvr_house_front_door
+      entities: 
+        - binary_sensor.camera_motion_house_front_door
+      
+    - type: picture-glance
+      title: House - Driveway
+      camera_view: live
+      show_state: false
+      camera_image: camera.agentdvr_house_driveway
+      entities: 
+        - binary_sensor.camera_motion_house_driveway
+      
+    - type: picture-glance
+      title: House - Side Lawn
+      camera_view: live
+      show_state: false
+      camera_image: camera.agentdvr_house_side_lawn
+      entities: 
+        - binary_sensor.camera_motion_house_side_lawn
+    
+    - type: picture-glance
+      title: Garage - Inside Front
+      camera_view: live
+      show_state: false
+      camera_image: camera.agentdvr_garage_inside_front
+      entities: 
+        - binary_sensor.camera_motion_garage_inside_front
+      
+    - type: picture-glance
+      title: Garage - Inside Rear
+      camera_image: camera.agentdvr_garage_inside_rear
+      camera_view: live
+      show_state: false
+      entities: 
+        - binary_sensor.camera_motion_garage_inside_rear
+
+    - type: entities
+      title: DVR Storage
+      show_header_toggle: false
+      entities:
+        - type: custom:decluttering-card
+          template: drive_jbod_row
+          variables: 
+            - name: 'DVR Storage'
+            - prefix: 'server_drive_dvr'
+      
+    # - type: vertical-stack
+      # #title: Controls
+      # cards:
+        # - type: entities
+          # title: Motion Detection
+          # show_header_toggle: false
+          # entities:
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_garage_inside_front
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_garage_inside_rear
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_house_driveway
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_house_front_door
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_house_side_lawn
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+            # - type: custom:multiple-entity-row
+              # entity: binary_sensor.camera_motion_pool_area
+              # secondary_info:
+                # attribute: last-changed
+                # format: datetime
+                
+        # - type: entities
+          # title: DVR Storage
+          # show_header_toggle: false
+          # entities:
+            # - type: custom:decluttering-card
+              # template: drive_jbod_row
+              # variables: 
+                # - name: 'DVR Storage'
+                # - prefix: 'server_drive_dvr'
+            

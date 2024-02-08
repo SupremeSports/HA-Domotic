@@ -1,0 +1,211 @@
+    type: vertical-stack
+    cards:
+      - type: custom:mushroom-title-card
+        title: Cold Storage
+        #subtitle: Floor Heater
+        alignment: justify
+#Comfort
+      - type: custom:mushroom-chips-card
+        chips:
+          # - type: menu
+          - type: entity
+            entity: sensor.cold_storage_temperature
+            icon_color: orange
+          - type: entity
+            entity: sensor.cold_storage_humidity
+            icon: mdi:water-percent
+            icon_color: indigo
+          - type: entity
+            entity: sensor.cold_storage_floor_temperature
+            icon: mdi:heat-wave
+            icon_color: red
+#Doors
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.cold_storage_door
+            icon: |-
+              {% if is_state('binary_sensor.cold_storage_door', 'off') %}
+                mdi:door-closed
+              {% else %}
+                mdi:door-open
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.cold_storage_door', 'off') %}
+                green
+              {% else %}
+                red
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.cold_storage_door', 'off') %}
+                Closed
+              {% else %}
+                Open
+              {% endif %}
+#Lights
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: switch.cold_storage_light
+            icon: |-
+              {% if is_state('switch.cold_storage_light', 'on') %}
+                mdi:lightbulb-on
+              {% else %}
+                mdi:lightbulb-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('switch.cold_storage_light', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('switch.cold_storage_light', 'on') %}
+                On
+              {% else %}
+                Off
+              {% endif %}
+#Heaters
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.cold_storage_floor_heater
+            icon: |-
+              {% if is_state('binary_sensor.cold_storage_floor_heater','on') %}
+                mdi:radiator
+              {% elif is_state('binary_sensor.cold_storage_floor_heater','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.cold_storage_floor_heater', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.cold_storage_floor_heater', 'on') %}
+                Floor On
+              {% else %}
+                Floor Off
+              {% endif %}
+              
+          - type: template
+            icon: mdi:ticket-percent
+            icon_color: blue
+            content: |-
+              {% if state_attr('sensor.cold_storage_floor_heater_power','duty_cycle') %}
+                {% set duty = state_attr('sensor.cold_storage_floor_heater_power','duty_cycle').split(' ')[0]|float(0) %}
+              {% else %}
+                {% set duty = 0 %}
+              {% endif %}
+              
+              Duty Cycle {{ duty|round(1) }} %
+#Energy
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.cold_storage_floor_heater_power
+            icon: mdi:transmission-tower
+          - type: entity
+            entity: sensor.cold_storage_floor_heater_energy_daily
+            icon: mdi:lightning-bolt
+          - type: template
+            icon: |-
+              mdi:cash
+            content: |-
+              {% set energy = states('sensor.cold_storage_floor_heater_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ (energy*cost)|round(5) }} $
+#Comfort graphs
+      - type: horizontal-stack
+        cards:
+          - type: custom:mini-graph-card
+            entities:
+              - sensor.cold_storage_temperature
+            name: Temperature
+            hour24: true
+            hours_to_show: 24
+            points_per_hour: 1
+            color: orange
+            line_color: orange
+            cache: false
+          - type: custom:mini-graph-card
+            icon: mdi:water-percent
+            entities:
+              - sensor.cold_storage_humidity
+            name: Humidity
+            hour24: true
+            hours_to_show: 24
+            points_per_hour: 1
+            color: steelblue
+            line_color: steelblue
+            cache: false
+          - type: custom:mini-graph-card
+            entities:
+              - sensor.cold_storage_floor_temperature
+            name: Floor
+            icon: mdi:heat-wave
+            hour24: true
+            hours_to_show: 24
+            points_per_hour: 1
+            color: green
+            line_color: green
+            cache: false
+#Comfort thermostat            
+      - type: custom:mushroom-climate-card
+        entity: climate.cold_storage_floor_heater
+        show_temperature_control: true
+        hvac_modes:
+          - 'heat'
+          - 'off'
+        icon: mdi:heat-wave
+        #layout: vertical
+#Energy graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.cold_storage_floor_heater_power
+            # name: Power
+            # icon: mdi:transmission-tower
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 0.5
+            # color: green
+            # line_color: green
+            # cache: false
+            # #group_by: hour
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.cold_storage_floor_heater_energy_daily
+            # name: Energy
+            # icon: mdi:lightning-bolt
+            # hour24: true
+            # hours_to_show: 24
+            # cache: false
+            # show:
+              # graph: bar
+            # #bar_spacing: 6
+            # aggregate_func: max
+            # group_by: hour
+            # color_thresholds:
+              # - value: 0
+                # color: "#00ff00f0"
+              # - color: "#6fed00f0"
+              # - color: "#98db00f0"
+              # - color: "#b6c700f0"
+              # - color: "#cdb200f0"
+              # - color: "#df9b00f0"
+              # - color: "#ee8200f0"
+              # - color: "#f86600f0"
+              # - color: "#fe4400f0"
+              # - value: 10
+                # color: "#ff0000f0"

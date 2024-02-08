@@ -1,0 +1,175 @@
+####################################################
+# TEMPLATES - PEOPLE                               #
+####################################################
+
+  - unique_id: distance_jean_cindy
+    #name: Distance between us
+    unit_of_measurement: 'km'
+    state_class: measurement
+    #device_class: none
+    icon: mdi:map-marker-distance
+    state: >
+      {% set d = distance('device_tracker.life360_cindy', 'device_tracker.life360_jean')|float(0) %}
+      {% if d < 0.1 %}
+        {% set d = 0.0 %}
+      {% endif %}
+      
+      {% if d < 10 %}
+        {{ d | round(3) }}
+      {% elif d < 100 %}
+        {{ d | round(2) }}
+      {% elif d < 1000 %}
+        {{ d | round(1) }}
+      {% else %}
+        {{ d | round(0) }}
+      {% endif %}
+    attributes:
+      friendly_name: Distance between us
+      
+  - unique_id: iphone_de_jean_distance_home
+    #name: Distance from home
+    unit_of_measurement: 'km'
+    state_class: measurement
+    #device_class: none
+    icon: mdi:map-marker-distance
+    state: >
+      {% set d = distance('device_tracker.life360_jean')|float(0) %}
+      {% if d < 0.1 %}
+        {% set d = 0.0 %}
+      {% endif %}
+        
+      {% if d < 10 %}
+        {{ d | round(3) }}
+      {% elif d < 100 %}
+        {{ d | round(2) }}
+      {% elif d < 1000 %}
+        {{ d | round(1) }}
+      {% else %}
+        {{ d | round(0) }}
+      {% endif %}
+    attributes:
+      friendly_name: Distance from home
+
+  - unique_id: iphone_de_cindy_distance_home
+    #name: Distance from home
+    unit_of_measurement: 'km'
+    state_class: measurement
+    #device_class: none
+    icon: mdi:map-marker-distance
+    state: >
+        {% set d = distance('device_tracker.life360_cindy')|float(0) %}
+        {% if d < 0.1 %}
+          {% set d = 0.0 %}
+        {% endif %}
+          
+        {% if d < 10 %}
+          {{ d | round(3) }}
+        {% elif d < 100 %}
+          {{ d | round(2) }}
+        {% elif d < 1000 %}
+          {{ d | round(1) }}
+        {% else %}
+          {{ d | round(0) }}
+        {% endif %}
+    attributes:
+      friendly_name: Distance from home
+
+  - unique_id: workplace_jean
+    #name: Jean's workplace
+    #unit_of_measurement: ''
+    #state_class: measurement
+    #device_class: none
+    icon: >
+      {% set value = states('input_select.workplace_jean') %}
+      {% if value == 'Office' %}
+        mdi:account-tie
+      {% elif value == 'Telework' %}
+        mdi:account-voice
+      {% elif value == 'Trip' %}
+        mdi:account-hard-hat
+      {% elif value == 'Away' %}
+        mdi:account-settings
+      {% elif value == 'Vacation' %}
+        mdi:beach
+      {% else %}
+        mdi:account-question
+      {% endif %}
+    state: >
+      {{ states('input_select.workplace_jean') }}
+    attributes:
+      friendly_name: Jean's workplace
+      
+  - unique_id: iphone_de_jean_location_time
+    #name: iPhone de Jean Location Time
+    icon: mdi:calendar-clock
+    state: >
+      {% set time_offset = states('sensor.iphone_de_jean_timezone')|float(-5.0) - states('sensor.ha_timezone')|float(-5.0) %}
+      {{ as_timestamp(utcnow() + timedelta(hours = time_offset)) | timestamp_custom('%A %B %-d, %H:%M') }}
+    attributes:
+      friendly_name: iPhone de Jean Location Time
+      time_zone: "{{ states('sensor.iphone_de_jean_timezone') }}"
+
+  - unique_id: iphone_de_cindy_location_time
+    #name: iPhone de Cindy Location Time
+    icon: mdi:calendar-clock
+    state: >
+      {% set time_offset = states('sensor.iphone_de_cindy_timezone')|float(-5.0) - states('sensor.ha_timezone')|float(-5.0) %}
+      {{ as_timestamp(utcnow() + timedelta(hours = time_offset)) | timestamp_custom('%A %B %-d, %H:%M') }}
+    attributes:
+      friendly_name: iPhone de Cindy Location Time
+      time_zone: "{{ states('sensor.iphone_de_cindy_timezone') }}"
+      
+  - unique_id: cody
+    #name: Distance from home
+    #state_class: measurement
+    #device_class: none
+    icon: mdi:home-account
+    state: >
+      {% set distance_jean = states('sensor.iphone_de_jean_distance_home')|float(0) %}
+      {% set distance_cindy = states('sensor.iphone_de_cindy_distance_home')|float(0) %}
+      {% set distance_us = states('sensor.distance_jean_cindy')|float(0) %}
+      {% set position_jean = states('device_tracker.life360_jean') %}
+      {% set position_cindy = states('device_tracker.life360_cindy') %}
+      {% set cindy = distance_cindy < 75 %}
+      {% set jean = distance_jean > 40 or distance_us > 75 %}
+      {% set cody = states('input_select.cody_presence') %}
+      {% set cody_school_day = is_state('binary_sensor.cody_at_school','on') %}
+      {% set time = state_attr('sensor.times','hourmin')|int(0) %}
+      {% set starttime = 745 %}
+      {% set endtime = 1510 %}
+      {% set bus_starttime = 730 %}
+      {% set bus_endtime = 1526 %}
+      {% set error = ['unknown','unavailable','none',''] %}
+      
+      {% if cody == "Force Home" %}
+        home
+      {% elif cody == "Force Away" %}
+        Away
+      {% elif cody == "Garderie" %}
+        Garderie
+      {% elif cody == "École" %}
+        École
+      {% elif cody == "Avec Maman" %}
+        {{ position_cindy }}
+      {% elif cody == "Avec Papa" %}
+        {{ position_jean }}
+      {% else %}
+        {% if cody_school_day and (time >= bus_starttime and time < bus_endtime) %}
+          {% if (time >= bus_starttime and time < starttime) or (time >= endtime and time < bus_endtime) %}
+            Autobus
+          {% else %}
+            École
+          {% endif %}
+        {% elif cindy %}
+          {{ position_cindy }}
+        {% else %}
+          {% if jean and position_cindy not in error %}
+            {{ position_cindy }}
+          {% else %}
+            Away
+          {% endif %}
+        {% endif %}
+      {% endif %}
+    attributes:
+      friendly_name: Cody
+      

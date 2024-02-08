@@ -1,0 +1,248 @@
+  - title: Makerspace
+    icon: mdi:printer-3d
+    # Unique path for direct access /lovelace/${path}
+    path: 3dprinter
+    visible: true
+    cards:
+      - type: entities
+        title: Soldering Station
+        show_header_toggle: false
+        #color_state: true
+        ##state_color: true
+        entities:
+          - type: custom:fold-entity-row
+            head: sensor.soldering_station_status
+            entities:
+              - switch.soldering_station
+              - sensor.soldering_station_power
+              - sensor.soldering_station_data
+              - type: custom:fold-entity-row
+                head:
+                  type: section
+                  label: Automations
+                entities:
+                  - input_number.soldering_station
+                  - automation.shut_soldering_station_warning
+                  - automation.shut_soldering_station_shutdown
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: picture-entity
+          entity: camera.octoprint
+          name: printcam
+          show_state: false
+          tap_action: more-info
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: vertical-stack
+          cards:
+          - type: horizontal-stack
+            cards:
+              - type: gauge
+                title: Bed Temp
+                entity: sensor.octoprint_actual_bed_temp
+                theme: th_gauge_3
+                unit_of_measurement: °C
+                min: 0
+                max: 150
+                needle: true
+                severity: 
+                  red: 60
+                  yellow: 40
+                  green: 0
+                #scale: '50px'
+              - type: gauge
+                title: Hot End Temp
+                entity: sensor.octoprint_actual_tool0_temp
+                theme: th_gauge_3
+                unit_of_measurement: °C
+                min: 0
+                max: 300
+                needle: true
+                severity:
+                  red: 60
+                  yellow: 40
+                  green: 0
+                #scale: '50px'
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: horizontal-stack
+          cards:
+            - type: gauge
+              title: Bed Target
+              entity: sensor.octoprint_target_bed_temp
+              theme: th_gauge_3
+              unit_of_measurement: °C
+              min: 0
+              max: 150
+              needle: true
+              severity: 
+                red: 60
+                yellow: 40
+                green: 0
+              #scale: '50px'
+            - type: gauge
+              title: Hot End Target
+              entity: sensor.octoprint_target_tool0_temp
+              theme: th_gauge_3
+              unit_of_measurement: °C
+              min: 0
+              max: 300
+              needle: true
+              severity:
+                red: 60
+                yellow: 40
+                green: 0
+              #scale: '50px'
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: horizontal-stack
+          cards:
+          - type: custom:dual-gauge-card
+            theme: th_gauge_3
+            title: Print Bed
+            cardwidth: 230
+            min: 10
+            max: 135
+            outer:
+              entity: sensor.octoprint_actual_bed_temp
+              label: "Current"
+              unit: "°C"
+            inner:
+              entity: sensor.octoprint_target_bed_temp
+              label: "Target"
+              unit: "°C"
+            colors:
+              - color: "var(--label-badge-green)"
+                value: 0
+              - color: "var(--label-badge-yellow)"
+                value: 40
+              - color: "#B82A27"
+                value: 60
+          - type: custom:dual-gauge-card
+            title: Print Nozzle
+            cardwidth: 230
+            min: 10
+            max: 300
+            outer:
+              entity: sensor.octoprint_actual_tool0_temp
+              label: "Current"
+              unit: "°C"
+            inner:
+              entity: sensor.octoprint_target_tool0_temp
+              label: "Target"
+              unit: "°C"
+            colors:
+              - color: "var(--label-badge-green)"
+                value: 0
+              - color: "var(--label-badge-yellow)"
+                value: 40
+              - color: "#B82A27"
+                value: 60
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: custom:bignumber-card
+          title: Current Job Completion Status
+          entity: sensor.octoprint_job_percentage
+          scale: 30px
+          from: left
+          min: 0
+          max: 100
+          severity:
+            - value: 40
+              style: '#B82A27'
+            - value: 70
+              style: 'var(--label-badge-yellow)'
+            - value: 100
+              style: 'var(--label-badge-green)' 
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: horizontal-stack
+          cards:
+            - type: sensor
+              name: Elapsed
+              entity: sensor.octoprint_time_elapsed
+              graph: none
+
+            - type: sensor
+              name: Remaining
+              entity: sensor.octoprint_time_remaining
+              graph: none
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: glance
+          show_header_toggle: false
+          column_width: calc(100% / 3)
+          entities:
+            - entity: binary_sensor.octoprint_printing
+              name: Printing Status
+              icon: mdi:printer-wireless
+            - entity: binary_sensor.octoprint_printing_error
+              name:  Error State
+              icon: mdi:printer-alert
+            - entity: sensor.octoprint_current_state
+              name: Current Status
+              
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state: "unavailable"
+        card:
+          type: glance
+          show_header_toggle: false
+          column_width: calc(100% / 3)
+          entities:
+            - entity: binary_sensor.octoprint_printing
+              name: Printing Status
+              icon: mdi:printer-wireless
+
+      - type: conditional
+        conditions:
+          - entity: binary_sensor.octoprint_printing
+            state_not: "unavailable"
+        card:
+          type: 'custom:threedy-card'
+          base_entity: 'sensor.octoprint'
+          name: '3D Printer #1'
+          printer_type: I3 # I3 or Cantilever
+          monitored:
+            - Status
+            - ETA
+            - Elapsed
+            - Remaining
+            - Hotend
+            - Bed
+          # optionals  
+          theme: 'Default'
+          font: 'Roboto'
+          scale: 1.0
+          round: false
+          use_24hr: true
+          camera_entity: camera.octoprint
+          # light_entity: 
+          # power_entity:

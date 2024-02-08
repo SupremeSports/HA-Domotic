@@ -1,0 +1,89 @@
+####################################################
+# TEMPLATES - CONTROL ROOM                         #
+####################################################
+    
+  - unique_id: poweroutlet_status
+    #name: Power Outlet
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+        mdi:power-plug
+      {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+        mdi:pumpkin
+      {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+        mdi:pine-tree
+      {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+        mdi:fountain
+      {% else %}
+        mdi:power-plug-off
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.power_outlet', 'unavailable') }}
+    state: >
+      {{ is_state('switch.power_outlet', 'on') }}
+    attributes:
+      # friendly_name: >-
+      #   {% if is_state('input_select.poweroutlet_mode', 'Halloween Decorations') or is_state('input_select.poweroutlet_mode', 'Christmas Decorations') or is_state('input_select.poweroutlet_mode', 'Fountain') %}
+      #     {{ states('input_select.poweroutlet_mode') }}
+      #   {% else %}
+      #     Power Outlet
+      #   {% endif %}
+      friendly_name: Power Outlet
+      mode: "{{ states('input_select.poweroutlet_mode') }}"
+      schedule: >-
+        {% if is_state('input_select.poweroutlet_mode', '24/7') %}
+          Always ON
+        {% elif is_state('input_select.poweroutlet_mode', 'Fountain') %}
+          Turns ON at sunrise until 10PM.{{- '\n' -}}
+          Will turn ON if outside temperature is freezing
+        {% elif is_state('input_select.poweroutlet_mode', 'Halloween Decorations') %}
+          Turns ON an hour before sunset or at 4PM, turns OFF at 11PM.{{- '\n' -}}
+          Oct15-Oct31, ON at 7AM until 11PM, On Halloween until midnight
+        {% elif is_state('input_select.poweroutlet_mode', 'Christmas Decorations') %}
+          Turns ON an hour before sunset or at 4PM, turns OFF at 11PM.{{- '\n' -}}
+          On Christmas night, turns ON at 7AM until midnight
+        {% else %}
+          Always OFF
+        {% endif %}
+
+  - unique_id: lamppost_status
+    #name: Lamp Post
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.lamppost_mode', 'Force Off') %}
+        mdi:lightbulb-off
+      {% else %}
+        mdi:lightbulb
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.lamp_post', 'unavailable') }}
+    state: >
+      {{ is_state('switch.lamp_post', 'on') }}
+    attributes:
+      friendly_name: Lamp Post
+      mode: "{{ states('input_select.lamppost_mode') }}"
+      schedule: >-
+        {% if is_state('input_select.lamppost_mode', '24/7') %}
+          Always ON
+        {% elif is_state('input_select.lamppost_mode', 'Sunset to 23h') %}
+          Turns ON at sunset until 23h
+        {% elif is_state('input_select.lamppost_mode', 'Sunset to Sunrise') %}
+          Turns ON at sunset until sunrise next day
+        {% else %}
+          Always OFF
+        {% endif %}
+        
+  - unique_id: frontdoorlight_status
+    #name: Front Door Light
+    #device_class: none
+    icon: mdi:lightbulb
+    availability: >
+      {{ not is_state('switch.front_door_light', 'unavailable') }}
+    state: >
+      {{ is_state('switch.front_door_light', 'on') }}
+    attributes:
+      friendly_name: Front Door Light
+      mode: >-
+        Synch'd on change with the lamp post for now
+        
+

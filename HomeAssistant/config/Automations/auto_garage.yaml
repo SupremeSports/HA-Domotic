@@ -2,21 +2,22 @@
 # AUTOMATIONS - GARAGE                            #
 ###################################################
 
-  - alias: Garage Safety Heartbeat
-    #id: auto_garage_safety_heartbeat
-    trigger:
-      - platform: time_pattern
-        seconds: '/5'
-    condition: 
-      - condition: template
-        value_template: "{{ not is_state('sensor.garage_safety_heartbeat', 'unavailable') }}"
-    action:
-    - service: modbus.write_register
-      data:
-        hub: MB_GarageSafety
-        unit: 1
-        address: 0
-        value: '{{ states.counter.second_counter.state | int }}'
+  # - alias: Garage Safety Heartbeat
+    # #id: auto_garage_safety_heartbeat
+    # mode: restart
+    # trigger:
+      # - platform: time_pattern
+        # seconds: '/5'
+    # condition: 
+      # - condition: template
+        # value_template: "{{ not is_state('sensor.garage_safety_heartbeat','unavailable') }}"
+    # action:
+    # - service: modbus.write_register
+      # data:
+        # hub: MB_GarageSafety
+        # unit: 1
+        # address: 0
+        # value: '{{ states.counter.second_counter.state | int(0) }}'
         
 #Garage heaters
           
@@ -40,79 +41,83 @@
       - platform: state
         entity_id: binary_sensor.garage_safety_rear_active
     action:
-      - entity_id: switch.garage_front_heater
+      - data:
+          entity_id: "garage_front_heater"
         service_template: >
-          {% set safety = is_state('binary_sensor.garage_safety_front_active', 'on') or is_state('binary_sensor.garage_safety_rear_active', 'on') %}
-          {% set safety_low = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float-1.5 %}
-          {% set safety_high = states('sensor.garage_mean_temp')|float > state_attr('climate.garage_heaters', 'temperature')|float+1.5 %}
-          {% set safety_rear = ((as_timestamp(now()) - as_timestamp(states.switch.garage_rear_heater.last_changed))/60)>20 and is_state('switch.garage_rear_heater', 'on') %}
-          {% set safety_run = is_state('sensor.garage_safety_control_status', 'Running...') %}
-          {% set latch_on = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float %}
-          {% set request = is_state('input_boolean.garage_heaters', 'on') %}
-          {% set turn = states('counter.heaters_counter')|int == 2 %}
-          {% set current_state = is_state('switch.garage_front_heater', 'on') %}
-          {% set water_heater = is_state('sensor.water_heater_status', 'Heating') and is_state('binary_sensor.power_peakperiod','on') %}
+          {% set garage_mean_temp = states('sensor.garage_mean_temp')|float(99) %}
+          {% set garage_heaters_temp = state_attr('climate.garage_heaters','temperature')|float(0) %}
+          
+          {% set safety_low = garage_mean_temp < garage_heaters_temp-1.5 %}
+          {% set safety_high = garage_mean_temp > garage_heaters_temp+1.5 %}
+          {% set safety_rear = ((as_timestamp(now()) - as_timestamp(states.switch.garage_rear_heater.last_changed,as_timestamp(now())))/60)>20 and is_state('switch.garage_rear_heater','on') %}
+          {% set safety_run = is_state('sensor.garage_safety_control_status','Running...') %}
+          {% set thermostat = states('climate.garage_front_heater') in ['heat','unavailable'] and is_state('climate.garage_heaters','heat') %}
+          {% set latch_on = garage_mean_temp < garage_heaters_temp %}
+          {% set request = is_state('input_boolean.garage_heaters','on') %}
+          {% set turn = states('counter.heaters_counter')|int(1) == 1 %}
+          {% set current_state = is_state('switch.garage_front_heater','on') %}
+          {% set water_heater = is_state('sensor.water_heater_status','Heating') and is_state('binary_sensor.power_peakperiod','on') %}
           
           {% set water_heater = false %}
-          {% set out = false %}
+          {% set output = false %}
           
-          {% if not safety_run %}
-            {% set out = false %}
-          {% elif safety or safety_low %}
-            {% set out = true %}
+          {% if not safety_run or not thermostat %}
+            {% set output = false %}
+          {% elif safety_low %}
+            {% set output = true %}
           {% elif water_heater %}
-            {% set out = false %}
+            {% set output = false %}
           {% elif safety_high %}
-            {% set out = false %}
-          {% elif safety_rear and request %}
-            {% set out = true %}
-          {% elif request and turn %}
-            {% set out = true %}
+            {% set output = false %}
+          {% elif request and (turn or safety_rear) %}
+            {% set output = true %}
           {% elif current_state and latch_on %}
-            {% set out = true %}
+            {% set output = true %}
           {% endif %}
           
-          {% if out %}
-            switch.turn_on
+          {% if output %}
+            script.switch_turn_on
           {% else %}
-            switch.turn_off
+            script.switch_turn_off
           {% endif %}
-      - entity_id: switch.garage_rear_heater
+      - data:
+          entity_id: "garage_rear_heater"
         service_template: >
-          {% set safety = is_state('binary_sensor.garage_safety_front_active', 'on') or is_state('binary_sensor.garage_safety_rear_active', 'on') %}
-          {% set safety_low = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float-2 %}
-          {% set safety_high = states('sensor.garage_mean_temp')|float > state_attr('climate.garage_heaters', 'temperature')|float+1.5 %}
-          {% set safety_front = ((as_timestamp(now()) - as_timestamp(states.switch.garage_front_heater.last_changed))/60)>20 and is_state('switch.garage_front_heater', 'on') %}
-          {% set safety_run = is_state('sensor.garage_safety_control_status', 'Running...') %}
-          {% set latch_on = states('sensor.garage_mean_temp')|float < state_attr('climate.garage_heaters', 'temperature')|float %}
-          {% set request = is_state('input_boolean.garage_heaters', 'on') %}
-          {% set turn = states('counter.heaters_counter')|int == 1 %}
-          {% set current_state = is_state('switch.garage_rear_heater', 'on') %}
-          {% set water_heater = is_state('sensor.water_heater_status', 'Heating') and is_state('binary_sensor.power_peakperiod','on') %}
+          {% set garage_mean_temp = states('sensor.garage_mean_temp')|float(0) %}
+          {% set garage_heaters_temp = state_attr('climate.garage_heaters','temperature')|float(0) %}
+          
+          {% set safety_low = garage_mean_temp < garage_heaters_temp-1.5 %}
+          {% set safety_high = garage_mean_temp > garage_heaters_temp+1.5 %}
+          {% set safety_front = ((as_timestamp(now()) - as_timestamp(states.switch.garage_front_heater.last_changed,as_timestamp(now())))/60)>20 and is_state('switch.garage_front_heater','on') %}
+          {% set safety_run = is_state('sensor.garage_safety_control_status','Running...') %}
+          {% set thermostat = states('climate.garage_rear_heater') in ['heat','unavailable'] and is_state('climate.garage_heaters','heat') %}
+          {% set latch_on = garage_mean_temp < garage_heaters_temp %}
+          {% set request = is_state('input_boolean.garage_heaters','on') %}
+          {% set turn = states('counter.heaters_counter')|int(1) == 2 %}
+          {% set current_state = is_state('switch.garage_rear_heater','on') %}
+          {% set water_heater = is_state('sensor.water_heater_status','Heating') and is_state('binary_sensor.power_peakperiod','on') %}
           
           {% set water_heater = false %}
-          {% set out = false %}
+          {% set output = false %}
           
-          {% if not safety_run %}
-            {% set out = false %}
-          {% elif safety or safety_low %}
-            {% set out = true %}
+          {% if not safety_run or not thermostat %}
+            {% set output = false %}
+          {% elif safety_low %}
+            {% set output = true %}
           {% elif water_heater %}
-            {% set out = false %}
+            {% set output = false %}
           {% elif safety_high %}
-            {% set out = false %}
-          {% elif safety_front and request %}
-            {% set out = true %}
-          {% elif request and turn %}
-            {% set out = true %}
+            {% set output = false %}
+          {% elif request and (turn or safety_front) %}
+            {% set output = true %}
           {% elif current_state and latch_on %}
-            {% set out = true %}
+            {% set output = true %}
           {% endif %}
           
-          {% if out %}
-            switch.turn_on
+          {% if output %}
+            script.switch_turn_on
           {% else %}
-            switch.turn_off
+            script.switch_turn_off
           {% endif %}
           
   - alias: Garage Heaters Counter
@@ -120,37 +125,204 @@
     mode: restart
     trigger:
       - platform: state
-        entity_id: switch.garage_front_heater
+        entity_id: input_boolean.garage_heaters
         from: "on"
         to: "off"
       - platform: state
-        entity_id: switch.garage_rear_heater
-        from: "on"
+        entity_id: climate.garage_front_heater
+        from: "off"
+        to: "heat"
+      - platform: state
+        entity_id: climate.garage_front_heater
+        from: "heat"
         to: "off"
-    condition:
-      - condition: and
-        conditions:
-          - condition: and
-            conditions:
-              - condition: state
-                entity_id: switch.garage_front_heater
-                state: "off"
-              - condition: state
-                entity_id: switch.garage_rear_heater
-                state: "off"
-          - condition: not
-            conditions:
-              - condition: state
-                entity_id: sensor.water_heater_status
-                state: "Heating"
+      - platform: state
+        entity_id: climate.garage_rear_heater
+        from: "off"
+        to: "heat"
+      - platform: state
+        entity_id: climate.garage_rear_heater
+        from: "heat"
+        to: "off"
     action:
       - entity_id: counter.heaters_counter
-        service_template: >
-          {% if states('counter.heaters_counter')|int == 1 %}
-            counter.increment
-          {% else %}
-            counter.decrement
-          {% endif %}
+        service: counter.set_value
+        data:
+          value: >
+            {% set count = states('counter.heaters_counter')|int(1) %}
+            {% set front_thermostat = states('climate.garage_front_heater') in ['heat','unavailable'] %}
+            {% set rear_thermostat = states('climate.garage_rear_heater') in ['heat','unavailable'] %}
+            {% set trig = 'garage_heaters' not in trigger.to_state.entity_id %}
+            
+            {% if front_thermostat and rear_thermostat %}
+              {% if trig %}
+                {{ count }}
+              {% elif count == 1 %}
+                2
+              {% else %}
+                1
+              {% endif %}
+            {% elif front_thermostat %}
+              1
+            {% elif rear_thermostat %}
+              2
+            {% else %}
+              0
+            {% endif %}
+          
+  # - alias: Garage Heaters Sync To Thermostats
+  #   #id: auto_garage_heaters_sync_to_thermostat
+  #   mode: restart
+  #   trigger:
+  #     - platform: state
+  #       entity_id: climate.garage_heaters
+  #       attribute: temperature
+  #   condition:
+  #     condition: and
+  #     conditions:
+  #       - condition: template
+  #         value_template: "{{ state_attr('climate.garage_heaters', 'temperature')|float(0) > state_attr('climate.garage_heaters', 'min_temp')|float(0) }}"
+  #       - condition: template
+  #         value_template: "{{ state_attr('climate.garage_heaters', 'temperature')|float(0) < state_attr('climate.garage_heaters', 'max_temp')|float(0) }}"
+  #   action:
+  #     - service: climate.set_temperature
+  #       target:
+  #         entity_id: 
+  #           - climate.garage_front_heater
+  #           - climate.garage_rear_heater
+  #       data_template:
+  #         temperature: >
+  #           {{ state_attr('climate.garage_heaters','temperature') | float(0) }}
+          
+  - alias: Garage Heaters Temperature Sync
+    #id: auto_garage_heaters_sync_from_thermostat
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: climate.garage_front_heater
+        attribute: temperature
+      - platform: state
+        entity_id: climate.garage_rear_heater
+        attribute: temperature
+      - platform: state
+        entity_id: climate.garage_heaters
+        attribute: temperature
+    condition:
+      condition: and
+      conditions:
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_front_heater', 'temperature')|float(0) > state_attr('climate.garage_front_heater', 'min_temp')|float(0) }}"
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_front_heater', 'temperature')|float(0) < state_attr('climate.garage_front_heater', 'max_temp')|float(0) }}"
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_rear_heater', 'temperature')|float(0) > state_attr('climate.garage_rear_heater', 'min_temp')|float(0) }}"
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_rear_heater', 'temperature')|float(0) < state_attr('climate.garage_rear_heater', 'max_temp')|float(0) }}"
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_heaters', 'temperature')|float(0) > state_attr('climate.garage_heaters', 'min_temp')|float(0) }}"
+        - condition: template
+          value_template: "{{ state_attr('climate.garage_heaters', 'temperature')|float(0) < state_attr('climate.garage_heaters', 'max_temp')|float(0) }}"
+    action:
+      - service: climate.set_temperature
+        target:
+          entity_id: 
+            - climate.garage_front_heater
+            - climate.garage_rear_heater
+            - climate.garage_heaters
+        data_template:
+          temperature: >
+            {% set prev_value = state_attr('climate.garage_heaters','temperature') | float(11) %}
+            {% set value = prev_value %}
+            {% if 'garage_front_heater' in trigger.to_state.entity_id %}
+              {% set value = state_attr('climate.garage_front_heater','temperature') | float(-100) %}
+            {% elif 'garage_rear_heater' in trigger.to_state.entity_id %}
+              {% set value = state_attr('climate.garage_rear_heater','temperature') | float(-100) %}
+            {% endif %}
+            
+            {% if value > 0 %}
+              {{ value }}
+            {% else %}
+              {{ prev_value }}
+            {% endif %}
+            
+  - alias: Garage Heaters Season
+    #id: auto_garage_heaters_season
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    condition:
+      condition: or
+      conditions:
+        - condition: template
+          value_template: >
+            {% set month = state_attr('sensor.dates','month') %}
+            {{ not is_state('climate.garage_heaters', 'heat') and (month >= 12 or month <= 3) }}
+        - condition: template
+          value_template: >
+            {% set month = state_attr('sensor.dates','month') %}
+            {{ not is_state('climate.garage_heaters', 'off') and (month < 12 and month > 3) }}
+        # - condition: template
+          # value_template: >
+            # {% set month = state_attr('sensor.dates','month') %}
+            # {{ not is_state('climate.garage_hvac', 'heat') and (month >= 11 or month <= 4) }}
+        # - condition: template
+          # value_template: >
+            # {% set month = state_attr('sensor.dates','month') %}
+            # {{ not is_state('climate.garage_hvac', 'off') and (month < 11 and month > 4) }}
+    action:
+      - service: climate.set_hvac_mode
+        target:
+          entity_id: climate.garage_heaters
+        data_template:
+          hvac_mode: >
+            {% set month = state_attr('sensor.dates','month') %}
+            {{ 'heat' if month >= 12 or month <= 3 else 'off' }}
+      # - service: climate.set_hvac_mode
+        # target:
+          # entity_id: climate.garage_hvac
+        # data_template:
+          # hvac_mode: >
+            # {% set month = state_attr('sensor.dates','month') %}
+            # {{ 'heat' if month >= 11 or month <= 4 else 'off' }}
+            
+  # - alias: Garage HVAC Control
+    # #id: auto_garage_heaters_season
+    # mode: restart
+    # trigger:
+      # - platform: time_pattern
+        # seconds: '/30'
+    # condition:
+      # - condition: template
+        # value_template: >
+          # {% set state = states('climate.garage_hvac') %}
+          # {% set month = state_attr('sensor.dates','month') %}
+          # {% set threshold = is_state('binary_sensor.garage_hvac_threshold','on') %}
+          # {% set running = is_state('binary_sensor.garage_hvac_running','on') %}
+          
+          # {% if month >= 11 or month <= 4 %}
+            # {% if threshold %}
+              # {{ true if (state != 'heat' or not running) else false }}
+            # {% else %}
+              # {{ true if (state != 'off' or running) else false }}
+            # {% endif %}
+          # {% else %}
+            # {{ true if (state != 'off' or running) else false }}
+          # {% endif %}
+    # action:
+      # - service: climate.set_hvac_mode
+        # target:
+          # entity_id: climate.garage_hvac
+        # data_template:
+          # hvac_mode: > 
+            # {% set month = state_attr('sensor.dates','month') %}
+            # {% set threshold = is_state('binary_sensor.garage_hvac_threshold','on') %}
+            
+            # {% if month >= 11 or month <= 4 %}
+              # {{ 'heat' if threshold else 'off' }}
+            # {% else %}
+              # off
+            # {% endif %}
           
 ######### GARAGE SLAVE - SENSORS #########
 
@@ -180,12 +352,12 @@
       - service: mqtt.publish
         data_template:
           topic: "Garage/Slave/Relay/Cmd"
-          payload: '{"r4":"ON","h4":"{{(states.input_number.air_compressor_purge.state|float)}}"}'
+          payload: '{"r4":"ON","h4":"{{(states.input_number.air_compressor_purge.state|float(5))}}"}'
       #Give more time to ensure it has been completed
       # This switch receives a hold value from the mqtt switch definition and/or this automation
       # Ensure that this delay is higher than the hold value
       - delay:
-          seconds: "{{ states('input_number.air_compressor_purge')|int + 1 }}"
+          seconds: "{{ states('input_number.air_compressor_purge')|int(5) + 1 }}"
       - service: mqtt.publish
         data_template:
           topic: "Garage/Slave/Relay/Cmd"
@@ -204,7 +376,7 @@
         service: switch.turn_off
       - entity_id: switch.garage_air_valve_open
         service_template: >
-          {% if is_state('input_boolean.garage_air_valve', 'on') %}
+          {% if is_state('input_boolean.garage_air_valve','on') %}
             switch.turn_on
           {% else %}
             switch.turn_off
@@ -231,18 +403,12 @@
     trigger:
       - platform: state
         entity_id: input_boolean.house_air_valve
-        # from: "off"
-        # to: "on"
-      # - platform: state
-        # entity_id: input_boolean.house_air_valve
-        # from: "on"
-        # to: "off"
     action:
       - entity_id: switch.house_air_valve
         service: switch.turn_off
       - entity_id: switch.house_air_valve_open
         service_template: >
-          {% if is_state('input_boolean.house_air_valve', 'on') %}
+          {% if is_state('input_boolean.house_air_valve','on') %}
             switch.turn_on
           {% else %}
             switch.turn_off
@@ -263,3 +429,62 @@
       - entity_id: switch.house_air_valve_open
         service: switch.turn_off
         
+######## GARAGE CLOCK ########
+        
+  #Input Text Changes Trigger
+  - alias: Garage Clock Text Change
+    mode: restart
+    trigger:
+      platform: state
+      entity_id: input_text.garage_clock_text
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Garage/Clock/Cmd"
+        payload: '{"uptxt":"{{ trigger.to_state.state }}"}'
+        qos: 0
+        retain: false
+
+  - alias: "Garage Clock Scroll Speed"
+    mode: restart
+    trigger:
+      platform: state
+      entity_id: input_number.garage_clock_scroll_speed
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Garage/Clock/Cmd"
+        payload: '{"scroll":{{ trigger.to_state.state | int(0) }}}'
+        qos: 0
+        retain: false
+        
+  - alias: "Garage Clock Transistion Speed"
+    mode: restart
+    trigger:
+      platform: state
+      entity_id: input_number.garage_clock_trans_speed
+    action:
+    - service: mqtt.publish
+      data_template:
+        topic: "Garage/Clock/LED/Cmd"
+        payload: '{"transition":{{ trigger.to_state.state | int(0) }}}'
+        qos: 0
+        retain: false
+        
+  - alias: "Garage Clock ON when unlocked"
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    action:
+      data:
+        entity_id: "garage_clock"
+      service_template: >
+        {% set ok = ['Unlocked','Opening','Opened'] %}
+        {% set output = states('sensor.garage_fd_status') in ok or states('sensor.garage_cd_status') in ok or states('sensor.garage_cd_status') in ok %}
+        
+        {% if output %}
+          script.light_turn_on
+        {% else %}
+          script.light_turn_off
+        {% endif %}

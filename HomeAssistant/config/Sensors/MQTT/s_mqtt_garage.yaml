@@ -1,0 +1,239 @@
+####################################################
+# SENSORS - MQTT - GARAGE                          #
+####################################################
+    
+######### GARAGE MAIN - BASIC DATA #########
+  - name: Garage Main Control Status
+    icon: mdi:server
+    state_topic: "Garage/Control/Json"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Garage/Control/Json"
+    
+  - name: Garage Main Box Temperature
+    unit_of_measurement: '°C'
+    icon: mdi:thermometer
+    state_topic: "Garage/Control/Json"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_in }}"
+    
+  - name: Garage Main Box Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Garage/Control/Json"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.hum_in }}"
+    
+  - name: Garage Main 5V Voltage
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Garage/Control/Json"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - name: Garage Main 12V Voltage
+    icon: mdi:flash-outline
+    unit_of_measurement: 'V'
+    state_topic: "Garage/Control/Json"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+
+  - name: "Garage Clock Status"
+    icon: mdi:clock
+    state_topic: "Garage/Clock/Json"
+    availability:
+      - topic: "Garage/Clock/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      
+      {% if is_state('light.garage_clock', 'on') %}
+        On
+      {% elif status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Garage/Clock/Json"
+
+######### GARAGE MAIN - SAFETY HEATER #########
+  - name: Garage Safety Front Temperature
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Control/Sensors/Stts"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: "{{ value_json.safety.temp }}"
+
+  - name: Garage Safety Front Temp Raw
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Control/Sensors/Stts"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set x = (value_json.safety.raw)|float %}
+      {% set Ta = x * x * (0.0) %}
+      {% set Tb = x * (-0.09850) %}
+      {% set Tc = (77.80752) %}
+      
+      {% set T = Ta + Tb + Tc %}
+      
+      {{- T|round(1) -}}
+    json_attributes_topic: "Garage/Control/Sensors/Stts"
+    json_attributes_template: "{{ value_json.safety | tojson  }}"
+
+
+######### GARAGE SLAVE - BASIC DATA #########
+  - name: Garage Slave Control Status
+    icon: mdi:server
+    state_topic: "Garage/Slave/Json"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Garage/Slave/Json"
+    
+  - name: Garage Slave Box Temperature
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Slave/Json"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: "{{ value_json.temp_in }}"
+    
+  - name: Garage Slave Box Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Garage/Slave/Json"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    value_template: "{{ value_json.hum_in }}"
+    qos: 0
+    
+  - name: Garage Slave 5V Voltage
+    icon: mdi:flash-outline
+    unit_of_measurement: 'V'
+    state_topic: "Garage/Slave/Json"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+
+
+######### GARAGE SLAVE - SAFETY HEATER #########
+        
+  - name: Garage Safety Rear Temperature
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: "{{ value_json.safety.temp }}"
+    
+  - name: Garage Safety Rear Temp Raw
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: >
+      {% set x = (value_json.safety.raw)|float %}
+      {% set Ta = x * x * (0.0) %}
+      {% set Tb = x * (-0.09850) %}
+      {% set Tc = (78.40752) %}
+      
+      {% set T = Ta + Tb + Tc %}
+      
+      {{- T|round(1) -}}
+    json_attributes_topic: "Garage/Slave/Sensors/Stts"
+    json_attributes_template: "{{ value_json.safety | tojson  }}"
+
+      
+######### GARAGE SLAVE - SENSORS #########
+  - name: Air Compressor Pressure Raw
+    icon: mdi:gauge
+    unit_of_measurement: 'psi'
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: >
+      {% set RP = value_json.air_press|int(0) %}
+      {% set min = 0.5 %} 
+      {% set span = 4.0 %}
+      {% set presmax = 200.0 %}
+      
+      {% if RP < 104 and RP > 30 %}
+        {% set RP = 104.0 %}
+      {% endif %}
+      
+      {% set ax = presmax / span %}
+      {% set b = -(ax * min) %}
+      {% set ax = ((ax * 5.0) / 1023.0) %}
+      
+      {{ (ax*RP)+b }}
+
+  - name: Garage Air Valve
+    icon: mdi:valve
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: "{{ value_json.air_garage }}"
+    
+  - name: House Air Valve
+    icon: mdi:valve
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: "{{ value_json.air_house }}"
+  

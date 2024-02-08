@@ -1,0 +1,131 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - ALL OTHERS          #
+####################################################
+
+    - name: Server
+      #unique_id: server
+      device_class: connectivity
+      #icon: mdi:none
+      state: >
+        {% set LAN1 = is_state('binary_sensor.server_lan1','on') %}
+        {% set LAN2 = is_state('binary_sensor.server_lan2','on') %}
+        {% set LAN3 = is_state('binary_sensor.server_lan3','on') %}
+        {% set LAN4 = is_state('binary_sensor.server_lan4','on') %}
+        
+        {{ LAN1 or LAN2 or LAN3 or LAN4 }}
+      attributes:
+        round_trip_time_avg: >
+          {% set LAN1 = state_attr('binary_sensor.server_lan1','round_trip_time_avg')|float(99) %}
+          {% set LAN2 = state_attr('binary_sensor.server_lan2','round_trip_time_avg')|float(99) %}
+          {% set LAN3 = state_attr('binary_sensor.server_lan3','round_trip_time_avg')|float(99) %}
+          {% set LAN4 = state_attr('binary_sensor.server_lan4','round_trip_time_avg')|float(99) %}
+          
+          {% set foo = ( LAN1, LAN2, LAN3, LAN4 ) %}
+          {{ foo | list | min }}
+        round_trip_time_max: >
+          {% set LAN1 = state_attr('binary_sensor.server_lan1','round_trip_time_max')|float(-1) %}
+          {% set LAN2 = state_attr('binary_sensor.server_lan2','round_trip_time_max')|float(-1) %}
+          {% set LAN3 = state_attr('binary_sensor.server_lan3','round_trip_time_max')|float(-1) %}
+          {% set LAN4 = state_attr('binary_sensor.server_lan4','round_trip_time_max')|float(-1) %}
+          
+          {% set foo = ( LAN1, LAN2, LAN3, LAN4 ) %}
+          {{ foo | list | max }}
+        round_trip_time_min: >
+          {% set LAN1 = state_attr('binary_sensor.server_lan1','round_trip_time_min')|float(99) %}
+          {% set LAN2 = state_attr('binary_sensor.server_lan2','round_trip_time_min')|float(99) %}
+          {% set LAN3 = state_attr('binary_sensor.server_lan3','round_trip_time_min')|float(99) %}
+          {% set LAN4 = state_attr('binary_sensor.server_lan4','round_trip_time_min')|float(99) %}
+          
+          {% set foo = ( LAN1, LAN2, LAN3, LAN4 ) %}
+          {{ foo | list | min }}
+
+    - name: OwnCloud Status
+      #unique_id: owncloud_status
+      device_class: connectivity
+      icon: mdi:database-check
+      availability: >
+        {{ not is_state('sensor.owncloud_status', 'unavailable') }}
+      state: >
+        {{ is_state('sensor.owncloud_status','ok') }}
+        
+    - name: WavLink Clients Number
+      state: >
+        {{ states.sensor | selectattr('attributes.wifi_ssid', 'defined') | selectattr('attributes.wifi_ssid', 'in', ["GauthierHA0"]) | list | count > 0 }}
+      attributes:
+        count: "{{ states.sensor | selectattr('attributes.wifi_ssid', 'defined') | selectattr('attributes.wifi_ssid', 'in', ['GauthierHA0']) | list | count }}"
+        list: "{{ states.sensor | selectattr('attributes.wifi_ssid', 'defined') | selectattr('attributes.wifi_ssid', 'in', ['GauthierHA0']) | map(attribute='entity_id') | list }}"
+        
+    - name: WavLink Access Point
+      #unique_id: wavlink_access_point
+      device_class: connectivity
+      #icon: mdi:database-check
+      availability: >
+        {{ not is_state('binary_sensor.wavlink_access_point_ping', 'unavailable') or not is_state('binary_sensor.wavlink_clients_number', 'off') }}
+      state: >
+        {% set ping = is_state('binary_sensor.wavlink_access_point_ping', 'on') %}
+        {% set client_count = is_state('binary_sensor.wavlink_clients_number', 'on') %}
+        
+        {{ ping or client_count }}
+      attributes:
+        count: "{{ state_attr('binary_sensor.wavlink_clients_number', 'count') }}"
+        list: "{{ state_attr('binary_sensor.wavlink_clients_number', 'list') }}"
+        
+    - name: Doorbell State
+      #unique_id: doorbell_state
+      #device_class: sound
+      icon: mdi:bell
+      state: >
+        {{ is_state('input_boolean.doorbell_state','on') }}
+      attributes:
+        front: "{{ states('binary_sensor.house_fd_bell') }}"
+        side: "{{ states('binary_sensor.house_sd_bell') }}"
+        back: "{{ states('binary_sensor.house_bd_bell') }}"
+        garage: "{{ states('binary_sensor.garage_fd_bell') }}"
+        
+    - name: Cody At School
+      #unique_id: cody_at_school
+      #device_class: none
+      icon: mdi:bus-school
+      state: >
+        {% set day_number = state_attr('sensor.dates','dayofyear')|int(0) %}
+        {% set today = state_attr('sensor.dates','yyyymmdd')|replace('/','-') %}
+        {% set weekday = state_attr('sensor.dates','weekdaynumber')|int(99) <= 4 %}        
+        {% set startdate = "2023-09-05" %}
+        {% set enddate = "2024-06-21" %}
+        {% set exclusions = 
+          [
+            '2023-09-01', 
+            '2023-09-04',
+            '2023-10-09',
+            '2023-11-13',
+            '2023-11-14',
+            '2023-12-25',
+            '2023-12-26',
+            '2023-12-27',
+            '2023-12-28',
+            '2023-12-29',
+            '2024-01-01',
+            '2024-01-02',
+            '2024-01-03',
+            '2024-01-04',
+            '2024-01-05',
+            '2024-01-08',
+            '2024-02-29',
+            '2024-03-01',
+            '2024-03-04',
+            '2024-03-05',
+            '2024-03-06',
+            '2024-03-07',
+            '2024-03-08',
+            '2024-03-29',
+            '2024-04-01',
+            '2024-05-20'
+          ] 
+        %}
+        
+        {% set start = as_timestamp(strptime(startdate, '%Y-%m-%d')) | timestamp_custom("%j")|int(0) %}
+        {% set end = as_timestamp(strptime(enddate, '%Y-%m-%d')) | timestamp_custom("%j")|int(0) %}
+        
+        {{ (start <= day_number or day_number <= end) and weekday and (today not in exclusions) }}
+        
+        

@@ -1,0 +1,71 @@
+###################################################
+# SENSORS - MQTT - ALL OTHERS                     #
+###################################################
+
+######### TRANSMITTER CONTROL - BASIC DATA #########
+  - name: Transmitter Box Control Status
+    #icon: mdi:antenna
+    icon: mdi:server
+    state_topic: "Home/Transmitter/Json"
+    availability:
+      - topic: "Home/Transmitter/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+         Running...
+      {% else %}
+         ERROR
+      {% endif %}
+    json_attributes_topic: "Home/Transmitter/Json"
+
+  - name: Postal Status JSON
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    value_template: '{{ value_json.state }}'
+    availability_topic: "Home/Transmitter/LWT"
+    payload_available: "online"
+    payload_not_available: "offline"
+    qos: 0
+    json_attributes_topic: "Home/Postal/Stts"
+    
+  - name: "Stepper Wall Clock"
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    #availability_topic: "Home/WallClock/LWT"
+    availability:
+      - topic: "Home/WallClock/LWT"
+    #payload_available: "online"
+    #payload_not_available: "offline"
+    qos: 0
+    value_template: >
+      {% if value_json.homed == "ON" %}
+         Ok
+      {% else %}
+         Homing
+      {% endif %}
+    json_attributes_topic: "Home/WallClock/Json"
+    
+  - name: "Nixie Clock Status"
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Stts"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    value_template: >
+      {% if value_json.state == "ON" %}
+         On
+      {% else %}
+         Off
+      {% endif %}
+    qos: 0
+    json_attributes_topic: "Home/NixieClock/Json"
+    
+  - name: "Nixie Clock Case Temp"
+    unit_of_measurement: '°C'
+    icon: mdi:clock
+    state_topic: "Home/NixieClock/Json"
+    value_template: "{{ value_json.temp_in | default('', true) }}"
+    availability:
+      - topic: "Home/NixieClock/LWT"
+    qos: 0
+

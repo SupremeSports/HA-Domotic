@@ -1,0 +1,215 @@
+####################################################
+# UILOVELACE - HA Server                           #
+####################################################
+
+- title: HA Server - VM
+  #icon: mdi:home-assistant
+  icon: si:homeassistant
+  # Unique path for direct access /lovelace/${path}
+  path: settings
+  visible: true
+  #panel: true
+  badges:
+    - sensor.time
+    - input_boolean.restart_hass
+    - sensor.ha_vm_cpu_used
+    - sensor.ha_vm_memory_used_percent
+    - sensor.ha_vm_drive_used_percent
+    # - sensor.ha_update_available
+    # - binary_sensor.addons_update_available
+    - !include /config/UILovelaceCards/update_badges.yaml
+
+#THIS MAKES A SCREENWIDE CARD
+    # - type: custom:decluttering-card
+      # template: badge_core
+      # variables: 
+        # - item: 'ha'
+
+  cards:
+    # The markdown card will render markdown text.
+    - type: markdown
+      title: Home Assistant
+      content: >
+        Home Assistant Dolbeau Platform
+
+    - type: horizontal-stack
+      #title: N/A
+      cards:
+        - type: button
+          name: HA Dev VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_dev
+        - type: button
+          name: HA Chicoutimi
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_chic
+        - type: button
+          name: Server
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_server
+        - type: button
+          name: Computers
+          icon: mdi:desktop-tower
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/computers
+
+    - type: entities
+      title: Health Data
+      show_header_toggle: false
+      entities:
+        - sensor.date_time
+        - sensor.last_boot
+        - sensor.time_online
+        - type: custom:fold-entity-row
+          head: sensor.ha_vm_heartbeat
+          entities:
+            - sensor.ha_dev_vm_heartbeat
+            - sensor.ha_chic_heartbeat
+
+        - type: custom:decluttering-card
+          template: ha_updates_sensor
+          variables: 
+            - item: 'ha'
+            - addon: ''
+        - !include /config/UILovelaceCards/update_addons.yaml
+        - binary_sensor.remote_ui
+        - !include /config/UILovelaceCards/entities.yaml
+
+    - type: entities
+      title: Resources
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.ha_vm_cpu_used
+          entities:
+            - sensor.ha_vm_cpu_used
+        - type: custom:fold-entity-row
+          head: sensor.ha_vm_memory_used_percent
+          entities:
+            - sensor.ha_vm_memory_used
+            - sensor.ha_vm_memory_free
+
+    - type: entities
+      title: Storage
+      show_header_toggle: false
+      entities:
+        # - sensor.home_assistant_v2_db
+        #- sensor.mariadb_size
+        - sensor.ha_vm_db_size
+        - type: custom:multiple-entity-row
+          name: HA VM used percent
+          entity: sensor.ha_vm_drive_used_percent
+          #secondary_info: last-changed
+          entities:
+            - entity: sensor.ha_vm_drive_used
+              name: used
+            - entity: sensor.ha_vm_drive_free
+              name: free
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: Notifications
+          entities:
+            - input_number.drive_used_threshold
+            - automation.ha_vm_used_high_notification
+            - automation.ha_vm_used_critical_notification
+
+    - type: entities
+      title: Network
+      show_header_toggle: false
+      entities:
+        - sensor.myip
+        - sensor.local_ip
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_in_lo
+          entities:
+            - sensor.network_in_lo
+            - sensor.packets_in_lo
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_out_lo
+          entities:
+            - sensor.network_out_lo
+            - sensor.packets_out_lo
+            
+    #APC UPS
+    - !include /config/UILovelaceCards/apc_ups.yaml
+            
+    #Speedtest
+    - !include /config/UILovelaceCards/speed_test.yaml
+
+    - type: vertical-stack
+      title: Hardware
+      cards:
+        - type: horizontal-stack
+          cards:
+            - type: gauge
+              needle: true
+              name: CPU
+              unit: '%'
+              entity: sensor.ha_vm_cpu_used
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 45
+                red: 85
+            - type: gauge
+              needle: true
+              name: Disk
+              unit: '%'
+              entity: sensor.ha_vm_drive_used_percent
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 45
+                red: 85
+            - type: gauge
+              needle: true
+              name: Memory
+              unit: '%'
+              entity: sensor.ha_vm_memory_used_percent
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 30
+                red: 60
+        - type: horizontal-stack
+          cards:
+            - type: gauge
+              needle: true
+              name: UPS Battery
+              unit: '%'
+              entity: sensor.ups_battery
+              theme: th_gauge_3
+              severity:
+                green: 70
+                yellow: 45
+                red: 0
+            - type: gauge
+              needle: true
+              name: UPS Load
+              unit: '%'
+              entity: sensor.ups_load
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 20
+                red: 30
+
+    # - type: history-graph
+    #   title: Heartbeats
+    #   refresh_interval: 60
+    #   hours_to_show: 12
+    #   entities:
+    #     - entity: sensor.ha_vm_heartbeat
+    #       name: "HA VM"
+    #     - entity: sensor.ha_dev_vm_heartbeat
+    #       name: "HA DEV VM"
+    #     - entity: sensor.ha_chic_heartbeat
+    #       name: "HA CHIC"

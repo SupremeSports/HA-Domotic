@@ -1,0 +1,146 @@
+####################################################
+# CLIMATE                                          #
+####################################################
+    
+  - name: Garage HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "cool"
+      - "dry"
+      - "fan_only"
+      - "heat"
+    swing_modes:
+      - "Off"
+      - "Highest"
+      - "High"
+      - "Middle"
+      - "Low"
+      - "Lowest"
+      - "On"
+    fan_modes:
+      - "Auto"
+      - "High"
+      - "Medium"
+      - "Low"
+      - "Quiet"
+    min_temp: 16
+    max_temp: 31
+    temp_step: 1
+    #power_command_topic: "Garage/Hvac/Power/Cmd"
+    mode_command_topic: "Garage/Hvac/Mode/Cmd"
+    temperature_command_topic: "Garage/Hvac/Temp/Cmd"
+    fan_mode_command_topic: "Garage/Hvac/Fan/Cmd"
+    swing_mode_command_topic: "Garage/Hvac/Swing/Cmd"
+    mode_state_topic: "Garage/Hvac/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Garage/Hvac/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    fan_mode_state_topic: "Garage/Hvac/Stts"
+    fan_mode_state_template: "{{ value_json.fan }}"
+    swing_mode_state_topic: "Garage/Hvac/Stts"
+    swing_mode_state_template: "{{ value_json.swing }}"
+    current_temperature_topic: "Garage/Hvac/Json"
+    #current_temperature_template: "{{ value_json.room_temp }}"
+    #current_temperature_template: "{{ value_json.air_temp }}"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set air = value_json.air_temp %}
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {{ air }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    #send_if_off: true
+    retain: false
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Hvac/Json"
+
+  - name: Garage Front Heater
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 25
+    temp_step: 0.5
+    precision: 0.1
+    #send_if_off: true
+    #power_command_topic: "Garage/Front/Heater/Power/Cmd"
+    mode_command_topic: "Garage/Front/Heater/Mode/Cmd"
+    temperature_command_topic: "Garage/Front/Heater/Temp/Cmd"
+    mode_state_topic: "Garage/Front/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Garage/Front/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Garage/Front/Therm/Json"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set ok = false %}
+      
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {% if is_state('binary_sensor.garagefrontheater_error','on') %}
+          {% set room = states('sensor.garage_safety_front_temperature')|float %}
+          {% set ok = true %}
+        {% endif %}
+      {% else %}
+        {% set room = room|float %}
+        {% set ok = true %}
+      {% endif %}
+      
+      {% if ok %}
+        {{ room | round(1) }}
+      {% else %}
+        unknown
+      {% endif %}
+    retain: false
+    availability:
+      - topic: "Garage/Front/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Front/Therm/Json"
+    
+  - name: Garage Rear Heater
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 30
+    temp_step: 0.5
+    precision: 0.1
+    #send_if_off: true
+    #power_command_topic: "Garage/Rear/Heater/Power/Cmd"
+    mode_command_topic: "Garage/Rear/Heater/Mode/Cmd"
+    temperature_command_topic: "Garage/Rear/Heater/Temp/Cmd"
+    mode_state_topic: "Garage/Rear/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Garage/Rear/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Garage/Rear/Therm/Json"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set ok = false %}
+      
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {% if is_state('binary_sensor.garagerearheater_error','on') %}
+          {% set room = states('sensor.garage_safety_rear_temperature')|float %}
+          {% set ok = true %}
+        {% endif %}
+      {% else %}
+        {% set room = room|float %}
+        {% set ok = true %}
+      {% endif %}
+      
+      {% if ok %}
+        {{ room | round(1) }}
+      {% else %}
+        unknown
+      {% endif %}
+    retain: false
+    availability:
+      - topic: "Garage/Rear/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Rear/Therm/Json"

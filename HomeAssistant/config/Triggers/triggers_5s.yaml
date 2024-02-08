@@ -1,0 +1,76 @@
+####################################################
+# TEMPLATES - TRIGGERS 5s                          #
+####################################################
+
+    trigger: 
+    - platform: time_pattern
+      seconds: '/5'
+######## BINARY SENSORS ########
+    binary_sensor:
+      - name: HA VM Heartbeat
+        #unique_id: ha_vm_heartbeat
+        icon: mdi:clock
+        unit_of_measurement: "#"
+        state: >
+          {{ now().second | int(0) > 30 }}
+
+      - name: Water Leak Detected
+        #unique_id: water_leak_detected
+        device_class: moisture
+        state: >
+          {{ (states.binary_sensor | selectattr('entity_id', 'search', '(_water_leak|_water_overflow)') | selectattr('state', 'eq', 'on') | map(attribute='state')  | list | count) > 0 }}
+        attributes:
+          count_total: "{{ states.binary_sensor | selectattr('entity_id', 'search', '(_water_leak|_water_overflow)') | map(attribute='state')  | list | count }}"
+          count_ok: "{{ states.binary_sensor | selectattr('entity_id', 'search', '(_water_leak|_water_overflow)') | selectattr('state', 'eq', 'off') | map(attribute='state')  | list | count }}"
+          count_leak: "{{ states.binary_sensor | selectattr('entity_id', 'search', '(_water_leak|_water_overflow)') | selectattr('state', 'eq', 'on') | map(attribute='state')  | list | count }}"
+          entity_id: "{{ states.binary_sensor | selectattr('entity_id', 'search', '(_water_leak|_water_overflow)') | map(attribute='entity_id')  | list | join (', ') }}"
+######## SENSORS ########
+    sensor:
+      - name: HA VM Heartbeat
+        #unique_id: ha_vm_heartbeat
+        icon: mdi:clock
+        unit_of_measurement: "#"
+        state: >
+          {{ now().second | int(0) }}
+          
+      - unique_id: wan_uptime
+        #name: WAN uptime
+        unit_of_measurement: 'd'
+        #state_class: measurement
+        #device_class: timestamp  #Makes display on minutes since...
+        icon: mdi:server-network
+        availability: >
+          {{ (as_timestamp(now()) - as_timestamp(states('sensor.uptime'),as_timestamp(now())))|int > 15 }}
+        state: >
+          {% set time_d = states('sensor.wan_uptime_seconds')|int(0) / 86400 %}
+          
+          {% if time_d < 10.0 %}
+            {{time_d|round(3) }}
+          {% elif time_d < 100.0 %}
+            {{time_d|round(2) }}
+          {% else %}
+            {{time_d|round(1) }}
+          {% endif %}
+        attributes:
+          friendly_name: WAN uptime
+
+#WATER
+      - name: Total Water Daily Used Raw
+        #unique_id: total_water_daily_used_raw
+        icon: mdi:water
+        state_class: total_increasing
+        device_class: water
+        unit_of_measurement: "L"
+        state: >
+          {{ states.sensor | selectattr('entity_id', 'search', 'water_daily_usage') |
+            rejectattr('entity_id', 'equalto', 'sensor.total_water_daily_used') | 
+            map(attribute='state') | map('float', 0) | sum | round(2) }}
+
+      - name: Appliances Total Water
+        #unique_id: total_appliances_water
+        icon: mdi:cup-water
+        state_class: total_increasing
+        device_class: water
+        unit_of_measurement: "L"
+        state: >
+          {{ expand('group.appliances_water') | map(attribute='state') | map('float', 0) | sum }}

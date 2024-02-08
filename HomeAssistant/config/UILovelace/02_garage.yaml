@@ -1,0 +1,437 @@
+####################################################
+# UILOVELACE - GARAGE                              #
+####################################################
+
+- title: Garage
+  icon: mdi:garage-variant
+  # Unique path for direct access /lovelace/${path}
+  path: garage
+  visible: true
+  badges:
+    - sensor.time
+    #- sensor.garage_mean_temp
+    - sensor.garage_average_temp
+    - sensor.garage_mean_humidity
+    - sensor.ted5000_mtu2_energy_daily
+    - sensor.ted5000_mtu2_energy_daily_cost
+    - sensor.ted5000_mtu2_power
+    - sensor.ted5000_mtu2_energy_actual_cost_raw
+    - sensor.garage_heater_duty_cycle
+
+  cards:
+    - type: entities
+      title: Doors & Locks
+      show_header_toggle: false
+      entities:
+        - type: custom:decluttering-card
+          template: powerbolt2_bell
+          variables:
+            - door: 'garage_fd'
+            - doorbell_g: 'on'
+        - type: custom:decluttering-card
+          template: garage_opener
+          variables:
+            - door: 'garage_cd'
+        - type: custom:decluttering-card
+          template: door_lock
+          variables:
+            - door: 'garage_bd'
+    - type: entities
+      title: Lights
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontlight_status
+          entities:
+            - input_select.garagefrontlight_mode
+        - type: custom:fold-entity-row
+          head: binary_sensor.garagefrontpower_status
+          entities:
+            - input_select.garagefrontpower_mode
+        - type: custom:fold-entity-row
+          head: binary_sensor.garage_attic_light
+          entities:
+            - automation.garage_attic_light_on_immediate
+            - automation.garage_attic_light_on_repetitive
+        - type: custom:fold-entity-row
+          head: sensor.garage_clock_status
+          entities:
+          - light.garage_clock
+          - input_number.garage_clock_trans_speed
+          - input_text.garage_clock_text
+          - input_number.garage_clock_scroll_speed
+
+    - type: entities
+      title: Air Supply
+      show_header_toggle: false
+      entities:
+        - sensor.air_compressor_pressure
+        - switch.garage_air_compressor
+        - type: custom:fold-entity-row
+          head: input_boolean.air_compressor_purge
+          entities:
+            - switch.air_compressor_purge
+            - input_number.air_compressor_purge
+        - type: custom:decluttering-card
+          template: air_valve
+          variables: 
+            - valve: garage
+        - type: custom:decluttering-card
+          template: air_valve
+          variables: 
+            - valve: house
+
+    - type: entities
+      title: Power usage
+      show_header_toggle: false
+      entities: 
+        - type: custom:decluttering-card
+          template: mtu
+          variables: 
+            - id: 2
+        - type: custom:decluttering-card
+          template: utility
+
+    - type: entities
+      title: Garage Cabinets Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.garage_main_control_status
+          entities:
+            - sensor.garage_main_box_temperature
+            - sensor.garage_main_box_humidity
+            #- sensor.garage_main_12v_voltage
+            - sensor.garage_main_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_main_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_slave_control_status
+          entities:
+            - sensor.garage_slave_box_temperature
+            - sensor.garage_slave_box_humidity
+            #- sensor.garage_slave_12v_voltage
+            - sensor.garage_slave_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_slave_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_safety_control_status
+          entities:
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagefrontheater_error
+            entities:
+              - sensor.garage_safety_front_temp_raw
+              - sensor.garage_safety_front_temperature
+              - binary_sensor.garage_safety_front_active
+              - binary_sensor.garage_front_heater_ac
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagerearheater_error
+            entities:
+              - sensor.garage_safety_rear_temp_raw
+              - sensor.garage_safety_rear_temperature
+              - binary_sensor.garage_safety_rear_active
+              - binary_sensor.garage_rear_heater_ac
+          - switch.garage_thermostat_reset
+              
+    - type: vertical-stack
+      title: Garage Stats
+      cards:
+        # - type: history-graph
+          # title: Garage Temperatures
+          # hours_to_show: 12
+          # entities:
+            # # - entity: sensor.garage_mean_temp
+              # # name: Garage Mean Temperature
+            # - name: Garage Average Temperature
+              # entity: sensor.garage_average_temp
+            # # - entity: sensor.garage_front_temp
+              # # name: Garage Front Temperature
+            # # - entity: sensor.garage_rear_temp
+              # # name: Garage Rear Temperature
+        - type: custom:mini-graph-card
+          name: Garage Temperatures
+          align_state: center
+          icon: mdi:thermometer
+          hours_to_show: 12
+          #points_per_hour: 5
+          min_bound_range: 5
+          # lower_bound: 5
+          # upper_bound: 30
+          hour24: true
+          show:
+            extrema: true
+            labels: true
+            points: false
+            icon_adaptive_color: true
+          entities:
+            - name: Mean Temperature
+              entity: sensor.garage_mean_temp
+          color_thresholds:
+            - value: 8
+              color: "#1230f3"
+            - value: 11
+              color: "#a1f312"
+            - value: 14
+              color: "#dcf312"
+            - value: 17
+              color: "#d35400"
+            - value: 20
+              color: "#c0392b"
+        # - type: history-graph
+          # title: Garage Heaters
+          # hours_to_show: 12
+          # entities:
+            # - name: Control
+              # entity: input_boolean.garage_heaters
+            # - name: Front Aux
+              # entity: binary_sensor.garage_front_heater_ac
+            # - name: Rear Aux
+              # entity: binary_sensor.garage_rear_heater_ac
+            # - name: HVAC
+              # entity: binary_sensor.garage_hvac_running
+              
+              
+        - type: custom:mini-graph-card
+          name: Garage Heaters
+          align_state: center
+          hours_to_show: 12
+          points_per_hour: 60
+          update_interval: 30
+          aggregate_func: max
+          line_width: 2
+          smoothing: false
+          state_map:
+            - value: "off"
+              label: Idle
+            - value: "on"
+              label: Running
+          entities:
+            - name: Control
+              entity: input_boolean.garage_heaters
+            - name: Front Aux
+              entity: binary_sensor.garage_front_heater_ac
+            - name: Rear Aux
+              entity: binary_sensor.garage_rear_heater_ac
+              
+        - type: custom:mini-graph-card
+          name: Garage HVAC
+          align_state: center
+          hours_to_show: 12
+          points_per_hour: 60
+          update_interval: 30
+          aggregate_func: max
+          line_width: 2
+          smoothing: false
+          state_map:
+            - value: "off"
+              label: Idle
+            - value: "on"
+              label: Running
+          entities:
+            - name: HVAC Running
+              entity: binary_sensor.garage_hvac_running
+              color: yellow
+            - name: HVAC Defrost
+              entity: binary_sensor.garage_hvac_defrost
+              color: blue
+              
+
+    - type: vertical-stack
+      title: Garage Heaters
+      cards:
+        - type: horizontal-stack
+          cards:
+            - type: thermostat
+              entity: climate.garage_front_heater
+              name: ""
+            - type: thermostat
+              entity: climate.garage_heaters
+              name: ""
+            - type: thermostat
+              entity: climate.garage_rear_heater
+              name: ""
+        - type: custom:fold-entity-row
+          head: input_boolean.garage_heaters
+          open: true
+          entities:
+            - sensor.garage_mean_temp
+            - sensor.garage_mean_humidity
+            - sensor.garage_average_temp
+            - counter.heaters_counter
+            - sensor.garage_heater_duty_cycle
+        - type: horizontal-stack
+          cards:
+            - type: gauge
+              needle: true
+              name: Front Heater Time Last 24h
+              unit: 'h'
+              entity: sensor.garage_front_heater_time
+              theme: th_gauge_3
+              min: 0
+              max: 24
+              severity:
+                green: 0
+                yellow: 10
+                red: 15
+            - type: gauge
+              needle: true
+              name: Rear Heater Time Last 24h
+              unit: 'h'
+              entity: sensor.garage_rear_heater_time
+              theme: th_gauge_3
+              min: 0
+              max: 24
+              severity:
+                green: 0
+                yellow: 10
+                red: 15
+
+        - type: horizontal-stack
+          cards:
+            - type: markdown
+              content: |
+                Time Today:           {{states('sensor.garage_front_heater_time')|float(0)}}
+                Count Today:          {{states('sensor.garage_front_heater_count')|float(0)}}
+                Front Temperature:    {{states('sensor.garage_front_temp')|float(0)}} °C
+                Front Humidty:        {{states('sensor.garage_front_hum')|float(0)}} %
+                Power Now:            {{states('sensor.garage_front_heater_power')|float(0)}} W
+                Energy Daily:         {{states('sensor.garage_front_heater_energy_daily')|float(0)}} kWh
+                Cost Today:           {{(states('sensor.garage_front_heater_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0))|round(2)}} $
+                Cost Now:             {{(states('sensor.garage_front_heater_power')|float(0)/1000 * states('sensor.ted5000_utility_current_rate')|float(0))|round(5)}} $/h
+                Cost Today Projected: {{(states('sensor.garage_front_heater_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+            - type: markdown
+              content: |
+                Time Today:           {{states('sensor.garage_rear_heater_time')|float(0)}}
+                Count Today:          {{states('sensor.garage_rear_heater_count')|float(0)}}
+                rear Temperature:    {{states('sensor.garage_rear_temp')|float(0)}} °C
+                rear Humidty:        {{states('sensor.garage_rear_hum')|float(0)}} %
+                Power Now:            {{states('sensor.garage_rear_heater_power')|float(0)}} W
+                Energy Daily:         {{states('sensor.garage_rear_heater_energy_daily')|float(0)}} kWh
+                Cost Today:           {{(states('sensor.garage_rear_heater_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0))|round(2)}} $
+                Cost Now:             {{(states('sensor.garage_rear_heater_power')|float(0)/1000 * states('sensor.ted5000_utility_current_rate')|float(0))|round(5)}} $/h
+                Cost Today Projected: {{(states('sensor.garage_rear_heater_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+        
+        - type: horizontal-stack
+          cards:
+            - type: custom:fold-entity-row
+              head: switch.garage_front_heater
+              open: false
+              entities:
+                - sensor.garage_front_heater_time
+                - sensor.garage_front_heater_count
+                #- input_boolean.garage_heaters
+                #- counter.heaters_counter
+                - sensor.garage_front_temp
+                - sensor.garage_front_hum
+                - sensor.garage_front_heater_power
+                - sensor.garage_front_heater_energy_daily
+                # - type: custom:fold-entity-row
+                  # head: sensor.garage_front_temp
+                  # entities:
+                    # - sensor.garage_front_temp
+                    # - sensor.garage_front_hum
+                    # - type: custom:hui-element
+                      # card_type: markdown
+                      # content: |
+                        # Room Temperature:   {{state_attr('climate.garage_front_heater','room_temp')}} °C
+                        # Room Humidty:       {{state_attr('climate.garage_front_heater','room_hum')}} %
+            - type: custom:fold-entity-row
+              head: switch.garage_rear_heater
+              open: false
+              entities:
+                - sensor.garage_rear_heater_time
+                - sensor.garage_rear_heater_count
+                #- input_boolean.garage_heaters
+                #- counter.heaters_counter
+                - sensor.garage_rear_temp
+                - sensor.garage_rear_hum
+                - sensor.garage_rear_heater_power
+                - sensor.garage_rear_heater_energy_daily
+                # - type: custom:fold-entity-row
+                  # head: sensor.garage_rear_temp
+                  # entities:
+                    # - sensor.garage_rear_temp
+                    # - sensor.garage_rear_hum
+                    # - type: custom:hui-element
+                      # card_type: markdown
+                      # content: |
+                        # Room Temperature:   {{state_attr('climate.garage_rear_heater','room_temp')}} °C
+                        # Room Humidty:       {{state_attr('climate.garage_rear_heater','room_hum')}} %
+                        
+                        
+            #Cost Now:             {{(states('sensor.garage_hvac_power')|float(0)/1000 * states('sensor.ted5000_utility_current_rate')|float(0))|round(5)}} $/h
+            #Cost Today Projected: {{(states('sensor.garage_hvac_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+                        
+    - type: vertical-stack
+      title: Garage HVAC
+      cards:
+        - type: thermostat
+          entity: climate.garage_hvac
+          name: ""
+        - type: markdown
+          content: |
+            Airflow Temperature:  {{state_attr('climate.garage_hvac','air_temp')|float(0)}} °C
+            Garage Temperature:   {{states('sensor.garage_mean_temp')|float(0)}} °C
+            Garage Humidty:       {{states('sensor.garage_mean_humidity')|float(0)}} %
+            Power Now:            {{states('sensor.garage_hvac_power')|float(0)}} W
+            Energy Daily:         {{states('sensor.garage_hvac_energy_daily')|float(0)}} kWh
+            Cost Today:           {{(states('sensor.garage_hvac_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0))|round(2)}} $
+            Cost Now:             {{(states('sensor.garage_hvac_power')|float(0)/1000 * states('sensor.ted5000_utility_current_rate')|float(0))|round(5)}} $/h
+            Cost Today Projected: {{(states('sensor.garage_hvac_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: 'custom:text-divider-row'
+              text: States
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - binary_sensor.garage_hvac_running
+            - binary_sensor.garage_hvac_defrost
+            - sensor.garage_hvac_temperature
+            - sensor.garage_mean_temp
+            - sensor.garage_mean_humidity
+            - sensor.garage_hvac_power
+            - sensor.garage_hvac_energy_daily
+            - binary_sensor.garage_hvac_threshold
+            - type: 'custom:text-divider-row'
+              text: Controls
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - switch.garage_hvac_swing
+
+    # - type: 'custom:shutter-card'
+      # entities:
+        # - entity: cover.garage_cd_opener
+      # style: |
+        # ha-card {
+          # font-size: 11px !IMPORTANT;
+        # }
+        # .sc-shutter-label {
+          # font-size: 15px !IMPORTANT;
+        # }
+        # .sc-shutter-top {
+          # text-align: left !IMPORTANT;
+        # }
+        # .card-header {
+          # font-size: 20px !IMPORTANT;
+        # }
+        # .sc-shutter-selector-slide {
+          # width: 54% !IMPORTANT;
+        # }
+        # .sc-shutter-selector-picture {
+          # background-size: 100px 100% !IMPORTANT;
+          # background-repeat: no-repeat !IMPORTANT;
+        # }
+        # .sc-shutter-selector-picker {
+          # width: 54% !IMPORTANT;
+        # }

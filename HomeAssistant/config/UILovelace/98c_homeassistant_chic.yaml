@@ -1,0 +1,254 @@
+####################################################
+# UILOVELACE - HA CHIC Server                      #
+####################################################
+
+- title: HA Server - Chicoutimi
+  icon: mdi:home-assistant
+  # Unique path for direct access /lovelace/${path}
+  path: settings_chic
+  visible: false
+  badges:
+    - sensor.time
+    - sensor.ha_chic_cpu_used
+    - sensor.ha_chic_drive_used_percent
+    - type: entity-filter
+      entities:
+        - entity: sensor.ha_chic_update_available
+          icon: mdi:cloud-check
+          state_filter:
+            - 'Up-to-date'
+          style: |
+            :host {
+              --label-badge-text-color: green;
+            }
+            
+        - entity: sensor.ha_chic_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Major update'
+            - 'Stopped'
+          style: |
+            :host {
+              --label-badge-text-color: red;
+            }
+        - entity: sensor.ha_chic_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Update available'
+          style: |
+            :host {
+              --label-badge-text-color: orange;
+            }
+        - entity: sensor.ha_chic_update_available
+          icon: mdi:cloud-sync
+          state_filter:
+            - 'Updating'
+          style: |
+            :host {
+              --label-badge-text-color: yellow;
+            }
+        - entity: sensor.ha_chic_update_available
+          icon: mdi:cloud-question
+          state_filter:
+            - 'unavailable'
+            - 'Unavailable'
+            - 'unknown'
+            - 'Unknown'
+            - 'none'
+            - 'None'
+          style: |
+            :host {
+              --label-badge-text-color:  var(--state-icon-unavailable-color);
+            }
+#Addons
+        - entity: sensor.ha_chic_addons_update_available
+          icon: mdi:cloud-check
+          state_filter:
+            - 'Up-to-date'
+          style: |
+            :host {
+              --label-badge-text-color: green;
+            }
+        - entity: sensor.ha_chic_addons_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Major update'
+            - 'Stopped'
+            - 'Update available'
+          style: |
+            :host {
+              --label-badge-text-color: red;
+            }
+        - entity: sensor.ha_chic_addons_update_available
+          icon: mdi:cloud-sync
+          state_filter:
+            - 'Updating'
+          style: |
+            :host {
+              --label-badge-text-color: yellow;
+            }
+        - entity: sensor.ha_chic_addons_update_available
+          icon: mdi:cloud-question
+          state_filter:
+            - 'unavailable'
+            - 'Unavailable'
+            - 'unknown'
+            - 'Unknown'
+            - 'none'
+            - 'None'
+          style: |
+            :host {
+              --label-badge-text-color:  var(--state-icon-unavailable-color);
+            }
+    #- binary_sensor.addons_update_available
+    
+  cards:
+    # The markdown card will render markdown text.
+    - type: markdown
+      title: Home Assistant CHICOUTIMI
+      content: >
+        Home Assistant CHIC Remote Platform
+
+    - type: horizontal-stack
+      #title: N/A
+      cards:
+        - type: button
+          name: HA Main VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings
+        - type: button
+          name: HA Dev VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_dev
+        - type: button
+          name: Server
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_server
+        - type: button
+          name: Computers
+          icon: mdi:desktop-tower
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/computers
+
+    - type: entities
+      title: Health Data
+      show_header_toggle: false
+      entities:
+        - sensor.ha_chic_date_time
+        - sensor.ha_chic_last_boot
+        - sensor.ha_chic_time_online
+        - sensor.ha_chic_heartbeat
+        - type: custom:multiple-entity-row
+          entity: sensor.ha_chic_update_available
+          #name: 
+          secondary_info: 
+            name: Major update - 
+            attribute: major_update
+            #unit: '%'
+          entities:
+            - name: current
+              attribute: current
+            - name: latest
+              attribute: latest
+        - sensor.ha_chic_addons_update_available
+        #- binary_sensor.remote_ui
+        - type: custom:fold-entity-row
+          head: sensor.ha_chic_uun_entities
+          entities:
+            - sensor.ha_chic_entities
+            - type: custom:hui-markdown-card
+              style: |
+                ha-card {
+                  box-shadow: none;
+                  margin: 0px -16px -16px -26px;
+                  color: var(--primary-color);
+                }
+              content: |
+                {% set list = ['icon_color', 'icon', 'friendly_name', '--------------', 'templates', 'hide_attributes'] %}
+                
+                {% for attr in states.sensor.ha_chic_entities.attributes %}
+                  {% if attr not in list -%}
+                    {{attr}}: {{states.sensor.ha_chic_entities.attributes[attr]}}
+                  {%- endif  -%}
+                {%- endfor -%}
+                
+                -------------
+                
+                {% for attr in states.sensor.ha_chic_uun_entities.attributes %}
+                  {% if attr not in list -%}
+                    {{attr}}: {{states.sensor.ha_chic_uun_entities.attributes[attr]}}
+                  {%- endif  -%}
+                {%- endfor -%}
+
+    - type: entities
+      title: Resources
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.ha_chic_cpu_used
+          entities:
+            - sensor.ha_chic_cpu_used
+        - type: custom:fold-entity-row
+          head: sensor.ha_chic_memory_used_percent
+          entities:
+            - sensor.ha_chic_memory_used
+            - sensor.ha_chic_memory_free
+        
+    - type: entities
+      title: Storage
+      show_header_toggle: false
+      entities:
+        #- sensor.ha_chic_home_assistant_v2_db
+        #- sensor.ha_chic_mariadb_size
+        - sensor.ha_chic_db_size
+        - type: custom:multiple-entity-row
+          name: HA Chicoutimi used percent
+          entity: sensor.ha_chic_drive_used_percent
+          #secondary_info: last-changed
+          entities:
+            - name: used
+              entity: sensor.ha_chic_drive_used
+            - name: free
+              entity: sensor.ha_chic_drive_free
+
+    - type: horizontal-stack
+      title: Hardware
+      cards:
+        - type: gauge
+          needle: true
+          name: CPU
+          unit: '%'
+          entity: sensor.ha_chic_cpu_used
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 45
+            red: 85
+        - type: gauge
+          needle: true
+          name: Disk
+          unit: '%'
+          entity: sensor.ha_chic_drive_used_percent
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 45
+            red: 85
+        - type: gauge
+          needle: true
+          name: Memory
+          unit: '%'
+          entity: sensor.ha_chic_memory_used_percent
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 30
+            red: 60
+    

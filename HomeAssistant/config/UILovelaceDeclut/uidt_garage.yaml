@@ -1,0 +1,28 @@
+####################################################
+# LOVELACE DECLUTTERING - Garage                   #
+####################################################
+
+air_valve: 
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[valve]]_air_valve
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[valve]]_air_valve_closed
+            icon: "mdi:valve"
+            state_icons:
+              "on": "mdi:valve-closed"
+              "off": "mdi:valve-open"
+            state_styles:
+              "off":
+                color: var(--state-icon-active-color)
+              "on":
+                color: var(--state-icon-color)
+          - entity: input_boolean.[[valve]]_air_valve
+            icon: "mdi:toggle-switch"
+            state_icons:
+              "on": "mdi:toggle-switch"
+              "off": "mdi:toggle-switch-off"
+      - switch.[[valve]]_air_valve
+      - switch.[[valve]]_air_valve_open

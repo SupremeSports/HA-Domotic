@@ -1,0 +1,253 @@
+    type: vertical-stack
+    cards:
+      - type: custom:mushroom-title-card
+        title: Living Room
+        #subtitle: Floor Heater
+        alignment: justify
+#Comfort
+
+#Doors
+
+#Lights
+      # - type: custom:mushroom-chips-card
+        # chips:
+          # - type: template
+            # tap_action:
+              # action: more-info
+            # entity: switch.living_room_jean_light
+            # icon: |-
+              # {% if is_state('switch.living_room_jean_light', 'on') %}
+                # mdi:lightbulb-on
+              # {% else %}
+                # mdi:lightbulb-off
+              # {% endif %}
+            # icon_color: |-
+              # {% if is_state('switch.living_room_jean_light', 'off') %}
+                # grey
+              # {% else %}
+                # yellow
+              # {% endif %}
+            # content: |-
+              # {% if is_state('switch.living_room_jean_light', 'on') %}
+                # Jean On
+              # {% else %}
+                # Jean Off
+              # {% endif %}
+#HVACs
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.living_room_hvac_running
+            icon: |-
+              {% if is_state('binary_sensor.living_room_hvac_running','on') %}
+                {% if is_state('binary_sensor.living_room_hvac_defrost','on') %}
+                  mdi:snowflake-melt
+                {% else %}
+                  mdi:radiator
+                {% endif %}
+              {% elif is_state('binary_sensor.living_room_hvac_running','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.living_room_hvac_running','on') %}
+                {% if is_state('binary_sensor.living_room_hvac_defrost','on') %}
+                  light-blue
+                {% else %}
+                  yellow
+                {% endif %}
+              {% else %}
+                grey
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.living_room_hvac_running', 'on') %}
+                {% if is_state('binary_sensor.living_room_hvac_defrost','on') %}
+                  HVAC Defrost
+                {% else %}
+                  HVAC On
+                {% endif %}
+              {% else %}
+                HVAC Off
+              {% endif %}
+
+          - type: template
+            tap_action:
+              action: more-info
+            entity: sensor.living_room_hvac_temperature
+            icon: mdi:weather-windy
+            icon_color: |-
+              {% if is_state('climate.living_room_hvac','heat') %}
+                red
+              {% elif is_state('climate.living_room_hvac','cool') %}
+                light-blue
+              {% else %}
+                grey
+              {% endif %}
+            content: "{{ states('sensor.living_room_hvac_temperature') }} °C"
+              
+#Heaters
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.living_room_heater_running
+            icon: |-
+              {% if is_state('binary_sensor.living_room_heater_running','on') %}
+                mdi:radiator
+              {% elif is_state('binary_sensor.living_room_heater_running','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.living_room_heater_running', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.living_room_heater_running', 'on') %}
+                Heater On
+              {% else %}
+                Heater Off
+              {% endif %}
+
+          - type: template
+            icon: mdi:ticket-percent
+            icon_color: blue
+            content: |-
+              {% if state_attr('sensor.living_room_heater_power','duty_cycle') %}
+                {% set duty = state_attr('sensor.living_room_heater_power','duty_cycle').split(' ')[0]|float(0) %}
+              {% else %}
+                {% set living_room_duty = 0 %}
+              {% endif %}
+              
+              Duty Cycle {{ duty|round(1) }} %
+#Energy
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            icon: mdi:transmission-tower
+            content: |-
+              {% set heater_power = states('sensor.living_room_heater_power')|float(0) %}
+              {% set hvac_power = states('sensor.living_room_hvac_power')|float(0) %}
+              {{ (heater_power+hvac_power)|round(5) }} W
+          - type: template
+            icon: mdi:lightning-bolt
+            content: |-
+              {% set heater_energy = states('sensor.living_room_heater_energy_daily')|float(0) %}
+              {% set hvac_energy = states('sensor.living_room_hvac_energy_daily')|float(0) %}
+              {{ (heater_energy+hvac_energy)|round(5) }} kWh
+          - type: template
+            icon: mdi:cash
+            content: |-
+              {% set heater_energy = states('sensor.living_room_heater_energy_daily')|float(0) %}
+              {% set hvac_energy = states('sensor.living_room_hvac_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ ((heater_energy+hvac_energy)*cost)|round(5) }} $
+          - type: template
+            icon: mdi:finance
+            content: |-
+              {% set living_room_energy = states('sensor.living_room_heater_energy_daily')|float(0) %}
+              {% set bar_energy = states('sensor.bar_heater_energy_daily')|float(0) %}
+              {% set hvac_energy = states('sensor.living_room_hvac_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ (((living_room_energy+hvac_energy)*cost)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(5) }} $
+              
+#Comfort graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.living_room_temperature
+            # name: Temperature
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: orange
+            # line_color: orange
+          # - type: custom:mini-graph-card
+            # icon: mdi:water-percent
+            # entities:
+              # - sensor.living_room_humidity
+            # name: Humidity
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: steelblue
+            # line_color: steelblue
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.living_room_floor_temperature
+            # name: Floor
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 1
+            # color: green
+            # line_color: green
+#Comfort thermostat
+      # - type: custom:mushroom-climate-card
+        # entity: climate.living_room_heater
+        # show_temperature_control: true
+        # hvac_modes:
+          # - 'heat'
+          # - 'off'
+        # icon: mdi:heat-wave
+        # #layout: vertical
+      - type: custom:mushroom-climate-card
+        entity: climate.living_room_hvac
+        show_temperature_control: true
+        hvac_modes:
+          - 'heat'
+          - 'cool'
+          - 'off'
+        icon: mdi:car-defrost-rear
+#Energy graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.living_room_hvac_power
+              # - sensor.living_room_heater_power
+            # name: Power
+            # icon: mdi:transmission-tower
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 0.5
+            # color: green
+            # line_color: green
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.living_room_hvac_energy_daily
+              # - sensor.living_room_heater_energy_daily
+            # name: Energy
+            # icon: mdi:lightning-bolt
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # show:
+              # graph: bar
+            # #bar_spacing: 6
+            # aggregate_func: max
+            # group_by: hour
+            # color_thresholds:
+              # - value: 0
+                # color: "#00ff00f0"
+              # - color: "#6fed00f0"
+              # - color: "#98db00f0"
+              # - color: "#b6c700f0"
+              # - color: "#cdb200f0"
+              # - color: "#df9b00f0"
+              # - color: "#ee8200f0"
+              # - color: "#f86600f0"
+              # - color: "#fe4400f0"
+              # - value: 20
+                # color: "#ff0000f0"

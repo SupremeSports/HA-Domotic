@@ -1,0 +1,168 @@
+###################################################
+# AUTOMATIONS - ARCHIVES                          #
+###################################################
+
+  # - alias: Water valve ON
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Opened'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_open
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Opened'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_open
+      
+  # - alias: Water valve OFF
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'on'
+        # for: '00:00:08'
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Closed'
+    # condition:
+      # condition: and
+      # conditions:
+        # - condition: state
+          # entity_id: switch.water_valve_close
+          # state: 'on'
+        # - condition: state
+          # entity_id: sensor.water_valve_status
+          # state: 'Closed'
+    # action:
+      # service: switch.turn_off
+      # entity_id: switch.water_valve_close
+      
+  # #Force water valve off if the feedback signal fails (prevent water leaks)
+  # - alias: Water valve Force Off
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: sensor.water_valve_status
+        # to: 'Unknown'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_open
+        # to: 'off'
+        # for: '00:00:20'
+      # - platform: state
+        # entity_id: switch.water_valve_close
+        # to: 'off'
+        # for: '00:00:20'
+    # condition:
+      # - condition: state
+        # entity_id: sensor.water_valve_status
+        # state: 'Unknown'
+    # action:
+      # service: switch.turn_on
+      # entity_id: switch.water_valve_close
+      
+######## POOL VALVES ########
+
+  # - alias: "Pool Valves Adjust"
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: input_number.pool_drain_percent
+      # - platform: state
+        # entity_id: input_number.pool_heater_percent
+      # - platform: state
+        # entity_id: input_number.pool_slide_percent
+    # action:
+    # - service: mqtt.publish
+      # data_template:
+        # topic: "Pool/Control/Cmd"
+        # payload_template: '{"drain":"{{states.input_number.pool_drain_percent.state}}","heatp":"{{states.input_number.pool_heater_percent.state}}","slide":"{{states.input_number.pool_slide_percent.state}}"}'
+        # qos: 0
+        # retain: false
+        
+  # - alias: "Pool Drain Adjust"
+    # mode: restart
+    # trigger:
+      # platform: state
+      # entity_id: input_number.pool_drain_percent
+    # action:
+    # - service: mqtt.publish
+      # data_template:
+        # topic: "Test/Control/Cmd"
+        # payload: '{"drain":{{ trigger.to_state.state | int(0) }}}'
+        # qos: 0
+        # retain: false
+        
+  # - alias: "Pool Heatpump Adjust"
+    # trigger:
+      # platform: state
+      # entity_id: input_number.pool_heater_percent
+    # action:
+    # - service: mqtt.publish
+      # data_template:
+        # topic: "Test/Control/Cmd"
+        # payload: '{"heatp":{{ trigger.to_state.state | int(0) }}}'
+        # qos: 0
+        # retain: false
+        
+  # - alias: "Pool Valves Adjust"
+    # mode: restart
+    # trigger:
+      # - platform: state
+        # entity_id: input_select.pool_drain_skimmer_mode
+      # - platform: state
+        # entity_id: input_select.pool_heater_mode
+      # - platform: state
+        # entity_id: input_select.pool_slide_mode
+    # action:
+      # - alias: "Turn ON valve main 24V power"
+        # entity_id: switch.pool_control_valves
+        # service: switch.turn_on
+      # - alias: "Wait for valve to turn ON"
+        # wait_for_trigger:
+          # - platform: state
+            # entity_id: switch.pool_control_valves
+            # to: "on"
+            # for: 1
+      # - alias: "Turn OFF pool pump for slide when turning OFF"
+        # entity_id: input_boolean.poolpump_force_off
+        # service_template: >
+          # {% set newOffRequest = is_state('input_select.pool_slide_mode', 'Off') %}
+          # {% set prevState = states('input_number.pool_slide_percent')|int(0) != 0 %}
+          
+          # {% set PFO = false %}
+          
+          # {% if newOffRequest and prevState %}
+            # {% set PFO = true %}
+          # {% endif %}
+                  
+          # {% if PFO == true %}
+            # input_boolean.turn_on
+          # {% else %}
+            # input_boolean.turn_off
+          # {% endif %}
+      # - alias: "Wait until pool pump is stopped"
+        # wait_template: "{{ (is_state('sensor.poolpump_status', 'Off') and is_state('input_select.pool_slide_mode', 'Off')) or is_state('input_select.pool_slide_mode', 'On') or states('input_number.pool_slide_percent')|int(0) == 0}}"
+      # - alias: "Move Slide valve to drain"
+        # service: mqtt.publish
+        # data_template:
+          # topic: "Test/Control/Cmd"
+          # payload: '{"slide":50}'
+          # qos: 0
+          # retain: false

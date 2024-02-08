@@ -1,0 +1,50 @@
+####################################################
+# COVERS - TEMPLATE - All OTHERS                   #
+####################################################
+
+##TO BE FIXED
+
+#RGBW Milight Speed Up/Dn
+  - platform: template
+    covers:
+      master_bedroom_rgbw:
+        friendly_name: "Master Bedroom RGBW Speed"
+        position_template: "{{ 50 }}"
+        open_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/1"
+            command: "up"
+        close_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/1"
+            command: "down"
+            
+      under_bar_rgbw:
+        friendly_name: "Under Bar RGBW Speed"
+        position_template: "{{ 50 }}"
+        open_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/2"
+            command: "up"
+        close_cover:
+          service: script.milightspeed
+          data:
+            topic: "Home/Milight/Cmd/2"
+            command: "down"
+            
+      pool_water_rgb:
+        friendly_name: "Pool Water RGB Speed"
+        position_template: "{{ 50 }}"
+        open_cover:
+          service: script.milightspeed
+          data:
+            topic: "Pool/Milight/Cmd/3"
+            command: "up"
+        close_cover:
+          service: script.milightspeed
+          data:
+            topic: "Pool/Milight/Cmd/3"
+            command: "down"

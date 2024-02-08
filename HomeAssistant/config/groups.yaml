@@ -4,14 +4,16 @@
       
   all_locks:
     name: All Locks
-    all: true
+    all: false
     entities:
       - lock.house_fd_lock
-      #- lock.house_sd_lock
-      #- lock.house_bd_lock
+      - lock.house_sd_lock
+      - lock.house_bd_lock
+      - lock.house_mbd_lock
       - lock.garage_fd_lock
       - lock.shed_fd_lock
-      #- lock.pool_fd_lock
+      - lock.glasshouse_fd_lock
+      - lock.pool_fd_lock
 
   locks:
     name: Locks
@@ -22,18 +24,22 @@
       - input_boolean.house_sd_unlock
       - input_boolean.house_bd_lock
       - input_boolean.house_bd_unlock
+      - input_boolean.house_mbd_lock
+      - input_boolean.house_mbd_unlock
       - input_boolean.garage_fd_lock
       - input_boolean.garage_fd_unlock
       - input_boolean.shed_fd_lock
       - input_boolean.shed_fd_unlock
-      - input_boolean.pool_fd_lock
-      - input_boolean.pool_fd_unlock
+      - input_boolean.glasshouse_fd_lock
+      - input_boolean.glasshouse_fd_unlock
       - input_boolean.lock_all
       
   garagedoors:
     name: Garage Doors
     entities:
-      - input_boolean.garage_cd_trigger
+      - input_boolean.garage_cd_open
+      - input_boolean.garage_cd_stop
+      - input_boolean.garage_cd_close
       
   cars:
     name: Cars
@@ -49,7 +55,6 @@
   irrigation:
     name: Irrigation
     entities:
-      - switch.backyard_irrigation
       - switch.frontyard_irrigation
       - switch.garden_irrigation
       
@@ -63,4 +68,94 @@
       - input_boolean.garage_main_control_reset
       - input_boolean.garage_slave_control_reset
       - input_boolean.shed_control_reset
+      - input_boolean.glasshouse_control_reset
+      - input_boolean.well_control_reset
+      - input_boolean.pool_toilet_control_reset
+      - input_boolean.transmitter_box_control_reset
 
+  addons:
+    name: HA Addons
+    all: false
+    entities:
+      - sensor.home_assistant_operating_system_update_available
+      - sensor.supervisor_update_available
+      #- sensor.adguard_home_addon_update_available
+      #- sensor.bitwarden_addon_update_available
+      - sensor.chrony_addon_update_available
+      - sensor.duck_dns_addon_update_available
+      - sensor.file_editor_addon_update_available
+      #- sensor.frigate_addon_update_available
+      #- sensor.frigate_server_update_available
+      - sensor.grocy_addon_update_available
+      - sensor.mosquitto_addon_update_available
+      - sensor.phpmyadmin_addon_update_available
+      - sensor.samba_share_addon_update_available
+      - sensor.speedtest_addon_update_available
+      - sensor.ssh_web_terminal_addon_update_available
+
+#ENERGY METERS
+  heaters_power:
+    name: Heaters Power
+    all: false
+    entities:
+      - sensor.cold_storage_floor_heater_power
+      - sensor.storage_floor_heater_power
+      - sensor.garage_hvac_power
+      - sensor.garage_front_heater_power
+      - sensor.garage_rear_heater_power
+      - sensor.living_room_hvac_power
+      - sensor.office_heater_power
+      - sensor.recroom_hvac_power
+      - sensor.recroom_heater_power
+      - sensor.bar_heater_power
+      - sensor.master_bedroom_heater_power
+      - sensor.massage_room_heater_power
+      - sensor.training_room_heater_power
+      - sensor.kitchen_heater_power
+      - sensor.living_room_heater_power
+      - sensor.entrance_heater_power
+
+  appliances_power:
+    name: Appliances Power
+    all: false
+    entities:
+      - sensor.tankless_water_heater_power
+      - sensor.washing_machine_power
+      - sensor.drying_machine_power
+      - sensor.dishwasher_power
+      - sensor.kitchen_refrigerator_power
+      - sensor.chest_freezer_power
+      - sensor.well_power
+      
+  lighting_power:
+    name: Lighting Power
+    all: false
+    entities:
+      - binary_sensor.garage_attic_light
+      - switch.control_room_light
+      - switch.cold_storage_light    
+      - switch.storage_room_light
+      - switch.front_door_light
+      - switch.garage_front_light
+      - switch.shed_door_light 
+      - switch.shed_inside_light  
+      - switch.shed_pool_light
+      - switch.lamp_post
+      
+  outdoor_power:
+    name: Outdoor Power
+    all: false
+    entities:
+      - sensor.pond_waterfall_pump_power
+      - sensor.pool_pump_power
+      - sensor.pool_heater_power
+
+#WATER METERS
+  appliances_water:
+    name: Appliances Water
+    all: false
+    entities:
+      - sensor.dishwasher_water_daily_usage
+      - sensor.icemaker_water_daily_usage
+      - sensor.washing_machine_water_daily_usage
+      

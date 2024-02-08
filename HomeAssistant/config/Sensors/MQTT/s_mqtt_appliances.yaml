@@ -1,0 +1,206 @@
+###################################################
+# SENSORS - MQTT - APPLIANCES                     #
+###################################################
+
+#WASHING MACHINE
+  - name: Washing Machine Power
+    icon: mdi:washing-machine
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) / 2 %}
+      {% set ratio = 1.0 %}
+      {% set power = current * voltage * ratio %}
+      
+      {{ power | float(0) | round(5) }}
+    json_attributes_topic: "Home/WashingMachine/Json"
+
+#DRYING MACHINE
+  - name: Drying Machine Power
+    icon: mdi:tumble-dryer
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/DryingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/DryingMachine/LWT"
+    qos: 0
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) %}
+      {% set ratio = 1.0 %}
+      {% set power = (current * voltage * ratio) %}
+      
+      {% set power = power / (3.0 if power<50.0 else 1.0) %}
+      
+      {{ power | float(0) | round(5) }}
+    json_attributes_topic: "Home/DryingMachine/Json"
+
+#DISHWASHER
+  - name: Dishwasher Power
+    icon: mdi:dishwasher
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) / 2 %}
+      {% set ratio = 1.0 %}
+      {% set power = current * voltage * ratio %}
+      
+      {{ power | float(0) | round(5) }}
+    json_attributes_topic: "Home/Dishwasher/Json"
+
+#KITCHEN REFRIGERATOR/FREEZER
+  - name: Kitchen Refrigerator Power
+    icon: mdi:fridge
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.kitchen_refrigerator_power')|float(0) %}
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) / 2 %}
+      {% set ratio = 1.0 %}
+      {% set power = current * voltage * ratio %}
+      
+      {% if power < 0 or power > 525 %}
+        {% if prev != 0 %}
+          {% set power = prev %}
+        {% else %}
+          {% set power = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ power | float(0) | round(5) }}
+    json_attributes_topic: "Home/KitchenRefigerator/Json"
+    
+  - name: Kitchen Refrigerator Fridge Temperature
+    icon: mdi:fridge-bottom
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.kitchen_refrigerator_fridge_temperature')|float(0) %}
+      {% set RT = value_json.temp_fridge | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+      
+  - name: Kitchen Refrigerator Freezer Temperature
+    icon: mdi:fridge-top
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.kitchen_refrigerator_freezer_temperature')|float(0) %}
+      {% set RT = value_json.temp_freezer | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+
+#CHEST FREEZER
+  - name: Chest Freezer Power
+    icon: mdi:treasure-chest
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/ChestFreezer/Sensors/Stts"
+    availability:
+      - topic: "Home/ChestFreezer/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.chest_freezer_power')|float(0) %}
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) / 2 %}
+      {% set ratio = 1.0 %}
+      {% set power = current * voltage * ratio %}
+      
+      {% if power < 0 or power > 225 %}
+        {% if prev != 0 %}
+          {% set power = prev %}
+        {% else %}
+          {% set power = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ power | float(0) | round(5) }}
+    json_attributes_topic: "Home/ChestFreezer/Json"
+    
+  - name: Chest Freezer Temperature
+    icon: mdi:treasure-chest
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Home/ChestFreezer/Sensors/Stts"
+    availability:
+      - topic: "Home/ChestFreezer/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.chest_freezer_temperature')|float(0) %}
+      {% set RT = value_json.temp_lower | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+
+#BAR REFRIGERATORS
+
+#TANKLESS WATER HEATER
+  - name: "Water Heater Temperature"
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    state_topic: "Home/WaterHeater/Sensors/Stts"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
+    qos: 0
+    value_template: "{{ value_json.wtr_t_out }}"
+    json_attributes_topic: "Home/WaterHeater/Sensors/Stts"
+    #json_attributes_topic: "Home/WaterHeater/Json"
+    
+  - name: "Water Heater Flow"
+    icon: mdi:water-pump
+    unit_of_measurement: 'L/min'
+    state_topic: "Home/WaterHeater/Sensors/Stts"
+    availability:
+      - topic: "Home/WaterHeater/LWT"
+    qos: 0
+    value_template: "{{ value_json.wtr_flow }}"
+    json_attributes_topic: "Home/WaterHeater/Sensors/Stts"
+    #json_attributes_topic: "Home/WaterHeater/Json"
+    
+

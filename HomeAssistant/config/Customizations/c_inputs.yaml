@@ -40,8 +40,14 @@
     templates:
       icon_color: >
         if (entities['input_boolean.running_hass'].state === 'off') return 'var(--state-icon-color)';
-        if (entities['sensor.lock_passcode_ok'].state === 'on') return 'var(--label-badge-green)';
+        if (entities['binary_sensor.lock_passcode_ok'].state === 'on') return 'var(--label-badge-green)';
         return 'var(--state-icon-color)';
   
   input_text.doorlock_passcode_list:
     hidden: true
+
+  input_boolean.enable_flash:
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:alarm-light';
+        return 'mdi:alarm-light-off';

@@ -1,0 +1,294 @@
+####################################################
+# UILOVELACE - Computers                           #
+####################################################
+
+- title: Computers
+  icon: mdi:desktop-tower
+  # Unique path for direct access /lovelace/${path}
+  path: computers
+  visible: false
+  badges:
+    - sensor.time
+  cards:
+    - type: horizontal-stack
+      #title: N/A
+      cards:
+        - type: button
+          name: HA Main VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings
+        - type: button
+          name: HA Dev VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_dev
+        - type: button
+          name: HA Chicoutimi
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_chic
+        - type: button
+          name: Server
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_server
+            
+    - type: entities
+      title: Computers Status
+      show_header_toggle: false
+      entities: 
+        # - type: custom:decluttering-card
+          # template: jgau_pc
+        # - type: custom:decluttering-card
+          # template: cfor_pc
+        # - type: custom:decluttering-card
+          # template: server
+        # - type: custom:decluttering-card
+          # template: ha_dev_vm
+
+        - type: custom:stack-in-card
+          #title: My Stack In Card
+          mode: vertical
+          cards:
+            - type: custom:decluttering-card
+              template: jgau_pc_on
+            - type: custom:decluttering-card
+              template: jgau_pc_off
+            - type: custom:decluttering-card
+              template: cfor_pc_on
+            - type: custom:decluttering-card
+              template: cfor_pc_off
+            - type: custom:decluttering-card
+              template: ha_dev_vm_on
+            - type: custom:decluttering-card
+              template: ha_dev_vm_off
+            # - type: custom:decluttering-card
+              # template: owncloud_server_on
+            # - type: custom:decluttering-card
+              # template: owncloud_server_off
+            - type: custom:decluttering-card
+              template: owncloud_server
+            - type: custom:decluttering-card
+              template: server_on
+            - type: custom:decluttering-card
+              template: server_off
+            - type: custom:multiple-entity-row
+              entity: binary_sensor.server
+              name: Server LAN
+              secondary_info:
+                attribute: round_trip_time_avg
+                name: 'Ping Avg: '
+                unit: 'ms'
+                format: precision1
+              entities:
+                - entity: binary_sensor.server_lan1
+                  name: 'LAN1'
+                  show_state: false
+                  icon: true
+                - entity: binary_sensor.server_lan2
+                  name: 'LAN2'
+                  show_state: false
+                  icon: true
+                - entity: binary_sensor.server_lan3
+                  name: 'LAN3'
+                  show_state: false
+                  icon: true
+                - entity: binary_sensor.server_lan4
+                  name: 'LAN4'
+                  show_state: false
+                  icon: true
+
+#ROUTERS
+    - type: entities
+      title: "Routers"
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: binary_sensor.wan_status
+          entities:
+            - sensor.wan_status
+            - sensor.wan_uptime
+            - sensor.wan_external_ip
+            - type: divider
+              style:
+                height: 1px
+                width: 80%
+                margin-left: auto
+                margin-right: auto
+                background: '#62717b'
+            - sensor.wan_kib_s_sent
+            - sensor.wan_packets_s_sent
+            - sensor.wan_packets_sent
+            - sensor.wan_b_sent
+            - type: divider
+              style:
+                height: 1px
+                width: 80%
+                margin-left: auto
+                margin-right: auto
+                background: '#62717b'
+            - sensor.wan_kib_s_received
+            - sensor.wan_packets_s_received
+            - sensor.wan_packets_received
+            - sensor.wan_b_received
+        - binary_sensor.main_router
+        - binary_sensor.garage_access_point
+        - binary_sensor.wavlink_access_point
+        #- binary_sensor.shed_router
+
+    - type: entities
+      title: Control Cabinets Status
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.control_room_control_status
+          entities:
+            # - sensor.control_room_temperature
+            # - sensor.control_room_humidity
+            - sensor.control_room_box_temperature
+            - sensor.control_room_box_humidity
+            - sensor.control_room_12v_voltage
+            - sensor.control_room_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.control_room_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_main_control_status
+          entities:
+            - sensor.garage_main_box_temperature
+            - sensor.garage_main_box_humidity
+            #- sensor.garage_main_12v_voltage
+            - sensor.garage_main_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_main_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_slave_control_status
+          entities:
+            - sensor.garage_slave_box_temperature
+            - sensor.garage_slave_box_humidity
+            #- sensor.garage_slave_12v_voltage
+            - sensor.garage_slave_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.garage_slave_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.garage_safety_control_status
+          entities:
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagefrontheater_error
+            entities:
+              - sensor.garage_safety_front_temp_raw
+              - sensor.garage_safety_front_temperature
+              - binary_sensor.garage_safety_front_active
+              - binary_sensor.garage_front_heater_ac
+          - type: custom:fold-entity-row
+            head: binary_sensor.garagerearheater_error
+            entities:
+              - sensor.garage_safety_rear_temp_raw
+              - sensor.garage_safety_rear_temperature
+              - binary_sensor.garage_safety_rear_active
+              - binary_sensor.garage_rear_heater_ac
+        - type: custom:fold-entity-row
+          head: sensor.shed_control_status
+          entities:
+            - sensor.shed_box_temperature
+            - sensor.shed_box_humidity
+            - sensor.shed_12v_voltage
+            - sensor.shed_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.shed_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.glasshouse_control_status
+          entities:
+            - sensor.glasshouse_box_temperature
+            - sensor.glasshouse_box_humidity
+            - sensor.glasshouse_12v_voltage
+            - sensor.glasshouse_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.glasshouse_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.pool_control_status
+          entities:
+            - input_boolean.pool_running
+            - sensor.pool_cabin_temperature
+            - sensor.pool_cabin_humidity
+            - sensor.pool_control_box_temperature
+            - sensor.pool_control_box_humidity
+            - sensor.pool_control_12v_voltage
+            - sensor.pool_control_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.pool_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.pool_toilet_control_status
+          entities:
+            - sensor.pool_toilet_temperature
+            - sensor.pool_toilet_humidity
+            - sensor.pool_toilet_3v3_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.pool_toilet_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.pond_control_status
+          entities:
+            - input_boolean.pond_running
+            - sensor.pond_area_temperature
+            - sensor.pond_area_humidity
+            - sensor.pond_control_box_temperature
+            - sensor.pond_control_box_humidity
+            - sensor.pond_control_12v_voltage
+            - sensor.pond_control_5v_voltage
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.pond_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.well_control_status
+          entities:
+            - sensor.well_box_temperature
+            - sensor.well_box_humidity
+            - sensor.well_12v_voltage
+            - sensor.well_5v_voltage
+            - sensor.well_pit_temperature
+            - sensor.well_water_temperature
+            - sensor.well_power
+            - binary_sensor.well_pump_running
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.well_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+        - type: custom:fold-entity-row
+          head: sensor.transmitter_box_control_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: input_boolean.transmitter_box_control_reset
+                  name: RESET
+                  icon: "mdi:power-cycle"
+
+
+            

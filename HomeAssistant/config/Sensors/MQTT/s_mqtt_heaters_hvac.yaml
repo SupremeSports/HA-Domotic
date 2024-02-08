@@ -1,0 +1,140 @@
+###################################################
+# SENSORS - MQTT - HEATERS & HVAC                 #
+###################################################
+
+#HVACs
+#LIVING ROOM
+  - name: Living Room HVAC Power
+    icon: mdi:hvac
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/Living/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    ### Wrong reading when power is very low, therefor special ratio
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) %}
+      {% set ratio = 0.595395 %}
+      
+      {% if current < 0 %}
+        {% set current = 0 %}
+      {% elif current < 0.5 %}
+        {% set current = current/5.4/ratio %}
+      {% endif %}
+      
+      {% set power = current * voltage * ratio %}
+      
+      {{ power | float(0) | round(5) }}
+    #json_attributes_topic: "Home/Living/Hvac/Json"
+    
+  - name: Living Room HVAC Temperature
+    icon: mdi:weather-windy
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Home/Living/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.living_room_hvac_temperature')|float(0) %}
+      {% set RT = value_json.air_temp | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+
+#GARAGE
+  - name: Garage HVAC Power
+    icon: mdi:hvac
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Garage/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    qos: 0
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu2_voltage')|float(240) %}
+      {% set ratio = 0.850445562912 %}
+      {% set ratio = 0.807053115364 %}
+      {% set power = current * voltage * ratio %}
+      
+      {{ power | float(0) | round(5) }}
+    #json_attributes_topic: "Garage/Hvac/Json"
+    
+  - name: Garage HVAC Temperature
+    icon: mdi:weather-windy
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Garage/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.garage_hvac_temperature')|float(0) %}
+      {% set RT = value_json.air_temp | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+
+#RECROOM
+  - name: RecRoom HVAC Power
+    icon: mdi:hvac
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Home/RecRoom/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    qos: 0
+    value_template: >
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) %}
+      {% set ratio = 0.70497614712 %}
+      {% set power = current * voltage * ratio %}
+      
+      {{ power | float(0) | round(5) }}
+    #json_attributes_topic: "Home/RecRoom/Hvac/Json"
+    
+  - name: RecRoom HVAC Temperature
+    icon: mdi:weather-windy
+    device_class: temperature
+    unit_of_measurement: '°C'
+    state_topic: "Home/RecRoom/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.recroom_hvac_temperature')|float(0) %}
+      {% set RT = value_json.air_temp | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+
+
+#HEATERS
+
+
+
+#FLOOR HEATERS

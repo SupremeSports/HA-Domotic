@@ -1,0 +1,221 @@
+####################################################
+# UILOVELACE - MAIN                                #
+####################################################
+
+- title: HVACs
+  icon: mdi:thermostat
+  # Unique path for direct access /lovelace/${path}
+  path: hvacs
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+  cards:
+    - type: vertical-stack
+      title: Living Room HVAC
+      cards:
+        - type: thermostat
+          entity: climate.living_room_hvac
+          name: ""
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: markdown
+          content: |
+            Airflow Temperature:  {{state_attr('climate.living_room_hvac','air_temp')|float(0)}} °C
+            Room Temperature:     --- °C
+            Room Humidty:         --- %
+            Power Now:            {{states('sensor.living_room_hvac_power')|float(0)}} W
+            Energy Daily:         {{states('sensor.living_room_hvac_energy_daily')|float(0)}} kWh
+            Cost Today:           {{(states('sensor.living_room_hvac_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0))|round(2)}} $
+            Cost Now:             {{(states('sensor.living_room_hvac_power')|float(0)/1000 * states('sensor.ted5000_utility_current_rate')|float(0))|round(5)}} $/h
+            Cost Today Projected: {{(states('sensor.living_room_hvac_energy_daily')|float(0) * states('sensor.ted5000_utility_current_rate')|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+            
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: 'custom:text-divider-row'
+              text: States
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - binary_sensor.living_room_hvac_running
+            - binary_sensor.living_room_hvac_defrost
+            - sensor.living_room_hvac_temperature
+            - sensor.living_room_hvac_power
+            - sensor.living_room_hvac_energy_daily
+            - type: 'custom:text-divider-row'
+              text: Controls
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - input_boolean.living_room_hvac_tilt
+          # style: |
+            # ha-card {
+              # box-shadow: 0px -10px 50px blue;
+            # }
+        # - type: custom:fold-entity-row
+          # head: sensor.living_room_temp
+          # entities:
+            # - sensor.living_room_temp
+            # - sensor.living_room_hum
+            # - type: custom:hui-element
+              # card_type: markdown
+              # # style: |
+                # # ha-card {
+                  # # box-shadow: 0px 10px 50px blue;
+                  # # margin: 0px 0px 0px 0px;
+                # # }
+              # content: |
+                # Air Temperature:    {{states.climate.living_room_hvac.attributes.air_temp}} °C
+                # Room Temperature:   {{states.climate.living_room_hvac.attributes.room_temp}} °C
+                # Room Humidty:       {{states.climate.living_room_hvac.attributes.room_hum}} %
+                
+    - type: vertical-stack
+      title: Rec Room HVAC
+      cards:
+        - type: thermostat
+          entity: climate.recroom_hvac
+          name: ""
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: markdown
+          content: |
+            Outlet Air Temp:      {{state_attr('climate.recroom_hvac','air_temp')}} °C
+            Room Temperature:     --- °C
+            Room Humidty:         --- %
+            Power Now:            {{states('sensor.recroom_hvac_power')|float(0)|round(5)}} W
+            Energy Daily:         {{states('sensor.recroom_hvac_energy_daily')|float(0)|round(5)}} kWh
+            Cost Today:           {{(states.sensor.recroom_hvac_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $
+            Cost Now:             {{(states.sensor.recroom_hvac_power.state|float(0)/1000 * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $/h
+            Cost Today Projected: {{(states.sensor.recroom_hvac_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: 'custom:text-divider-row'
+              text: States
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - binary_sensor.recroom_hvac_running
+            - binary_sensor.recroom_hvac_defrost
+            - sensor.recroom_hvac_temperature
+            - sensor.recroom_hvac_power
+            - sensor.recroom_hvac_energy_daily
+            - type: 'custom:text-divider-row'
+              text: Controls
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - switch.recroom_hvac_swing
+            - switch.recroom_hvac_swipe
+            - switch.recroom_hvac_display
+
+    - type: vertical-stack
+      title: Cold Storage Floor Heater
+      cards:
+        - type: thermostat
+          entity: climate.cold_storage_floor_heater
+          name: ""
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: markdown
+          content: |
+            Floor Temperature:    {{states.climate.cold_storage_floor_heater.attributes.flr_temp}} °C
+            Room Temperature:     {{states.climate.cold_storage_floor_heater.attributes.room_temp}} °C
+            Room Humidty:         {{states.climate.cold_storage_floor_heater.attributes.room_hum}} %
+            Power Now:            {{states.sensor.cold_storage_floor_heater_power.state}} W
+            Energy Daily:         {{states.sensor.cold_storage_floor_heater_energy_daily.state}} kWh
+            Cost Today:           {{(states.sensor.cold_storage_floor_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $
+            Cost Now:             {{(states.sensor.cold_storage_floor_heater_power.state|float(0)/1000 * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $/h
+            Cost Today Projected: {{(states.sensor.cold_storage_floor_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: 'custom:text-divider-row'
+              text: States
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - binary_sensor.cold_storage_floor_heater
+            - sensor.cold_storage_floor_temperature
+            - type: 'custom:text-divider-row'
+              text: Controls
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - input_boolean.cold_storage_floor_air_temp
+
+    - type: vertical-stack
+      title: Storage Room  Floor Heater
+      cards:
+        - type: thermostat
+          entity: climate.storage_room_floor_heater
+          name: ""
+          style: |
+            ha-card {
+              box-shadow: 0px -10px 50px blue;
+            }
+        - type: markdown
+          content: |
+            Floor Temperature:    {{states.climate.storage_room_floor_heater.attributes.flr_temp}} °C
+            Room Temperature:     {{states.climate.storage_room_floor_heater.attributes.room_temp}} °C
+            Room Humidty:         {{states.climate.storage_room_floor_heater.attributes.room_hum}} %
+            Power Now:            {{states.sensor.storage_room_floor_heater_power.state}} W
+            Energy Daily:         {{states.sensor.storage_room_floor_heater_energy_daily.state}} kWh
+            Cost Today:           {{(states.sensor.storage_room_floor_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $
+            Cost Now:             {{(states.sensor.storage_room_floor_heater_power.state|float(0)/1000 * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $/h
+            Cost Today Projected: {{(states.sensor.storage_room_floor_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+        - type: entities
+          show_header_toggle: false
+          entities:
+            - type: 'custom:text-divider-row'
+              text: States
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - binary_sensor.storage_room_floor_heater
+            - sensor.storage_room_floor_temperature
+            - type: 'custom:text-divider-row'
+              text: Controls
+              style: |
+                ha-card {
+                  --secondary-text-color: var(--primary-text-color);
+                }
+            - input_boolean.storage_room_floor_air_temp
+
+    # - type: custom:stack-in-card
+    #   title: My Stack In Card
+    #   mode: vertical
+    #   style: |
+    #     ha-card {
+    #       box-shadow: 0px 0px 50px blue;
+    #     }
+    #   cards:
+    #     - type: thermostat
+    #       entity: climate.living_room_hvac
+    #       name: ""
+    #     - type: custom:hui-element
+    #       card_type: markdown
+    #       style: |
+    #         ha-card {
+    #           box-shadow: 0px 0px 50px blue;
+    #           margin: 0px 0px 0px 0px;
+    #         }
+    #       content: |
+    #         Air Temperature:    {{states.climate.living_room_hvac.attributes.air_temp}} °C
+    #         Room Temperature:   {{states.climate.living_room_hvac.attributes.room_temp}} °C
+    #         Room Humidty:       {{states.climate.living_room_hvac.attributes.room_hum}} %
+              

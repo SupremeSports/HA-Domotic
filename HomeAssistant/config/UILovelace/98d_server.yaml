@@ -1,0 +1,355 @@
+####################################################
+# UILOVELACE - HA Server                           #
+####################################################
+
+- title: Server
+  icon: mdi:home-assistant
+  # Unique path for direct access /lovelace/${path}
+  path: settings_server
+  visible: false
+  #panel: true
+  badges:
+    - sensor.time
+    - sensor.server_cpu_used
+    - sensor.server_cpu_temperature
+    - sensor.server_drive_used_percent
+
+#THIS MAKES A SCREENWIDE CARD
+    # - type: custom:decluttering-card
+      # template: badge_core
+      # variables: 
+        # - item: 'ha'
+
+  cards:
+    # The markdown card will render markdown text.
+    - type: markdown
+      title: Server
+      content: >
+        Home Assistant HOST Remote Platform
+
+    - type: horizontal-stack
+      #title: N/A
+      cards:
+        - type: button
+          name: HA Main VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings
+        - type: button
+          name: HA Dev VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_dev
+        - type: button
+          name: HA Chicoutimi
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_chic
+        - type: button
+          name: Computers
+          icon: mdi:desktop-tower
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/computers
+
+    - type: entities
+      title: Health Data
+      show_header_toggle: false
+      entities:
+        - sensor.date_time
+
+    - type: entities
+      title: Resources
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.server_cpu_temperature
+          entities:
+            - sensor.server_k10temp_1_temperature
+        - type: custom:fold-entity-row
+          head: sensor.server_mb_temperature
+          entities:
+            - sensor.server_mb_temperature
+        - type: custom:fold-entity-row
+          head: sensor.server_it8720_1_fan_speed
+          entities:
+            - sensor.server_it8720_1_fan_speed
+            - sensor.server_it8720_2_fan_speed
+            - sensor.server_it8720_3_fan_speed
+            - sensor.server_it8720_4_fan_speed
+        - type: custom:fold-entity-row
+          head: sensor.server_running
+          entities:
+            - sensor.server_sleeping
+            - sensor.server_total
+            - sensor.server_thread
+        - type: custom:fold-entity-row
+          head: sensor.server_cpu_used
+          entities:
+            - sensor.server_load_1m
+            - sensor.server_load_5m
+            - sensor.server_load_15m
+        - type: custom:fold-entity-row
+          head: sensor.server_ram_used_percent
+          entities:
+            - sensor.server_ram_used
+            - sensor.server_ram_free
+        - type: custom:fold-entity-row
+          head: sensor.server_swap_used_percent
+          entities:
+            - sensor.server_swap_used
+            - sensor.server_swap_free
+            
+    - type: vertical-stack
+      title: Storage & JBOD
+      cards:
+        - type: entities
+          title: Storage
+          show_header_toggle: false
+          entities:
+            - type: custom:decluttering-card
+              template: drive_multiple_row
+              variables: 
+                - name: 'Server OS'
+                - prefix: 'server_drive'
+            - type: custom:decluttering-card
+              template: drive_jbod_row
+              variables: 
+                - name: 'JBOD Drives'
+                - prefix: 'server_drive_jbod'
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: JBOD Drives Details
+              entities:
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:0'
+                    - prefix: 'server_drive_jbod_00'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:1'
+                    - prefix: 'server_drive_jbod_01'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:2'
+                    - prefix: 'server_drive_jbod_02'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:3'
+                    - prefix: 'server_drive_jbod_03'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:4'
+                    - prefix: 'server_drive_jbod_04'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:5'
+                    - prefix: 'server_drive_jbod_05'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:6'
+                    - prefix: 'server_drive_jbod_06'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 0:7'
+                    - prefix: 'server_drive_jbod_07'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:0'
+                    - prefix: 'server_drive_jbod_10'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:1'
+                    - prefix: 'server_drive_jbod_11'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:2'
+                    - prefix: 'server_drive_jbod_12'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:3'
+                    - prefix: 'server_drive_jbod_13'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:4'
+                    - prefix: 'server_drive_jbod_14'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:5'
+                    - prefix: 'server_drive_jbod_15'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:6'
+                    - prefix: 'server_drive_jbod_16'
+                - type: custom:decluttering-card
+                  template: drive_jbod_row
+                  variables: 
+                    - name: 'JBOD 1:7'
+                    - prefix: 'server_drive_jbod_17'
+            - type: custom:fold-entity-row
+              head:
+                type: section
+                label: Notifications
+              entities:
+                - input_number.drive_used_threshold
+                - automation.server_used_high_notification
+                - automation.server_used_critical_notification
+                
+        #JBOD Drives
+        - !include /config/UILovelaceCards/server_jbod_drives.yaml
+
+        # - type: glance
+          # title: JBOD Visualization
+          # columns: 4
+          # show_name: false
+          # show_icon: true
+          # show_state: true
+          # entities:
+            # - sensor.server_drive_jbod_00
+            # - sensor.server_drive_jbod_01
+            # - sensor.server_drive_jbod_02
+            # - sensor.server_drive_jbod_03
+            # - sensor.server_drive_jbod_04
+            # - sensor.server_drive_jbod_05
+            # - sensor.server_drive_jbod_06
+            # - sensor.server_drive_jbod_07
+            # - sensor.server_drive_jbod_10
+            # - sensor.server_drive_jbod_11
+            # - sensor.server_drive_jbod_12
+            # - sensor.server_drive_jbod_13
+            # - sensor.server_drive_jbod_14
+            # - sensor.server_drive_jbod_15
+            # - sensor.server_drive_jbod_16
+            # - sensor.server_drive_jbod_17
+        
+    - type: entities
+      title: Storage
+      show_header_toggle: false
+      entities:
+        - type: custom:multiple-entity-row
+          name: Server OS used percent
+          entity: sensor.server_drive_used_percent
+          #secondary_info: last-changed
+          entities:
+            - entity: sensor.server_drive_used
+              name: used
+            - entity: sensor.server_drive_free
+              name: free
+        - type: custom:multiple-entity-row
+          name: Server srv01 used percent
+          entity: sensor.server_drive_gauthier_srv01_used_percent
+          #secondary_info: last-changed
+          entities:
+            - entity: sensor.server_drive_gauthier_srv01_used
+              name: used
+            - entity: sensor.server_drive_gauthier_srv01_free
+              name: free
+        - type: custom:fold-entity-row
+          head:
+            type: section
+            label: Notifications
+          entities:
+            - input_number.drive_used_threshold
+            - automation.server_used_high_notification
+            - automation.server_used_critical_notification
+
+##TODO##
+    - type: entities
+      title: Network
+      show_header_toggle: false
+      entities:
+        - sensor.myip
+        - sensor.local_ip
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_in_lo
+          entities:
+            - sensor.network_in_lo
+            - sensor.packets_in_lo
+        - type: custom:fold-entity-row
+          head: sensor.network_throughput_out_lo
+          entities:
+            - sensor.network_out_lo
+            - sensor.packets_out_lo
+            
+    #APC UPS
+    - !include /config/UILovelaceCards/apc_ups.yaml
+        
+    #Speedtest
+    - !include /config/UILovelaceCards/speed_test.yaml
+
+    - type: vertical-stack
+      title: Hardware
+      cards:
+        - type: horizontal-stack
+          cards:
+            - type: gauge
+              needle: true
+              name: CPU
+              unit: '%'
+              entity: sensor.server_cpu_used
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 45
+                red: 85
+            - type: gauge
+              needle: true
+              name: Disk
+              unit: '%'
+              entity: sensor.server_drive_used_percent
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 45
+                red: 85
+            - type: gauge
+              needle: true
+              name: Memory
+              unit: '%'
+              entity: sensor.server_ram_used_percent
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 45
+                red: 85
+        - type: horizontal-stack
+          cards:
+            - type: gauge
+              needle: true
+              name: UPS Battery
+              unit: '%'
+              entity: sensor.ups_battery
+              theme: th_gauge_3
+              severity:
+                green: 70
+                yellow: 45
+                red: 0
+            - type: gauge
+              needle: true
+              name: UPS Load
+              unit: '%'
+              entity: sensor.ups_load
+              theme: th_gauge_3
+              severity:
+                green: 0
+                yellow: 20
+                red: 30

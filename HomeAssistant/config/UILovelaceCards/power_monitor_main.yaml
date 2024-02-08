@@ -1,0 +1,83 @@
+    type: vertical-stack
+    title: Main
+    cards:
+      - type: 'custom:config-template-card'
+        variables:
+          - entity: sensor.ted5000_mtu1_power
+            name: Main Power
+          - entity: sensor.ted5000_mtu0_power
+            name: House Power
+          - entity: sensor.ted5000_mtu2_power
+            name: Garage Power
+          - entity: sensor.ted5000_mtu3_power
+            name: Pool Power
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          # - sensor.ted5000_mtu1_power
+          # - sensor.ted5000_mtu0_power
+          # - sensor.ted5000_mtu2_power
+          # - sensor.ted5000_mtu3_power
+          - sensor.times
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 0
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#a1a1a18a'
+            from: 0
+            to: 0.25
+          - color: '#24ff008a'
+            from: 0.25
+            to: 10
+          - color: '#81e8008a'
+            from: 10
+            to: 100
+          - color: '#acd0008a'
+            from: 100
+            to: 500
+          - color: '#cbb5008a'
+            from: 500
+            to: 1000
+          - color: '#e297008a'
+            from: 1000
+            to: 2000
+          - color: '#f376008a'
+            from: 2000
+            to: 3000
+          - color: '#fc4f008a'
+            from: 3000
+            to: 6000
+          - color: '#ff00008a'
+            from: 6000
+            to: 50000
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+              font-weight: bold;
+            }
+            bar-card-value	{
+              font-weight: bolder;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }

@@ -1,0 +1,39 @@
+####################################################
+# INPUT SELECT - COVERS                            #
+####################################################
+    
+  dining_room_tulle_curtain:
+    name: Dining Room Tulle Mode
+    icon: mdi:curtains
+    options:
+      - Auto
+      - Force Open
+      - Force Close
+      - Disabled
+      
+  dining_room_curtain_curtain:
+    name: Dining Room Curtain Mode
+    icon: mdi:curtains
+    options:
+      - Auto
+      - Force Open
+      - Force Close
+      - Disabled
+    
+  patio_door_tulle_curtain:
+    name: Patio Door Tulle Mode
+    icon: mdi:curtains
+    options:
+      - Auto
+      - Force Open
+      - Force Close
+      - Disabled
+      
+  patio_door_curtain_curtain:
+    name: Patio Door Curtain Mode
+    icon: mdi:curtains
+    options:
+      - Auto
+      - Force Open
+      - Force Close
+      - Disabled

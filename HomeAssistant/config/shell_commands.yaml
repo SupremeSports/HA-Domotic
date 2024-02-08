@@ -9,4 +9,5 @@
   delete_oldconfigs: find /usr/share/hassio/share/ThumbDrive/Configs/* -type d -ctime +10 -exec rm -rf {} \;
   
   # Shell Command Service to rename a file
-  rename_energy_log: "mv -n /config/datalog/energy-data.csv {{ (as_timestamp(now()) - (60*60*24*27)) | timestamp_custom('/config/datalog/energy-data_%Y-%m.csv') }}"
+  rename_energy_log: "mv -n /config/datalog/energy/energy-data.csv {{ (as_timestamp(now()) - (60*60*24*27)) | timestamp_custom('/config/datalog/energy/energy-data_%Y-%m.csv') }}"
+  rename_water_log: "mv -n /config/datalog/water/water-data.csv {{ (as_timestamp(now()) - (60*60*24*27)) | timestamp_custom('/config/datalog/water/water-data_%Y-%m.csv') }}"

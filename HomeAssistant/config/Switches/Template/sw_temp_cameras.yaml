@@ -1,0 +1,16 @@
+####################################################
+# TEMPLATES - SENSORS - CAMERAS                    #
+####################################################
+
+  # - platform: template
+    # switches:
+      # camera_pool_area:
+        # value_template: "{{ is_state_attr('camera.agentdvr_pool_area', 'enabled', 'true') }}"
+        # turn_on:
+          # service: camera.turn_on
+          # target:
+            # entity_id: camera.agentdvr_pool_area
+        # turn_off:
+          # service: camera.turn_off
+          # target:
+            # entity_id: camera.agentdvr_pool_area

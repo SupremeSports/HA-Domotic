@@ -1,0 +1,232 @@
+###################################################
+# BINARY SENSORS - MQTT - APPLIANCES              #
+###################################################
+
+#WASHING MACHINE
+  - name: Washing Machine Running
+    icon: mdi:washing-machine
+    device_class: running
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/WashingMachine/Json"
+    
+  - name: Washing Machine Door
+    #icon: mdi:washing-machine
+    device_class: door
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    
+  - name: Washing Machine Water Cold
+    #icon: mdi:washing-machine
+    device_class: moisture
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_cold }}'
+
+  - name: Washing Machine Water Hot
+    #icon: mdi:washing-machine
+    device_class: moisture
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_hot }}'
+    
+  - name: Washing Machine Water Leak
+    #icon: mdi:washing-machine
+    device_class: moisture
+    state_topic: "Home/WashingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/WashingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_leak }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    
+#DRYING MACHINE
+  - name: Drying Machine Running
+    icon: mdi:tumble-dryer
+    device_class: running
+    state_topic: "Home/DryingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/DryingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/DryingMachine/Json"
+    
+  - name: Drying Machine Door
+    #icon: mdi:tumble-dryer
+    device_class: door
+    state_topic: "Home/DryingMachine/Sensors/Stts"
+    availability:
+      - topic: "Home/DryingMachine/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+
+#DISHWASHER
+  - name: Dishwasher Running
+    icon: mdi:dishwasher
+    device_class: running
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Dishwasher/Json"
+    
+  - name: Dishwasher Door
+    #icon: mdi:dishwasher
+    device_class: door
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    
+  - name: Dishwasher Water Hot
+    #icon: mdi:dishwasher
+    device_class: moisture
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_hot }}'
+    
+  - name: Dishwasher Water Leak
+    #icon: mdi:dishwasher
+    device_class: moisture
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_leak }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    
+  - name: Dishwasher Water Overflow
+    #icon: mdi:dishwasher
+    device_class: moisture
+    state_topic: "Home/Dishwasher/Sensors/Stts"
+    availability:
+      - topic: "Home/Dishwasher/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_overflow }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+
+#KITCHEN REFRIGERATOR/FREEZER
+  - name: Kitchen Refrigerator Powered
+    device_class: running
+    state_topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    payload_on: 'online'
+    payload_off: 'offline'
+    off_delay: 60
+
+  - name: Kitchen Refrigerator Running
+    icon: mdi:fridge
+    device_class: running
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/KitchenRefrigerator/Json"
+    
+  - name: Kitchen Refrigerator Defrost Cycle
+    icon: mdi:snowflake-melt
+    device_class: running
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.defrost }}'
+    
+  - name: Kitchen Refrigerator Door Fridge
+    #icon: mdi:fridge
+    device_class: door
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened_fridge }}'
+    payload_on: "opened"
+    payload_off: "closed"
+    
+  - name: Kitchen Refrigerator Door Freezer
+    #icon: mdi:fridge
+    device_class: door
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened_freezer }}'
+    payload_on: "opened"
+    payload_off: "closed"
+
+  - name: Kitchen Refrigerator Water Cold
+    #icon: mdi:fridge
+    device_class: moisture
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_cold }}'
+
+  - name: Kitchen Refrigerator Water Leak
+    #icon: mdi:fridge
+    device_class: moisture
+    state_topic: "Home/KitchenRefrigerator/Sensors/Stts"
+    availability:
+      - topic: "Home/KitchenRefrigerator/LWT"
+    qos: 0
+    value_template: '{{ value_json.water_leak }}'
+    payload_on: "DISABLED"
+    payload_off: "OFF"
+
+#CHEST FREEZER
+  - name: Chest Freezer Powered
+    device_class: running
+    state_topic: "Home/ChestFreezer/LWT"
+    qos: 0
+    payload_on: 'online'
+    payload_off: 'offline'
+    off_delay: 60
+    
+  - name: Chest Freezer Running
+    icon: mdi:treasure-chest
+    device_class: running
+    state_topic: "Home/ChestFreezer/Sensors/Stts"
+    availability:
+      - topic: "Home/ChestFreezer/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/ChestFreezer/Json"
+    
+  - name: Chest Freezer Door
+    #icon: mdi:treasure-chest
+    device_class: door
+    state_topic: "Home/ChestFreezer/Sensors/Stts"
+    availability:
+      - topic: "Home/ChestFreezer/LWT"
+    qos: 0
+    value_template: '{{ value_json.opened }}'
+    payload_on: "opened"
+    payload_off: "closed"
+
+#BAR REFRIGERATORS
+

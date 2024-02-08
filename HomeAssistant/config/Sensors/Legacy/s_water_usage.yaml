@@ -1,0 +1,69 @@
+####################################################
+# SENSORS - WATER USAGE                            #
+####################################################
+
+#APPLIANCES
+  - platform: history_stats_high_resolution
+    name: Washing Machine Water Cold Time
+    entity_id: binary_sensor.washing_machine_water_cold
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_high_resolution
+    name: Washing Machine Water Hot Time
+    entity_id: binary_sensor.washing_machine_water_hot
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_high_resolution
+    name: Dishwasher Water Hot Time
+    entity_id: binary_sensor.dishwasher_water_hot
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_in_seconds
+    name: Icemaker Water Cold Time
+    entity_id: binary_sensor.kitchen_refrigerator_water_cold
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+#OUTDOOR
+  - platform: history_stats_high_resolution
+    name: Pool Filler Water Cold Time
+    entity_id: binary_sensor.poolfiller_status
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_high_resolution
+    name: Pond Filler Water Cold Time
+    entity_id: binary_sensor.pondfiller_status
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_high_resolution
+    name: Garden Irrigation Water Cold Time
+    entity_id: binary_sensor.gardenirrigation_status
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"
+    
+  - platform: history_stats_high_resolution
+    name: Frontyard Irrigation Water Cold Time
+    entity_id: binary_sensor.frontyardirrigation_status
+    state: "on"
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0, microsecond=0) }}"
+    end: "{{ now() }}"

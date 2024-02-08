@@ -4,6 +4,9 @@
 
   - name: sms_test
     platform: smtp
+    encryption: starttls
+    port: !secret notify_port
+    timeout: 15
     server: !secret notify_smtp
     sender: !secret notify_sender
     username: !secret notify_sender
@@ -12,9 +15,13 @@
       - !secret sms_jean
       - !secret email_jean
     sender_name: My Home Assistant
+    debug: false
     
   - name: sms_jean
     platform: smtp
+    encryption: starttls
+    port: !secret notify_port
+    timeout: 15
     server: !secret notify_smtp
     sender: !secret notify_sender
     username: !secret notify_sender
@@ -22,9 +29,13 @@
     recipient:
       - !secret sms_jean
     sender_name: My Home Assistant
+    debug: false
     
   - name: sms_cindy
     platform: smtp
+    encryption: starttls
+    port: !secret notify_port
+    timeout: 15
     server: !secret notify_smtp
     sender: !secret notify_sender
     username: !secret notify_sender
@@ -32,9 +43,13 @@
     recipient:
       - !secret sms_cindy
     sender_name: My Home Assistant
+    debug: false
     
   - name: SMS Notify All
     platform: smtp
+    encryption: starttls
+    port: !secret notify_port
+    timeout: 15
     server: !secret notify_smtp
     sender: !secret notify_sender
     username: !secret notify_sender
@@ -43,19 +58,28 @@
        - !secret sms_jean
        - !secret sms_cindy
     sender_name: My Home Assistant
-
+    debug: false
+    
   - name: iOS Notify All
     platform: group
     services:
       - service: mobile_app_iphone_de_jean
       - service: mobile_app_iphone_de_cindy
       - service: mobile_app_ipad_de_cindy
+      - service: jgau_pc
 
   - name: iOS Notify Parents
     platform: group
     services:
       - service: mobile_app_iphone_de_jean
       - service: mobile_app_iphone_de_cindy
+      - service: jgau_pc
+      
+  - name: iOS Notify Admins
+    platform: group
+    services:
+      - service: mobile_app_iphone_de_jean
+      - service: jgau_pc
       
 ####################################################
 # DATA LOGGING                                     #
@@ -65,4 +89,14 @@
     platform: file
     filename: /config/datalog/energy-data.csv
     timestamp: true
+    
+  - name: filenotify_energydaily
+    platform: file
+    filename: /config/datalog/energy/energy-data.csv
+    timestamp: false
+    
+  - name: filenotify_waterdaily
+    platform: file
+    filename: /config/datalog/water/water-data.csv
+    timestamp: false
     

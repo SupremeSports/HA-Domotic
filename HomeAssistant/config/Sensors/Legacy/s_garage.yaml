@@ -1,0 +1,93 @@
+####################################################
+# SENSORS - GARAGE                                 #
+####################################################
+
+######### GARAGE MAIN - SAFETY HEATER #########
+
+  - platform: min_max
+    name: Garage Mean Temp Thermostats
+    round_digits: 1
+    type: mean
+    entity_ids:
+      - sensor.garage_front_temp
+      - sensor.garage_rear_temp
+      
+  - platform: min_max
+    name: Garage Mean Temp Safety
+    round_digits: 1
+    type: mean
+    entity_ids:
+      - sensor.garage_safety_front_temperature
+      - sensor.garage_safety_rear_temperature
+
+  - platform: min_max
+    name: Garage Mean Humidity
+    round_digits: 1
+    type: mean
+    entity_ids:
+      - sensor.garage_front_hum
+      - sensor.garage_rear_hum
+      
+#Deprecated recoder access
+  - platform: average
+    name: Garage Average Temp Thermostats
+    precision: 1
+    duration:
+      seconds: 15
+    entities:
+      - sensor.garage_mean_temp_thermostats
+      
+  - platform: average
+    name: Garage Average Temp Safety
+    precision: 1
+    duration:
+      seconds: 15
+    entities:
+      - sensor.garage_mean_temp_safety
+      
+  # - platform: statistics
+    # name: Garage Average Temp
+    # state_characteristic: average_linear
+    # sampling_size: 15
+    # precision: 1
+    # # max_age:
+      # # seconds: 15
+    # entity_id: sensor.garage_mean_temp
+      
+  - platform: history_stats
+    name: Garage Front Heater Time
+    #entity_id: switch.garage_front_heater
+    entity_id: binary_sensor.garage_front_heater_ac
+    state: "on"
+    type: time
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+      
+  - platform: history_stats
+    name: Garage Front Heater Count
+    entity_id: switch.garage_front_heater
+    state: "on"
+    type: count
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+      
+  - platform: history_stats
+    name: Garage Rear Heater Time
+    #entity_id: switch.garage_rear_heater
+    entity_id: binary_sensor.garage_rear_heater_ac
+    state: "on"
+    type: time
+    end: "{{ now() }}"
+    duration:
+      hours: 24
+      
+  - platform: history_stats
+    name: Garage Rear Heater Count
+    entity_id: switch.garage_rear_heater
+    state: "on"
+    type: count
+    end: "{{ now() }}"
+    duration:
+      hours: 24

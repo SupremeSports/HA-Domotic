@@ -1,0 +1,53 @@
+####################################################
+# TEMPLATES - CONTROL ROOM                         #
+####################################################
+
+######### CONTROL ROOM - SENSORS #########
+
+  - unique_id: water_valve_status
+    #name: Water Valve State
+    icon: >
+      {% set LS_opened = is_state('binary_sensor.water_valve_opened','on') %}
+      {% set LS_closed = is_state('binary_sensor.water_valve_closed','on') %}
+      {% set RL_open = is_state('switch.water_valve_open','on') %}
+      {% set RL_close = is_state('switch.water_valve_close','on') %}
+      
+      {% if LS_opened and not LS_closed %}
+        mdi:pipe
+      {% elif LS_closed and not LS_opened %}
+        mdi:pipe-disconnected
+      {% elif not LS_closed and not LS_opened and (RL_open or RL_close) %}
+        mdi:valve
+      {% elif is_state('binary_sensor.water_valve_opened', 'unavailable') or is_state('binary_sensor.water_valve_closed', 'unavailable') %}
+        mdi:pipe-disconnected
+      {% else %}
+        mdi:help
+      {% endif %}
+    availability: >
+      {{ not is_state('binary_sensor.water_valve_opened', 'unavailable') and not is_state('binary_sensor.water_valve_closed', 'unavailable') }}
+    state: >
+      {% set LS_opened = is_state('binary_sensor.water_valve_opened','on') %}
+      {% set LS_closed = is_state('binary_sensor.water_valve_closed','on') %}
+      {% set RL_open = is_state('switch.water_valve_open','on') %}
+      {% set RL_close = is_state('switch.water_valve_close','on') %}
+      
+      {% if LS_opened and not LS_closed %}
+        Opened
+      {% elif LS_closed and not LS_opened %}
+        Closed
+      {% elif LS_closed and LS_opened %}
+        ERROR
+      {% else %}
+        {% if RL_open %}
+          Opening
+        {% elif RL_close %}
+          Closing
+        {% else %}
+          ERROR
+        {% endif %}
+      {% endif %}
+    attributes:
+      friendly_name: Water Valve State
+      opened: "{{ is_state('binary_sensor.water_valve_opened', 'on') }}"
+      closed: "{{ is_state('binary_sensor.water_valve_closed', 'on') }}"
+

@@ -1,0 +1,47 @@
+####################################################
+# LOVELACE DECLUTTERING                            #
+####################################################
+
+energy_meters: 
+  card:
+    type: custom:apexcharts-card
+    graph_span: 24h
+    span:
+      start: day
+      offset: |
+        [[offset_time]]
+    show:
+      last_updated: true
+    apex_config:
+      chart:
+        stacked: true
+    header:
+      show: true
+      show_states: false
+      colorize_states: true
+      title: Daily energy consumption
+    series:
+      - entity: sensor.ted5000_mtu0_energy_daily_raw
+        name: House
+        type: column
+        unit: ' kWh'
+        color: darkviolet
+        group_by:
+          func: diff
+          duration: 60min
+      - entity: sensor.ted5000_mtu2_energy_daily
+        name: Garage
+        type: column
+        unit: ' kWh'
+        color: slateblue
+        group_by:
+          func: diff
+          duration: 60min
+      - entity: sensor.ted5000_mtu3_energy_daily
+        name: Pool
+        type: column
+        unit: ' kWh'
+        color: orangered
+        group_by:
+          func: diff
+          duration: 60min

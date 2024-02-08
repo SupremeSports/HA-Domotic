@@ -1,0 +1,36 @@
+####################################################
+# SWITCHES - CAMERAS                               #
+####################################################
+
+  # - platform: command_line
+    # switches:
+      # camera_poolarea:
+        # friendly_name: Camera - Pool Area
+        # command_on: 'curl "http://192.168.1.250:8080/bringonline?ot=2&oid=1"'
+        # command_off: 'curl "http://192.168.1.250:8080/takeoffline?ot=2&oid=1"'
+        # command_state: 'curl -s http://192.168.1.250:8080/getobjectlist | grep "Pool Area" | cut -d , -f 5'
+        # value_template: '{{ value == "Online" }}'
+        
+  - platform: template
+    switches:
+      camera_poolarea:
+        value_template: "{{ is_state_attr('camera.agentdvr_poolarea', 'enabled', true) }}"
+        turn_on:
+          service: camera.turn_on
+          target:
+            entity_id: camera.agentdvr_poolarea
+        turn_off:
+          service: camera.turn_off
+          target:
+            entity_id: camera.agentdvr_poolarea
+
+      camera_garage:
+        value_template: "{{ is_state_attr('camera.agentdvr_garage', 'enabled', true) }}"
+        turn_on:
+          service: camera.turn_on
+          target:
+            entity_id: camera.agentdvr_garage
+        turn_off:
+          service: camera.turn_off
+          target:
+            entity_id: camera.agentdvr_garage

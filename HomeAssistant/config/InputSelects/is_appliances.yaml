@@ -1,0 +1,33 @@
+####################################################
+# INPUT SELECT - APPLIANCES                        #
+####################################################
+
+  washing_machine_state:
+    name: Washing Machine State
+    icon: mdi:washing-machine
+    options:
+      - ERROR
+      - Idle
+      - Running
+      - Load Ready
+      - Empty
+      
+  drying_machine_state:
+    name: Drying Machine State
+    icon: mdi:tumble-dryer
+    options:
+      - ERROR
+      - Idle
+      - Running
+      - Load Ready
+      - Empty
+      
+  dishwasher_state:
+    name: Dishwasher State
+    icon: mdi:dishwasher
+    options:
+      - ERROR
+      - Idle
+      - Running
+      - Load Ready
+      - Empty

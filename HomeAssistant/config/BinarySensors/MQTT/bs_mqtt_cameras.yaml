@@ -1,0 +1,18 @@
+###################################################
+# BINARY SENSORS - MQTT - CAMERAS                 #
+###################################################
+
+  # - name: Journey Presence Raw
+    # icon: mdi:car
+    # device_class: presence
+    # state_topic: "AgentDVR/Presence/Car/Journey"
+    # qos: 0
+    # value_template: '{{ value_json.presence }}'
+    
+  # - name: Lexus Presence Raw
+    # icon: mdi:car
+    # device_class: presence
+    # state_topic: "AgentDVR/Presence/Car/Lexus"
+    # qos: 0
+    # value_template: '{{ value_json.presence }}'
+    

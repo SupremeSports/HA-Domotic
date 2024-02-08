@@ -1,0 +1,67 @@
+    type: vertical-stack
+    #title: Water
+    cards:
+      - type: 'custom:config-template-card'
+        variables:
+          - entity: sensor.total_water_daily_used
+          - entity: sensor.dishwasher_water_daily_usage
+          - entity: sensor.icemaker_water_daily_usage
+          - entity: sensor.washing_machine_water_daily_usage
+          - entity: sensor.garden_irrigation_water_daily_usage
+          - entity: sensor.flowerbed_irrigation_water_daily_usage
+          - entity: sensor.pool_filler_water_daily_usage
+          - entity: sensor.pond_filler_water_daily_usage
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          - sensor.total_water_daily_used
+          - sensor.dishwasher_water_daily_usage
+          - sensor.icemaker_water_daily_usage
+          - sensor.washing_machine_water_daily_usage
+          - sensor.garden_irrigation_water_daily_usage
+          - sensor.flowerbed_irrigation_water_daily_usage
+          - sensor.pool_filler_water_daily_usage
+          - sensor.pond_filler_water_daily_usage
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          #max: 0.3
+          #max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          #max: ${ Math.max(...vars.map(v => states['sensor.total_water_daily_used'].state))}
+          #max: ${ Math.floor(Math.max(...vars.map(v => states['sensor.total_water_daily_used'].state))*10)/10}
+          max: ${ Math.floor(Math.max(...vars.map(v => states[v.entity].state))*10)/10}
+          width: 50%
+          height: 20px
+          stack: vertical
+          decimal: 1
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: off
+            name: outside
+            value: inside
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-card {
+              border-radius: 2.5px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.8rem;
+              color: #ffffffaa;
+            }
+
+            
+      # bar-card-currentbar {
+      #   background: linear-gradient(to right, green 5%, yellow 15%, orange 35%, red 85%);
+      #   clip-path: polygon(0 0, var(--bar-percent) 0, var(--bar-percent) 100%, 0 100%);
+      # }
+      # bar-card-backgroundbar {
+      #   background: linear-gradient(to right, green 5%, yellow 15%, orange 35%, red 85%);
+      # }
+      # margin-top: -10px;

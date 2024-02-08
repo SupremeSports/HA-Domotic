@@ -1,0 +1,286 @@
+####################################################
+# SENSORS - HA Chicoutimi                          #
+####################################################
+
+#HA Health
+  - platform: rest
+    name: HA Chic Heartbeat
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_heartbeat
+    scan_interval: 5
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    unit_of_measurement: '#'
+    
+  - platform: rest
+    name: HA Chic Date & Time
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.date_time
+    scan_interval: 5
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+
+  - platform: rest
+    name: HA Chic Update Available
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_update_available
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - running
+      - cpu
+      - memory
+        updating
+      - current
+      - latest
+      - major_update
+      #- breaking_changes
+      - icon
+      
+  - platform: rest
+    name: HA Chic Addons Update Available
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.addons_update_available
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - ha_core
+      #- ha_os
+      - supervisor
+      #- adguard
+      - check_config
+      - chrony
+      - duck_dns
+      - file_editor
+      - grocy
+      - mariadb
+      - mosquitto
+      - samba_share
+      - icon
+
+  - platform: rest
+    name: HA Chic Entities
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.entities
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - Entities
+      - Domains
+      
+  - platform: rest
+    name: HA Chic UUN Entities
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.uun_ordered
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - all_count
+      - none_count
+      - unavailable_count
+      - unknown_count
+      - sensors_count
+      - automations_count
+      - unfiltered_count
+    
+  - platform: rest
+    name: HA Chic DB Size
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_db_size
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - database
+      - value
+    unit_of_measurement: MiB
+
+#VM Health
+  - platform: rest
+    name: HA Chic CPU Used
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_cpu_used
+    scan_interval: 10
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+    
+  - platform: rest
+    name: HA Chic Last Boot
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.last_boot
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - latest
+    device_class: timestamp
+    unit_of_measurement: ""
+      
+  - platform: rest
+    name: HA Chic Time Online
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.time_online
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+    #unit_of_measurement: hours
+
+#Drive usage
+  - platform: rest
+    name: HA Chic Drive Free
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.sd_drive_free
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_drive_free
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: GiB
+    
+  - platform: rest
+    name: HA Chic Drive Used
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.sd_drive_used
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_drive_used
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: GiB
+    
+  - platform: rest
+    name: HA Chic Drive Used Percent
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.sd_drive_used_percent
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_drive_used_percent
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+
+#Memory Usage
+  - platform: rest
+    name: HA Chic Memory Free
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.memory_free
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_memory_free
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: MiB
+    
+  - platform: rest
+    name: HA Chic Memory Used
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.memory_used
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_memory_used
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: MiB
+    
+  - platform: rest
+    name: HA Chic Memory Used Percent
+    #resource: http://blackmagics.duckdns.org:8123/api/states/sensor.memory_used_percent
+    resource: http://blackmagics.duckdns.org:8123/api/states/sensor.ha_vm_memory_used_percent
+    scan_interval: 10
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_chicoutimi_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+
+# to test GET
+# curl -X GET -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJkZTQ1MjMzMzcyNWE0MGM3ODdjMjE3OWVjMTJkMzc3OSIsImlhdCI6MTYwMjcxMjE5MSwiZXhwIjoxOTE4MDcyMTkxfQ.pCG2r16zCJ4ETOilCsVNofGgMDnoCze6U_O-Mf8P0H4" \
+#     -H "Content-Type: application/json" \
+#     http://blackmagics.duckdns.org:8123/api/states/sensor.ha_update_available
+    
+# https://community.home-assistant.io/t/json-attribute/62564/2
+# https://www.home-assistant.io/integrations/http/

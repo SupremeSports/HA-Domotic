@@ -1,0 +1,39 @@
+###################################################
+# REST ENTITIES                                   #
+###################################################
+
+  # - resource: https://www.hydroquebec.com/data/documents-donnees/donnees-ouvertes/json/demande.json
+    # scan_interval: 900 
+    # sensor:
+      # - name: "Hydro-Québec Demande Totale"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.demandeTotal if value_json.details[value_json.indexDonneePlusRecent].valeurs.demandeTotal is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+
+  # - resource: https://www.hydroquebec.com/data/documents-donnees/donnees-ouvertes/json/production.json
+    # scan_interval: 3600 
+    # sensor:
+      # - name: "Hydro-Québec production totale"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.total if value_json.details[value_json.indexDonneePlusRecent].valeurs.total is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+      # - name: "Hydro-Québec production hydraulique"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.hydraulique if value_json.details[value_json.indexDonneePlusRecent].valeurs.hydraulique is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+      # - name: "Hydro-Québec production éolien"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.eolien if value_json.details[value_json.indexDonneePlusRecent].valeurs.eolien is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+      # - name: "Hydro-Québec production autres"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.autres if value_json.details[value_json.indexDonneePlusRecent].valeurs.autres is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+      # - name: "Hydro-Québec production solaire"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.solaire if value_json.details[value_json.indexDonneePlusRecent].valeurs.solaire is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"
+      # - name: "Hydro-Québec production thermique"
+        # value_template: '{{ value_json.details[value_json.indexDonneePlusRecent].valeurs.thermique if value_json.details[value_json.indexDonneePlusRecent].valeurs.thermique is defined else 0 }}'
+        # device_class: energy
+        # unit_of_measurement: "MWh"

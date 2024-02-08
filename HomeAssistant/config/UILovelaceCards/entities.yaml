@@ -3,7 +3,7 @@
       entities:
         - entity: script.update_entities
           secondary_info: last-triggered
-          action_name: Update
+          action_name: Re-Count
         - type: custom:fold-entity-row
           head: sensor.entities
           entities:
@@ -12,7 +12,8 @@
               style: |
                 ha-card {
                   box-shadow: none;
-                  margin: -16px -16px -16px -26px;
+                  margin: 0px -16px -16px -26px;
+                  color: var(--primary-color);
                 }
               content: |
                 {% set list = ['icon_color', 'icon', 'friendly_name', '--------------'] %}
@@ -20,109 +21,53 @@
                 {% for attr in states.sensor.entities.attributes %}
                   {% if attr not in list -%}
                     {{attr}}: {{states.sensor.entities.attributes[attr]}}
-                  {%- endif  -%}
+                  {%- endif -%}
                 {%- endfor -%}
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: Unknown entities
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','unknown_count')}}
-                {{state_attr('sensor.uun_ordered','unknown_entities')}}
-    
-        # - type: custom:fold-entity-row
-        #   head:
-        #     type: section
-        #     label: Unknown sensors
-        #   entities:
-        #     - type: custom:hui-markdown-card
-        #       style: |
-        #         ha-card {
-        #           box-shadow: none;
-        #           margin: -16px -16px -16px -26px;
-        #         }
-        #       content: |
-        #         Count: {{state_attr('sensor.uun_ordered','sensors_count')}}
-        #         {{state_attr('sensor.uun_ordered','sensors_entities')}}
-  
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: Unavailable
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','unavailable_count')}}
-                {{state_attr('sensor.uun_ordered','unavailable_entities')}}
-    
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: None
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','none_count')}}
-                {{state_attr('sensor.uun_ordered','none_entities')}}
-                
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: Automations Off
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','automations_count')}}
-                {{state_attr('sensor.uun_ordered','automations_entities')}}
-   
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: Full list filtered
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','all_count')}}
-                {{state_attr('sensor.uun_ordered','all_entities')}}
-  
-        - type: custom:fold-entity-row
-          head:
-            type: section
-            label: Full list unfiltered
-          entities:
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: -16px -16px -16px -26px;
-                }
-              content: |
-                Count: {{state_attr('sensor.uun_ordered','unfiltered_count')}}
-                {{state_attr('sensor.uun_ordered','unfiltered_entities')}}
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Unknown entities'
+            - id: 'unknown'
+
+        # - type: custom:decluttering-card
+        #   template: entity_issues
+        #   variables: 
+        #     - name: 'Unknown sensors'
+        #     - id: 'sensors'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Unavailable'
+            - id: 'unavailable'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'None'
+            - id: 'none'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Automations Off'
+            - id: 'automations'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Full list filtered'
+            - id: 'all'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Full list unfiltered'
+            - id: 'unfiltered'
+
+        - type: custom:decluttering-card
+          template: entity_issues
+          variables: 
+            - name: 'Full list blacklisted'
+            - id: 'blacklisted'

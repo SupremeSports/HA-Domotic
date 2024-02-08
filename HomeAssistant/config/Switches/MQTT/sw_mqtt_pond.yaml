@@ -1,0 +1,23 @@
+####################################################
+# SWITCHES - MQTT - POND                           #
+####################################################
+    
+  - name: Pond Waterfall Pump
+    icon: mdi:debug-step-over
+    state_topic: "Pool/Control/Relay/Stts"
+    command_topic: "Pool/Control/Relay/Cmd"
+    value_template: '{{ value_json.r6 }}'
+    payload_on: '{"r6":"ON"}'
+    payload_off: '{"r6":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Pool/Control/LWT"
+    qos: 0
+    json_attributes_topic: "Pool/Control/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "pump"' + 
+      ', "watts": 719}' }}
+
+  #- name: Pond Filler Valve
+    #See Well MQTT switches

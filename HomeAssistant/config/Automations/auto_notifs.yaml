@@ -2,26 +2,51 @@
 # AUTOMATIONS - NOTIFICATIONS                     #
 ###################################################
 
-  - alias: HA Update Notification
-    mode: restart
-    trigger:
-      - platform: homeassistant
-        event: start
-      - platform: state
-        entity_id: binary_sensor.ha_update_available
-        from: 'off'
-        to: 'on'
-    condition:
-      condition: or
-      conditions:
-        - condition: state
-          entity_id: binary_sensor.ha_update_available
-          state: 'on'
-        - condition: state
-          entity_id: binary_sensor.updater
-          state: 'on'
-    action:
-      - service: script.haupdateavailable
+  # - alias: HA Update Notification
+  #   mode: restart
+  #   trigger:
+  #     - platform: homeassistant
+  #       event: start
+  #     - platform: state
+  #       entity_id: sensor.ha_update_available
+  #       to: 'Update available'
+  #     - platform: state
+  #       entity_id: sensor.ha_update_available
+  #       to: 'Major update'
+  #   condition:
+  #     condition: or
+  #     conditions:
+  #       - condition: state
+  #         entity_id: sensor.ha_update_available
+  #         state: 'Update available'
+  #       - condition: state
+  #         entity_id: sensor.ha_update_available
+  #         state: 'Major update'
+  #   action:
+  #     - service: script.haupdateavailable
+      
+  # - alias: Addons Update Notification
+  #   mode: restart
+  #   trigger:
+  #     - platform: homeassistant
+  #       event: start
+  #     - platform: state
+  #       entity_id: sensor.addons_update_available
+  #       to: 'Update available'
+  #     - platform: state
+  #       entity_id: sensor.addons_update_available
+  #       to: 'Major update'
+  #   condition:
+  #     condition: or
+  #     conditions:
+  #       - condition: state
+  #         entity_id: sensor.addons_update_available
+  #         state: 'Update available'
+  #       - condition: state
+  #         entity_id: sensor.addons_update_available
+  #         state: 'Major update'
+  #   action:
+  #     - service: script.addons_update_available
 
 #   - alias: Publish Florida Days
 #     mode: restart
@@ -36,7 +61,7 @@
 #       - service: notify.ios_notify_parents
 #         data:
 #           message: clear_badge
-          
+
   - alias: Publish Postal Arrival
     mode: restart
     trigger:
@@ -59,9 +84,9 @@
           title: "Postal Status Update"
           message: |
             New Mail has been delivered
-            id: {{ states.sensor.postal_status.attributes.id }}
-            {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
-          
+            id: {{ state_attr('sensor.postal_status','id') }}
+            {% if state_attr('sensor.postal_status', 'battery')|int(100) <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int(100) <= 90 %}Low battery level{% endif %}
+
   - alias: Publish Postal Removal
     mode: restart
     trigger:
@@ -84,16 +109,24 @@
           title: "Postal Status Update"
           message: |
             Mail has been removed
-            id: {{ states.sensor.postal_status.attributes.id }}
-            {% if state_attr('sensor.postal_status', 'battery')|int <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int <= 90 %}Low battery level{% endif %}
-          
+            id: {{ state_attr('sensor.postal_status','id') }}
+            {% if state_attr('sensor.postal_status', 'battery')|int(100) <= 50 %}Critical battery level{% elif state_attr('sensor.postal_status', 'battery')|int(100) <= 90 %}Low battery level{% endif %}
+
   - alias: Lexus Office Start Reminder
     mode: restart
     trigger:
-      - platform: time
-        at: '11:45:00'
-      - platform: time
-        at: '16:45:00'
+      # - platform: time
+        # at: '11:45:00'
+      # - platform: time
+        # at: '16:45:00'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '11:45'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '16:45'
     condition:
       condition: and
       conditions:
@@ -104,7 +137,8 @@
           entity_id: sensor.outdoor_temperature
           below: 5
     action:
-      - service: notify.sms_jean
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "Start the Lexus"
 
@@ -123,21 +157,14 @@
     mode: restart
     trigger:
       # - platform: time
-        # at: '7:00:00'
-      - platform: time
-        at: '18:00:00'
+        # at: '18:00:00'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '18:00'
     condition:
       condition: or
       conditions:
-        # - condition: state
-          # entity_id: sensor.collect_trash_week
-          # state: 'Today'
-        # - condition: state
-          # entity_id: sensor.collect_recycle_week
-          # state: 'Today'
-        # - condition: state
-          # entity_id: sensor.collect_compost_week
-          # state: 'Today'
         - condition: state
           entity_id: sensor.collect_trash_week
           state: 'Tomorrow'
@@ -149,16 +176,16 @@
           state: 'Tomorrow'
     action:
       service_template: >
-        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 75 or is_state('device_tracker.life360_jean', 'home') %}
-        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 75 or is_state('device_tracker.life360_cindy', 'home') %}
+        {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 75 or is_state('device_tracker.life360_jean', 'home') %}
+        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 75 or is_state('device_tracker.life360_cindy', 'home') %}
         {% if jean and cindy %}
-          notify.sms_notify_all
+          notify.ios_notify_all
         {% elif jean %}
-          notify.sms_jean
+          notify.mobile_app_iphone_de_jean
         {% elif cindy %}
-          notify.sms_cindy
+          notify.mobile_app_iphone_de_cindy
         {% else %}
-          notify.sms_jean
+          notify.ios_notify_admins
         {% endif %}
       data_template:
         title: "Collect day"
@@ -168,6 +195,22 @@
              {{ device.attributes['displayName'] }}
           {%- endfor -%}
           {{' out for collection tomorrow'}}
+          
+  - alias: Notification Cindy Magasinage
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: device_tracker.life360_cindy
+        to: 'Mail Dolbeau'
+        for:
+          minutes: 5
+    action:
+      - service: notify.mobile_app_iphone_de_cindy
+      #- service: notify.mobile_app_iphone_de_jean
+        data:
+          title: "Une p'tite visite au centre d'achat?"
+          message: "Ne dépenses pas trop chérie :) HAHAHA"
+
           
   - alias: Printer3D Job Complete
     mode: restart
@@ -184,7 +227,8 @@
         entity_id: sensor.master_bed_raw
         below: 100
     action:
-      - service: notify.sms_jean
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "3D Printing Completed"
           
@@ -200,7 +244,8 @@
         entity_id: sensor.master_bed_raw
         below: 100
     action:
-      - service: notify.sms_jean
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "3D Printing Failed"
           
@@ -217,7 +262,7 @@
         entity_id: sensor.garage_fd_status
         state: "Ok"
     action:
-      - service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "Attic Light Still On"
           
@@ -233,7 +278,7 @@
         entity_id: binary_sensor.garage_attic_light
         state: "on"
     action:
-      - service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "Attic Light Remained On"
           
@@ -269,15 +314,20 @@
           for:
             minutes: 1
     action:
-      - service: notify.sms_jean
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
         data:
           message: "ALARM - Garage Safety Temperature"
           
 #   - alias: Set new dates for collects
 #     mode: restart
 #     trigger:
-#       platform: time
-#       at: "01:00:00"
+#       #- platform: time
+#         #at: "01:00:00"
+#       - platform: state
+#         entity_id: sensor.times
+#         attribute: short
+#         to: '01:00'
 #     condition:
 #       - condition: template
 #         value_template: '{{ now().date()|string == "2020-09-23" }}'
@@ -290,98 +340,126 @@
 #         data:
 #           entity_id: input_select.collect_recycle
 #           option: Even/Wednesday
-
-  - alias: Cold Storage Light ON Repetitive
+        
+  - alias: Server Used High Notification
     mode: restart
     trigger:
       - platform: time_pattern
-        seconds: '/10'        
+        minutes: '/10'
     condition:
-      condition: and
-      conditions:
-        - condition: template
-          value_template: >-
-            '{{ as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) | int > 120 and 
-            as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) | int < 3600 and 
-            as_timestamp(states.automation.cold_storage_light_on_immediate.attributes.last_triggered) != None }}'
-        - condition: template
-          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.cold_storage_light_on_repetitive.attributes.last_triggered) | int > 300 }}'
-        - condition: or
-          conditions:
-            - condition: state
-              entity_id: binary_sensor.control_room_light
-              state: "on"
-              for:
-                minutes: 5
-            - condition: and
-              conditions:
-                - condition: state
-                  entity_id: binary_sensor.control_room_light
-                  state: "on"
-                  for:
-                    seconds: 30
-                - condition: state
-                  entity_id: binary_sensor.control_room_door
-                  state: "off"
-                  for:
-                    seconds: 30
+      - alias: "Server usage high level threshold"
+        condition: numeric_state
+        entity_id: sensor.server_drive_used_percent
+        above: input_number.drive_used_threshold
+        below: 95
     action:
-      service_template: >
-        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 15 or is_state('device_tracker.life360_jean', 'home') %}
-        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 15 or is_state('device_tracker.life360_cindy', 'home') %}
-        {% if jean and cindy %}
-          notify.sms_notify_all
-        {% elif jean %}
-          notify.sms_jean
-        {% elif cindy %}
-          notify.sms_cindy
-        {% else %}
-          notify.sms_jean
-        {% endif %}
-      data:
-        message: "Cold Storage Light Still On"
-          
-  - alias: Cold Storage Light ON Immediate
+      - service: notify.ios_notify_admins
+        data:
+          title: "Server Usage HIGH"
+          message: |
+            Server usage: {{ states('sensor.server_drive_used_percent') }}%
+
+  - alias: Server Used Critical Notification
     mode: restart
     trigger:
-      - platform: state
-        entity_id: binary_sensor.control_room_light
-        to: "on"
-        for:
-           minutes: 5
+      - platform: time_pattern
+        minutes: '/10'
+    condition:
+      - alias: "Server usage critical level"
+        condition: numeric_state
+        entity_id: sensor.server_drive_used_percent
+        above: 95
     action:
-      service_template: >
-        {% set jean = states('sensor.iphone_de_jean_distance_home')|int < 15 or is_state('device_tracker.life360_jean', 'home') %}
-        {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int < 15 or is_state('device_tracker.life360_cindy', 'home') %}
-        {% if jean and cindy %}
-          notify.sms_notify_all
-        {% elif jean %}
-          notify.sms_jean
-        {% elif cindy %}
-          notify.sms_cindy
-        {% else %}
-          notify.sms_jean
-        {% endif %}
-      data:
-        message: "Cold Storage Light Remained On"
+      - service: notify.ios_notify_admins
+        data:
+          title: "Server Usage CRITICAL"
+          message: |
+            Server usage: {{ states('sensor.server_drive_used_percent') }}%
+      - service: notify.sms_jean
+        data:
+          title: "Server Usage CRITICAL"
+          message: |
+            Server usage: {{ states('sensor.server_drive_used_percent') }}%
+
+  - alias: HA VM Used High Notification
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: '/10'
+    condition:
+      - alias: "HA VM usage high level threshold"
+        condition: numeric_state
+        entity_id: sensor.ha_vm_drive_used_percent
+        above: input_number.drive_used_threshold
+        below: 95
+    action:
+      - service: notify.ios_notify_admins
+        data:
+          title: "HA VM Usage HIGH"
+          message: |
+            HA VM usage: {{ states('sensor.ha_vm_drive_used_percent') }}%
+
+  - alias: HA VM Used Critical Notification
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        minutes: '/10'
+    condition:
+      - alias: "HA VM usage critical level"
+        condition: numeric_state
+        entity_id: sensor.ha_vm_drive_used_percent
+        above: 95
+    action:
+      - service: notify.ios_notify_admins
+        data:
+          title: "HA VM Usage CRITICAL"
+          message: |
+            HA VM usage: {{ states('sensor.ha_vm_drive_used_percent') }}%
+      - service: notify.sms_jean
+        data:
+          title: "HA VM Usage CRITICAL"
+          message: |
+            HA VM usage: {{ states('sensor.ha_vm_drive_used_percent') }}%
+            
+  - alias: Recorder Failure Alert
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.recorder_fault_detected
+        to: 'on'
+    action:
+      - service: notify.ios_notify_admins
+        data:
+          #title: "Recorder Failure Detected"
+          message: "Recorder Failure Detected"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
 
 # ACTIONNABLE NOTIFICATIONS
 
-  - alias: Doors unlocked notification
+  - alias: Doors unlocked Notification
     mode: restart
     trigger:
-      - platform: time
-        at: "22:00:00"
-      - platform: time
-        at: "23:00:00"
-      - platform: time
-        at: "00:00:00"
-      - platform: time
-        at: "01:00:00"
+      # - platform: time
+        # at: "22:00:00"
+      # - platform: time
+        # at: "23:00:00"
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '22:00'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '23:00'
     condition:
       - condition: state
-        entity_id: group.all_locks
-        state: "unlocked"
+        entity_id: binary_sensor.all_locks_ok
+        state: "on"
     action:
       - alias: "Set up variables for the actions"
         variables:
@@ -390,9 +468,30 @@
           action_lock: "{{ 'LOCK_' ~ context.id }}"
           action_ignore: "{{ 'IGNORE_' ~ context.id }}"
       - alias: "Ask to lock the doors"
-        service: notify.ios_notify_parents
+        service: notify.ios_notify_all
+        #service: notify.ios_notify_admins
         data:
-          message: "The doors are not all locked, lock all now?"
+          title: "The doors are not all locked, lock all now?"
+          message: |
+            {% set ok_states = ('locked', 'unavailable', 'off', 'Ok') %}
+            {% set ok_states_toilet = ('Unlocked', 'unavailable', 'Ok') %}
+            {% set ok_states_glass = ('Unlocked', 'unavailable', 'Ok') %}
+            
+            {%- if states('sensor.house_fd_status') not in ok_states %}{{state_attr('sensor.house_fd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.house_bd_status') not in ok_states %}{{state_attr('sensor.house_bd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.garage_fd_status') not in ok_states %}{{state_attr('sensor.garage_fd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.garage_cd_status') not in ok_states %}{{state_attr('sensor.garage_cd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.garage_bd_status') not in ok_states %}{{state_attr('sensor.garage_bd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.shed_fd_status') not in ok_states %}{{state_attr('sensor.shed_fd_status','friendly_name')}}{{' - '}}{{states('sensor.shed_fd_status')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.glasshouse_fd_status') not in ok_states_glass %}{{state_attr('sensor.glasshouse_fd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.pool_fd_status') not in ok_states %}{{state_attr('sensor.pool_fd_status','friendly_name')}}{{'\n'}}{%endif%}
+            {%- if states('sensor.pool_gates') not in ok_states %}{{state_attr('sensor.pool_gates','friendly_name')}}{{'\n'}}{%endif%}
+            
+            {% if is_state('input_boolean.pool_running','on') %}
+              {%- if states('sensor.pool_td_status') not in ok_states_toilet %}{{state_attr('sensor.pool_td_status','friendly_name')}}{{'\n'}}{%endif%}
+            {% else %}
+              {%- if states('sensor.pool_td_status') not in ok_states %}{{state_attr('sensor.pool_td_status','friendly_name')}}{{'\n'}}{%endif%}
+            {% endif %}
           data:
             ttl: 0
             priority: high
@@ -427,3 +526,391 @@
               - service: input_boolean.turn_off
                 target:
                   entity_id: input_boolean.lock_all
+                  
+  - alias: Doors Auto Lock
+    mode: restart
+    trigger:
+      # - platform: time
+        # at: "23:59"
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '23:59'
+    condition:
+      - condition: state
+        entity_id: binary_sensor.all_locks_ok
+        state: "on"
+    action:
+      - service: notify.ios_notify_all
+        #service: notify.ios_notify_admins
+        data:
+          title: "DOORS AUTO LOCKED"
+          message: "The doors have been locked automatically"
+      - service: input_boolean.turn_on
+        target:
+          entity_id: input_boolean.lock_all
+
+  - alias: FindPhone
+    initial_state: 'on'
+    trigger:
+      - platform: state
+        entity_id: input_boolean.findphone_button
+        to: 'on'
+    action:
+      - service: notify.mobile_app_iphone_de_jean
+        data:
+          message: "Polo!"
+          data:
+            push:
+              sound:
+                name: default
+                critical: 1
+                volume: 1.0
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.findphone_button
+      
+  - alias: TED5000 Time Error
+    mode: restart
+    trigger:
+      - platform: template
+        value_template: "{{ (as_timestamp(now()) - as_timestamp(states('sensor.ted5000_utility_gateway_date_and_time'),as_timestamp(now()))) > 180 }}"
+        for:
+          minutes: 30
+    action:
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
+        data:
+          title: "TED5000 Date/Time error"
+          message: "TED5000 date or time is off by more than 3 minutes"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+      - service: persistent_notification.create
+        data:
+          title: "TED5000 Date/Time error"
+          message: "TED5000 date or time is off by more than 3 minutes"
+
+  - alias: Garage Temperature Error
+    mode: restart
+    trigger:
+      - alias: "Temperature getting too high"
+        platform: template
+        value_template: "{{ states('sensor.garage_average_temp')|float(0) > state_attr('climate.garage_heaters','temperature')|float(0)+2.0 and
+                            states('sensor.ted5000_mtu2_power')|float(0) > 4000 and
+                            is_state('climate.garage_heaters','heat') }}"
+      - alias: "Temperature getting too low"
+        platform: template
+        value_template: "{{ states('sensor.garage_average_temp')|float(0) < state_attr('climate.garage_heaters','temperature')|float(0)-2.0 and
+                            states('sensor.ted5000_mtu2_power')|float(0) < 4000 and
+                            is_state('climate.garage_heaters','heat') }}"
+      - platform: state
+        entity_id: sensor.garage_main_control_status
+        to: 'unavailable'
+        for:
+          minutes: 5
+    action:
+      #- service: notify.sms_jean
+      - service: notify.ios_notify_admins
+        data:
+          title: "Garage Temperature Error"
+          message: "Garage Temperature or Main Module Error"
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+
+# WATER LEAKS
+  - alias: Water Leak Detected
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.water_leak_detected
+        to: 'on'
+        for:
+          seconds: 5
+    action:
+      - service: notify.ios_notify_admins
+      #- service: notify.ios_notify_all
+        data:
+          title: "Water Leak Detected"
+          message: >-
+            {%- for state in state_attr('binary_sensor.water_leak_detected','entity_id').split(', ') -%}
+              {% if states(state) == 'on' %}
+                {{- state_attr(state,'friendly_name') -}}
+              {% endif %}
+            {% endfor -%}
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+                
+  - alias: Ring Jean
+    trigger:
+      - platform: state
+        entity_id: input_button.ring_jean
+    action:
+      - service: mqtt.publish
+        data_template:
+          topic: "Home/Chime/Trigger"
+          #IMPORTANT - Always send all 3 infos for correct assignement of tune and volume (state, sound, volume[s])
+          payload: >
+            {% set volume_gf = states('input_number.doorchime_gf_volume')|int(5) %}
+            {"state":"ON","sound":"-1","volume_gf":"{{volume_gf}}"}
+      - service: notify.mobile_app_iphone_de_jean
+        data:
+          title: "Cindy is ringing you"
+          message: >
+            {% set text = states('input_text.ring_jean') %}
+            {% set error_list = states('input_text.errors_list') %}
+            
+            {% if text not in error_list  %}
+              {{ text }}
+            {% else %}
+              {{ "Cindy is ringing you" }}
+            {% endif %}
+          data:
+            push:
+              category: "alarm"
+              sound:
+                name: "default"
+                critical: 1
+                volume: 1.0
+
+#LIGHTS AND DOORS ALERTS
+  - alias: Lights & Doors Alerts Re-enable
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.lights_doors_alerts_pause_30min
+        to: 'on'
+    action:
+      - service: script.turn_on
+        target:
+          entity_id: script.lights_doors_alert_pause30m
+
+  - alias: Lights & Doors Alerts Reset
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '00:00'
+      - platform: state
+        entity_id: input_boolean.lights_doors_alerts_pause_30min
+        to: 'off'
+    action:
+      - service: script.turn_off
+        target:
+          entity_id: script.lights_doors_alert_pause30m
+      - service: input_boolean.turn_off
+        target:
+          entity_id: input_boolean.lights_doors_alerts_pause_30min
+
+  - alias: Lights Doors Alert Immediate
+    mode: single
+    max_exceeded: silent
+    description: ''
+    trigger:
+      - platform: state
+        entity_id: switch.control_room_light
+        to: 'on'
+        for:
+          minutes: 5
+      - platform: state
+        entity_id: binary_sensor.control_room_door
+        to: 'off'
+        for:
+          minutes: 5
+      - platform: state
+        entity_id: switch.cold_storage_light
+        to: 'on'
+        for:
+          minutes: 5
+      - platform: state
+        entity_id: binary_sensor.cold_storage_door
+        to: 'on'
+        for:
+          minutes: 5
+      - platform: state
+        entity_id: switch.storage_room_light
+        to: 'on'
+        for:
+          minutes: 5
+      - platform: state
+        entity_id: binary_sensor.storage_room_door
+        to: 'on'
+        for:
+          minutes: 5
+    action:
+      - repeat:
+          while:
+            condition: and
+            conditions:
+              - condition: state
+                entity_id: input_boolean.lights_doors_alerts_pause_30min
+                state: 'off'
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: switch.control_room_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.control_room_door
+                    state: 'off'
+                  - condition: state
+                    entity_id: switch.cold_storage_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.cold_storage_door
+                    state: 'on'
+                  - condition: state
+                    entity_id: switch.storage_room_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.storage_room_door
+                    state: 'on'
+          sequence:
+            - service_template: >
+                {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 3 or is_state('device_tracker.life360_jean', 'home') %}
+                {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 3 or is_state('device_tracker.life360_cindy', 'home') %}
+              
+                {% if jean and cindy %}
+                  notify.ios_notify_all
+                {% elif jean %}
+                  notify.mobile_app_iphone_de_jean
+                {% elif cindy %}
+                  notify.mobile_app_iphone_de_cindy
+                {% else %}
+                  notify.ios_notify_all
+                {% endif %}
+              data:
+                title: "Storages Doors/Lights Warning"
+                message: |
+                  {% set ok_states = ('unavailable', 'unknown', 'off') %}
+                  {% set ok_states_others = ('unavailable', 'unknown', 'on') %}
+                  
+                  {%- if states('switch.control_room_light') not in ok_states %}{{state_attr('switch.control_room_light','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('switch.cold_storage_light') not in ok_states %}{{state_attr('switch.cold_storage_light','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('switch.storage_room_light') not in ok_states %}{{state_attr('switch.storage_room_light','friendly_name')}}{{'\n'}}{%endif%}
+              
+                  {%- if states('binary_sensor.control_room_door') not in ok_states_others %}{{state_attr('binary_sensor.control_room_door','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('binary_sensor.cold_storage_door') not in ok_states %}{{state_attr('binary_sensor.cold_storage_door','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('binary_sensor.storage_room_door') not in ok_states %}{{state_attr('binary_sensor.storage_room_door','friendly_name')}}{{'\n'}}{%endif%}
+            - delay:
+                hours: 24
+
+  - alias: Lights Doors Alert Repetitive
+    mode: single
+    max_exceeded: silent
+    description: ''
+    trigger:
+      - platform: state
+        entity_id: switch.control_room_light
+        to: 'on'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: binary_sensor.control_room_door
+        to: 'off'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: switch.cold_storage_light
+        to: 'on'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: binary_sensor.cold_storage_door
+        to: 'on'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: switch.storage_room_light
+        to: 'on'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: binary_sensor.storage_room_door
+        to: 'on'
+        for:
+          minutes: 10
+      - platform: state
+        entity_id: input_boolean.lights_doors_alerts_pause_30min
+        from: 'on'
+        to: 'off'
+    action:
+      - repeat:
+          while:
+            condition: and
+            conditions:
+              - condition: state
+                entity_id: input_boolean.lights_doors_alerts_pause_30min
+                state: 'off'
+              - condition: or
+                conditions:
+                  - condition: state
+                    entity_id: switch.control_room_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.control_room_door
+                    state: 'off'
+                  - condition: state
+                    entity_id: switch.cold_storage_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.cold_storage_door
+                    state: 'on'
+                  - condition: state
+                    entity_id: switch.storage_room_light
+                    state: 'on'
+                  - condition: state
+                    entity_id: binary_sensor.storage_room_door
+                    state: 'on'
+          sequence:
+            - service_template: >
+                {% set jean = states('sensor.iphone_de_jean_distance_home')|int(0) < 3 or is_state('device_tracker.life360_jean', 'home') %}
+                {% set cindy = states('sensor.iphone_de_cindy_distance_home')|int(0) < 3 or is_state('device_tracker.life360_cindy', 'home') %}
+              
+                {% if jean and cindy %}
+                  notify.ios_notify_all
+                {% elif jean %}
+                  notify.mobile_app_iphone_de_jean
+                {% elif cindy %}
+                  notify.mobile_app_iphone_de_cindy
+                {% else %}
+                  notify.ios_notify_all
+                {% endif %}
+              data:
+                title: "Storages Doors/Lights ALERT"
+                message: |
+                  {% set ok_states = ('unavailable', 'unknown', 'off') %}
+                  {% set ok_states_others = ('unavailable', 'unknown', 'on') %}
+                  
+                  {%- if states('switch.control_room_light') not in ok_states %}{{state_attr('switch.control_room_light','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('switch.cold_storage_light') not in ok_states %}{{state_attr('switch.cold_storage_light','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('switch.storage_room_light') not in ok_states %}{{state_attr('switch.storage_room_light','friendly_name')}}{{'\n'}}{%endif%}
+              
+                  {%- if states('binary_sensor.control_room_door') not in ok_states_others %}{{state_attr('binary_sensor.control_room_door','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('binary_sensor.cold_storage_door') not in ok_states %}{{state_attr('binary_sensor.cold_storage_door','friendly_name')}}{{'\n'}}{%endif%}
+                  {%- if states('binary_sensor.storage_room_door') not in ok_states %}{{state_attr('binary_sensor.storage_room_door','friendly_name')}}{{'\n'}}{%endif%}
+                data:
+                  push:
+                    category: "alarm"
+                    sound:
+                      name: "default"
+                      critical: 1
+                      volume: 1.0
+            - delay:
+                minutes: 5

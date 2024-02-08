@@ -1,0 +1,74 @@
+##########################################
+# CUSTOMIZATIONS - WATTAGE               #
+##########################################
+        
+#LIGHTS        
+  # binary_sensor.garage_attic_light:
+    # templates:
+      # watts: >
+        # return 21;
+      # appliances: >
+        # return 'light';
+
+  # switch.control_room_light:
+    # templates:
+      # watts: >
+        # return 7;
+      # appliances: >
+        # return 'light';
+
+  # switch.cold_storage_light:
+    # templates:
+      # watts: >
+        # return 100;
+      # appliances: >
+        # return 'light';
+        
+  # switch.storage_room_light:
+    # templates:
+      # watts: >
+        # return 100;
+      # appliances: >
+        # return 'light';
+
+  # switch.front_door_light:
+    # templates:
+      # watts: >
+        # return 7;
+      # appliances: >
+        # return 'light';
+
+  # switch.garage_front_light:
+    # templates:
+      # watts: >
+        # return 10;
+      # appliances: >
+        # return 'light';
+
+  # switch.shed_door_light:
+    # templates:
+      # watts: >
+        # return 7;
+      # appliances: >
+        # return 'light';
+        
+  # switch.shed_inside_light:
+    # templates:
+      # watts: >
+        # return 100;
+      # appliances: >
+        # return 'light';
+        
+  # switch.shed_pool_light:
+    # templates:
+      # watts: >
+        # return 250;
+      # appliances: >
+        # return 'light';
+        
+  # switch.lamp_post:
+    # templates:
+      # watts: >
+        # return 18;
+      # appliances: >
+        # return 'light';

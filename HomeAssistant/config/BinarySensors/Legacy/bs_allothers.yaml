@@ -1,0 +1,66 @@
+####################################################
+# BINARY SENSORS                                   #
+####################################################
+
+  # - platform: workday
+    # name: Workday Jean
+    # country: 'CA'
+    # province: 'QC'
+    # excludes: [sat, sun, holiday]
+    # add_holidays:
+      # - '2019-12-02'
+      # - '2019-12-03'
+      # - '2019-12-04'
+      # - '2019-12-05'
+      # - '2019-12-06'
+      # - '2019-12-09'
+      # - '2019-12-10'
+      # - '2019-12-11'
+      # - '2019-12-12'
+      # - '2019-12-13'
+      # - '2019-12-24'
+      # - '2019-12-26'
+      # - '2019-12-31'
+      # - '2020-01-01'
+      
+  # - platform: workday
+    # name: Workday Cindy
+    # country: 'CA'
+    # province: 'QC'
+    # excludes: [sat, sun, holiday]
+    # add_holidays:
+      # - '2019-12-02'
+      # - '2019-12-03'
+      # - '2019-12-04'
+      # - '2019-12-05'
+      # - '2019-12-06'
+      # - '2019-12-09'
+      # - '2019-12-10'
+      # - '2019-12-11'
+      # - '2019-12-12'
+      # - '2019-12-13'
+      # - '2019-12-24'
+      # - '2019-12-26'
+      # - '2019-12-31'
+      # - '2020-01-01'
+
+  - platform: threshold
+    name: "Antifreeze Active"
+    entity_id: sensor.outdoor_temperature
+    lower: 5.0
+    hysteresis: 0.75
+    
+  - platform: threshold
+    name: "Garage HVAC Threshold"
+    entity_id: sensor.garage_mean_temp
+    lower: 16.0
+    hysteresis: 0.2
+
+  # - platform: command_line
+    # name: Recorder Fault Detected
+    # scan_interval: 15
+    # device_class: problem
+    # payload_on: "ON"
+    # payload_off: "OFF"
+    # command: 'xyz=`cat home-assistant.log | grep -ic "Setup failed for recorder"`; if [ $xyz -gt 0 ]; then echo ON; else echo OFF; fi'
+

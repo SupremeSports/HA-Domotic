@@ -7,6 +7,55 @@
     hide_attributes:
       - templates
       - icon_color
+      
+  sensor.*_update_available:
+    templates:
+      icon: >
+        if (state === 'Updating') return 'mdi:cloud-sync';
+        if (state === 'Update available' || state === 'Major update') return 'mdi:cloud-download';
+        if (state === 'Stopped') return 'mdi:cloud-alert';
+        if (state === 'Up-to-date') return 'mdi:cloud-check';
+        return 'mdi:cloud-question';
+      icon_color: >
+        if (state === 'Updating') return 'yellow';
+        if (typeof attributes.major_update === 'undefined' && state === 'Update available') return 'red';
+        if (state === 'Major update') return 'red';
+        if (state === 'Update available') return 'orange';
+        if (state === 'Stopped') return 'var(--state-icon-color)';
+        if (state === 'Up-to-date') return 'green';
+        return 'var(--state-icon-unavailable-color)';
+
+  sensor.*_entities:
+    friendly_name: "Entities"
+    templates:
+      icon: >
+        return 'mdi:script-text';
+  sensor.*_uun_entities:
+    friendly_name: "Entities Issues"
+    templates:
+      icon: >
+        if (state > 0) return 'mdi:thumb-down';
+        return 'mdi:thumb-up';
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
+        if (state > 0) return 'red';
+        return 'green';
+
+  sensor.*last_boot:
+    templates:
+      icon: >
+        return 'mdi:clock';
+  sensor.*mariadb_size:
+    templates:
+      icon: >
+        return 'mdi:file';
+  sensor.*_home_assistant_v2_db:
+    templates:
+      icon: >
+        return 'mdi:file';
+  sensor.*cpu_used:
+    state_class: measurement
     
   sensor.*_control_status:
     #state_color: true
@@ -17,13 +66,23 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'red';
         
-  sensor.*_heater_status:
+  sensor.*_heater_stat*:
     templates:
       icon_color: >
         if (state === 'Ready') return 'var(--state-icon-color)';
         if (state === 'Off') return 'var(--state-icon-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'var(--state-icon-active-color)';
+        
+  sensor.garage_*_heater_time:
+    templates:
+      icon: >
+        return 'mdi:clock-end';
+        
+  sensor.garage_*_heater_count:
+    templates:
+      icon: >
+        return 'mdi:chart-bar';
         
   sensor.garage_safety_*_temperature:
       icon_color: >
@@ -38,7 +97,7 @@
       icon_color: >
         if (state >= 6000)
         {
-          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          if (entities['binary_sensor.flashing_1s'].state === 'off') return 'red';
           return 'var(--state-icon-unavailable-color)';
         }
         if (state >= 5000) return 'red';
@@ -50,25 +109,31 @@
   sensor.ted5000_mtu*_voltage:
     icon: mdi:flash
     templates:
-      icon_color: >  
+      icon_color: >
         if (state > 250 || state < 230)
         {
-          if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+          if (entities['binary_sensor.flashing_1s'].state === 'off') return 'red';
           return 'var(--state-icon-unavailable-color)';
         }
-        if (state > 245 || state < 235) return 'red';
+        if (state > 243 || state < 237) return 'yellow';
+        if (state > 246 || state < 233) return 'red';
         if (state > 0) return '#00FF00'; 
         return 'var(--state-icon-unavailable-color)';
 
+  sensor.ted5000_mtu*_energy_*_cost:
+    unit_of_measurement: "$"
+    
   sensor.*_*d_status:
     templates:
       icon: >
         if (state === 'Ok') return 'mdi:shield-lock';
+        if (state === 'Ok*') return 'mdi:shield-alert';
         if (state === 'Unlocked') return 'mdi:shield-remove';
         if (state === 'Opened') return 'mdi:door-open';
         return 'mdi:close-octagon';
       icon_color: >
         if (state === 'Ok') return 'green';
+        if (state === 'Ok*') return 'orange';
         if (state === 'Unlocked') return 'red';
         if (state === 'Opened') return 'var(--state-icon-active-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
@@ -108,3 +173,52 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'red';
         
+  sensor.*_drive*_used_percent:
+    icon: mdi:harddisk
+    templates:
+      icon_color: >
+        if (state >= 0 && state <= 100)
+        {
+          if (state < parseFloat(entities['input_number.drive_used_threshold'].state)) return 'green';
+          if (state < 95) return 'yellow';
+          if (state >= 95) return 'red';
+        }
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.*_drive_jbod*:
+    icon: mdi:harddisk
+    templates:
+      icon_color: >
+        if (attributes.used === '0.0 GiB' && attributes.free === '0.0 GiB') return 'var(--state-icon-unavailable-color)';
+        if (state >= 0 && state <= 100)
+        {
+          if (state < 80) return 'green';
+          if (state < 90) return 'yellow';
+          if (state >= 90) return 'red';
+        }
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.*_drive_dvr:
+    icon: mdi:harddisk
+    templates:
+      icon_color: >
+        if (attributes.used === '0.0 GiB' && attributes.free === '0.0 GiB') return 'var(--state-icon-unavailable-color)';
+        if (state >= 0 && state <= 100)
+        {
+          if (state < 80) return 'green';
+          if (state < 90) return 'yellow';
+          if (state >= 90) return 'red';
+        }
+        return 'var(--state-icon-unavailable-color)';
+        
+  sensor.*_load_used_space:
+    icon: mdi:harddisk
+    templates:
+      icon_color: >
+        if (state >= 0 && state <= 100)
+        {
+          if (state < 60) return 'green';
+          if (state < 95) return 'yellow';
+          if (state >= 95) return 'red';
+        }
+        return 'var(--state-icon-unavailable-color)';

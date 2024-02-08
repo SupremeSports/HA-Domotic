@@ -1,0 +1,103 @@
+####################################################
+# SENSORS - ROOMS                                  #
+####################################################
+
+#Control Room
+  - platform: history_stats
+    name: Control Room Door Count
+    entity_id: binary_sensor.control_room_door
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Control Room Door Time
+    entity_id: binary_sensor.control_room_door
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    
+  - platform: history_stats
+    name: Control Room Light Count
+    entity_id: switch.control_room_light
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Control Room Light Time
+    entity_id: switch.control_room_light
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+
+#Storage Room
+  - platform: history_stats
+    name: Storage Room Door Count
+    entity_id: binary_sensor.storage_room_door
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Storage Room Door Time
+    entity_id: binary_sensor.storage_room_door
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    
+  - platform: history_stats
+    name: Storage Room Light Count
+    entity_id: switch.storage_room_light
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Storage Room Light Time
+    entity_id: switch.storage_room_light
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+      
+#Cold Storage
+  - platform: history_stats
+    name: Cold Storage Door Count
+    entity_id: binary_sensor.cold_storage_door
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Cold Storage Door Time
+    entity_id: binary_sensor.cold_storage_door
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+
+  - platform: history_stats
+    name: Cold Storage Light Count
+    entity_id: switch.cold_storage_light
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+      
+  - platform: history_stats
+    name: Cold Storage Light Time
+    entity_id: switch.cold_storage_light
+    state: 'on'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'

@@ -1,0 +1,11 @@
+####################################################
+# BINARY SENSORS - CAMERAS                         #
+####################################################
+
+  # - platform: command_line
+    # name: Camera Motion - PoolArea
+    # scan_interval: 5
+    # device_class: motion
+    # payload_on: "true"
+    # payload_off: "false"
+    # command: 'curl -s http://192.168.1.250:8080/getobjectlist | grep "Pool Area" | cut -d , -f 11'

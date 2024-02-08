@@ -1,0 +1,98 @@
+####################################################
+# TEMPLATES - TRIGGERS                             #
+####################################################
+
+    trigger: 
+    - platform: time_pattern
+      seconds: '/1'
+######## BINARY SENSORS ########
+    # binary_sensor:
+
+######## SENSORS ########
+    sensor:
+
+#POWER MEASUREMENTS
+      - name: Heating Total Power
+        #unique_id: heating_total_power
+        icon: mdi:radiator
+        state_class: measurement
+        device_class: power
+        unit_of_measurement: "W"
+        state: >
+          {{ expand('group.heaters_power') | map(attribute='state') | map('float', 0) | sum }}
+        attributes:
+          list: "{{ expand('group.heaters_power') | map(attribute='entity_id') | list | join(',\n') }}"
+          
+      - name: Appliances Total Power
+        #unique_id: appliances_total_power
+        icon: mdi:fridge-industrial
+        state_class: measurement
+        device_class: power
+        unit_of_measurement: "W"
+        state: >
+          {{ expand('group.appliances_power') | map(attribute='state') | map('float', 0) | sum }}
+        attributes:
+          list: "{{ expand('group.appliances_power') | map(attribute='entity_id') | list | join(',\n') }}"
+          
+      - name: Outdoor Total Power
+        #unique_id: outdoor_total_power
+        icon: mdi:flower
+        state_class: measurement
+        device_class: power
+        unit_of_measurement: "W"
+        state: >
+          {% set voltage_ratio = states('sensor.ted5000_mtu3_voltage')|float(240) / 240 %}
+          {% set ns = namespace(watts = 0) %}
+          
+          {% for s in expand('group.outdoor_power') %}
+            {% set ns.watts = ns.watts + (s.state | float(0)) %}
+          {% endfor %}
+          
+          {% set power = ns.watts * voltage_ratio %}
+          
+          {{ power | float(0) }}
+        attributes:
+          list: "{{ expand('group.outdoor_power') | map(attribute='entity_id') | list | join(',\n') }}"
+          entities_on: "{{ expand('group.outdoor_power') | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list | join(',\n') }}"
+
+      - name: Lighting Total Power
+        #unique_id: lighting_total_power
+        icon: mdi:lightbulb-group
+        state_class: measurement
+        device_class: power
+        unit_of_measurement: "W"
+        state: >
+          {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240 %}
+          {% set ns = namespace(watts = 0) %}
+          
+          {% for s in expand('group.lighting_power') if s.state == 'on' %}
+            {% set ns.watts = ns.watts + (s.attributes.watts | float(0)) %}
+          {% endfor %}
+          
+          {% set power = ns.watts * voltage_ratio %}
+          
+          {{ power | float(0) }}
+        # state: >
+          # {{  states | 
+              # selectattr('attributes.appliances', 'defined') | 
+              # selectattr('attributes.appliances', 'in', ["light"]) | 
+              # selectattr('state', '==', 'on') | 
+              # selectattr('attributes.watts', 'defined') | 
+              # list | map(attribute='attributes.watts') | map('float', 0) | 
+              # sum }}
+        attributes:
+          list: "{{ expand('group.lighting_power') | map(attribute='entity_id') | list | join(',\n') }}"
+          entities_on: "{{ expand('group.lighting_power') | selectattr('state', 'eq', 'on') | map(attribute='entity_id') | list | join(',\n') }}"
+          # list: >
+            # {{  states | 
+                # selectattr('attributes.appliances', 'defined') | 
+                # selectattr('attributes.appliances', 'in', ["light"]) | 
+                # selectattr('attributes.watts', 'defined') | 
+                # list | join(',\n', attribute='entity_id') }}
+          # entities_on: >
+            # {{  states | 
+                # selectattr('attributes.appliances', 'defined') | 
+                # selectattr('attributes.appliances', 'in', ["light"]) | 
+                # selectattr('state', '==', 'on') | 
+                # selectattr('attributes.watts', 'defined') | 
+                # list | join(',\n', attribute='entity_id') }}

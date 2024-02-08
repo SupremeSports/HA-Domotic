@@ -1,0 +1,332 @@
+####################################################
+# LOVELACE DECLUTTERING - Doors & Locks            #
+####################################################
+
+#LOCK ALL BUTTON
+lock_all: 
+  card:
+    type: "custom:button-entity-row"
+    buttons:
+      - entity: input_boolean.lock_all
+        name: LOCK ALL DOORS
+        state_icons:
+          "off": "mdi:lock"
+          "on": "mdi:lock"
+        state_styles:
+          "off":
+            color: "var(--state-icon-color)"
+            font-weight: bold
+          "on":
+            color: "var(--state-icon-active-color)"
+            font-weight: bold
+
+#DOOR WITHOUT LOCK SENSOR
+door: 
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[door]]_opened
+            icon: "mdi:door"
+            state_icons:
+              "on": "mdi:door-open"
+              "off": "mdi:door"
+
+#DOOR WITH LOCK SENSOR
+door_lock: 
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[door]]_opened
+            icon: "mdi:door"
+            state_icons:
+              "on": "mdi:door-open"
+              "off": "mdi:door"
+          - entity: binary_sensor.[[door]]_locked
+            icon: "mdi:lock"
+            state_icons:
+              "on": "mdi:lock-open-outline"
+              "off": "mdi:lock"
+            state_styles:
+              "on":
+                color: red
+              "off":
+                color: "var(--state-icon-color)"
+
+#POWERBOLT2 WEISER LOCKS
+powerbolt2:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[door]]_opened
+            icon: "mdi:door"
+            state_icons:
+              "on": "mdi:door-open"
+              "off": "mdi:door"
+          - entity: input_boolean.[[door]]_lock
+            icon: "mdi:lock"
+          - entity: input_boolean.[[door]]_unlock
+            icon: "mdi:lock-open-outline"
+      - input_text.doorlock_passcode
+
+#POWERBOLT2 WEISER LOCKS WITH DOORBELL BUTTON
+powerbolt2_bell:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[door]]_opened
+            icon: "mdi:door"
+            state_icons:
+              "on": "mdi:door-open"
+              "off": "mdi:door"
+          - entity: binary_sensor.[[door]]_bell
+            icon: "mdi:bell"
+            state_icons:
+              "on": "mdi:bell-ring"
+              "off": "mdi:bell"
+          - entity: input_boolean.[[door]]_lock
+            icon: "mdi:lock"
+          - entity: input_boolean.[[door]]_unlock
+            icon: "mdi:lock-open-outline"
+      - input_text.doorlock_passcode
+
+      # - type: conditional
+        # conditions:
+          # - entity: automation.heartbeat_seconds
+            # state: '[[doorbell_tf]]'
+        # row:
+          # type: custom:decluttering-card
+          # template: doorchime_musical
+          # variables: 
+            # - name: 'Hallway'
+            # - id: 'tf'
+      # - type: conditional
+        # conditions:
+          # - entity: automation.heartbeat_seconds
+            # state: '[[doorbell_bf]]'
+        # row:
+          # type: custom:decluttering-card
+          # template: doorchime_musical
+          # variables: 
+            # - name: 'Bottom Floor'
+            # - id: 'bf'
+      # - type: conditional
+        # conditions:
+          # - entity: automation.heartbeat_seconds
+            # state: '[[doorbell_g]]'
+        # row:
+          # type: custom:decluttering-card
+          # template: doorchime
+          # variables: 
+            # - name: 'Garage'
+            # - id: 'gf'
+            
+powerbolt2_shed: 
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.[[door]]_opened
+            icon: "mdi:door"
+            state_icons:
+              "on": "mdi:door-open"
+              "off": "mdi:door"
+          - entity: binary_sensor.[[ldoor]]_opened
+            icon: "mdi:chevron-left-box"
+            state_icons:
+              "on": "mdi:chevron-left-box"
+              "off": "mdi:chevron-left-box"
+          - entity: binary_sensor.[[rdoor]]_opened
+            icon: "mdi:chevron-right-box"
+            state_icons:
+              "on": "mdi:chevron-right-box"
+              "off": "mdi:chevron-right-box"
+          - entity: input_boolean.[[door]]_lock
+            icon: "mdi:lock"
+          - entity: input_boolean.[[door]]_unlock
+            icon: "mdi:lock-open-outline"
+      - input_text.doorlock_passcode
+
+#GARAGE OPENER
+garage_opener:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[door]]_status
+    entities:
+      - type: "custom:button-entity-row"
+        buttons:
+          - entity: binary_sensor.garage_cd_opened
+            icon: "mdi:garage"
+            state_icons:
+              "on": "mdi:garage-open"
+              "off": "mdi:garage"
+          # - entity: input_boolean.garage_cd_trigger
+            # icon: "mdi:arrow-up-down-bold-outline"
+          - entity: binary_sensor.garage_cd_locked
+            icon: "mdi:garage"
+            state_icons:
+              "on": "mdi:lock-open"
+              "off": "mdi:lock"
+            state_styles:
+              "on":
+                color: red
+              "off":
+                color: "var(--state-icon-color)"
+          - entity: input_boolean.garage_cd_open
+            icon: "mdi:arrow-up-bold"
+          - entity: input_boolean.garage_cd_stop
+            icon: "mdi:stop"
+          - entity: input_boolean.garage_cd_close
+            icon: "mdi:arrow-down-bold"
+      - input_text.doorlock_passcode
+
+#MAGNALATCH GATES
+gates:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.pool_gates
+    entities:
+      - type: custom:decluttering-card
+        template: gate
+        variables: 
+          - gate: deck
+      - type: custom:decluttering-card
+        template: gate
+        variables: 
+          - gate: main
+      - type: custom:decluttering-card
+        template: gate
+        variables: 
+          - gate: pond
+              
+gate:
+  card:
+    type: "custom:secondaryinfo-entity-row"
+    entity: binary_sensor.pool_gate_closed_[[gate]]
+    secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_[[gate]] == unavailable, "N/A", if(binary_sensor.pool_gate_closed_[[gate]] == unknown, "N/A", sensor.pool_gate_count_[[gate]])) ]]'
+
+#DOORCHIMES
+doorchime_global:
+  card:
+    type: custom:stack-in-card
+    #title: My Stack In Card
+    mode: vertical
+    cards:
+      - type: custom:fold-entity-row
+        head: binary_sensor.doorbell_state
+        entities:
+          - type: "custom:button-entity-row"
+            buttons:
+              - entity: binary_sensor.house_fd_bell
+                icon: "mdi:home-floor-1"
+                state_icons:
+                  "on": "mdi:bell-ring"
+                  "off": "mdi:home-floor-1"
+              - entity: binary_sensor.house_sd_bell
+                icon: "mdi:home-floor-2"
+                state_icons:
+                  "on": "mdi:bell-ring"
+                  "off": "mdi:home-floor-2"
+              - entity: binary_sensor.house_bd_bell
+                icon: "mdi:home-floor-3"
+                state_icons:
+                  "on": "mdi:bell-ring"
+                  "off": "mdi:home-floor-3"
+              - entity: binary_sensor.garage_fd_bell
+                icon: "mdi:home-floor-g"
+                state_icons:
+                  "on": "mdi:bell-ring"
+                  "off": "mdi:home-floor-g"
+          - input_select.doorchime_fd_sound
+          - input_select.doorchime_sd_sound
+          - input_select.doorchime_bd_sound
+          - input_select.doorchime_gd_sound
+          - input_number.doorchime_tf_volume
+          - input_number.doorchime_bf_volume
+          - input_number.doorchime_gf_volume
+          #- input_boolean.test_doorbell
+          - automation.doorchime_trigger
+    
+
+# doorchime_musical:
+  # card:
+    # type: custom:stack-in-card
+    # #title: My Stack In Card
+    # mode: vertical
+    # cards:
+      # - type: custom:fold-entity-row
+        # head:
+          # type: section
+          # label: '[[name]] Door Chime'
+        # entities:
+          # - input_select.doorchime_[[id]]_sound
+          # - input_number.doorchime_[[id]]_volume
+          # - automation.doorchime_[[id]]_trigger
+
+# doorchime:
+  # card:
+    # type: custom:stack-in-card
+    # #title: My Stack In Card
+    # mode: vertical
+    # cards:
+      # - type: custom:fold-entity-row
+        # head:
+          # type: section
+          # label: '[[name]] Door Chime'
+        # entities:
+          # - automation.doorchime_[[id]]_trigger
+
+#TASMOTA SENSORS
+tasmota_door_light:
+  card:
+    type: custom:stack-in-card
+    #title: My Stack In Card
+    mode: vertical
+    cards:
+      - type: custom:fold-entity-row
+        head: switch.[[room]]_light
+        entities:
+          - sensor.[[room]]_light_count
+          - sensor.[[room]]_light_time
+          - type: conditional
+            conditions:
+              - entity: automation.heartbeat_seconds
+                state: '[[add_light_alert]]'
+            row:
+              entity: automation.[[room]]_light_on_immediate
+          - type: conditional
+            conditions:
+              - entity: automation.heartbeat_seconds
+                state: '[[add_light_alert]]'
+            row:
+              entity: automation.[[room]]_light_on_repetitive
+      - type: custom:fold-entity-row
+        head: binary_sensor.[[room]]_door
+        entities:
+          - sensor.[[room]]_door_count
+          - sensor.[[room]]_door_time
+          - type: conditional
+            conditions:
+              - entity: automation.heartbeat_seconds
+                state: '[[add_door_alert]]'
+            row:
+              entity: automation.[[room]]_door_open_immediate
+          - type: conditional
+            conditions:
+              - entity: automation.heartbeat_seconds
+                state: '[[add_door_alert]]'
+            row:
+              entity: automation.[[room]]_door_open_repetitive

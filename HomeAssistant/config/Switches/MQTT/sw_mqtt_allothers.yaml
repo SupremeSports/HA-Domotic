@@ -1,0 +1,70 @@
+####################################################
+# SWITCHES - MQTT - ALL OTHERS                     #
+####################################################
+    
+  - name: Postal Status
+    icon: mdi:mailbox
+    state_topic: "Home/Postal/Stts"
+    command_topic: "Home/Postal/Cmd"
+    value_template: '{{ value_json.state }}'
+    payload_on: '{"state":"ON"}'
+    payload_off: '{"state":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Transmitter/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Transmitter/Json"
+    
+  - name: Postal Status Activate Delay
+    icon: mdi:lock-clock
+    state_topic: "Home/Postal/Stts"
+    command_topic: "Home/Postal/Cmd"
+    value_template: '{{ value_json.delay }}'
+    payload_on: '{"delay":"ON"}'
+    payload_off: '{"delay":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Transmitter/LWT"
+    qos: 0
+    
+  #Homed status of the hands
+  - name: Stepper Wall Clock Homed
+    icon: mdi:clock-start
+    state_topic: "Home/WallClock/Stts"
+    command_topic: "Home/WallClock/Cmd"
+    value_template: '{{ value_json.homed }}'
+    payload_on: '{"homed":"ON"}'
+    payload_off: '{"homed":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/WallClock/LWT"
+    qos: 0
+    
+  # - name: Storage Floor Heater
+    # icon: mdi:clock-start
+    # state_topic: "Home/Storage/Therm/Stts"
+    # command_topic: "Home/Storage/Hvac/Stts"
+    # value_template: '{{ value_json.floor }}'
+    # payload_on: '{"floor":"ON"}'
+    # payload_off: '{"floor":"OFF"}'
+    # state_on: "ON"
+    # state_off: "OFF"
+    # availability:
+      # - topic: "Home/Storage/Therm/LWT"
+    # qos: 0
+    
+  # - name: Cold Storage Floor Heater
+    # icon: mdi:clock-start
+    # state_topic: "Home/ColdStorage/Therm/Stts"
+    # command_topic: "Home/ColdStorage/Hvac/Stts"
+    # value_template: '{{ value_json.floor }}'
+    # payload_on: '{"floor":"ON"}'
+    # payload_off: '{"floor":"OFF"}'
+    # state_on: "ON"
+    # state_off: "OFF"
+    # availability:
+      # - topic: "Home/ColdStorage/Therm/LWT"
+    # qos: 0

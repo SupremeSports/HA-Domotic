@@ -1,0 +1,149 @@
+####################################################
+# UILOVELACE - ASTRONOMY                           #
+####################################################
+
+- title: Astronomy
+  icon: mdi:telescope
+  # Unique path for direct access /lovelace/${path}
+  path: astronomy
+  visible: true
+  badges:
+    - sensor.time
+    - sun.sun
+    - entity: sensor.moon_phases
+      name: Moon
+    - entity: sensor.seasons
+      name: Season
+  cards:
+    - type: entities
+      title: Astronomy
+      show_header_toggle: false
+      entities:
+        - entity: sensor.seasons
+          name: Season
+        - entity: sensor.moon_phases
+          name: Moon
+        - entity: sensor.moon
+          name: Moon Details
+        - type: custom:hui-element
+          card_type: markdown
+          content: |
+            <center>Moon Distance: {{state_attr('sensor.moon', 'visibility')['distance'] | float | round(2)}} km</center>
+        - type: custom:hui-markdown-card
+          class: sidebar
+          style:
+            {top: 90%, left: 50.1%}
+          content: >
+            <span>Moon Distance: {{state_attr('sensor.moon', 'visibility')['distance'] | float | round(2)}} km</span>
+            
+        - entity: sensor.moon
+          name_template: Moon Distance
+          state_template: >
+            {{state_attr('sensor.moon', 'visibility')['distance'] | float | round(2)}} km
+
+        # - sensor.moon_distance
+        - type: 'custom:sun-card'
+          title: Sun
+          darkMode: true
+          showAzimuth: true
+          showElevation: true
+          
+    # - type: picture-entity
+    #   entity: camera.iss
+    #   name: ISS
+    #   show_state: false
+    #   tap_action: more-info
+      
+    # - type: map
+    #   entities:
+    #     - entity: device_tracker.iss
+    #   dark_mode: true
+    #   aspect_ratio: '16:9'
+    #   default_zoom: 1.5
+    #   hours_to_show: 2
+      
+    # - type: picture-entity
+    #   entity: camera.skyfield
+    #   name: SkyField
+    #   show_state: false
+    #   tap_action: more-info
+    
+    #ISS
+    - type: 'custom:vertical-stack-in-card'
+      cards:
+        - type: picture
+          image: /local/images/CustomMDI/iss_logo.png
+        - type: map
+          entities:
+            - entity: device_tracker.iss
+          dark_mode: true
+          aspect_ratio: '16:9'
+          default_zoom: 1.5
+          hours_to_show: 2
+          auto_fit: true
+        - type: entities
+          title: International Space Station
+          icon: 'mdi:space-station'
+          entities:
+            - type: divider
+        # - type: entity
+          # entity: sensor.iss_risetime_0
+          # name: Next Risetime
+        # - type: entities
+          # entities:
+            # - entity: sensor.iss_risetime_1
+              # name: 2nd Risetime
+              # icon: 'mdi:clock-out'
+            # - entity: sensor.iss_risetime_2
+              # name: 3rd Risetime
+              # icon: 'mdi:clock-out'
+            # - entity: sensor.iss_risetime_3
+              # name: 4th Risetime
+              # icon: 'mdi:clock-out'
+            # - entity: sensor.iss_risetime_4
+              # name: 5th Risetime
+              # icon: 'mdi:clock-out'
+        - type: entity
+          entity: sensor.iss_crew
+          name: Current Crew
+          icon: 'mdi:account-group'
+          unit: People
+          
+    #SpaceX
+    - type: 'custom:vertical-stack-in-card'
+      cards:
+        - type: picture
+          image: /local/images/CustomMDI/spacex_logo.png
+        - type: markdown
+          content: >-
+            <table ><tr><td> {% if
+            states.sensor.spacex_next_launch_mission.attributes.mission_patch != "" %}
+              <img src="{{states.sensor.spacex_next_launch_mission.attributes.mission_patch}}" width=250>
+            {% endif %}</td> <td>{{
+            states.sensor.spacex_next_launch_mission.attributes.details }}
+            </tr></table>
+          title: Next Launch
+        - type: entities
+          entities:
+            - entity: sensor.spacex_next_launch_rocket
+              name: Rocket
+            - entity: sensor.spacex_next_launch_mission
+              name: Mission
+            - entity: binary_sensor.spacex_next_launch_confirmed
+              name: Confirmed
+            - entity: sensor.spacex_next_launch_day
+              name: Day
+            - entity: sensor.spacex_next_launch_time
+              name: Time
+            - entity: sensor.spacex_next_launch_site
+              name: Site
+            - entity: sensor.spacex_latest_launch_payload
+              name: Latest Payload
+            - entity: sensor.spacex_next_launch_payload
+              name: Next Payload
+        - type: entities
+          title: Starman Tesla Roadster
+          show_header_toggle: false
+          entities:
+            - entity: sensor.spacex_starman_speed
+            - entity: sensor.spacex_starman_distance

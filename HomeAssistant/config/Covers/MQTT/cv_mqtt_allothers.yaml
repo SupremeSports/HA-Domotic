@@ -1,0 +1,24 @@
+####################################################
+# COVERS - MQTT - ALL OTHERS                       #
+####################################################
+
+  - name: "Garage CD Opener"
+    #device_class: garage
+    command_topic: "Garage/Door/Car/Cmd"
+    state_topic: "Garage/Door/Car/Sensors/Stts"
+    value_template: '{{ value_json.state }}'
+    # position_topic: "Garage/Door/Car/Sensors/Stts"
+    # position_template: '{{ value_json.position }}'
+    availability:
+      - topic: "Garage/Door/Car/LWT"
+    qos: 0
+    retain: false
+    payload_open: '{"open":"ON"}'
+    payload_close: '{"close":"ON"}'
+    payload_stop: '{"stop":"ON"}'
+    state_open: "opened"
+    state_closed: "closed"
+    state_opening : "opening"
+    state_closing: "closing"
+    optimistic: false
+    json_attributes_topic: "Garage/Door/Car/Json"

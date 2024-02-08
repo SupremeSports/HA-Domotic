@@ -2,27 +2,134 @@
 # AUTOMATIONS - DATA LOGGING                      #
 ###################################################
   
-  - alias: sensor_values_to_file
+  # - alias: sensor_values_to_file
+  #   mode: queued
+  #   initial_state: 'on'
+  #   trigger:
+  #     - platform: time_pattern
+  #       seconds: '/5'
+  #   action:
+  #     - service: notify.filenotify
+  #       data_template: 
+  #         message: >
+  #           MTU1: {{ states('sensor.ted5000_mtu1_power') }};{{ states('sensor.ted5000_mtu1_voltage') }}
+  #           MTU0: {{ states('sensor.ted5000_mtu0_power') }};{{ states('sensor.ted5000_mtu0_voltage') }}
+  #           MTU2: {{ states('sensor.ted5000_mtu2_power') }};{{ states('sensor.ted5000_mtu2_voltage') }}
+  #           MTU3: {{ states('sensor.ted5000_mtu3_power') }};{{ states('sensor.ted5000_mtu3_voltage') }}
+  
+  - alias: datalogging_hourly
+    mode: queued
     initial_state: 'on'
     trigger:
       - platform: time_pattern
-        seconds: '/5'
+        hours: "*"
+        minutes: "59"
+        seconds: "55"
     action:
-      - service: notify.filenotify
+      - service: notify.filenotify_energydaily
         data_template: 
           message: >
-            MTU1: {{ states.sensor.ted5000_mtu1_power.state }};{{ states.sensor.ted5000_mtu1_voltage.state }}
-            MTU2: {{ states.sensor.ted5000_mtu2_power.state }};{{ states.sensor.ted5000_mtu2_voltage.state }}
-            MTU3: {{ states.sensor.ted5000_mtu3_power.state }};{{ states.sensor.ted5000_mtu3_voltage.state }}
-            
-            
+            {{-state_attr('sensor.dates','yyyymmdd')}} {{state_attr('sensor.times','long')}},
+            {{-states('sensor.ted5000_mtu1_energy_daily')|float(0)}},{{states('sensor.ted5000_mtu1_energy_daily_cost')|float(0)}},
+            {{-states('sensor.ted5000_mtu0_energy_daily')|float(0)}},{{states('sensor.ted5000_mtu0_energy_daily_cost')|float(0)}},
+            {{-states('sensor.ted5000_mtu2_energy_daily')|float(0)}},{{states('sensor.ted5000_mtu2_energy_daily_cost')|float(0)}},
+            {{-states('sensor.ted5000_mtu3_energy_daily')|float(0)}},{{states('sensor.ted5000_mtu3_energy_daily_cost')|float(0)}},
+            {{-states('sensor.garage_front_heater_energy_daily')|float(0)}},
+            {{-states('sensor.garage_rear_heater_energy_daily')|float(0)}},
+            {{-states('sensor.garage_hvac_energy_daily')|float(0)}},
+            {{-states('sensor.recroom_hvac_energy_daily')|float(0)}},
+            {{-states('sensor.living_room_hvac_energy_daily')|float(0)}},
+            {{-states('sensor.cold_storage_floor_heater_energy_daily')|float(0)}},
+            {{-states('sensor.storage_room_floor_heater_energy_daily')|float(0)}},
+            {{-states('sensor.kitchen_refrigerator_energy_daily')|float(0)}},
+            {{-states('sensor.chest_freezer_energy_daily')|float(0)}},
+            {{-states('sensor.tankless_water_heater_energy_daily')|float(0)}},
+            {{-states('sensor.washing_machine_energy_daily')|float(0)}},
+            {{-states('sensor.drying_machine_energy_daily')|float(0)}},
+            {{-states('sensor.dishwasher_energy_daily')|float(0)}},
+            {{-states('sensor.bar_heater_energy_daily')|float(0)}},
+            {{-states('sensor.entrance_heater_energy_daily')|float(0)}},
+            {{-states('sensor.kitchen_heater_energy_daily')|float(0)}},
+            {{-states('sensor.living_room_heater_energy_daily')|float(0)}},
+            {{-states('sensor.massage_room_heater_energy_daily')|float(0)}},
+            {{-states('sensor.master_bedroom_heater_energy_daily')|float(0)}},
+            {{-states('sensor.office_heater_energy_daily')|float(0)}},
+            {{-states('sensor.recroom_heater_energy_daily')|float(0)}},
+            {{-states('sensor.training_room_heater_energy_daily')|float(0)}},
+            {{-states('sensor.well_energy_daily')|float(0)}},
+      - service: notify.filenotify_waterdaily
+        data_template: 
+          message: >
+            {{-state_attr('sensor.dates','yyyymmdd')}} {{state_attr('sensor.times','long')}},
+            {{-states('sensor.total_water_daily_used')|float(0)}},{{states('sensor.total_water_daily_used_cost')|float(0)}},
+            {{-states('sensor.icemaker_water_daily_usage')|float(0)}},
+            {{-states('sensor.dishwasher_water_daily_usage')|float(0)}},
+            {{-states('sensor.washing_machine_water_daily_usage')|float(0)}},
+            {{-states('sensor.flowerbed_irrigation_water_daily_usage')|float(0)}},
+            {{-states('sensor.garden_irrigation_water_daily_usage')|float(0)}},
+            {{-states('sensor.pool_filler_water_daily_usage')|float(0)}},
+            {{-states('sensor.pond_filler_water_daily_usage')|float(0)}},
+
   - alias: rename_datalogging_files
     initial_state: 'on'
     trigger:
-    - at: '00:00:01'
-      platform: time
+      # - platform: time
+      #   at: '00:00:01'
+      - platform: state
+        entity_id: sensor.times
+        attribute: long
+        to: '00:00:01'
     condition:
       - condition: template
-        value_template: "{{ now().day == 1 }}"
+        value_template: "{{state_attr('sensor.dates','day')|int(0) == 1 }}"
     action:
-      service: shell_command.rename_energy_log
+      - service: shell_command.rename_energy_log
+      - service: shell_command.rename_water_log
+      - delay: 
+          seconds: 10
+      - service: notify.filenotify_energydaily
+        data_template: 
+          message: >
+            {{-'Date & Time'}},
+            {{-state_attr('sensor.ted5000_mtu1_energy_daily','friendly_name')}},{{state_attr('sensor.ted5000_mtu1_energy_daily_cost','friendly_name')}},
+            {{-state_attr('sensor.ted5000_mtu0_energy_daily','friendly_name')}},{{state_attr('sensor.ted5000_mtu0_energy_daily_cost','friendly_name')}},
+            {{-state_attr('sensor.ted5000_mtu2_energy_daily','friendly_name')}},{{state_attr('sensor.ted5000_mtu2_energy_daily_cost','friendly_name')}},
+            {{-state_attr('sensor.ted5000_mtu3_energy_daily','friendly_name')}},{{state_attr('sensor.ted5000_mtu3_energy_daily_cost','friendly_name')}},
+            {{-state_attr('sensor.garage_front_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.garage_rear_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.garage_hvac_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.recroom_hvac_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.living_room_hvac_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.cold_storage_floor_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.storage_room_floor_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.kitchen_refrigerator_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.chest_freezer_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.tankless_water_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.washing_machine_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.drying_machine_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.dishwasher_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.bar_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.entrance_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.kitchen_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.living_room_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.massage_room_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.master_bedroom_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.office_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.recroom_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.training_room_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.training_room_heater_energy_daily','friendly_name')}},
+            {{-state_attr('sensor.well_energy_daily','friendly_name')}},
+      - service: notify.filenotify_waterdaily
+        data_template: 
+          message: >
+            {{-'Date & Time'}},
+            {{-state_attr('sensor.total_water_daily_used','friendly_name')}},{{state_attr('sensor.total_water_daily_used_cost','friendly_name')}},
+            {{-state_attr('sensor.icemaker_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.dishwasher_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.washing_machine_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.flowerbed_irrigation_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.garden_irrigation_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.pool_filler_water_daily_usage','friendly_name')}},
+            {{-state_attr('sensor.pond_filler_water_daily_usage','friendly_name')}},
+
+

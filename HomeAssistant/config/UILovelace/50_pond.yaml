@@ -14,6 +14,7 @@
     #- sensor.pond_ph
     - binary_sensor.pond_level_low
     - binary_sensor.pond_level_high
+    - binary_sensor.antifreeze_active
   cards:
     # - type: conditional
     #   conditions:
@@ -37,13 +38,13 @@
           state: "on"
       card:
         type: entities
-        title: Pond pump
+        title: Pond pumps
         show_header_toggle: false
         entities:
           - type: custom:fold-entity-row
             head: sensor.pondwaterfallpump_status
             entities:
-              - switch.pond_pump
+              - switch.pond_waterfall_pump
               - input_select.pondwaterfallpump_mode
 
     - type: conditional
@@ -58,9 +59,9 @@
           - type: custom:fold-entity-row
             head: binary_sensor.pondfiller_status
             entities:
-              - type: "custom:secondaryinfo-entity-row"
+              - type: custom:secondaryinfo-entity-row
                 entity: switch.pond_filler_valve
-                secondary_info: 'Time last 24h: [[ sensor.pond_filler_timer.attributes.value ]] / [[ if(input_number.pond_filler_runtime <= 0, "Unlimites", input_number.pond_filler_runtime) ]] minutes'
+                secondary_info: 'Time last 24h: [[ sensor.pond_filler_timer.state ]]h / [[ if(input_number.pond_filler_runtime.state <= 0, "Unlimites", input_number.pond_filler_runtime.state) ]] minutes'
               - input_select.pondfiller_mode
               - binary_sensor.pond_level_low
               - binary_sensor.pond_level_high
@@ -70,8 +71,16 @@
                   - input_number.pond_filler_runtime
                   - input_number.pond_filler_start
                   - input_number.pond_filler_stop
-              #- automation.pond_filler_control
-              - type: "custom:button-entity-row"
+                  - sensor.pond_filler_timer
+                  - sensor.pond_filler_water_daily_usage
+              - type: custom:fold-entity-row
+                head: automation.pond_filler_force_start
+                entities:
+                  - input_boolean.pondfiller_start30m
+                  - input_boolean.pondfiller_start1h
+                  - input_boolean.pondfiller_start2h
+                  - input_boolean.pondfiller_cancel
+              - type: custom:button-entity-row
                 buttons:
                   - entity: input_boolean.pondfiller_start30m
                     name: 30 min

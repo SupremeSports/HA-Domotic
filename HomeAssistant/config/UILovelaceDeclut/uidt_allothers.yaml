@@ -1,0 +1,177 @@
+####################################################
+# LOVELACE DECLUTTERING                            #
+####################################################
+
+entity_issues: 
+  card:
+    type: custom:fold-entity-row
+    head:
+      type: custom:hui-markdown-card
+      style: |
+        ha-card {
+          box-shadow: 100px;
+          margin: 0px -16px -16px 0px;
+        }
+      content: |
+        #### [[name]]: {{state_attr('sensor.uun_ordered','[[id]]_count')}}
+    entities:
+      - type: custom:hui-markdown-card
+        style: |
+          ha-card {
+            box-shadow: none;
+            margin: 0px -16px -16px 0px;
+            color: var(--primary-color);
+          }
+        content: |
+          Count: {{state_attr('sensor.uun_ordered','[[id]]_count')}}
+          {{state_attr('sensor.uun_ordered','[[id]]_entities')}}
+
+anniversaries:
+  card:
+    type: "custom:secondaryinfo-entity-row"
+    entity: sensor.[[name]]_s_birthday
+    secondary_info: "Birthday: {{ as_timestamp(states.sensor.[[name]]_s_birthday.attributes.date) | timestamp_custom('%Y-%m-%d') }} => {{ states.sensor.[[name]]_s_birthday.attributes.current_years }} y/o"
+
+anniversaries_no_s:
+  card:
+    type: "custom:secondaryinfo-entity-row"
+    entity: sensor.[[name]]_birthday
+    secondary_info: "Birthday: {{ as_timestamp(states.sensor.[[name]]_birthday.attributes.date) | timestamp_custom('%Y-%m-%d') }} => {{ states.sensor.[[name]]_birthday.attributes.current_years }} y/o"
+
+collect:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.collect_[[name]]_week
+    entities:
+      - input_select.collect_[[name]]
+      - type: custom:fold-entity-row
+        head: sensor.collect_[[name]]_summer_mode
+        entities:
+          - type: "custom:button-entity-row"
+            buttons:
+              - entity: input_datetime.collect_[[name]]_start
+              - entity: input_datetime.collect_[[name]]_end
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Automations
+        entities:
+          - automation.publish_collect_notification
+          
+people_iphone_data:
+  card:
+    type: custom:fold-entity-row
+    head: device_tracker.life360_[[name]]
+    entities:
+      - type: conditional
+        conditions:
+          - entity: automation.heartbeat_seconds
+            state: '[[workplace]]'
+        row:
+          type: custom:fold-entity-row
+          head: sensor.workplace_[[name]]
+          entities:
+            - input_select.workplace_[[name]]
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Device Status
+        entities:
+          - sensor.iphone_de_[[name]]_battery_state
+          - sensor.iphone_de_[[name]]_battery_level
+          - sensor.iphone_de_[[name]]_connection_type
+          - sensor.iphone_de_[[name]]_activity
+          - sensor.iphone_de_[[name]]_ssid
+          - sensor.iphone_de_[[name]]_sim_1
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Device Position
+        entities:
+          - sensor.iphone_de_[[name]]_last_update_trigger
+          - sensor.iphone_de_[[name]]_distance_home
+          - sensor.iphone_de_[[name]]_geocoded_location
+          - sensor.iphone_de_[[name]]_location_time
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Owner's Health
+        entities:
+          - sensor.iphone_de_[[name]]_distance
+          - sensor.iphone_de_[[name]]_steps
+          - sensor.iphone_de_[[name]]_average_active_pace
+          - sensor.iphone_de_[[name]]_floors_ascended
+          - sensor.iphone_de_[[name]]_floors_descended
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Others
+        entities:
+          - binary_sensor.workday_[[name]]
+          - type: custom:decluttering-card
+            template: anniversaries
+            variables: 
+              - name: '[[name]]'
+      - type: conditional
+        conditions:
+          - entity: automation.heartbeat_seconds
+            state: '[[jean]]'
+        row:
+          type: custom:fold-entity-row
+          head:
+            type: section
+            label: Automations
+          entities:
+            - automation.lexus_morning_start
+            - automation.lexus_lock_at_home
+            - automation.lexus_office_start_reminder
+            - input_datetime.lexus_morning_start
+      - type: conditional
+        conditions:
+          - entity: automation.heartbeat_seconds
+            state: '[[cindy]]'
+        row:
+          type: custom:fold-entity-row
+          head:
+            type: section
+            label: Automations
+          entities:
+            - automation.journey_lock_at_home
+      - type: conditional
+        conditions:
+          - entity: automation.heartbeat_seconds
+            state: '[[jean]]'
+        row:
+          type: custom:fold-entity-row
+          head:
+            type: section
+            label: Ring Jean
+          entities:
+            - entity: script.ring_jean
+              secondary_info: last-triggered
+              action_name: RING JEAN
+            - input_text.ring_jean
+            
+people_ipad_data:
+  card:
+    type: custom:fold-entity-row
+    head: device_tracker.ipad_de_[[name]]
+    entities:
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Device Status
+        entities:
+          - sensor.ipad_de_[[name]]_battery_state
+          - sensor.ipad_de_[[name]]_battery_level
+          - sensor.ipad_de_[[name]]_connection_type
+          - sensor.ipad_de_[[name]]_activity
+          - sensor.ipad_de_[[name]]_ssid
+      - type: custom:fold-entity-row
+        head:
+          type: section
+          label: Device Position
+        entities:
+          - device_tracker.ipad_de_[[name]]
+          - sensor.ipad_de_[[name]]_last_update_trigger
+          - sensor.ipad_de_[[name]]_geocoded_location

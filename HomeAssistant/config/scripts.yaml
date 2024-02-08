@@ -4,11 +4,15 @@
 
   none:
     alias: Dummy Script
-    sequence:
-      - delay:
-          milliseconds: 1
-      
-  clear_lock:
+    mode: queued
+    max: 25
+    sequence: []
+    # sequence:
+      # - delay:
+          # milliseconds: 1
+
+#DOOR Lock & Unlock
+  clear_locks:
     alias: Clear Lock Script
     sequence:
       - service: input_text.set_value
@@ -18,6 +22,8 @@
       - delay: 00:00:01
       - service: input_boolean.turn_off
         entity_id: group.locks
+      - service: input_boolean.turn_off
+        entity_id: group.garagedoors
 
   lock:
     alias: Lock Script
@@ -26,7 +32,7 @@
         data_template:
           entity_id: lock.{{ entity_id }}_lock
       - service: script.turn_on
-        entity_id: script.clear_lock
+        entity_id: script.clear_locks
           
   unlock:
     alias: Unlock Script
@@ -35,7 +41,7 @@
         data_template:
           entity_id: lock.{{ entity_id }}_lock
       - service: script.turn_on
-        entity_id: script.clear_lock
+        entity_id: script.clear_locks
            
   lockall:
     alias: Lock ALL Script
@@ -44,36 +50,132 @@
         entity_id: group.all_locks
       - delay: 00:00:01
       - service: script.turn_on
-        entity_id: script.clear_lock
-           
-  clear_garagedoor:
-    alias: Clear Garage Door Script
+        entity_id: script.clear_locks
+
+#DOMAINS "turn_on" & "turn_off"
+  switch_turn_on:
+    alias: Switch Turn ON
+    mode: queued
+    max: 25
     sequence:
-      - service: input_text.set_value
-        data_template:
-          entity_id: input_text.doorlock_passcode
-          value: ""
-      - delay: 00:00:01
-      - service: input_boolean.turn_off
-        entity_id: group.garagedoors
-  
-  garagedoor:
-    alias: Garage Door Script
+      - variables:
+          current_state: >
+            {{ states('switch.'~entity_id) }}
+      - if: "{{ current_state != 'on' }}"
+        then:
+          - alias: "Then turn switch on"
+            service: switch.turn_on
+            data_template:
+              entity_id: switch.{{ entity_id }}
+  switch_turn_off:
+    alias: Switch Turn OFF
+    mode: queued
+    max: 25
     sequence:
-      - service: cover.toggle
-        data_template:
-          entity_id: cover.{{ entity_id }}_opener
-      - service: script.turn_on
-        entity_id: script.clear_garagedoor
-        
-  # garagedoor_close:
-    # alias: Garage Door Close Script
+      - variables:
+          current_state: >
+            {{ states('switch.'~entity_id) }}
+      - if: "{{ current_state != 'off' }}"
+        then:
+          - alias: "Then turn switch off"
+            service: switch.turn_off
+            data_template:
+              entity_id: switch.{{ entity_id }}
+
+  light_turn_on:
+    alias: Light Turn ON
+    mode: queued
+    max: 25
+    sequence:
+      - variables:
+          current_state: >
+            {{ states('light.'~entity_id) }}
+      - if: "{{ current_state != 'on' }}"
+        then:
+          - alias: "Then turn light on"
+            service: light.turn_on
+            data_template:
+              entity_id: light.{{ entity_id }}
+  light_turn_off:
+    alias: Light Turn OFF
+    mode: queued
+    max: 25
+    sequence:
+      - variables:
+          current_state: >
+            {{ states('light.'~entity_id) }}
+      - if: "{{ current_state != 'off' }}"
+        then:
+          - alias: "Then turn light off"
+            service: light.turn_off
+            data_template:
+              entity_id: light.{{ entity_id }}
+              
+  cover_open:
+    alias: Cover Open
+    mode: queued
+    max: 25
+    sequence:
+      - variables:
+          current_state: >
+            {{ state_attr('cover.'~entity_id,'current_position')|float(100) }}
+      - if: "{{ current_state < 100 }}"
+        then:
+          - alias: "Then open cover"
+            service: cover.open_cover
+            data_template:
+              entity_id: cover.{{ entity_id }}
+  cover_close:
+    alias: Cover Close
+    mode: queued
+    max: 25
+    sequence:
+      - variables:
+          current_state: >
+            {{ state_attr('cover.'~entity_id,'current_position')|float(0) }}
+      - if: "{{ current_state > 0 }}"
+        then:
+          - alias: "Then close cover"
+            service: cover.close_cover
+            data_template:
+              entity_id: cover.{{ entity_id }}
+  cover_position:
+    alias: Cover Position
+    mode: queued
+    max: 25
+    sequence:
+      - variables:
+          current_state: >
+            {{ state_attr('cover.'~entity_id,'current_position')|float(-1) }}
+          requested_position: >
+            {{ open_percent|int(-1) }}
+      - if: "{{ current_state != requested_position and current_state >= 0 and requested_position >= 0 }}"
+        then:
+          - alias: "Then set cover to position"
+            service: cover.set_cover_position
+            data_template:
+              entity_id: cover.{{ entity_id }}
+              position: "{{ requested_position }}"
+
+# GARAGE DOOR
+  # garagedoor:
+    # alias: Garage Door Script
     # sequence:
-      # - service: cover.close_cover
+      # - service: cover.toggle
         # data_template:
           # entity_id: cover.{{ entity_id }}_opener
       # - service: script.turn_on
-        # entity_id: script.clear_garagedoor
+        # entity_id: script.clear_locks
+        
+  garagedoor_ctrl:
+    alias: Garage Door Control Script
+    sequence:
+      - service: script.turn_on
+        entity_id: script.clear_locks
+      - condition: template
+        value_template: "{{ ok }}"
+      - service: mqtt.publish
+        data_template: {"topic": "{{ topic_prefix }}/Cmd", "payload": "{\"{{ command }}\": \"ON\"}"}
 
   cars:
     alias: Cars Script
@@ -88,7 +190,7 @@
     alias: Control Boxes Script
     sequence:
       - service: mqtt.publish
-        data_template: {"topic": "{{ entity_id }}/Cmd", "payload": "{\"reset\": \"ON\"}"}
+        data_template: {"topic": "{{ topic_prefix }}/Cmd", "payload": "{\"reset\": \"ON\"}"}
       - delay: 00:00:01
       - service: input_boolean.turn_off
         entity_id: group.control_boxes
@@ -128,12 +230,33 @@
         data:
           title: "New Home Assistant version"
           message: |
-            New Home Assistant version {{ states.sensor.ha_latest_version.state}} is available for download.
+            New Home Assistant version {{ state_attr('update.ha_update','latest_version') }} is available for download.
             
-            You are currently running {{ states.sensor.ha_installed_version.state}}.
+            You are currently running {{ state_attr('update.ha_update','installed_version') }}.
             
-            ## Release Notes
-            https://home-assistant.io/blog/categories/release-notes/
+            [**Release notes**](https://home-assistant.io/blog/categories/release-notes/)
+            [**Update Home Assistant Core**](http://supremesports.duckdns.org:8123/hassio/update-available/core)
+            
+  addons_update_available:
+    alias: New Add-ons version
+    sequence:
+      - service: persistent_notification.create
+        data:
+          title: "New Add-ons version"
+          message: >
+            The following add-ons have a new version available for download.
+            
+            
+            [**Go to Supervisor**](http://supremesports.duckdns.org:8123/hassio/dashboard)
+            
+            
+            {% for entity_id in states.group.addons.attributes.entity_id %}
+              {%- set parts = entity_id.split('.') %}
+              {%- if states(entity_id) == 'Update available' or states(entity_id) == 'Major update' %}
+                {{-states[parts[0]][parts[1]].attributes.friendly_name}}: {{states[parts[0]][parts[1]].attributes.current}} ==> {{states[parts[0]][parts[1]].attributes.latest}}
+                {{- '\n' -}}
+              {%- endif %}
+            {%- endfor %}
           
   # rain_count:
     # alias: Rain Count
@@ -250,63 +373,24 @@
       - service: input_boolean.turn_off
         entity_id: input_boolean.pondfiller_cancel
         
+  lights_doors_alert_pause30m:
+    alias: Lights & Doors Pause 30m
+    sequence:
+      - delay: 00:30:00
+      - service: input_boolean.turn_off
+        entity_id: input_boolean.lights_doors_alerts_pause_30min
+        
   update_entities:
     alias: Update entities
     sequence:
+      - service: button.press
+        entity_id: button.jgau_pc_publishallsensors
+      - delay: 00:00:02
       - service: python_script.issues
       - service: python_script.count
-      
-  # pool_slide_off:
-    # alias: Turn Slide Off
-    # sequence:
-      # - alias: "Turn ON valve main 24V power"
-        # service: switch.turn_on
-        # entity_id: switch.pool_control_valves
-      # - alias: "Wait for valve to turn ON"
-        # wait_for_trigger:
-          # - platform: state
-            # entity_id: switch.pool_control_valves
-            # to: "on"
-            # for: 1
-      # - alias: "Turn OFF pool pump for slide when turning OFF"
-        # service: input_boolean.turn_on
-        # entity_id: input_boolean.poolpump_force_off
-      # - alias: "Wait for pool pump to stop"
-        # wait_for_trigger:
-          # - platform: state
-            # entity_id: sensor.poolpump_status
-            # to: "Off"
-            # for: 1
-      # - alias: "Move Slide valve to DRAIN position (50%)"
-        # service: mqtt.publish
-        # data_template:
-          # topic: "Pool/Control/Cmd"
-          # payload: '{"slide":50}'
-          # qos: 0
-          # retain: false
-      # - alias: "Wait for piping to drain"
-        # delay: 00:00:15
-      # - alias: "Turn ON valve main 24V power"
-        # service: switch.turn_on
-        # entity_id: switch.pool_control_valves
-      # - alias: "Wait for valve to turn ON again"
-        # wait_for_trigger:
-          # - platform: state
-            # entity_id: switch.pool_control_valves
-            # to: "on"
-            # for: 1
-      # - alias: "Move Slide valve to OFF position (0%)"
-        # service: mqtt.publish
-        # data_template:
-          # topic: "Pool/Control/Cmd"
-          # payload: '{"slide":0}'
-          # qos: 0
-          # retain: false
-      # - alias: "Wait for valve to position"
-        # delay: 00:00:05
-      # - alias: "Turn OFF valve main 24V power"
-        # service: switch.turn_off
-        # entity_id: switch.pool_control_valves
-      # - alias: "Turn pool pump back ON"
-        # service: input_boolean.turn_off
-        # entity_id: input_boolean.poolpump_force_off
+
+  ring_jean:
+    alias: Ring Jean
+    sequence:
+      - service: input_button.press
+        entity_id: input_button.ring_jean

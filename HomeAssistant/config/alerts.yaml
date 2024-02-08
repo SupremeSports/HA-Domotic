@@ -5,10 +5,22 @@
   garage_door_alert:
     name: Garage is open
     done_message: Garage is closed
-    entity_id: binary_sensor.garage_door_opened
+    entity_id: binary_sensor.garage_cd_opened
     state: 'on'
     repeat: 30
     can_acknowledge: true
     skip_first: false
     notifiers:
-      - sms
+      - sms_dummy
+      #- sms_jean
+      
+  # storage_room_alert:
+  #   name: Storage Room Light ON Immediate
+  #   entity_id: switch.storage_room_light
+  #   state: "on"
+  #   repeat: 5
+  #   can_acknowledge: true
+  #   skip_first: true
+  #   message: "Storage Room Light Remained On"
+  #   notifiers:
+  #     - iphone_de_jean

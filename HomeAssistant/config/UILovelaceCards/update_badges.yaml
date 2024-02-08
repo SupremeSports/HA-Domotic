@@ -1,0 +1,90 @@
+#HA Core
+      type: entity-filter
+      entities:
+        - entity: sensor.ha_update_available
+          icon: mdi:cloud-check
+          state_filter:
+            - 'Up-to-date'
+          style: |
+            :host {
+              --label-badge-text-color: green;
+            }
+            
+        - entity: sensor.ha_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Major update'
+            - 'Stopped'
+          style: |
+            :host {
+              --label-badge-text-color: red;
+            }
+        - entity: sensor.ha_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Update available'
+          style: |
+            :host {
+              --label-badge-text-color: orange;
+            }
+        - entity: sensor.ha_update_available
+          icon: mdi:cloud-sync
+          state_filter:
+            - 'Updating'
+          style: |
+            :host {
+              --label-badge-text-color: yellow;
+            }
+        - entity: sensor.ha_update_available
+          icon: mdi:cloud-question
+          state_filter:
+            - 'unavailable'
+            - 'Unavailable'
+            - 'unknown'
+            - 'Unknown'
+            - 'none'
+            - 'None'
+          style: |
+            :host {
+              --label-badge-text-color:  var(--state-icon-unavailable-color);
+            }
+#Addons
+        - entity: sensor.addons_update_available
+          icon: mdi:cloud-check
+          state_filter:
+            - 'Up-to-date'
+          style: |
+            :host {
+              --label-badge-text-color: green;
+            }
+        - entity: sensor.addons_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Major update'
+            - 'Stopped'
+            - 'Update available'
+          style: |
+            :host {
+              --label-badge-text-color: red;
+            }
+        - entity: sensor.addons_update_available
+          icon: mdi:cloud-sync
+          state_filter:
+            - 'Updating'
+          style: |
+            :host {
+              --label-badge-text-color: yellow;
+            }
+        - entity: sensor.addons_update_available
+          icon: mdi:cloud-question
+          state_filter:
+            - 'unavailable'
+            - 'Unavailable'
+            - 'unknown'
+            - 'Unknown'
+            - 'none'
+            - 'None'
+          style: |
+            :host {
+              --label-badge-text-color:  var(--state-icon-unavailable-color);
+            }

@@ -1,0 +1,55 @@
+###################################################
+# COMMAND LINE - ALL OTHERS                       #
+###################################################
+
+# BINARY_SENSORS
+  # - binary_sensor:
+      # name: Camera Motion - PoolArea
+      # scan_interval: 5
+      # device_class: motion
+      # payload_on: "true"
+      # payload_off: "false"
+      # command: 'curl -s http://192.168.1.250:8080/getobjectlist | grep "Pool Area" | cut -d , -f 11'
+      
+  - binary_sensor:
+      name: Recorder Fault Detected
+      scan_interval: 15
+      device_class: problem
+      payload_on: "ON"
+      payload_off: "OFF"
+      command: 'xyz=`cat home-assistant.log | grep -ic "Setup failed for recorder"`; if [ $xyz -gt 0 ]; then echo ON; else echo OFF; fi'
+      
+  # - binary_sensor:
+      # name: WavLink Access Point TEST
+      # command: ping -W 1 -c 1 192.168.0.4 > /dev/null 2>&1 && echo success || echo fail
+      # device_class: connectivity
+      # payload_on: "success"
+      # payload_off: "fail"
+      # scan_interval: 30
+
+
+# SENSORS
+  - sensor:
+      name: ha_timezone
+      command: "sh tz_convert.sh {{ now().tzinfo }}"
+      value_template: "{{ value | float(-5.0) | multiply(0.01) }}"
+    
+  - sensor:
+      name: iphone_de_jean_timezone
+      command: "sh tz_convert.sh {{ state_attr('sensor.iphone_de_jean_geocoded_location', 'Time Zone') }}"
+      value_template: "{{ value | float(-5.0) | multiply(0.01) }}"
+    
+  - sensor:
+      name: iphone_de_cindy_timezone
+      command: "sh tz_convert.sh {{ state_attr('sensor.iphone_de_cindy_geocoded_location', 'Time Zone') }}"
+      value_template: "{{ value | float(-5.0) | multiply(0.01) }}"
+
+
+# SWITCHES
+  # - switch:
+      # name: Camera - PoolArea
+      # command_on: 'curl "http://192.168.1.250:8080/bringonline?ot=2&oid=1"'
+      # command_off: 'curl "http://192.168.1.250:8080/takeoffline?ot=2&oid=1"'
+      # command_state: 'curl -s http://192.168.1.250:8080/getobjectlist | grep "Pool Area" | cut -d , -f 5'
+      # value_template: '{{ value == "Online" }}'
+        

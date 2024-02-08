@@ -15,63 +15,67 @@
       - platform: state
         entity_id: input_select.poolpump_mode
     action:
-      entity_id: switch.pool_pump
+      data:
+        entity_id: "pool_pump"
       service_template: >
         {% set curHour = now().hour %}
         {% set curWeekday = now().weekday() %}
-        {% set PP = false %}
+        {% set input_select = states('input_select.poolpump_mode') %}
+        {% set antifreeze = is_state('binary_sensor.antifreeze_active', 'on')  %}
         
-        {% if is_state('input_select.poolpump_mode', '24/7') %}
-          {% set PP = true %}
-        {% elif is_state('input_select.poolpump_mode', 'Spring') %}
+        {% set output = false %}
+        
+        {% if input_select == '24/7' %}
+          {% set output = true %}
+        {% elif input_select == 'Spring' %}
           {% if curHour >= 8 and curHour < 20 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% elif curHour >= 0 and curHour < 4 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% endif %}
-        {% elif is_state('input_select.poolpump_mode', 'Summer') %}
+        {% elif input_select == 'Summer' %}
           {% if curWeekday in (0,1,2,3,6) %}
             {% if curHour >= 8 and curHour < 21 %}
-              {% set PP = true %}
+              {% set output = true %}
             {% elif curHour >= 0 and curHour < 4 %}
-              {% set PP = true %}
+              {% set output = true %}
             {% endif %}
           {% else %}
             {% if curHour >= 8 and curHour < 21 %}
-              {% set PP = true %}
+              {% set output = true %}
             {% elif curHour >= 0 and curHour < 4 %}
-              {% set PP = true %}
+              {% set output = true %}
             {% endif %}
           {% endif %}
-        {% elif is_state('input_select.poolpump_mode', 'Autumn') %}
+        {% elif input_select == 'Autumn' %}
           {% if curHour >= 2 and curHour < 6 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% elif curHour >= 9 and curHour < 11 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% elif curHour >= 14 and curHour < 16 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% elif curHour >= 21 and curHour < 23 %}
-            {% set PP = true %}
+            {% set output = true %}
           {% endif %}
         {% endif %}
         
-        {% if not is_state('input_select.poolpump_mode', 'Winter/Off') and is_state('binary_sensor.antifreeze_active', 'on') %}
-          {% set PP = true %}
+        {% if input_select != 'Winter/Off' and antifreeze %}
+          {% set output = true %}
         {% endif %}
         
-        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_low.last_changed) %}
+        {% set lastLevel = as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_low.last_changed, default=0) %}
         {% if is_state('binary_sensor.pool_level_low', 'off') and lastLevel >= 120 %}
-          {% set PP = false %}
+          {% set output = false %}
         {% endif %}
         
         {% if is_state('input_boolean.poolpump_force_off', 'on') %}
-          {% set PP = false %}
+          {% set output = false %}
         {% endif %}
         
-        {% if PP == true %}
-          switch.turn_on
+        {% if output %}
+          script.switch_turn_on
         {% else %}
-          switch.turn_off
+          script.switch_turn_off
         {% endif %}
         
 ######## POOL HEATER ########
@@ -85,22 +89,25 @@
       - platform: state
         entity_id: input_select.poolheat_mode
     action:
-      entity_id: switch.pool_heater
+      data:
+        entity_id: "pool_heater"
       service_template: >
         {% set curHour = now().hour %}
         {% set curWeekday = now().weekday() %}
-        {% set PH = false %}
+        {% set input_select = states('input_select.poolheat_mode') %}
         
-        {% if is_state('input_select.poolheat_mode', '24/7') %}
-          {% set PH = true %}
-        {% elif is_state('input_select.poolheat_mode', 'Auto') %}
-          {% set PH = true %}
+        {% set output = false %}
+        
+        {% if input_select == '24/7' %}
+          {% set output = true %}
+        {% elif input_select == 'Auto' %}
+          {% set output = true %}
         {% endif %}
         
-        {% if PH == true %}
-          switch.turn_on
+        {% if output %}
+          script.switch_turn_on
         {% else %}
-          switch.turn_off
+          script.switch_turn_off
         {% endif %}
         
 ######## POOL REFILL ########
@@ -109,7 +116,7 @@
   #Pool pump mode shall not be in Winter mode
   #Filler valve can't operate more than 'maxDailyTime' per 24h period
     #Unless it is set to 0 or -1, then there's unlimited daily time
-  #Filler will start 'delayStart' minutes after level been below the high level and stop 'delayStop' minutes after it has been reached and maintained
+  #Filler will start 'delayStart' minutes after level been below the high level and stop after it has been reached and maintained for 'delayStop' minutes 
     #If you want to stop it, simply turn off filler valve (high level sensor MUST be ON otherwise filler valve will turn on again)
   - alias: Pool Filler Control
     mode: restart
@@ -120,148 +127,98 @@
       - condition: template
         value_template: "{{ not is_state('input_select.poolfiller_mode', 'Manual') }}"
     action:
-      entity_id: switch.pool_filler_valve
+      data:
+        entity_id: "pool_filler_valve"
       service_template: >
-        {% set lastLevel = (as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed))/60 %}
+        {% set lastLevel = (as_timestamp(now()) - as_timestamp(states.binary_sensor.pool_level_high.last_changed, default=0))/60 %}
         {% set lastStateOff = is_state('binary_sensor.pool_level_high', 'off') %}
         {% set lastSwitch = is_state('switch.pool_filler_valve', 'on') %}
-        {% set lastDay = states('sensor.pool_filler_timer')|float %}
+        {% set lastDay = states('sensor.pool_filler_timer')|float(1000) %}
         {% set poolRunning = is_state('input_boolean.pool_running', 'on') %}
-        {% set delayStart = states('input_number.pool_filler_start')|int %}
-        {% set delayStop = states('input_number.pool_filler_stop')|int %}
+        {% set delayStart = states('input_number.pool_filler_start')|int(0) %}
+        {% set delayStop = states('input_number.pool_filler_stop')|int(0) %}
         
-        {% if states('input_number.pool_filler_runtime')|int <= 0 %}
+        {% if states('input_number.pool_filler_runtime')|int(60) <= 0 %}
           {% set maxDailyTime = 25 %}
         {% else %}
-          {% set maxDailyTime = states('input_number.pool_filler_runtime')|int/60 %}
+          {% set maxDailyTime = states('input_number.pool_filler_runtime')|int(0)/60 %}
         {% endif %}
         
-        {% set PF = false %}
+        {% set output = false %}
         
         {% if lastSwitch %}
           {% if lastStateOff %}
-            {% set PF = true %}
+            {% set output = true %}
           {% elif lastLevel <= delayStop %}
-            {% set PF = true %}
+            {% set output = true %}
           {% endif %}
         {% elif lastStateOff and lastLevel >= delayStart and lastDay <= ((maxDailyTime*60-delayStop)/60) %}
-          {% set PF = true %}
+          {% set output = true %}
         {% endif %}
         
         {% if lastDay >= maxDailyTime %}
-          {% set PF = false %}
+          {% set output = false %}
         {% elif is_state('input_select.poolfiller_mode', 'Winter/Off') or is_state('input_select.poolpump_mode', 'Winter/Off') %}
-          {% set PF = false %}
+          {% set output = false %}
         {% elif is_state('binary_sensor.pool_level_high', 'unavailable') %}
-          {% set PF = false %}
+          {% set output = false %}
         {% elif is_state('group.irrigation', 'on') %}
-          {% set PF = false %}
+          {% set output = false %}
         {% endif %}
                 
-        {% if PF == true and poolRunning %}
-          switch.turn_on
-        {% else %}
-          switch.turn_off
+        {% if not poolRunning %}
+          {% set output = false %}
         {% endif %}
         
-######## POOL VALVES ########
-
-  - alias: "Pool Valves Adjust"
-    mode: restart
-    trigger:
-      - platform: state
-        entity_id: input_number.pool_drain_percent
-      - platform: state
-        entity_id: input_number.pool_heater_percent
-      - platform: state
-        entity_id: input_number.pool_slide_percent
-    action:
-    - service: mqtt.publish
-      data_template:
-        topic: "Pool/Control/Cmd"
-        payload_template: '{"drain":"{{states.input_number.pool_drain_percent.state}}","heatp":"{{states.input_number.pool_heater_percent.state}}","slide":"{{states.input_number.pool_slide_percent.state}}"}'
-        qos: 0
-        retain: false
-        
-  # - alias: "Pool Drain Adjust"
-    # mode: restart
-    # trigger:
-      # platform: state
-      # entity_id: input_number.pool_drain_percent
-    # action:
-    # - service: mqtt.publish
-      # data_template:
-        # topic: "Test/Control/Cmd"
-        # payload: '{"drain":{{ trigger.to_state.state | int }}}'
-        # qos: 0
-        # retain: false
-        
-  # - alias: "Pool Heatpump Adjust"
-    # trigger:
-      # platform: state
-      # entity_id: input_number.pool_heater_percent
-    # action:
-    # - service: mqtt.publish
-      # data_template:
-        # topic: "Test/Control/Cmd"
-        # payload: '{"heatp":{{ trigger.to_state.state | int }}}'
-        # qos: 0
-        # retain: false
-        
-  # - alias: "Pool Valves Adjust"
-    # mode: restart
-    # trigger:
-      # - platform: state
-        # entity_id: input_select.pool_drain_skimmer_mode
-      # - platform: state
-        # entity_id: input_select.pool_heater_mode
-      # - platform: state
-        # entity_id: input_select.pool_slide_mode
-    # action:
-      # - alias: "Turn ON valve main 24V power"
-        # entity_id: switch.pool_control_valves
-        # service: switch.turn_on
-      # - alias: "Wait for valve to turn ON"
-        # wait_for_trigger:
-          # - platform: state
-            # entity_id: switch.pool_control_valves
-            # to: "on"
-            # for: 1
-      # - alias: "Turn OFF pool pump for slide when turning OFF"
-        # entity_id: input_boolean.poolpump_force_off
-        # service_template: >
-          # {% set newOffRequest = is_state('input_select.pool_slide_mode', 'Off') %}
-          # {% set prevState = states('input_number.pool_slide_percent')|int != 0 %}
-          
-          # {% set PFO = false %}
-          
-          # {% if newOffRequest and prevState %}
-            # {% set PFO = true %}
-          # {% endif %}
-                  
-          # {% if PFO == true %}
-            # input_boolean.turn_on
-          # {% else %}
-            # input_boolean.turn_off
-          # {% endif %}
-      # - alias: "Wait until pool pump is stopped"
-        # wait_template: "{{ (is_state('sensor.poolpump_status', 'Off') and is_state('input_select.pool_slide_mode', 'Off')) or is_state('input_select.pool_slide_mode', 'On') or states('input_number.pool_slide_percent')|int == 0}}"
-      # - alias: "Move Slide valve to drain"
-        # service: mqtt.publish
-        # data_template:
-          # topic: "Test/Control/Cmd"
-          # payload: '{"slide":50}'
-          # qos: 0
-          # retain: false
+        {% if output %}
+          script.switch_turn_on
+        {% else %}
+          script.switch_turn_off
+        {% endif %}
         
 ######## POOL CLOCK ########
+
+  #Devices to turn ON when cover is removed
+  - alias: Pool Auto Controls
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: '/5'
+    action:
+      - data:
+          entity_id: "pool_clock"
+        service_template: >
+          {% set cover_removed = is_state('binary_sensor.pool_cover','on') %}
+          {% set poolRunning = is_state('input_boolean.pool_running','on') %}
+          
+          {% set output = cover_removed and poolRunning %}
+          
+          {% if output %}
+            script.light_turn_on
+          {% else %}
+            script.light_turn_off
+          {% endif %}
+      - data:
+          entity_id: "pool_water_rgb"
+        service_template: >
+          {% set sun_down = is_state('sun.sun','below_horizon') %}
+          {% set cover_removed = is_state('binary_sensor.pool_cover','on') %}
+          {% set poolRunning = is_state('input_boolean.pool_running','on') %}
+          
+          {% set output = sun_down and cover_removed and poolRunning %}
+          
+          {% if output %}
+            script.light_turn_on
+          {% else %}
+            script.light_turn_off
+          {% endif %}
         
   #Input Text Changes Trigger
-  - alias: Pool Top Text Change
+  - alias: Pool Clock Top Text Change
     mode: restart
     trigger:
       platform: state
-      entity_id: input_text.pool_text_top
+      entity_id: input_text.pool_clock_text_top
     action:
     - service: mqtt.publish
       data_template:
@@ -270,11 +227,11 @@
         qos: 0
         retain: false
         
-  - alias: Pool Bottom Text Change
+  - alias: Pool Clock Bottom Text Change
     mode: restart
     trigger:
       platform: state
-      entity_id: input_text.pool_text_bottom
+      entity_id: input_text.pool_clock_text_bottom
     action:
     - service: mqtt.publish
       data_template:
@@ -292,7 +249,7 @@
     - service: mqtt.publish
       data_template:
         topic: "Pool/Clock/Cmd"
-        payload: '{"scroll":{{ trigger.to_state.state | int }}}'
+        payload: '{"scroll":{{ trigger.to_state.state | int(0) }}}'
         qos: 0
         retain: false
         
@@ -305,7 +262,7 @@
     - service: mqtt.publish
       data_template:
         topic: "Pool/Clock/LED/Cmd"
-        payload: '{"transition":{{ trigger.to_state.state | int }}}'
+        payload: '{"transition":{{ trigger.to_state.state | int(0) }}}'
         qos: 0
         retain: false
 
@@ -327,25 +284,32 @@
           qos: 0
           retain: false
 
-  - alias: Publish Pool Pressure Data
-    mode: restart
-    trigger:
-      - platform: time_pattern
-        minutes: '/1'
-      - platform: state
-        entity_id: sensor.pool_pressure
-      - platform: state
-        entity_id: sensor.pool_fd_status
-    action:
-      - service: mqtt.publish
-        data_template:
-          topic: "Pool/Pressure/Cmd"
-          payload_template: >
-            {% if is_state('sensor.pool_fd_status', 'Unlocked') or is_state('sensor.pool_fd_status', 'Ok') %}
-              {"state":"OFF", "wpsi":"{{states.sensor.pool_pressure.state}}"}
-            {% else %}
-              {"state":"ON", "wpsi":"{{states.sensor.pool_pressure.state}}"}
-            {% endif %}
-          qos: 0
-          retain: false
+#UNKNOWN USAGE
+  # - alias: Publish Pool Pressure Data
+    # mode: restart
+    # trigger:
+      # - platform: time_pattern
+        # minutes: '/1'
+      # - platform: state
+        # entity_id: sensor.pool_pressure
+      # - platform: state
+        # entity_id: sensor.pool_fd_status
+    # action:
+      # - service: mqtt.publish
+        # data_template:
+          # topic: "Pool/Pressure/Cmd"
+          # # payload_template: >
+            # # {% if is_state('sensor.pool_fd_status', 'Unlocked') or is_state('sensor.pool_fd_status', 'Ok') %}
+              # # {"state":"OFF", "wpsi":"{{states.sensor.pool_pressure.state}}"}
+            # # {% else %}
+              # # {"state":"ON", "wpsi":"{{states.sensor.pool_pressure.state}}"}
+            # # {% endif %}
+          # payload_template: >
+            # {% if is_state('sensor.pool_fd_status', 'Unlocked') or is_state('sensor.pool_fd_status', 'Ok') %}
+              # {"state":"OFF", "wpsi":"{{states('sensor.pool_pressure')}}"}
+            # {% else %}
+              # {"state":"ON", "wpsi":"{{states('sensor.pool_pressure')}}"}
+            # {% endif %}
+          # qos: 0
+          # retain: false
           

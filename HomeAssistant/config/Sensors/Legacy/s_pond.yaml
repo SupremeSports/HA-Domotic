@@ -1,0 +1,23 @@
+####################################################
+# SENSORS - POND                                   #
+####################################################
+
+######### POND CONTROL - SENSORS #########
+      
+  - platform: statistics
+    name: Pond Temperature Stats
+    entity_id: sensor.pond_temperature_raw
+    state_characteristic: mean
+    sampling_size: 20 #DEFAULT
+    max_age:
+      minutes: 10
+    precision: 1
+
+  - platform: history_stats
+    name: Pond Filler Timer
+    entity_id: binary_sensor.pondfiller_status
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24

@@ -1,0 +1,26 @@
+####################################################
+# TEMPLATES - ASTRONOMY                            #
+####################################################
+
+  - name: Moon Phases
+    #unique_id: moon_phases
+    #icon: mdi:none
+    state: >
+      {{ states('sensor.moon').replace('_',' ') | title }}
+    picture: >
+      {% set state = states('sensor.moon').title().replace('_','').replace(' ','') %}
+      {{ '/local/images/MoonPhases/N{}.jpg'.format(state) }}
+
+  - name: Seasons
+    #unique_id: seasons
+    #icon: mdi:none
+    state: >
+      {{ states('sensor.season').replace('_',' ') | title }}
+    picture: >
+      {% set state = states('sensor.season') %}
+      {{ '/local/images/Seasons/Style1/{}.jpg'.format(state) }}
+    attributes:
+      days_left: "{{ states('sensor.season_days_left') }}"
+      days_in: "{{ states('sensor.season_days_in') }}"
+      next_season_start: "{{ states('sensor.season_next_start_date')|replace(',','') }}"
+      last_updated: "{{ as_timestamp(state_attr('sensor.season','last_updated'),0) | timestamp_custom('%Y-%m-%d %H:%M:%S') }}"

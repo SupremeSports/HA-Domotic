@@ -1,0 +1,717 @@
+####################################################
+# TEMPLATES - DOORS & LOCKS                        #
+####################################################
+
+######### HOUSE DOORS #########
+  - unique_id: house_fd_status
+    #name: House Front Door
+    availability: >
+      {{ not is_state('lock.house_fd_lock', 'unavailable') }}
+    state: >
+      {% set locked = is_state('lock.house_fd_lock', 'locked') %}
+      {% set closed = is_state('binary_sensor.house_fd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: House Front Door
+      #status: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #vcc_3v3: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.house_fd_lock') != 'unavailable' %}{{ state_attr('lock.house_fd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.house_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_fd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.house_fd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.house_fd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.house_fd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.house_fd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      bell: >
+        {% if is_state('binary_sensor.house_fd_bell', 'on') %}
+          True
+        {% elif is_state('binary_sensor.house_fd_bell', 'off') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+
+  - unique_id: house_sd_status
+    #name: House Side Door
+    availability: >
+      {{ not is_state('lock.house_sd_lock', 'unavailable') }}
+    state: >
+      {% set locked = is_state('lock.house_sd_lock', 'locked') %}
+      {% set closed = is_state('binary_sensor.house_sd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: House Side Door
+      #status: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #vcc_3v3: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.house_sd_lock') != 'unavailable' %}{{ state_attr('lock.house_sd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.house_sd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_sd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.house_sd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.house_sd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.house_sd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.house_sd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      bell: >
+        {% if is_state('binary_sensor.house_sd_bell', 'on') %}
+          True
+        {% elif is_state('binary_sensor.house_sd_bell', 'off') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+
+  - unique_id: house_bd_status
+    #name: House Back Door
+    availability: >
+      {{ not is_state('lock.house_bd_lock', 'unavailable') }}
+    state: >
+      {% set locked = is_state('lock.house_bd_lock', 'locked') %}
+      {% set unknown = is_state_attr('lock.house_bd_lock', 'locked', 'unknown') %}
+      {% set closed = is_state('binary_sensor.house_bd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: House Back Door
+      #status: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      vcc_3v3: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      ##battery:  "{% if states('lock.house_bd_lock') != 'unavailable' %}{{ state_attr('lock.house_bd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.house_bd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.house_bd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.house_bd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.house_bd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      bell: >
+        {% if is_state('binary_sensor.house_bd_bell', 'on') %}
+          True
+        {% elif is_state('binary_sensor.house_bd_bell', 'off') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      MQTT_timer: "{% if states('binary_sensor.house_bd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_bd_opened', 'reset')|float(0) | int(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+        
+  - unique_id: house_mbd_status
+    #name: House Master Bedroom Back Door
+    availability: >
+      {{ not is_state('lock.house_mbd_lock', 'unavailable') }}
+    state: >
+      {% set locked = is_state('lock.house_mbd_lock', 'locked') %}
+      {% set unknown = is_state_attr('lock.house_mbd_lock', 'locked', 'unknown') %}
+      {% set closed = is_state('binary_sensor.house_mbd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: House Master Bedroom Back Door
+      #status: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      vcc_3v3: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      ##battery:  "{% if states('lock.house_mbd_lock') != 'unavailable' %}{{ state_attr('lock.house_mbd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.house_mbd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.house_mbd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.house_mbd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.house_mbd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.house_mbd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.house_mbd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+
+######### GARAGE DOORS #########
+
+  - unique_id: garage_fd_status
+    #name: Garage Front Door
+    availability: >
+      {{ not is_state('lock.garage_fd_lock', 'unavailable') }}
+    state: >
+      {% set locked = is_state('lock.garage_fd_lock', 'locked') %}
+      {% set closed = is_state('binary_sensor.garage_fd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Garage Front Door
+      #status: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #vcc_3v3: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.garage_fd_lock') != 'unavailable' %}{{ state_attr('lock.garage_fd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.garage_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_fd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.garage_fd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.garage_fd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.garage_fd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.garage_fd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      bell: >
+        {% if is_state('binary_sensor.garage_fd_bell', 'on') %}
+          True
+        {% elif is_state('binary_sensor.garage_fd_bell', 'off') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+        
+  - unique_id: garage_bd_status
+    #name: Garage Back Door
+    availability: >
+      {{ not is_state('binary_sensor.garage_bd_opened', 'unavailable') and not is_state('binary_sensor.garage_bd_locked', 'unavailable') }}
+    state: >
+      {% set locked = is_state('binary_sensor.garage_bd_locked', 'off') %}
+      {% set closed = is_state('binary_sensor.garage_bd_opened', 'off') %}
+      
+      {% if closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Garage Back Door
+      locked: >
+        {% if is_state('binary_sensor.garage_bd_locked', 'off') %}
+          True
+        {% elif is_state('binary_sensor.garage_bd_locked', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.garage_bd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.garage_bd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+        
+  - unique_id: garage_cd_status
+    #name: Garage Car Door
+    availability: >
+      {{ not is_state('cover.garage_cd_opener', 'unavailable') and not is_state('sensor.garage_cd_raw', 'unavailable') }}
+    state: >
+      {% set fullOpen = is_state_attr('sensor.garage_cd_raw', 'opened', 'ON') %}
+      {% set closed = is_state_attr('sensor.garage_cd_raw', 'closed', 'ON') %}
+      {% set manual = is_state_attr('sensor.garage_cd_raw', 'manual', 'ON') %}
+      {% set locked = is_state_attr('sensor.garage_cd_raw', 'locked', 'ON') %}
+      {% set opening = is_state_attr('sensor.garage_cd_raw', 'opening', 'ON') %}
+      {% set closing = is_state_attr('sensor.garage_cd_raw', 'closing', 'ON') %}
+      
+      {% if opening %}
+        Opening
+      {% elif closing %}
+        Closing
+      {% elif manual %}
+        Manual Operation
+      {% elif not closed and not fullOpen %}
+        Opened
+      {% elif not closed and fullOpen %}
+        Fully Opened
+      {% elif closed and locked %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Garage Car Door
+      #status: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      vcc_5v: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'Vcc5V')|float(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.garage_cd_lock') != 'unavailable' %}{{ state_attr('lock.garage_cd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      closed: >
+        {% if is_state('binary_sensor.garage_cd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.garage_cd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      locked: "{{ is_state_attr('sensor.garage_cd_raw', 'locked', 'ON') }}"
+      manual: "{{ is_state_attr('sensor.garage_cd_raw', 'manual', 'ON') }}"
+      motor: "{{ state_attr('sensor.garage_cd_raw', 'motor') }}"
+      position: "{{ state_attr('sensor.garage_cd_raw', 'position') }}"
+      # position: >
+        # {% if is_state('sensor.garage_cd_raw', 'opened') %}
+          # 100
+        # {% elif is_state('sensor.garage_cd_raw', 'closed') %}
+          # 0
+        # {% else %}
+          # 50
+        # {% endif %}
+      MQTT_timer: "{% if states('binary_sensor.garage_cd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.garage_cd_opened', 'reset')|float(0) | int(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+
+######### SHED DOORS #########
+
+  - unique_id: shed_fd_status
+    #name: Shed Doors
+    availability: >
+      {{ not is_state('lock.shed_fd_lock', 'unavailable') or not is_state('sensor.shed_control_status', 'unavailable')  }}
+    state: >
+      {% set ok_states = ('locked', 'unavailable', 'off', 'Ok') %}
+      {% set locked = states('lock.shed_fd_lock') in ok_states %}
+      {% set main = is_state('binary_sensor.shed_fd_opened', 'off') %}
+      {% set left = is_state('binary_sensor.shed_ld_opened', 'off') %}
+      {% set right = is_state('binary_sensor.shed_rd_opened', 'off') %}
+      {% set lock_unavail = is_state('lock.shed_fd_lock', 'unavailable') %}
+      {% set ctrl_unavail = is_state('sensor.shed_control_status', 'unavailable') %}
+      {% set winter = is_state('input_boolean.global_winterization','on')  %}
+      
+      {% set main = main or winter %}
+      
+      {% set closed = main and left and right %}
+      
+      {% if lock_unavail and ctrl_unavail %}
+        unavailable
+      {% elif lock_unavail and not winter %}
+        {% if left and right %}
+          Ok*
+        {% else %}
+          Sides Opened
+        {% endif %}
+      {% elif ctrl_unavail and not winter %}
+        {% if main and locked %}
+          Ok*
+        {% elif main and not locked %}
+          Unlocked
+        {% elif not main and not locked %}
+          Opened
+        {% else %}
+          ERROR
+        {% endif %}
+      {% elif (closed and locked) %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% elif not (left and right) and locked %}
+        Sides Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Shed Doors
+      #status: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #vcc_3v3: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.shed_fd_lock') != 'unavailable' %}{{ state_attr('lock.shed_fd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.shed_fd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.shed_fd_lock', 'unlocked') %}
+          False
+        {% else %}
+          unknown
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.shed_fd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.shed_fd_opened', 'on') %}
+          False
+        {% else %}
+          unknown
+        {% endif %}
+      left: >
+        {% if is_state('binary_sensor.shed_ld_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.shed_ld_opened', 'on') %}
+          False
+        {% else %}
+          unknown
+        {% endif %}
+      right: >
+        {% if is_state('binary_sensor.shed_rd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.shed_rd_opened', 'on') %}
+          False
+        {% else %}
+          unknown
+        {% endif %}
+      MQTT_timer: "{% if states('binary_sensor.shed_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.shed_fd_opened', 'reset')|float(0) | int(0) }}{% else %}{{ 'unknown' }}{% endif %}"
+
+######### GLASSHOUSE DOORS #########
+
+  - unique_id: glasshouse_fd_status
+    #name: Glasshouse Doors
+    # availability: >
+    #   {{ not is_state('lock.glasshouse_fd_lock', 'unavailable') or not is_state('sensor.glasshouse_control_status', 'unavailable')  }}
+    # state: >
+      # {% set locked = is_state('lock.glasshouse_fd_lock', 'locked') %}
+      # {% set main = is_state('binary_sensor.glasshouse_fd_opened', 'off') %}
+      # {% set sliding = is_state('binary_sensor.glasshouse_sd_opened', 'off') %}
+      # {% set lock_unavail = is_state('lock.glasshouse_fd_lock', 'unavailable') %}
+      # {% set ctrl_unavail = is_state('sensor.glasshouse_control_status', 'unavailable') %}
+      
+      # {% set closed = main and sliding %}
+      
+      # {% if lock_unavail and ctrl_unavail %}
+        # unavailable
+      # {% elif lock_unavail %}
+        # {% if sliding %}
+          # Ok*
+        # {% else %}
+          # Sliding Opened
+        # {% endif %}
+      # {% elif ctrl_unavail %}
+        # {% if main and locked %}
+          # Ok*
+        # {% elif main and not locked %}
+          # Unlocked
+        # {% elif not main and not locked %}
+          # Opened
+        # {% else %}
+          # ERROR
+        # {% endif %}
+      # {% elif closed and locked %}
+        # Ok
+      # {% elif closed and not locked %}
+        # Unlocked
+      # {% elif not closed and not locked %}
+        # Opened
+      # {% elif not (sliding) and closed and locked %}
+        # Sliding Opened
+      # {% else %}
+        # ERROR
+      # {% endif %}
+    state: >
+      {% set locked = is_state('lock.glasshouse_fd_lock', 'locked') %}
+      {% set main = is_state('binary_sensor.glasshouse_fd_opened', 'off') %}
+      {% set lock_unavail = is_state('lock.glasshouse_fd_lock', 'unavailable') %}
+      {% set winter = is_state('input_boolean.global_winterization','on') %}
+      
+      {% set main = main or winter %}
+      
+      {% set closed = main %}
+      
+      {% if lock_unavail and not winter %}
+        unavailable
+      {% elif (closed and locked) or winter %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% elif not (sliding) and closed and locked %}
+        Sliding Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Glasshouse Doors
+      #status: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #vcc_3v3: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      battery:  "{% if states('lock.glasshouse_fd_lock') != 'unavailable' %}{{ state_attr('lock.glasshouse_fd_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.glasshouse_fd_opened') != 'unavailable' %}{{ state_attr('binary_sensor.glasshouse_fd_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.glasshouse_fd_lock', 'locked') %}
+          True
+        {% elif is_state('lock.glasshouse_fd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.glasshouse_fd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.glasshouse_fd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      sliding: >
+        {% if is_state('binary_sensor.glasshouse_sd_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.glasshouse_sd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+
+######### POOL DOORS & GATES #########
+
+  - unique_id: pool_fd_status
+    #name: Pool Cabin Door
+    availability: >
+      {% set unavailable = is_state('lock.pool_fd_lock', 'unavailable') and is_state('binary_sensor.pool_fd_opened', 'unavailable')  %}
+      {% set winter = is_state('input_boolean.pool_running', 'off') or is_state('input_boolean.global_winterization','on') %}
+      {{ not unavailable or winter }}
+    state: >
+      {% set locked = is_state('lock.pool_fd_lock', 'locked') %}
+      {% set closed = is_state('binary_sensor.pool_fd_opened', 'off') %}
+      {% set winter = is_state('input_boolean.pool_running', 'off') or is_state('input_boolean.global_winterization','on') %}
+      
+      {% set locked = closed %}
+      
+      {% if (closed and locked) or winter %}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Pool Cabin Door
+      locked: >
+        {% if is_state('lock.pool_fd_lock', 'locked') or is_state('input_boolean.pool_running', 'off') %}
+          True
+        {% elif is_state('lock.pool_fd_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.pool_fd_opened', 'off') or is_state('input_boolean.pool_running', 'off') %}
+          True
+        {% elif is_state('binary_sensor.pool_fd_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+        
+  - unique_id: pool_td_status
+    #name: Pool Toilet Door
+    availability: >
+      {% set unavailable = is_state('lock.pool_td_lock', 'unavailable') and is_state('binary_sensor.pool_td_opened', 'unavailable') %}
+      {% set winter = is_state('input_boolean.pool_running', 'off') or is_state('input_boolean.global_winterization','on') %}
+      {{ not unavailable or winter }}
+    state: >
+      {% set locked = is_state('lock.pool_td_lock', 'locked') %}
+      {% set closed = is_state('binary_sensor.pool_td_opened', 'off') %}
+      {% set winter = is_state('input_boolean.pool_running', 'off') or is_state('input_boolean.global_winterization','on') %}
+      
+      {% set locked = closed %}
+      
+      {% if (closed and locked) or winter%}
+        Ok
+      {% elif closed and not locked %}
+        Unlocked
+      {% elif not closed and not locked %}
+        Opened
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      friendly_name: Pool Toilet Door
+      #status: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ 'Running' }}{% else %}{{ 'unknown' }}{% endif %}"
+      version: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+      date: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+      vcc_3v3: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+      #battery:  "{% if states('lock.pool_td_lock') != 'unavailable' %}{{ state_attr('lock.pool_td_lock', 'battery') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_ssid: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_rssi: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+      wifi_percent: "{% if states('binary_sensor.pool_td_opened') != 'unavailable' %}{{ state_attr('binary_sensor.pool_td_opened', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+      locked: >
+        {% if is_state('lock.pool_td_lock', 'locked') %}
+          True
+        {% elif is_state('lock.pool_td_lock', 'unlocked') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+      closed: >
+        {% if is_state('binary_sensor.pool_td_opened', 'off') %}
+          True
+        {% elif is_state('binary_sensor.pool_td_opened', 'on') %}
+          False
+        {% else %}
+          NA
+        {% endif %}
+
+  - unique_id: pool_gates
+    #name: Pool Gates
+    #unit_of_measurement: ''
+    #state_class: measurement
+    #device_class: door
+    icon: mdi:gauge
+    availability: >-
+      {{ not is_state('binary_sensor.pool_gate_closed_deck', 'unavailable') and
+        not is_state('binary_sensor.pool_gate_closed_main', 'unavailable') and
+        not is_state('binary_sensor.pool_gate_closed_pond', 'unavailable') }}
+    state: >
+      {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+      {% set pond = is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+      {% set main = is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+      
+      {% set PG = deck and pond and main %}
+      
+      {% if PG %}
+        Ok
+      {% else %}
+        Opened
+      {% endif %}
+    attributes:
+      friendly_name: >
+        {% set deck = is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+        {% set main = is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+        {% set pond = is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+        
+        {% set count = 0 %}
+        {% if deck %}
+          {% set count = count+1 %}
+        {% endif %}
+        {% if main %}
+          {% set count = count+1 %}
+        {% endif %}
+        {% if pond %}
+          {% set count = count+1 %}
+        {% endif %}
+        
+        {{-'Pool Gates'-}}
+        
+        {% if count > 0 -%}
+          {% for device in states.binary_sensor if 'pool_gate_closed_' in device.entity_id if device.state == 'on' %}
+             {%- if loop.first -%}{{': '}}{% elif loop.last %}{{' & '}}{% else %}{{', '}}{% endif -%}
+             {{ device.attributes['friendly_name'].replace('Pool Gate Closed - ','') }}
+          {%- endfor -%}
+        {% endif %}
+      deck: >
+        {% if is_state('binary_sensor.pool_gate_closed_deck', 'off') %}
+          Closed
+        {% elif is_state('binary_sensor.pool_gate_closed_deck', 'on') %}
+          Opened
+        {% else %}
+          unknown
+        {% endif %}
+      main: >
+        {% if is_state('binary_sensor.pool_gate_closed_main', 'off') %}
+          Closed
+        {% elif is_state('binary_sensor.pool_gate_closed_main', 'on') %}
+          Opened
+        {% else %}
+          unknown
+        {% endif %}
+      pond: >
+        {% if is_state('binary_sensor.pool_gate_closed_pond', 'off') %}
+          Closed
+        {% elif is_state('binary_sensor.pool_gate_closed_pond', 'on') %}
+          Opened
+        {% else %}
+          unknown
+        {% endif %}

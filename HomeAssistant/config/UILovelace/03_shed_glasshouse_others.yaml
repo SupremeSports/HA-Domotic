@@ -1,0 +1,62 @@
+####################################################
+# UILOVELACE - SHED, GLASSHOUSE & OTHERS           #
+####################################################
+
+- title: Dev
+  icon: mdi:home-group
+  # Unique path for direct access /lovelace/${path}
+  path: other_buildings
+  visible: true
+  badges:
+    - sensor.time
+  cards:
+    - type: vertical-stack
+      title: Shed
+      cards:
+        - type: entities
+          title: Lights
+          show_header_toggle: false
+          entities:
+            - switch.shed_door_light
+            - switch.shed_inside_light
+            - switch.shed_pool_light
+        - type: entities
+          title: Doors & Locks
+          show_header_toggle: false
+          entities:
+            - type: custom:decluttering-card
+              template: powerbolt2_shed
+              variables:
+                - door: 'shed_fd'
+                - ldoor: 'shed_ld'
+                - rdoor: 'shed_rd'
+                
+    - type: vertical-stack
+      title: Glasshouse
+      cards:
+        - type: entities
+          title: Lights
+          show_header_toggle: false
+          entities:
+          
+        - type: entities
+          title: Doors & Locks
+          show_header_toggle: false
+          entities:
+            - type: custom:decluttering-card
+              template: powerbolt2
+              variables:
+                - door: 'glasshouse_fd'
+                
+    - type: vertical-stack
+      title: Well
+      cards:
+        - type: entities
+          title: Lights
+          show_header_toggle: false
+          entities:
+          
+        - type: entities
+          title: Doors & Locks
+          show_header_toggle: false
+          entities:

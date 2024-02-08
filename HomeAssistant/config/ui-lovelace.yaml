@@ -10,8 +10,13 @@ title: Cindy & Jean
 preload_cards:
   - markdown
   - gauge
+  - conditional
+  - custom:fold-entity-row
+  - custom:secondaryinfo-entity-row
 preload_rows:
   - divider
-  
+
 views: !include_dir_merge_list UILovelace
+
+decluttering_templates: !include_dir_merge_named UILovelaceDeclut
 

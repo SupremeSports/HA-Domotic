@@ -1,0 +1,194 @@
+###################################################
+# AUTOMATIONS - COVERS                            #
+###################################################
+
+##PATIO DOOR
+
+  # When in AUTO mode - Patio Door Tulle
+  #   - Closed during night (when sun below horizon)
+  #   - Closed until at least 6AM if sun rises before 6AM
+  #   - Opened 30% if door is unlocked or opened
+  - alias: Patio Door Tulle Curtain
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: "/5"
+      - platform: state
+        entity_id: input_select.patio_door_tulle_curtain
+    action:
+      data:
+        entity_id: "patio_door_tulle_curtain"
+        open_percent: 30
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set sun_down = is_state('sun.sun','below_horizon') %}
+        {% set mode = states('input_select.patio_door_tulle_curtain') %}
+        {% set door_opened = is_state_attr('lock.house_bd_lock','locked', 'unlocked') or is_state_attr('lock.house_bd_lock','opened', 'opened') %}
+        
+        {% set output = false %}
+        
+        {% if mode == 'Force Open' %}
+          {% set output = false %}
+        {% elif mode == 'Force Close' %}
+          {% set output = true %}
+        {% else %}
+          {% if curHour <= 6 %}
+            {% set output = true %}
+          {% else %}
+            {% if sun_down %}
+              {% set output = true %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        
+        {% if mode == 'Disabled' %}
+          script.none
+        {% elif output %}
+          {% if door_opened %}
+            script.cover_position
+          {% else %}
+            script.cover_close
+          {% endif %}
+        {% else %}
+          script.cover_open
+        {% endif %}
+        
+  # When in AUTO mode
+  #   - Closed during day (when sun above horizon) under conditions:
+  #     - if sunny and it's summer and sun position above threshold (200° azimuth)
+  #     - Opened 30% if door is unlocked or opened
+  #   - Never closed during winter
+  - alias: Patio Door Curtain Curtain
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: "/5"
+      - platform: state
+        entity_id: input_select.patio_door_curtain_curtain
+    action:
+      data:
+        entity_id: "patio_door_curtain_curtain"
+        open_percent: 30
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set summer = 6 <= now().month <= 9 %}
+        {% set sun_down = is_state('sun.sun','below_horizon') %}
+        {% set sun_position = state_attr('sun.sun','azimuth')|float(0) >= 200.0 %}
+        {% set sunny = true %}
+        {% set mode = states('input_select.patio_door_curtain_curtain') %}
+        {% set door_opened = is_state_attr('lock.house_bd_lock','locked', 'unlocked') or is_state_attr('lock.house_bd_lock','opened', 'opened') %}
+        
+        {% set output = false %}
+        
+        {% if mode == 'Force Open' %}
+          {% set output = false %}
+        {% elif mode == 'Force Close' %}
+          {% set output = true %}
+        {% else %}
+          {% if sun_down %}
+            {% set output = false %}
+          {% elif sunny and summer and sun_position %}
+            {% set output = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if mode == 'Disabled' %}
+          script.none
+        {% elif output %}
+          {% if door_opened %}
+            script.cover_position
+          {% else %}
+            script.cover_close
+          {% endif %}
+        {% else %}
+          script.cover_open
+        {% endif %}
+        
+##DINING ROOM
+
+  # When in AUTO mode - Dining Room Tulle
+  #   - Closed during night (when sun below horizon)
+  #   - Closed until at least 6AM if sun rises before 6AM
+  - alias: Dining Room Tulle Curtain
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: "/5"
+      - platform: state
+        entity_id: input_select.dining_room_tulle_curtain
+    action:
+      data:
+        entity_id: "dining_room_tulle_curtain"
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set sun_down = is_state('sun.sun','below_horizon') %}
+        {% set mode = states('input_select.dining_room_tulle_curtain') %}
+        
+        {% set output = false %}
+        
+        {% if mode == 'Force Open' %}
+          {% set output = false %}
+        {% elif mode == 'Force Close' %}
+          {% set output = true %}
+        {% else %}
+          {% if curHour <= 6 %}
+            {% set output = true %}
+          {% else %}
+            {% if sun_down %}
+              {% set output = true %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+        
+        {% if mode == 'Disabled' %}
+          script.none
+        {% elif output %}
+          script.cover_close
+        {% else %}
+          script.cover_open
+        {% endif %}
+        
+  # When in AUTO mode
+  #   - Closed during day (when sun above horizon) under conditions:
+  #     - if sunny and it's summer and sun position above threshold (265° azimuth)
+  #   - Never closed during winter
+  - alias: Dining Room Curtain Curtain
+    mode: restart
+    trigger:
+      - platform: time_pattern
+        seconds: "/5"
+      - platform: state
+        entity_id: input_select.dining_room_curtain_curtain
+    action:
+      data:
+        entity_id: "dining_room_curtain_curtain"
+      service_template: >
+        {% set curHour = now().hour %}
+        {% set summer = 6 <= now().month <= 9 %}
+        {% set sun_down = is_state('sun.sun','below_horizon') %}
+        {% set sun_position = state_attr('sun.sun','azimuth')|float(0) >= 265.0 %}
+        {% set sunny = true %}
+        {% set mode = states('input_select.dining_room_curtain_curtain') %}
+        
+        {% set output = false %}
+        
+        {% if mode == 'Force Open' %}
+          {% set output = false %}
+        {% elif mode == 'Force Close' %}
+          {% set output = true %}
+        {% else %}
+          {% if sun_down %}
+            {% set output = false %}
+          {% elif sunny and summer and sun_position %}
+            {% set output = true %}
+          {% endif %}
+        {% endif %}
+        
+        {% if mode == 'Disabled' %}
+          script.none
+        {% elif output %}
+          script.cover_close
+        {% else %}
+          script.cover_open
+        {% endif %}
+

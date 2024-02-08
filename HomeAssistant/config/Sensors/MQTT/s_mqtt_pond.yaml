@@ -1,0 +1,139 @@
+####################################################
+# SENSORS - MQTT - POND                            #
+####################################################
+
+######### POND CONTROL - BASIC DATA #########
+  - name: "Pond Control Status"
+    icon: mdi:fish
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Pond/Control/Json"
+
+  - name: "Pond Area Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    value_template: "{{ value_json.temp_out | float | round(1) }}"
+    qos: 0
+
+  - name: "Pond Area Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    value_template: "{{ value_json.hum_out | float | round(1) }}"
+    qos: 0
+    
+  - name: "Pond Control Box Temperature"
+    unit_of_measurement: '°C'
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    value_template: "{{ value_json.temp_in | float | round(1) }}"
+    qos: 0
+    
+  - name: "Pond Control Box Humidity"
+    unit_of_measurement: '%'
+    icon: mdi:water-percent
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    value_template: "{{ value_json.hum_in | float | round(1) }}"
+    qos: 0
+    
+  - name: "Pond Control 3V3 Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set PV = value_json.Vcc3V3 | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ PV | round(1) }}
+      {% endif %}
+    
+  - name: "Pond Control 5V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set PV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ PV | round(1) }}
+      {% endif %}
+    
+  - name: "Pond Control 12V Voltage"
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Pond/Control/Json"
+    availability:
+      - topic: "Pond/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set PV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ PV | round(1) }}
+      {% endif %}
+
+######### POND CONTROL - SENSORS #########
+  - name: "Pond Temperature Raw"
+    icon: mdi:oil-temperature
+    state_topic: "Pond/Control/Sensors/Stts"
+    availability:
+      - topic: "Pond/Control/LWT"
+    qos: 0
+    unit_of_measurement: '° F'
+    value_template: >
+      {% set PT = value_json.wtemp|float %}
+      {{ PT | round(1) }}
+
+  # - platform: mqtt
+    # name: "Pond Pressure"
+    # icon: mdi:gauge
+    # state_topic: "Pond/Control/Sensors/Stts"
+    # availability:
+      # - topic: "Pond/Control/LWT"
+    # qos: 0
+    # unit_of_measurement: 'psi'
+    # value_template: >
+      # {% set RP = value_json.wpsi|float %}
+      # {% set min = 0.5|float %} 
+      # {% set span = 4.0|float %}
+      # {% set presmax = 60.0|float %}
+      
+      # {% set ax = (presmax / span)|float %}
+      # {% set b = (ax * min * -1.0)|float %}
+      # {% set ax = ((ax * 5.0) / 1023.0)|float %}
+      
+      # {% set PV = ((ax*RP)+b)|float %}
+      
+      # {% if PV < 0 or PV > 35 %}
+        # {{ "unknown" }}
+      # {% else %}
+        # {{ PV | round(1) }}
+      # {% endif %}

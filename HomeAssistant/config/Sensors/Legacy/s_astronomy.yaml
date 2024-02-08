@@ -1,0 +1,25 @@
+####################################################
+# SENSORS - ASTRONOMY                              #
+####################################################
+
+  #ISS Coordinates
+  - platform: rest
+    name: ISS Coordinates
+    json_attributes:
+      - timestamp
+      - iss_position
+      - latitude
+      - longitude
+    resource: 'http://api.open-notify.org/iss-now.json'
+    scan_interval:
+      seconds: 60
+    
+  #ISS Crew
+  - platform: rest
+    name: ISS Crew
+    json_attributes:
+      - people
+      - number
+    value_template: "{{ value_json['number'] }}"
+    resource: 'http://api.open-notify.org/astros.json'
+    

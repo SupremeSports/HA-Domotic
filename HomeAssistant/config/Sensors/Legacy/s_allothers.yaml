@@ -1,0 +1,33 @@
+####################################################
+# SENSORS                                          #
+####################################################
+
+  #Time display
+  - platform: time_date
+    display_options:
+      - 'time'
+      - 'date'
+      - 'date_time'
+      - 'date_time_utc'
+      #- 'date_time_iso'
+      - 'time_date'
+      - 'time_utc'
+      #- 'beat'
+      
+  - platform: moon
+    #scan_interval: 2
+   
+  - platform: ted5000
+    host: !secret ted_ip
+    port: !secret ted_port
+    name: TED5000
+    mode: extended
+    scan_interval: 10
+
+  # - platform: ebox
+    # username: !secret ebox_username
+    # password: !secret ebox_password
+    # monitored_variables:
+      # - download
+      # - upload
+      # - total

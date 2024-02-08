@@ -1,15 +1,28 @@
 ####################################################
 # INPUT TEXT                                       #
 ####################################################
+
+  errors_list:
+    mode: text
+    initial: "['unknown','Unknown','unavailable','Unavailable','none','None','']"
+    min: 0
+    max: 255
   
-  pool_text_top:
+  pool_clock_text_top:
     name: Pool Text Display Top
     pattern: '^[a-zA-Z0-9]*$'
     min: 0
     max: 80
     mode: text
-  pool_text_bottom:
+  pool_clock_text_bottom:
     name: Pool Text Display Bottom
+    pattern: '^[a-zA-Z0-9]*$'
+    min: 0
+    max: 80
+    mode: text
+
+  garage_clock_text:
+    name: Pool Text Display
     pattern: '^[a-zA-Z0-9]*$'
     min: 0
     max: 80
@@ -26,6 +39,13 @@
     initial: !secret doorlock_passcode_list
     min: 0
     max: 255
+    
+  ring_jean:
+    name: Ring Jean Text
+    pattern: '^[a-zA-Z0-9]*$'
+    min: 0
+    max: 254
+    mode: text
 
   # issues:
     # name: Sensors that need attention

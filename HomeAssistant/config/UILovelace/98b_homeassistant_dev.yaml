@@ -1,0 +1,171 @@
+####################################################
+# UILOVELACE - HA DEV Server                       #
+####################################################
+
+- title: HA Server - DEV VM
+  icon: mdi:home-assistant
+  # Unique path for direct access /lovelace/${path}
+  path: settings_dev
+  visible: false
+  badges:
+    - sensor.time
+    - sensor.ha_dev_vm_cpu_used
+    - sensor.ha_dev_vm_drive_used_percent
+    - type: entity-filter
+      entities:
+        - entity: sensor.ha_dev_vm_update_available
+          icon: mdi:cloud-check
+          state_filter:
+            - 'Up-to-date'
+          style: |
+            :host {
+              --label-badge-text-color: green;
+            }
+        - entity: sensor.ha_dev_vm_update_available
+          icon: mdi:cloud-download
+          state_filter:
+            - 'Update available'
+          style: |
+            :host {
+              --label-badge-text-color: 
+                {% if is_state_attr('sensor.ha_dev_vm_update_available', 'major_update', 'true') %}
+                  red
+                {% else %}
+                  orange
+                {% endif %};
+            }
+        - entity: sensor.ha_dev_vm_update_available
+          icon: mdi:cloud-question
+          state_filter:
+            - 'unavailable'
+            - 'Unavailable'
+            - 'unknown'
+            - 'Unknown'
+          style: |
+            :host {
+              --label-badge-text-color:  var(--state-icon-unavailable-color);
+            }
+    #- binary_sensor.addons_update_available
+    
+  cards:
+    # The markdown card will render markdown text.
+    - type: markdown
+      title: Home Assistant DEV VM 
+      content: >
+        Home Assistant DEV Remote Platform
+
+    - type: horizontal-stack
+      #title: N/A
+      cards:
+        - type: button
+          name: HA Main VM
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings
+        - type: button
+          name: HA Chicoutimi
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_chic
+        - type: button
+          name: Server
+          icon: 'mdi:cog-transfer'
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/settings_server
+        - type: button
+          name: Computers
+          icon: mdi:desktop-tower
+          tap_action: 
+            action: navigate
+            navigation_path: /lovelace/computers
+
+    - type: entities
+      title: Health Data
+      show_header_toggle: false
+      entities:
+        - sensor.ha_dev_vm_date_time
+        - sensor.ha_dev_vm_last_boot
+        - sensor.ha_dev_vm_time_online
+        - sensor.ha_dev_vm_heartbeat
+        - type: custom:multiple-entity-row
+          entity: sensor.ha_dev_vm_update_available
+          #name: 
+          secondary_info: 
+            name: Major update - 
+            attribute: major_update
+            #unit: '%'
+          entities:
+            - name: current
+              attribute: current
+            - name: latest
+              attribute: latest
+        #- binary_sensor.remote_ui
+
+    - type: entities
+      title: Resources
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.ha_dev_vm_cpu_used
+          entities:
+            - sensor.ha_dev_vm_cpu_used
+        - type: custom:fold-entity-row
+          head: sensor.ha_dev_vm_memory_used_percent
+          entities:
+            - sensor.ha_dev_vm_memory_used
+            - sensor.ha_dev_vm_memory_free
+        
+    - type: entities
+      title: Storage
+      show_header_toggle: false
+      entities:
+        #- sensor.ha_dev_vm_home_assistant_v2_db
+        #- sensor.ha_dev_vm_mariadb_size
+        - sensor.ha_dev_vm_db_size
+        - type: custom:multiple-entity-row
+          name: HA DEV VM used percent
+          entity: sensor.ha_dev_vm_drive_used_percent
+          #secondary_info: last-changed
+          entities:
+            - name: used
+              entity: sensor.ha_dev_vm_drive_used
+            - name: free
+              entity: sensor.ha_dev_vm_drive_free
+            
+    - type: horizontal-stack
+      title: Hardware
+      cards:
+        - type: gauge
+          needle: true
+          name: CPU
+          unit: '%'
+          entity: sensor.ha_dev_vm_cpu_used
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 45
+            red: 85
+        - type: gauge
+          needle: true
+          name: Disk
+          unit: '%'
+          entity: sensor.ha_dev_vm_drive_used_percent
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 45
+            red: 85
+        - type: gauge
+          needle: true
+          name: Memory
+          unit: '%'
+          entity: sensor.ha_dev_vm_memory_used_percent
+          theme: th_gauge_3
+          severity:
+            green: 0
+            yellow: 30
+            red: 60
+    

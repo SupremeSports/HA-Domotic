@@ -1,0 +1,105 @@
+####################################################
+# UILOVELACE - PEOPLE                              #
+####################################################
+
+- title: People
+  icon: mdi:account-group
+  # Unique path for direct access /lovelace/${path}
+  path: people
+  visible: true
+  badges:
+    - sensor.time
+    - device_tracker.life360_jean
+    - device_tracker.life360_cindy
+  cards:
+  # Entities card will take a list of entities and show their state.
+  # The entities here will be shown in the same order as specified.
+  # Each entry is an entity ID or a map with extra options.
+    - type: custom:bignumber-card
+      entity: sensor.dates
+      scale: 25px
+      
+    - type: entities
+      title: "House Birthdays"
+      show_header_toggle: false
+      entities:
+        - sensor.party_18_ans_cody
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: jean
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: cindy
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: cody
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: mi_loup
+        
+    - type: entities
+      title: "Jean's Family Birthdays"
+      show_header_toggle: false
+      entities:
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: michel
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: suzanne
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: benoit
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: rosalie
+
+    - type: entities
+      title: "Cindy's Family Birthdays"
+      show_header_toggle: false
+      entities:
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: gisele
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: roxanne
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: pierre_luc
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: kaleb
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: salome
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: sabrina
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: frederick
+
+    - type: entities
+      title: "Pitousserie's Birthdays"
+      show_header_toggle: false
+      entities:
+        - type: custom:decluttering-card
+          template: anniversaries
+          variables: 
+            - name: mi_loup

@@ -1,0 +1,55 @@
+####################################################
+# TEMPLATES - DOORS & LOCKS                        #
+####################################################
+
+  - name: Doorlock Passcode OK
+    #unique_id: doorlock_passcode_ok
+    state: >
+      {% set string = states('input_text.doorlock_passcode_list') %}
+      {% set passcode = states('input_text.doorlock_passcode') %}
+      {% set ok = namespace(found=False) %}
+      {% for word in string.split() %}
+        {% if passcode == word %}
+          {% set ok.found = True %}
+        {% endif %}
+      {% endfor %}
+      
+      {{ok.found}}
+      
+  - name: All Locks OK
+    #unique_id: all_locks_ok
+    device_class: lock
+    state: >
+      {% set ok_states = ('locked', 'unavailable', 'off', 'Ok') %}
+      {% set ok_states_toilet = ('Unlocked', 'unavailable', 'Ok') %}
+      {% set ok_states_glass = ('Unlocked', 'unavailable', 'Ok') %}
+      
+      {% set house_fd = states('lock.house_fd_lock') in ok_states %}
+      {% set house_sd = states('lock.house_sd_lock') in ok_states %}
+      {% set house_bd = states('lock.house_bd_lock') in ok_states %}
+      {% set garage_fd = states('lock.garage_fd_lock') in ok_states %}
+      {% set garage_cd = states('binary_sensor.garage_cd_locked') in ok_states or states('binary_sensor.garage_cd_opened') in ok_states %}
+      {% set garage_bd = states('binary_sensor.garage_bd_opened') in ok_states %}
+      {% set shed_fd = states('lock.shed_fd_lock') in ok_states  %}
+      {% set shed_ld = states('binary_sensor.shed_ld_opened') in ok_states %}
+      {% set shed_rd = states('binary_sensor.shed_rd_opened') in ok_states %}
+      {% set glasshouse_fd = states('lock.glasshouse_fd_lock') in ok_states %}
+      {% set glasshouse_sd = states('binary_sensor.glasshouse_sd_opened') in ok_states_glass %}
+      {% set pool_fd = states('sensor.pool_fd_status') in ok_states %}
+      {% set pool_td = states('sensor.pool_td_status') in ok_states %}
+      {% set pool_gates = states('sensor.pool_gates') in ok_states %}
+      
+      {% if is_state('input_boolean.pool_running','on') %}
+        {% set pool_td = states('sensor.pool_td_status') in ok_states_toilet %}
+      {% else %}
+        {% set pool_td = states('lock.pool_td_lock') in ok_states %}
+      {% endif %}
+      
+      {% set allOk =  house_fd and house_sd and house_bd and
+                      garage_fd and garage_cd and garage_bd and
+                      shed_fd and shed_ld and shed_rd and
+                      glasshouse_fd and glasshouse_sd and
+                      pool_fd and pool_td and pool_gates
+      %}
+      
+      {{not allOk}}

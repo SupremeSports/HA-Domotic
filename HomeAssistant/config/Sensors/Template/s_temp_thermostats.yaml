@@ -1,0 +1,72 @@
+####################################################
+# TEMPLATES - THERMOSTATS                          #
+####################################################
+
+  - name: Garage Front Temp
+    #unique_id: garage_front_temp
+    unit_of_measurement: '°C'
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    availability: >
+      {% set status = not is_state('binary_sensor.garagefrontheater_error', 'unavailable') or not is_state('sensor.garage_front_temp_raw', 'unavailable') or not is_state('sensor.garage_safety_front_temp_raw', 'unavailable') %}
+      {% set thermostat = states('sensor.garage_front_temp_raw') %}
+      {% set safety = states('sensor.garage_safety_front_temp_raw') %}
+      {% set safety_valid = is_state_attr('sensor.garage_safety_front_temp_raw','sensor_ok','ON') %}
+      {% set error = ['unknown','unavailable','---','-99.9','-1',''] %}
+      
+      {% set forceSafety = false %}
+      
+      {{ not (thermostat in error or (not safety_valid and safety in error) or forceSafety) and status }}
+    state: >
+      {% set thermostat = states('sensor.garage_front_temp_raw')|float(0) %}
+      {% set safety = states('sensor.garage_safety_front_temp_raw')|float(0) %}
+      {% set safety_valid = is_state_attr('sensor.garage_safety_front_temp_raw','sensor_ok','ON') %}
+      {% set error = ['unknown','unavailable','---','-99.9','-1',''] %}
+      
+      {% set forceSafety = false %}
+      
+      {% if thermostat not in error %}
+        {% set room = thermostat %}
+      {% elif safety_valid %}
+        {% set room = safety %}
+      {% else %}
+        {% set room = 0.0 %}
+      {% endif %}
+      
+      {{ room|round(1) }}
+      
+  - name: Garage Rear Temp
+    #unique_id: garage_rear_temp
+    unit_of_measurement: '°C'
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    availability: >
+      {% set status = not is_state('binary_sensor.garagerearheater_error', 'unavailable') or not is_state('sensor.garage_rear_temp_raw', 'unavailable') or not is_state('sensor.garage_safety_rear_temp_raw', 'unavailable') %}
+      {% set thermostat = states('sensor.garage_rear_temp_raw') %}
+      {% set safety = states('sensor.garage_safety_rear_temp_raw') %}
+      {% set safety_valid = is_state_attr('sensor.garage_safety_rear_temp_raw','sensor_ok','ON') %}
+      {% set error = ['unknown','unavailable','---','-99.9','-1',''] %}
+      
+      {% set forceSafety = false %}
+      
+      {{ not (thermostat in error or (not safety_valid and safety in error) or forceSafety) and status }}
+    state: >
+      {% set thermostat = states('sensor.garage_rear_temp_raw') %}
+      {% set safety = states('sensor.garage_safety_rear_temp_raw') %}
+      {% set safety_valid = is_state_attr('sensor.garage_safety_rear_temp_raw','sensor_ok','ON') %}
+      {% set error = ['unknown','unavailable','---','-99.9','-1',''] %}
+      
+      {% set forceSafety = false %}
+      
+      {% if thermostat not in error %}
+        {% set room = thermostat %}
+      {% elif safety_valid %}
+        {% set room = safety %}
+      {% else %}
+        {% set room = 0.0 %}
+      {% endif %}
+      
+      {{ room|round(1) }}
+

@@ -1,0 +1,91 @@
+###################################################
+# BINARY SENSORS - MQTT - CONTROL ROOM            #
+###################################################
+
+  - name: Water Valve Opened
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.water_on }}'
+    qos: 0
+    
+  - name: Water Valve Closed
+    state_topic: "Home/Control/Sensors/Stts"
+    availability:
+      - topic: "Home/Control/LWT"
+    value_template: '{{ value_json.water_off }}'
+    qos: 0
+
+#DOORS & LIGHTS
+  - name: Control Room Door
+    device_class: door
+    state_topic: "Home/Control/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/Control/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch2 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - name: Control Room Light Switch
+    #device_class: light
+    state_topic: "Home/Control/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/Control/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch1 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - name: Cold Storage Door
+    device_class: door
+    state_topic: "Home/ColdStorage/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/ColdStorage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch2 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - name: Cold Storage Light Switch
+    #device_class: light
+    state_topic: "Home/ColdStorage/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/ColdStorage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch1 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+ 
+  - name: Storage Room Door
+    device_class: door
+    state_topic: "Home/Storage/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/Storage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch2 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    
+  - name: Storage Room Light Switch
+    #device_class: light
+    state_topic: "Home/Storage/Light/tele/SENSOR"
+    availability:
+      - topic: "Home/Storage/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    value_template: '{{ value_json.Switch1 }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+

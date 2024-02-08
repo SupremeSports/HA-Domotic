@@ -1,0 +1,587 @@
+####################################################
+# LOVELACE DECLUTTERING - Computers                #
+####################################################
+
+#JGAU-PC
+jgau_pc:
+  card:
+    type: entities
+    show_header_toggle: false
+    entities:
+      - type: custom:decluttering-card
+        template: jgau_pc_on
+      - type: custom:decluttering-card
+        template: jgau_pc_off
+
+jgau_pc_on:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.jgau_pc
+        state: "on"
+    card:
+      type: entities
+      entities:
+        - type: custom:decluttering-card
+          template: jgau_pc_states
+jgau_pc_off:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.jgau_pc
+        state: "off"
+    card:
+      type: entities
+      entities:
+        - binary_sensor.jgau_pc
+
+jgau_pc_states:
+  card:
+    type: custom:fold-entity-row
+    head: binary_sensor.jgau_pc
+    entities:
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_package
+        entities:
+          - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_1
+          - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_2
+          - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_3
+          - sensor.jgau_pc_intel_core_i7_3770_temperatures_cpu_core_4
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_cores
+        entities:
+          - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_1
+          - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_2
+          - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_3
+          - sensor.jgau_pc_intel_core_i7_3770_clocks_cpu_core_4
+          - sensor.jgau_pc_intel_core_i7_3770_clocks_bus_speed
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_core_i7_3770_load_cpu_total
+        entities:
+          - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_1
+          - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_2
+          - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_3
+          - sensor.jgau_pc_intel_core_i7_3770_load_cpu_core_4
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_core_i7_3770_powers_cpu_cores
+        entities:
+          - sensor.jgau_pc_intel_core_i7_3770_powers_cpu_package
+          - sensor.jgau_pc_intel_core_i7_3770_powers_cpu_graphics
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_generic_memory_load_memory
+        entities:
+          - sensor.jgau_pc_generic_memory_data_used_memory
+          - sensor.jgau_pc_generic_memory_data_available_memory
+          
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_fans_fan_2
+        entities:
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_1
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_2
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_controls_fan_control_3
+          - type: divider
+            style:
+              height: 1px
+              width: 80%
+              margin-left: auto
+              margin-right: auto
+              background: '#62717b'
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_cpu_core
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_temperature_1
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_temperatures_temperature_3
+
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_3vsb
+        entities:
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_3vcc
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_3vsb
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_avcc
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_cpu_vcore
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_2
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_5
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_6
+          - sensor.jgau_pc_intel_dp67bg_nuvoton_nct6771f_voltages_voltage_7
+
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_temperatures_gpu_core
+        entities:
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_controls_gpu_fan
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_fans_gpu
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_load_gpu_core
+        entities:
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_clocks_gpu_shader
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_load_gpu_bus_interface
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_load_gpu_frame_buffer
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_load_gpu_video_engine
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_load_gpu_memory
+        entities:
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_data_gpu_memory_used
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_data_gpu_memory_free
+          - sensor.jgau_pc_nvidia_nvidia_geforce_gtx_680_data_gpu_memory_total
+
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_kingston_sa400s37_240gb_load_used_space
+        entities:
+          - sensor.jgau_pc_kingston_sa400s37_240gb_temperatures_temperature
+      - type: custom:fold-entity-row
+        head: sensor.jgau_pc_hgst_hts721010a9e630_load_used_space
+        entities:
+          - sensor.jgau_pc_hgst_hts721010a9e630_temperatures_temperature
+
+#CFOR-PC
+cfor_pc:
+  card:
+    type: entities
+    show_header_toggle: false
+    entities:
+      - type: custom:decluttering-card
+        template: cfor_pc_on
+      - type: custom:decluttering-card
+        template: cfor_pc_off
+
+cfor_pc_on:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.cfor_pc
+        state: "on"
+    card:
+      type: entities
+      entities:
+        - type: custom:decluttering-card
+          template: cfor_pc_states
+cfor_pc_off:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.cfor_pc
+        state: "off"
+    card:
+      type: entities
+      entities:
+        - binary_sensor.cfor_pc
+
+cfor_pc_states:
+  card:
+    type: custom:fold-entity-row
+    head: binary_sensor.cfor_pc
+    entities:
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_package
+        entities:
+          - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_1
+          - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_2
+          - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_3
+          - sensor.cfor_pc_intel_core_i7_3820_temperatures_cpu_core_4
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_cores
+        entities:
+          - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_1
+          - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_2
+          - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_3
+          - sensor.cfor_pc_intel_core_i7_3820_clocks_cpu_core_4
+          - sensor.cfor_pc_intel_core_i7_3820_clocks_bus_speed
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_core_i7_3820_load_cpu_total
+        entities:
+          - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_1
+          - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_2
+          - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_3
+          - sensor.cfor_pc_intel_core_i7_3820_load_cpu_core_4
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_core_i7_3820_powers_cpu_cores
+        entities:
+          - sensor.cfor_pc_intel_core_i7_3820_powers_cpu_package
+          - sensor.cfor_pc_intel_core_i7_3820_powers_cpu_dram
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_generic_memory_load_memory
+        entities:
+          - sensor.cfor_pc_generic_memory_data_used_memory
+          - sensor.cfor_pc_generic_memory_data_available_memory
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_fans_fan_2
+        entities:
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_1
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_2
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_3
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_4
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_controls_fan_control_5
+          - type: divider
+            style:
+              height: 1px
+              width: 80%
+              margin-left: auto
+              margin-right: auto
+              background: '#62717b'
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_1
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_2
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_4
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_5
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_temperatures_temperature_6
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_3vsb
+        entities:
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_3vcc
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_3vsb
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_avcc
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_vtt
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_cpu_vcore
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_vbat
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_11
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_12
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_13
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_14
+          - sensor.cfor_pc_intel_x79f_nuvoton_nct6779d_voltages_voltage_15
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_radeon_rx_580_series_temperatures_gpu_core
+        entities:
+          - sensor.cfor_pc_radeon_rx_580_series_controls_gpu_fan
+          - sensor.cfor_pc_radeon_rx_580_series_fans_gpu_fan
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_radeon_rx_580_series_load_gpu_core
+        entities:
+          - sensor.cfor_pc_radeon_rx_580_series_clocks_gpu_core
+          - sensor.cfor_pc_radeon_rx_580_series_powers_gpu_total
+          - sensor.cfor_pc_radeon_rx_580_series_voltages_gpu_core
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_radeon_rx_580_series_clocks_gpu_memory
+        entities:
+          - sensor.cfor_pc_radeon_rx_580_series_clocks_gpu_memory
+
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_kingston_sa400s37120g_load_used_space
+        entities:
+          - sensor.cfor_pc_kingston_sa400s37120g_temperatures_temperature
+      - type: custom:fold-entity-row
+        head: sensor.cfor_pc_wdc_wd5000aads_11m2b2_load_used_space
+        entities:
+          - sensor.cfor_pc_wdc_wd5000aads_11m2b2_temperatures_temperature
+
+#SERVER
+server:
+  card:
+    type: entities
+    show_header_toggle: false
+    entities:
+      - type: custom:decluttering-card
+        template: server_on
+      - type: custom:decluttering-card
+        template: server_off
+
+server_on:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.server
+        state: "on"
+    card:
+      type: entities
+      entities:
+        - type: custom:decluttering-card
+          template: server_states
+server_off:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.server
+        state: "off"
+    card:
+      type: entities
+      entities:
+        - binary_sensor.server
+
+server_states:
+  card:
+    type: custom:fold-entity-row
+    head: binary_sensor.server
+    entities:
+      - type: custom:fold-entity-row
+        head: sensor.server_cpu_temperature
+        entities:
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_1
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_3
+          - sensor.server_it8720_2_temperature
+          - sensor.server_it8720_3_temperature
+          - sensor.server_k10temp_1_temperature
+      - type: custom:fold-entity-row
+        head: sensor.server_mb_temperature
+        entities:
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_2
+          - sensor.server_it8720_1_temperature
+      - type: custom:fold-entity-row
+        head: sensor.server_it8720_1_fan_speed
+        entities:
+          - sensor.server_it8720_1_fan_speed
+          - sensor.server_it8720_2_fan_speed
+          - sensor.server_it8720_3_fan_speed
+          - sensor.server_it8720_4_fan_speed
+      - type: custom:fold-entity-row
+        head: sensor.server_amd_fx_8120_clocks_cpu_cores
+        entities:
+          - sensor.server_amd_fx_8120_clocks_cpu_core_1
+          - sensor.server_amd_fx_8120_clocks_cpu_core_2
+          - sensor.server_amd_fx_8120_clocks_cpu_core_3
+          - sensor.server_amd_fx_8120_clocks_cpu_core_4
+          - sensor.server_amd_fx_8120_clocks_cpu_core_5
+          - sensor.server_amd_fx_8120_clocks_cpu_core_6
+          - sensor.server_amd_fx_8120_clocks_cpu_core_7
+          - sensor.server_amd_fx_8120_clocks_cpu_core_8
+      - type: custom:fold-entity-row
+        head: sensor.server_total
+        entities:
+          - sensor.server_thread
+          - sensor.server_running
+          - sensor.server_sleeping
+      - type: custom:fold-entity-row
+        head: sensor.server_cpu_used
+        entities:
+          - sensor.server_cpu_load
+      - type: custom:fold-entity-row
+        head: sensor.server_ram_used_percent
+        entities:
+          - sensor.server_ram_used
+          - sensor.server_ram_free
+      - type: custom:fold-entity-row
+        head: sensor.server_swap_used_percent
+        entities:
+          - sensor.server_swap_used
+          - sensor.server_swap_free
+      - type: custom:fold-entity-row
+        head: sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_fans_fan_3
+        entities:
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_fans_fan_3
+
+      - type: custom:fold-entity-row
+        head: sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_voltage_8
+        entities:
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_3_3v
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_5v
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_cpu_vcore
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_vbat
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_dram
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_voltage_5
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_voltage_6
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_voltage_7
+          - sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_voltages_voltage_8
+      - type: custom:fold-entity-row
+        head: sensor.server_drive_used_percent
+        entities:
+          - sensor.server_drive_used
+          - sensor.server_drive_free
+      - type: custom:fold-entity-row
+        head: sensor.server_drive_gauthier_srv01_used_percent
+        entities:
+          - sensor.server_drive_gauthier_srv01_used
+          - sensor.server_drive_gauthier_srv01_free
+      - type: custom:fold-entity-row
+        head: sensor.server_drive_jbod
+        entities:
+          - sensor.192_168_0_250_media_gauthier_data_used
+          - sensor.192_168_0_250_media_gauthier_data_free
+
+drive_multiple_row:
+  card:
+    type: custom:multiple-entity-row
+    name: '[[name]] used percent'
+    entity: sensor.[[prefix]]_used_percent
+    #secondary_info:
+      #attribute: size
+      #name: Power
+      #unit: 'W'
+      #format: precision0
+    entities:
+      - entity: sensor.[[prefix]]_used
+        name: used
+      - entity: sensor.[[prefix]]_free
+        name: free
+
+drive_fold_row:
+  card:
+    type: custom:fold-entity-row
+    head: sensor.[[prefix]]_used_percent
+    entities:
+      - sensor.[[prefix]]_used
+      - sensor.[[prefix]]_free
+      
+drive_jbod_row:
+  card:
+    type: custom:multiple-entity-row
+    name: '[[name]] used percent'
+    entity: sensor.[[prefix]]
+    secondary_info:
+      attribute: size
+      name: Total Size
+      #unit: 'W'
+      #format: precision0
+    entities:
+      - attribute: used
+        name: Used
+        #unit: 'GiB'
+      - attribute: free
+        name: Free
+        #unit: 'GiB' 
+        
+#https://github.com/LbDab/HassOS-Config-Buttons/blob/master/lovelace/main.yaml
+drive_jbod_button_card:
+  card:
+    type: custom:button-card
+    entity: sensor.server_drive_jbod_[[id]]
+    icon: 'mdi:harddisk'
+    aspect_ratio: 1/1
+    name: '[[name]]'
+    styles:
+      card:
+        - background-color: '#000044'
+        - border-radius: 10%
+        - padding: 10%
+        - color: ivory
+        - font-size: 10px
+        - text-shadow: 0px 0px 5px black
+        - text-transform: capitalize
+      grid:
+        - grid-template-areas: '"i size" "n n" "percent percent" "used used" "free free"'
+        - grid-template-columns: 1fr 1fr
+        - grid-template-rows: 1fr min-content min-content min-content min-content
+      name:
+        - font-weight: bold
+        - font-size: 13px
+        - color: white
+        - align-self: middle
+        - justify-self: start
+        - padding-bottom: 4px
+      img_cell:
+        - justify-content: start
+        - align-items: start
+        - margin: none
+      icon:
+        - color: >
+            [[[
+              if (entity.state < 60) return 'lime';
+              if (entity.state >= 60 && entity.state < 80) return 'orange';
+              else return 'red';
+            ]]]
+        - width: 70%
+        - margin-top: -10%
+      custom_fields:
+        size:
+          - align-self: start
+          - justify-self: end
+        percent:
+          - padding-bottom: 2px
+          - align-self: middle
+          - justify-self: start
+          - --text-color-sensor: '[[[ if (states["sensor.server_drive_jbod_[[id]]"].state > 80) return "red"; ]]]'
+        used:
+          - padding-bottom: 2px
+          - align-self: middle
+          - justify-self: start
+          - --text-color-sensor: '[[[ if (states["sensor.server_drive_jbod_[[id]]"].state > 80) return "red"; ]]]'
+        free:
+          - align-self: middle
+          - justify-self: start
+          - --text-color-sensor: '[[[ if (states["sensor.server_drive_jbod_[[id]]"].state > 80) return "red"; ]]]'
+    custom_fields:
+      size: >
+        [[[
+          return `<ha-icon
+            icon="mdi:harddisk"
+            style="width: 12px; height: 12px; color: yellow;">
+            </ha-icon><span>${entity.attributes.size}</span>`
+        ]]]
+
+
+      percent: >
+        [[[
+          return `<ha-icon
+            icon="mdi:harddisk"
+            style="width: 12px; height: 12px; color: deepskyblue;">
+            </ha-icon><span>PERCENT: <span style="color: var(--text-color-sensor);">${states['sensor.server_drive_jbod_[[id]]'].state}%</span></span>`
+        ]]]
+
+
+      used: >
+        [[[
+          return `<ha-icon
+            icon="mdi:harddisk"
+            style="width: 12px; height: 12px; color: deepskyblue;">
+            </ha-icon><span>USED: <span style="color: var(--text-color-sensor);">${states['sensor.server_drive_jbod_[[id]]'].attributes.used}%</span></span>`
+        ]]]
+
+
+      free: >
+        [[[
+          return `<ha-icon
+            icon="mdi:harddisk"
+            style="width: 12px; height: 12px; color: deepskyblue;">
+            </ha-icon><span>FREE: <span style="color: var(--text-color-sensor);">${states['sensor.server_drive_jbod_[[id]]'].attributes.free}%</span></span>`
+        ]]]
+
+#HA DEV VM
+ha_dev_vm:
+  card:
+    type: entities
+    show_header_toggle: false
+    entities:
+      - type: custom:decluttering-card
+        template: ha_dev_vm_on
+      - type: custom:decluttering-card
+        template: ha_dev_vm_off
+
+ha_dev_vm_on:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.ha_dev_vm
+        state: "on"
+    card:
+      type: entities
+      entities:
+        - type: custom:decluttering-card
+          template: ha_dev_vm_states
+ha_dev_vm_off:
+  card:
+    type: conditional
+    conditions:
+      - entity: binary_sensor.ha_dev_vm
+        state: "off"
+    card:
+      type: entities
+      entities:
+        - binary_sensor.ha_dev_vm
+
+ha_dev_vm_states:
+  card:
+    type: custom:fold-entity-row
+    head: binary_sensor.ha_dev_vm
+    entities:
+      - sensor.ha_dev_vm_heartbeat
+      - sensor.ha_dev_vm_cpu_used
+      - type: custom:fold-entity-row
+        head: sensor.ha_dev_vm_memory_used_percent
+        entities:
+          - sensor.ha_dev_vm_memory_used
+          - sensor.ha_dev_vm_memory_free
+      - type: custom:fold-entity-row
+        head: sensor.ha_dev_vm_drive_used_percent
+        entities:
+          - sensor.ha_dev_vm_drive_used
+          - sensor.ha_dev_vm_drive_free
+
+#OWNCLOUD
+owncloud_server:
+  card:
+    type: entities
+    entities:
+      - type: custom:fold-entity-row
+        head: binary_sensor.owncloud_status
+        entities:
+          - sensor.owncloud_status
+          - sensor.owncloud_status_code
+          - sensor.owncloud_status_message

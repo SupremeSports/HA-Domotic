@@ -21,3 +21,4 @@
       icon: >
         if (state === 'on') return 'mdi:mailbox-up';
         return 'mdi:mailbox';
+

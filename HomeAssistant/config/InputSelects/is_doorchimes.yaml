@@ -1,0 +1,143 @@
+####################################################
+# INPUT SELECT - DOORCHIMES                        #
+####################################################
+
+  doorchime_fd_sound:
+    name: Front Door Sound Selection
+    icon: mdi:music-note
+    options:
+      - Mute (No Sound)
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+      
+  doorchime_sd_sound:
+    name: Side Door Sound Selection
+    icon: mdi:music-note
+    options:
+      - Mute (No Sound)
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+      
+  doorchime_bd_sound:
+    name: Back Door Sound Selection
+    icon: mdi:music-note
+    options:
+      - Mute (No Sound)
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island
+      
+  doorchime_gd_sound:
+    name: Garage Door Sound Selection
+    icon: mdi:music-note
+    options:
+      - Mute (No Sound)
+      - Ding Dong
+      - Alouette
+      - Anniversary Waltz
+      - Auld Lang Syne
+      - Battle Hymn of the Republic
+      - Beethoven's Fifth
+      - Bless This House
+      - Dixie
+      - For He's a Jolly Good Fellow
+      - Greensleeves
+      - Happy Birthday
+      - Home on The Range
+      - I've Been Working On The Railroad
+      - Jingle Bells
+      - Joy to the World
+      - Mazel Tov
+      - My Wild Irish Rose
+      - O Sole Mio!
+      - Oh Tannenbaum
+      - Rule Britannia
+      - Star Sprangled Banner
+      - Stars and Stripes Forever
+      - Take Me Out to the Ballagme
+      - The Marseillaise
+      - Westminster Chimes (8 notes)
+      - Westminster Chimes (4 notes)
+      - Yankee Doodle
+      - Final Fantasy VII
+      - Yoshi's Island

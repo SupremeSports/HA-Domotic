@@ -1,0 +1,70 @@
+##########################################
+# CUSTOMIZATIONS - BINARY SENSORS        #
+##########################################
+
+  binary_sensor.flashing_test:
+    templates:
+      icon_color: >
+        if (entities['binary_sensor.flashing_1s'].state === 'on') return 'var(--state-icon-active-color)';
+        return 'var(--state-icon-color)';
+
+  binary_sensor.owncloud_status:
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:database-check';
+        if (state === 'off') return 'mdi:database-settings';
+        return 'mdi:database-remove';
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+
+  # binary_sensor.garage_attic_light:
+    # templates:
+      # icon: >
+        # return 'mdi:lightbulb';
+      # icon_color: >
+        # if (state === 'on') return 'var(--state-icon-active-color)';
+        # if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        # return 'var(--state-icon-color)';
+        
+  # binary_sensor.control_room_light:
+    # templates:
+      # icon: >
+        # return 'mdi:lightbulb';
+      # icon_color: >
+        # if (state === 'on') return 'var(--state-icon-active-color)';
+        # if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        # return 'var(--state-icon-color)';
+        
+  binary_sensor.wan_status:
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:web';
+        return 'mdi:search-web';
+      icon_color: >
+        if (state === 'on') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'var(--state-icon-color)';
+
+  binary_sensor.poolpump_security:
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:shield-check';
+        if (state === 'off') return 'mdi:shield-remove';
+        return 'mdi:close-octagon';
+      icon_color: >
+        if (state === 'on') return 'green';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'red';
+
+  binary_sensor.pool_cover:
+    templates:
+      icon: >
+        if (state === 'on') return 'mdi:file-download';
+        if (state === 'off') return 'mdi:file-check';
+        return 'mdi:file-question';
+      icon_color: >
+        if (state === 'on') return 'red';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'green';

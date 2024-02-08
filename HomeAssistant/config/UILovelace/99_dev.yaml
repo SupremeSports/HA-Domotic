@@ -101,66 +101,6 @@
       # hold_action:
         # action: none
       # image: http://192.168.1.20/
-      
-    - type: entities
-      title: Chicoutimi HA
-      show_header_toggle: false
-      entities:
-        - sensor.chicoutimi_last_boot
-        - sensor.chicoutimi_time_online
-        - sensor.chicoutimi_update_available
-        #- sensor.chicoutimi_home_assistant_v2_db
-        - sensor.chicoutimi_mariadb
-        - type: custom:fold-entity-row
-          head: sensor.chicoutimi_uun_entities
-          entities:
-            - sensor.chicoutimi_entities
-            - type: custom:hui-markdown-card
-              style: |
-                ha-card {
-                  box-shadow: none;
-                  margin: 0px 0px 0px 20px;
-                }
-              content: |
-                {% set list = ['icon_color', 'icon', 'friendly_name', '--------------', 'templates', 'hide_attributes'] %}
-                
-                {% for attr in states.sensor.chicoutimi_entities.attributes %}
-                  {% if attr not in list -%}
-                    {{attr}}: {{states.sensor.chicoutimi_entities.attributes[attr]}}
-                  {%- endif  -%}
-                {%- endfor -%}
-                
-                -------------
-                
-                {% for attr in states.sensor.chicoutimi_uun_entities.attributes %}
-                  {% if attr not in list -%}
-                    {{attr}}: {{states.sensor.chicoutimi_uun_entities.attributes[attr]}}
-                  {%- endif  -%}
-                {%- endfor -%}
-        # - type: custom:fold-entity-row
-          # head:
-            # type: section
-            # label: Master Bedroom Light/Fan
-          # open: true
-          # entities:
-            # - light.master_bedroom_light
-            # - light.master_bedroom_fan
-        # - type: custom:fold-entity-row
-          # head:
-            # type: section
-            # label: 1st Bedroom Light/Fan
-          # open: true
-          # entities:
-            # - light.bedroom_1_light
-            # - light.bedroom_1_fan
-        # - type: custom:fold-entity-row
-          # head:
-            # type: section
-            # label: 2nd Bedroom Light/Fan
-          # open: true
-          # entities:
-            # - light.bedroom_2_light
-            # - light.bedroom_2_fan
             
     - type: entities
       title: Pool Valves
@@ -173,7 +113,7 @@
         - input_select.pool_heater_mode
         - input_select.pool_slide_mode
         - switch.pool_control_valves
-
+        
     - type: statistics-graph
       title: 'Test Graph'
       chart_type: line
@@ -196,3 +136,35 @@
       #stat_types: sum
       entities:
         - sensor.server_cpu_used
+
+    - type: markdown
+      title: Season
+      card_size: 4
+      content: |
+        ## <div style="text-align: right"> {{ states('sensor.season') }} </div>
+        <ha-icon icon={{ state_attr('sensor.season','icon') }} />
+
+    # - type: custom:roomba-vacuum-card
+    #   entity: vacuum.roomba_irobot
+    #   #image: /local/img/different_vacuum.png
+    #   name: Insatiable Suceuse
+    #   clean_base: false
+
+    # - type: custom:history-explorer-card
+    #   cardName: historycard-67119468
+    #   header: hide
+    #   uiLayout:
+    #     toolbar: top
+    #     selector: bottom
+    #   combineSameUnits: true
+    #   showUnavailable: false
+      
+    - type: custom:history-explorer-card
+      filterEntities:                     # Or use multiple filters, entities matching any of the filters will be added
+        - '*power*'
+        - 'sensor.*energy*'
+
+    - type: custom:button-card
+      entity: sensor.times
+      show_label: true
+      show_state: true

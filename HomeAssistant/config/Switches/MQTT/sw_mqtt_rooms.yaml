@@ -1,0 +1,77 @@
+####################################################
+# SWITCHES - MQTT - ROOMS                          #
+####################################################
+
+########## MASSAGE ROOM ##########
+
+  - name: "Massage Room Appliances"
+    state_topic: "Home/Massage/tele/STATE"
+    command_topic: "Home/Massage/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Massage/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/Massage/tele/STATE"
+
+########## THINKERING ROOM ##########
+    
+  - name: "Soldering Station"
+    state_topic: "Home/Soldering/tele/STATE"
+    command_topic: "Home/Soldering/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Soldering/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/Soldering/tele/STATE"
+    
+########## MASTER BEDROOM ##########
+
+  - name: "Master Bed Tare"
+    icon: mdi:scale
+    state_topic: "Home/Master/Bed/Sensors/Stts"
+    command_topic: "Home/Master/Bed/Cmd"
+    value_template: "{{ value_json.tare }}"
+    payload_on: '{"tare":"ON"}'
+    payload_off: '{"tare":"OFF"}'
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Master/Bed/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Master/Bed/Json"
+
+########## LIVING/HALL ##########
+
+  - name: "Front Door Light"
+    state_topic: "Home/Door/Front/Light/tele/STATE"
+    command_topic: "Home/Door/Front/Light/cmnd/POWER"
+    value_template: "{{ value_json.POWER }}"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    availability:
+      - topic: "Home/Door/Front/Light/tele/LWT"
+        payload_available: "Online"
+        payload_not_available: "Offline"
+    qos: 1
+    retain: false
+    json_attributes_topic: "Home/Door/Front/Light/tele/STATE"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}}','}') + 
+      ', "appliances": "light"' + 
+      ', "watts": 7}' }}

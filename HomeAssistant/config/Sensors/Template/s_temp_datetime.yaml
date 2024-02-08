@@ -1,0 +1,123 @@
+####################################################
+# TEMPLATES - DATE & TIME                          #
+####################################################
+
+  - name: Dates
+    #unique_id: dates
+    icon: mdi:calendar
+    state: >
+      {{ state_attr('sensor.dates', 'full_en') }}
+    attributes:
+      year: >
+        {{ now().strftime("%Y")|int(0) }}
+      month: >
+        {{ now().strftime("%m")|int(0) }}
+      day: >
+        {{ now().strftime("%d")|int(0) }}
+      dayofyear: >
+        {{ now().strftime("%j")|int(0) }}
+      daysinmonth: >
+        {% set month = state_attr('sensor.dates', 'month')|int(0) %}
+        {% if month in [1,3,5,7,8,10,12] %}
+          31
+        {% elif month in [4,6,9,11] %}
+          30
+        {% elif month == 2 %}
+          {% set year = now().year %}
+          {% if ((year % 4) == 0 and (year % 100) > 0) or (year % 400) == 0 %}
+            29
+          {% else %}
+            28
+          {% endif %}
+        {% endif %}
+      weekofyear: >
+        {{ now().strftime("%W")|int(0) + 1 }}
+      weekdaynumber: >
+        {% set days = ["6", "0", "1", "2", "3", "4", "5"] %}
+        {% set day = days[now().strftime('%w')|int(0)] %}
+        {{ day }}
+      weekdayname_en: >
+        {% set days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] %}
+        {% set day = days[state_attr('sensor.dates', 'weekdaynumber')|int(0)] %}
+        {{ day }}
+      weekdayname_fr: >
+        {% set days = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] %}
+        {% set day = days[state_attr('sensor.dates', 'weekdaynumber')|int(0)] %}
+        {{ day }}
+      monthname_en: >
+        {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+        {% set month = months[state_attr('sensor.dates', 'month')|int(0)-1] %}
+        {{ month }}
+      monthname_fr: >
+        {% set months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] %}
+        {% set month = months[state_attr('sensor.dates', 'month')|int(0)-1] %}
+        {{ month }}
+      yyyymmdd: >
+        {{ now().strftime("%Y") + '/' + now().strftime("%m") + '/' + now().strftime("%d") }}
+      yyyyddmm: >
+        {{ now().strftime("%Y") + '/' + now().strftime("%d") + '/' + now().strftime("%m") }}
+      ddmmyyyy: >
+        {{ now().strftime("%d") + '/' + now().strftime("%m") + '/' + now().strftime("%Y") }}
+      utc: >
+        {% set utc_date = states('sensor.date_time_utc').split(',')[0] %}
+        {% set utc_year = utc_date.split('-')[0] %}
+        {% set utc_month = utc_date.split('-')[1] %}
+        {% set utc_day = utc_date.split('-')[2] %}
+        {{ utc_year + "/" + utc_month + "/" + utc_day }}
+      long_en: >
+        {% set months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] %}
+        {% set month = months[now().strftime('%m')|int(0) - 1] %}
+        {% set day = now().strftime('%d')|int(0) %}
+        {% set year = now().strftime('%Y') %}
+        {% if day == 1 or day == 21 or day == 31 %}
+          {% set num = "st, " %}
+        {% elif day == 2 or day == 22 %}
+          {% set num = "nd, " %}
+        {% elif day == 3 or day == 23 %}
+          {% set num = "rd, " %}
+        {% else %}
+          {% set num = "th, " %}
+        {% endif %}
+        {{ month + ' ' + day|string + num + year }}
+      long_fr: >
+        {% set months = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"] %}
+        {% set month = months[now().strftime('%m')|int(0) - 1] %}
+        {% set day = now().strftime('%d')|int(0) %}
+        {% set year = now().strftime('%Y') %}
+        {% if day == 1 %}
+          {% set num = "er " %}
+        {% else %}
+          {% set num = " " %}
+        {% endif %}
+        {{ day|string + num + month + ' ' + year }}
+      full_en: >
+        {{ state_attr('sensor.dates', 'weekdayname_en')|string + ', ' + state_attr('sensor.dates', 'long_en')|string }}
+      full_fr: >
+        {{ state_attr('sensor.dates', 'weekdayname_fr')|string + ', ' + state_attr('sensor.dates', 'long_fr')|string }}
+
+  - name: Times
+    #unique_id: times
+    icon: mdi:clock
+    state: >
+      {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' +now().strftime("%S")|string }}
+    attributes:
+      hour: >
+        {{ now().strftime("%H")|int(0) }}
+      minute: >
+        {{ now().strftime("%M")|int(0) }}
+      second: >
+        {{ now().strftime("%S")|int(0) }}
+      long: >
+        {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string + ':' + now().strftime("%S")|string }}
+      short: >
+        {{ now().strftime("%H")|string + ':' + now().strftime("%M")|string }}
+      internet: >
+        {{ states('sensor.internet_time') }}
+      utc: >
+        {{ states('sensor.time_utc') }}
+      sec_midnight: >
+        {{ now().strftime("%H")|int(0)*60*60 + now().strftime("%M")|int(0)*60 + now().strftime("%S")|int(0) }}
+      hourmin: >
+        {{ now().strftime("%H")|int(0)*100 + now().strftime("%M")|int(0) }}
+      dst: >
+        {{ now().timetuple().tm_isdst > 0 }}

@@ -1,0 +1,73 @@
+          type: custom:fold-entity-row
+          head: sensor.addons_update_available
+          entities:
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'home_assistant_operating_system'
+                - addon: ''
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'supervisor'
+                - addon: ''
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'chrony'
+                - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'duck_dns'
+                - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'file_editor'
+                - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'grocy'
+                - addon: '_addon'
+            # - type: custom:decluttering-card
+            #   template: ha_updates_sensor
+            #   variables: 
+            #     - item: 'mariadb'
+            #     - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'mosquitto'
+                - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'phpmyadmin'
+                - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'samba_share'
+                - addon: '_addon'
+            # - type: custom:decluttering-card
+              # template: ha_updates_sensor
+              # variables: 
+                # - item: 'speedtest'
+                # - addon: '_addon'
+            - type: custom:decluttering-card
+              template: ha_updates_sensor
+              variables: 
+                - item: 'ssh_web_terminal'
+                - addon: '_addon'
+            # - type: custom:decluttering-card
+            #   template: ha_updates_sensor
+            #   variables: 
+            #     - item: 'frigate'
+            #     - addon: '_addon'
+            # - type: custom:decluttering-card
+            #   template: ha_updates_sensor
+            #   variables: 
+            #     - item: 'frigate'
+            #     - addon: '_server'

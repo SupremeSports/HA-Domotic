@@ -1,0 +1,211 @@
+###################################################
+# AUTOMATIONS - HA                                #
+###################################################
+
+## BASIC HA SETUPS
+  - alias: Set theme at startup
+    mode: restart
+    trigger:
+      platform: homeassistant
+      event: start
+    action:
+      service: frontend.set_theme
+      data:
+        name: dolbeau
+        mode: dark
+
+  - alias: Restart HASS
+    trigger:
+      - platform: state
+        entity_id: input_boolean.restart_hass
+        from: 'off'
+        to: 'on'
+    action:
+      service: homeassistant.restart
+      
+  - alias: Home Assistant Started
+    mode: restart
+    trigger:
+      - platform: homeassistant
+        event: start
+      - platform: time_pattern
+        minutes: '*'
+    action:
+      - delay: 
+          seconds: 5
+      - service: input_boolean.turn_on
+        entity_id: input_boolean.running_hass
+        
+  - alias: Update entities
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        minutes: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: script.update_entities
+      
+## TIME KEEPING FUNCTIONS
+  - alias: Heartbeat Seconds
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        seconds: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: counter.set_value
+        entity_id: counter.second_counter
+        data_template:
+          value: "{{ now().second | int(0) }}"
+      - service: homeassistant.update_entity
+        entity_id: binary_sensor.flashing_1s
+      - service: homeassistant.update_entity
+        entity_id: sensor.times
+
+  - alias: Heartbeat Minutes
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        minutes: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - service: counter.set_value
+        entity_id: counter.minute_counter
+        data_template:
+          value: "{{ now().minute | int(0) }}"
+      - service: homeassistant.update_entity
+        entity_id: binary_sensor.flashing_1m
+      - service: homeassistant.update_entity
+        entity_id: sensor.dates
+
+  - alias: Heartbeat Hours
+    mode: restart
+    trigger:
+      - platform: state
+        entity_id: input_boolean.running_hass
+        to: 'on'
+      - platform: time_pattern
+        hours: '*'
+    condition:
+      - condition: state
+        entity_id: input_boolean.running_hass
+        state: 'on'
+    action:
+      - delay: 
+          seconds: 5
+      
+  #Publish time to all devices every 5 minutes or when a device requests an update (boot up or invalid time detected (by the device))
+  - alias: Publish Time
+    mode: queued
+    max: 2
+    trigger:
+      - platform: time_pattern
+        minutes: '/5'
+      - platform: mqtt
+        topic: "Home/Global/Time/Request"
+        payload: 'ON'
+        encoding: 'utf-8'
+    condition:
+      condition: or
+      conditions: 
+        - condition: template
+          value_template: '{{ states.automation.publish_time.attributes.last_triggered == none }}'
+        - condition: template
+          value_template: '{{ as_timestamp(now()) - as_timestamp(states.automation.publish_time.attributes.last_triggered, as_timestamp(now())) > 10 }}'
+    action:
+      service: mqtt.publish
+      data_template:
+        topic: "Home/Global/Time"
+        #IMPORTANT - Always send a delimiter at the end of the string for parsing to succeed
+        payload_template: >-
+          {% if is_state('sun.sun', "below_horizon") %}
+            {% set sun = 1 %}
+          {% else %}
+            {% set sun = 0 %}
+          {% endif %}
+          
+          {{ '{:04}:{:02}:{:02}:{:02}:{:02}:{:02}:{:02}:'.format(now().year, now().month, now().day, now().hour, now().minute, now().second, sun) }}
+
+## BACKUPS AND DATABASE
+  - alias: Daily Backup 2AM
+    trigger:
+      # - platform: time
+        # at: '2:00:00'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '02:00'
+    action:
+      service: hassio.backup_full
+      data_template:
+        name: Automated Backup {{ now().strftime('%Y-%m-%d') }}
+        compressed: true
+        homeassistant_exclude_database: true
+
+#     action:
+#       service: hassio.backup_partial
+#       data_template:
+#         name: Automated Backup {{ now().strftime('%Y-%m-%d') }}
+#         addons:
+#         #   - a0d7b954_home-panel
+#         #   - a0d7b954_influxdb
+#           - a0d7b954_chrony
+#           - a0d7b954_grocy
+#           - core_configurator
+#           - core_samba
+#           - core_duckdns
+#           - core_mosquitto
+#         folders:
+#         - homeassistant
+#         - ssl
+# #        - share
+# #        - addons_local.tar
+
+  # - alias: Purge Database 3AM
+  #   initial_state: False
+  #   trigger:
+  #     # - platform: time
+  #       # at: '03:00:00'
+  #     - platform: state
+  #       entity_id: sensor.times
+  #       attribute: short
+  #       to: '03:00'
+  #   action:
+  #     service: recorder.purge
+  #     data:
+  #       keep_days: 2
+  #       repack: true
+
+  - alias: Daily Backup Cleanup 4AM
+    trigger: 
+      # - platform: time
+        # at: '04:00:00'
+      - platform: state
+        entity_id: sensor.times
+        attribute: short
+        to: '04:00'
+    action:
+      - service: clean_up_snapshots_service.clean_up
+
+
+        
+
+        

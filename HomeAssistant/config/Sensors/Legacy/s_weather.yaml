@@ -1,0 +1,97 @@
+####################################################
+# SENSORS - WEATHER STATION                        #
+####################################################
+
+######### RAIN SENSOR/RATE #########
+    
+  - platform: history_stats
+    name: Rain Count
+    entity_id: sensor.rain_level_toggle
+    state: 'ON'
+    type: count
+    end: '{{ now() }}'
+    duration:
+      hours: 1
+      
+  - platform: history_stats
+    name: Raining Timer
+    entity_id: sensor.raining_detect
+    state: 'On'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+    
+######### TEMP/HUM/BARO SENSORS - AM2320/BME280 #########
+
+#Deprecated recoder access
+  - platform: average
+    name: Outdoor Temperature Average
+    precision: 1
+    duration:
+      minutes: 15
+    entities:
+      - sensor.outdoor_temperature_selection
+      
+  # - platform: statistics
+  #   name: Outdoor Temperature Average
+  #   state_characteristic: mean
+  #   sampling_size: 1
+  #   precision: 1
+  #   # max_age:
+  #     # minutes: 15
+  #   entity_id: sensor.outdoor_temperature_selection
+ 
+######### WIND SPEED #########
+
+#Deprecated recorder access
+  - platform: average
+    name: "Wind Speed Average"
+    duration:
+      minutes: 1
+    entities:
+      - sensor.wind_speed_raw
+
+  # - platform: statistics
+    # name: Wind Speed Average
+    # state_characteristic: average_linear
+    # sampling_size: 60
+    # precision: 1
+    # # max_age:
+      # # minutes: 1
+    # entity_id: sensor.wind_speed_raw
+
+######### WIND COMPASS #########
+    
+#Deprecated recoder access
+  - platform: average
+    name: "Wind Direction Average"
+    duration:
+      seconds: 10
+    entities:
+      - sensor.wind_direction_raw
+      
+  # - platform: statistics
+    # name: Wind Direction Average
+    # state_characteristic: average_linear
+    # sampling_size: 10
+    # precision: 1
+    # # max_age:
+      # # seconds: 10
+    # entity_id: sensor.wind_direction_raw
+      
+  - platform: statistics
+    name: "Wind Direction Stats"
+    entity_id: sensor.wind_direction_raw
+    state_characteristic: mean
+    sampling_size: 30
+    # max_age:
+      # seconds: 10
+      
+  - platform: filter
+    name: "Wind Direction Filter"
+    entity_id: sensor.wind_direction_raw
+    filters:
+      - filter: time_simple_moving_average
+        window_size: "00:01"
+        precision: 2

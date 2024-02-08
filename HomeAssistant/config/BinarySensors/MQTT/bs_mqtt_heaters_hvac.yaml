@@ -1,0 +1,266 @@
+###################################################
+# BINARY SENSORS - MQTT - HEATERS & HVAC          #
+###################################################
+
+#HVACs
+  - name: Living Room HVAC Running
+    icon: mdi:hvac
+    device_class: running
+    state_topic: "Home/Living/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set current = value_json.current|float(0) %}
+      
+      {{ "ON" if running or current >= 0.75 else "OFF" }}
+      
+  - name: Living Room HVAC Defrost
+    icon: mdi:snowflake-melt
+    device_class: running
+    state_topic: "Home/Living/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set current = value_json.current|float(0) %}
+      {% set air_temp = value_json.air_temp|float(0) %}
+      {% set set_temp = state_attr('climate.living_room_hvac','temperature')|float(0) %}
+      
+      {% if (running or current >= 0.5) and air_temp < set_temp %}
+        ON
+      {% else %}
+        OFF
+      {% endif %}
+
+  - name: RecRoom HVAC Running
+    icon: mdi:hvac
+    device_class: running
+    state_topic: "Home/RecRoom/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set current = value_json.current|float(0) %}
+      
+      {{ "ON" if running or current >= 0.75 else "OFF" }}
+      
+  - name: RecRoom HVAC Defrost
+    icon: mdi:snowflake-melt
+    device_class: running
+    state_topic: "Home/RecRoom/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set current = value_json.current|float(0) %}
+      {% set air_temp = value_json.air_temp|float(0) %}
+      {% set set_temp = state_attr('climate.recroom_hvac','temperature')|float(0) %}
+      
+      {% if (running or current >= 0.5) and air_temp < set_temp %}
+        ON
+      {% else %}
+        OFF
+      {% endif %}
+      
+  - name: Garage HVAC Running
+    icon: mdi:hvac
+    device_class: running
+    state_topic: "Garage/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set current = value_json.current|float(0) %}
+      
+      {{ "ON" if running or current >= 0.75 else "OFF" }}
+      
+  - name: Garage HVAC Defrost
+    icon: mdi:snowflake-melt
+    device_class: running
+    state_topic: "Garage/Hvac/Sensors/Stts"
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    qos: 0
+    # value_template: '{{ value_json.power }}'
+    value_template: >
+      {% set running = value_json.power == "ON" %}
+      {% set running = true %}
+      {% set power = states('sensor.garage_hvac_power')|float(0) %}
+      {% set air_temp = value_json.air_temp|float(0) %}
+      {% set set_temp = state_attr('climate.garage_hvac','temperature')|float(0) %}
+      {% set set_state = is_state('climate.garage_hvac','heat')|float(0) %}
+      
+      {% if (running and (power >= 600 and power < 1000)) and air_temp < (set_temp*3/4) and set_state %}
+        ON
+      {% elif power >= 600 and power < 1000 and set_state %}
+        ON
+      {% else %}
+        OFF
+      {% endif %}
+      
+#HEATERS
+  - name: Bar Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Bar/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Bar/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Bar/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 1500}' }}
+      
+  - name: Entrance Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Entrance/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Entrance/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Entrance/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 1000}' }}
+      
+  - name: Kitchen Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Kitchen/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Kitchen/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Kitchen/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 2000}' }}
+      
+  - name: Living Room Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Living/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Living/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Living/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 2000}' }}
+      
+  - name: Massage Room Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Massage/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Massage/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Massage/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 1000}' }}
+      
+  - name: Master Bedroom Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Master/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Master/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Master/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 1750}' }}
+      
+  - name: Office Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Office/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Office/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Office/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 1000}' }}
+      
+  - name: RecRoom Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/RecRoom/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/RecRoom/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/RecRoom/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 2000}' }}
+      
+  - name: Training Room Heater Running
+    icon: mdi:radiator
+    device_class: heat
+    state_topic: "Home/Training/Heater/Sensors/Stts"
+    availability:
+      - topic: "Home/Training/Heater/LWT"
+    qos: 0
+    value_template: '{{ value_json.power }}'
+    json_attributes_topic: "Home/Training/Heater/Json"
+    json_attributes_template: >
+      {{ value_json | tojson | replace('}','') + 
+      ', "appliances": "heater"' + 
+      ', "watts": 750}' }}
+      
+#FLOOR HEATERS
+  - name: Cold Storage Floor Heater
+    device_class: heat
+    state_topic: "Home/ColdStorage/Therm/Stts"
+    availability:
+      - topic: "Home/ColdStorage/Therm/LWT"
+    value_template: '{{ value_json.relayAC }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    json_attributes_topic: "Home/ColdStorage/Therm/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "heater"' + 
+      ', "watts": 932}' }}
+    
+  - name: Storage Room Floor Heater
+    device_class: heat
+    state_topic: "Home/Storage/Therm/Stts"
+    availability:
+      - topic: "Home/Storage/Therm/LWT"
+    value_template: '{{ value_json.relayAC }}'
+    payload_on: "ON"
+    payload_off: "OFF"
+    qos: 0
+    json_attributes_topic: "Home/Storage/Therm/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "heater"' + 
+      ', "watts": 1956}' }}

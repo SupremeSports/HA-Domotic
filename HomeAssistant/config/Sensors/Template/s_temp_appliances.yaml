@@ -1,0 +1,242 @@
+####################################################
+# TEMPLATES - APPLIANCES                           #
+####################################################
+
+    - name: Washing Machine State
+      #unique_id: washing_machine_state
+      icon: mdi:washing-machine
+      availability: >
+        {{ not is_state('binary_sensor.washing_machine_running', 'unavailable') }}
+      state: >
+        {{ states('input_select.washing_machine_state') }}
+      attributes:
+        appliances: "Washing Machine"
+        state: "{{ states('sensor.washing_machine_state') }}"
+        version: "{{ state_attr('binary_sensor.washing_machine_running', 'version') }}"
+        date: "{{ state_attr('binary_sensor.washing_machine_running', 'date') }}"
+        wifi_ssid: "{{ state_attr('binary_sensor.washing_machine_running', 'wifi_ssid') }}"
+        wifi_rssi: "{{ state_attr('binary_sensor.washing_machine_running', 'wifi_rssi') }}"
+        wifi_percent: "{{ state_attr('binary_sensor.washing_machine_running', 'wifi_percent') }}"
+        running: "{{ states('binary_sensor.washing_machine_running') }}"
+        door: "{{ states('binary_sensor.washing_machine_door') }}"
+        power: "{{ states('sensor.washing_machine_power') }} W"
+        energy_daily: "{{ states('sensor.washing_machine_energy_daily')|float(0) }} kWh"
+        water_cold: "{{ states('binary_sensor.washing_machine_water_cold') }}"
+        water_hot: "{{ states('binary_sensor.washing_machine_water_hot') }}"
+        water_leak: "{{ states('binary_sensor.washing_machine_water_leak') }}"
+        
+    - name: Drying Machine State
+      #unique_id: drying_machine_state
+      icon: mdi:tumble-dryer
+      availability: >
+        {{ not is_state('binary_sensor.drying_machine_running', 'unavailable') }}
+      state: >
+        {{ states('input_select.drying_machine_state') }}
+      attributes:
+        appliances: "Tumble Dryer"
+        state: "{{ states('sensor.drying_machine_state') }}"
+        version: "{{ state_attr('binary_sensor.drying_machine_running', 'version') }}"
+        date: "{{ state_attr('binary_sensor.drying_machine_running', 'date') }}"
+        wifi_ssid: "{{ state_attr('binary_sensor.drying_machine_running', 'wifi_ssid') }}"
+        wifi_rssi: "{{ state_attr('binary_sensor.drying_machine_running', 'wifi_rssi') }}"
+        wifi_percent: "{{ state_attr('binary_sensor.drying_machine_running', 'wifi_percent') }}"
+        running: "{{ states('binary_sensor.drying_machine_running') }}"
+        door: "{{ states('binary_sensor.drying_machine_door') }}"
+        power: "{{ states('sensor.drying_machine_power') }} W"
+        energy_daily: "{{ states('sensor.drying_machine_energy_daily')|float(0) }} kWh"
+
+    - name: Dishwasher State
+      #unique_id: dishwasher_state
+      icon: mdi:dishwasher
+      availability: >
+        {{ not is_state('binary_sensor.dishwasher_running', 'unavailable') }}
+      state: >
+        {{ states('input_select.dishwasher_state') }}
+      attributes:
+        appliances: "Dishwasher"
+        state: "{{ states('sensor.dishwasher_state') }}"
+        version: "{{ state_attr('binary_sensor.dishwasher_running', 'version') }}"
+        date: "{{ state_attr('binary_sensor.dishwasher_running', 'date') }}"
+        wifi_ssid: "{{ state_attr('binary_sensor.dishwasher_running', 'wifi_ssid') }}"
+        wifi_rssi: "{{ state_attr('binary_sensor.dishwasher_running', 'wifi_rssi') }}"
+        wifi_percent: "{{ state_attr('binary_sensor.dishwasher_running', 'wifi_percent') }}"
+        running: "{{ states('binary_sensor.dishwasher_running') }}"
+        door: "{{ states('binary_sensor.dishwasher_door') }}"
+        power: "{{ states('sensor.dishwasher_power') }} W"
+        energy_daily: "{{ states('sensor.dishwasher_energy_daily')|float(0) }} kWh"
+        water_hot: "{{ states('binary_sensor.dishwasher_water_hot') }}"
+        water_leak: "{{ states('binary_sensor.dishwasher_water_leak') }}"
+
+    - name: Kitchen Refrigerator State
+      #unique_id: kitchen_refrigerator_state
+      icon: mdi:fridge
+      availability: >
+        {{ not is_state('binary_sensor.kitchen_refrigerator_running','unavailable') and is_state('binary_sensor.kitchen_refrigerator_powered','on') }}
+      state: >
+        {% set running = is_state('binary_sensor.kitchen_refrigerator_running','on') %}
+        {% set defrost = is_state('binary_sensor.kitchen_refrigerator_defrost_cycle','on') %}
+        {% set top_door = is_state('binary_sensor.kitchen_refrigerator_door_freezer','on') %}
+        {% set bot_door = is_state('binary_sensor.kitchen_refrigerator_door_fridge','on') %}
+        
+        {% if top_door and bot_door %}
+          Doors Opened
+        {% elif top_door %}
+          Freezer Door Opened
+        {% elif bot_door %}
+          Fridge Door Opened
+        {% elif defrost %}
+          Defrost Cycle
+        {% elif running %}
+          Cooling Cycle
+        {% else %}
+          Ready
+        {% endif %}
+      attributes:
+        appliances: "Refrigerator"
+        state: "{{ states('sensor.kitchen_refrigerator_state') }}"
+        version: "{{ state_attr('binary_sensor.kitchen_refrigerator_running', 'version') }}"
+        date: "{{ state_attr('binary_sensor.kitchen_refrigerator_running', 'date') }}"
+        wifi_ssid: "{{ state_attr('binary_sensor.kitchen_refrigerator_running', 'wifi_ssid') }}"
+        wifi_rssi: "{{ state_attr('binary_sensor.kitchen_refrigerator_running', 'wifi_rssi') }}"
+        wifi_percent: "{{ state_attr('binary_sensor.kitchen_refrigerator_running', 'wifi_percent') }}"
+        running: "{{ states('binary_sensor.kitchen_refrigerator_running') }}"
+        door_freezer: "{{ states('binary_sensor.kitchen_refrigerator_door_freezer') }}"
+        door_fridge: "{{ states('binary_sensor.kitchen_refrigerator_door_fridge') }}"
+        power: "{{ states('sensor.kitchen_refrigerator_power') }} W"
+        energy_daily: "{{ states('sensor.kitchen_refrigerator_energy_daily')|float(0) }} kWh"
+        duty_cycle: >
+          {% set watts = 180.0|float(0) %}
+          {% set energy = states('sensor.kitchen_refrigerator_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+        daily_average: >
+          {% set energy = states('sensor.kitchen_refrigerator_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+        cooling_cycle: >
+          {% set running = is_state('binary_sensor.kitchen_refrigerator_running','on') %}
+          {% set defrost = is_state('binary_sensor.kitchen_refrigerator_defrost_cycle','on') %}
+          {{ 'on' if (running and not defrost) else 'off' }}
+        defrost_cycle: "{{ states('binary_sensor.kitchen_refrigerator_defrost_cycle') }}"
+        water_cold: "{{ states('binary_sensor.kitchen_refrigerator_water_cold') }}"
+        water_leak: "{{ states('binary_sensor.kitchen_refrigerator_water_leak') }}"
+        
+    - name: Chest Freezer State
+      #unique_id: chest_freezer_state
+      icon: mdi:treasure-chest
+      availability: >
+        {{ not is_state('binary_sensor.chest_freezer_running','unavailable') and is_state('binary_sensor.chest_freezer_powered','on') }}
+      state: >
+        {% set running = is_state('binary_sensor.chest_freezer_running','on') %}
+        {% set defrost = false %}
+        {% set door = is_state('binary_sensor.chest_freezer_door','on') %}
+        
+        {% if door %}
+          Freezer Door Opened
+        {% elif defrost %}
+          Defrost Cycle
+        {% elif running %}
+          Cooling Cycle
+        {% else %}
+          Ready
+        {% endif %}
+      attributes:
+        appliances: "Refrigerator"
+        state: "{{ states('sensor.chest_freezer_state') }}"
+        version: "{{ state_attr('binary_sensor.chest_freezer_running', 'version') }}"
+        date: "{{ state_attr('binary_sensor.chest_freezer_running', 'date') }}"
+        wifi_ssid: "{{ state_attr('binary_sensor.chest_freezer_running', 'wifi_ssid') }}"
+        wifi_rssi: "{{ state_attr('binary_sensor.chest_freezer_running', 'wifi_rssi') }}"
+        wifi_percent: "{{ state_attr('binary_sensor.chest_freezer_running', 'wifi_percent') }}"
+        running: "{{ states('binary_sensor.chest_freezer_running') }}"
+        door: "{{ states('binary_sensor.chest_freezer_door') }}"
+        power: "{{ states('sensor.chest_freezer_power') }} W"
+        energy_daily: "{{ states('sensor.chest_freezer_energy_daily')|float(0) }} kWh"
+        duty_cycle: >
+          {% set watts = 160.0|float(0) %}
+          {% set energy = states('sensor.chest_freezer_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+        daily_average: >
+          {% set energy = states('sensor.chest_freezer_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+        cooling_cycle: "{{ states('binary_sensor.chest_freezer_running') }}"
+        #defrost_cycle: "{{ states('binary_sensor.chest_freezer_defrost_cycle') }}"
+        
+    - name: Tankless Water Heater State
+      #unique_id: tankless_water_heater_state
+      icon: >
+        {% if is_state('switch.water_heater', 'off') %}
+          mdi:water-boiler-off
+        {% elif is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+          mdi:water-boiler-auto
+        {% else %}
+          mdi:water-boiler
+        {% endif %}
+      availability: >
+        {{ not is_state('switch.water_heater', 'unavailable') }}
+      state: >
+        {% if is_state('switch.water_heater', 'off') %}
+          Off
+        {% elif is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+         Heating
+        {% else %}
+          Ready
+        {% endif %}
+      attributes:
+        friendly_name: >
+          {% if is_state('switch.water_heater', 'on') and is_state('binary_sensor.water_heater_flow', 'on') %}
+            Water Heater Status: {{ states('sensor.water_heater_temperature') }}°C
+          {% else %}
+            Water Heater Status
+          {% endif %}  
+        state: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'state') }}{% else %}{{ 'unknown' }}{% endif %}"
+        version: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'version') }}{% else %}{{ 'unknown' }}{% endif %}"
+        date: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'date') }}{% else %}{{ 'unknown' }}{% endif %}"
+        #vcc_3v3: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'Vcc3V3') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_ssid: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_ssid') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_rssi: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_rssi') }}{% else %}{{ 'unknown' }}{% endif %}"
+        wifi_percent: "{% if states('switch.water_heater') != 'unavailable' %}{{ state_attr('switch.water_heater', 'wifi_percent') }}{% else %}{{ 'unknown' }}{% endif %}"
+        temp_in: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_in') }}{% else %}{{ 'unknown' }}{% endif %}"
+        temp_out: "{% if states('sensor.water_heater_temperature') != 'unavailable' %}{{ state_attr('sensor.water_heater_temperature', 'wtr_t_out') }}{% else %}{{ 'unknown' }}{% endif %}"
+        flow: "{% if states('sensor.water_heater_flow') != 'unavailable' %}{{ state_attr('sensor.water_heater_flow','wtr_flow') }}{% else %}{{ 'unknown' }}{% endif %}"
+        rated_watts: "{{ state_attr('binary_sensor.water_heater_flow','watts')|int(0) }} W"
+        power: "{% if states('sensor.tankless_water_heater_power') != 'unavailable' %}{{ states('sensor.tankless_water_heater_power')|float(0)|round(1) }} W{% else %}{{ 'unknown' }}{% endif %}"
+        # power: >
+        #   {% set power = state_attr('binary_sensor.water_heater_flow','watts')|float(0) %}
+        #   {{ power if is_state('binary_sensor.water_heater_flow','on') else 0.0 }} W
+        energy_daily: "{{ states('sensor.tankless_water_heater_energy_daily')|float(0) }} kWh"
+        duty_cycle: >
+          {% set watts = state_attr('binary_sensor.water_heater_flow','watts')|float(0) %}
+          {% set energy = states('sensor.tankless_water_heater_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+        daily_average: >
+          {% set energy = states('sensor.tankless_water_heater_energy_daily')|float(0) * 1000 %}
+          {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+          {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+          
+    - name: Well State
+      #unique_id: well_state
+      icon: mdi:water-well
+      availability: >
+        {{ not is_state('binary_sensor.well_pump_running', 'unavailable') }}
+      state: >
+        {% set pump = states('binary_sensor.well_pump_running') %}
+        
+        {% if pump %}
+          Running
+        {% else %}
+          Ready
+        {% endif %}
+      attributes:
+        appliances: "Well Pump"
+        state: "{{ states('sensor.well_state') }}"
+        version: "{{ state_attr('sensor.well_control_status', 'version') }}"
+        date: "{{ state_attr('sensor.well_control_status', 'date') }}"
+        running: "{{ states('binary_sensor.well_pump_running') }}"
+        power: "{{ states('sensor.well_power') }} W"
+        heater: "{{ states('switch.well_heatlamp') }} W"
+        energy_daily: "{{ states('sensor.well_energy_daily')|float(0) }} kWh"
+        water_leak: "{{ states('binary_sensor.well_water_leak') }}"

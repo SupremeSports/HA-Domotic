@@ -1,0 +1,37 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - DATE & TIME         #
+####################################################
+
+  #Flashing code
+  - name: Flashing 1s
+    #unique_id: flashing_1s
+    #icon: mdi:none
+    state: >
+      {% set enable = is_state('input_boolean.enable_flash','on') %}
+      {{ states('counter.second_counter')|int(0) % 2 == 1 if enable else false }}
+
+  - name: Flashing 1m
+    #unique_id: flashing_1m
+    #icon: mdi:none
+    state: >
+      {% set enable = is_state('input_boolean.enable_flash','on') %}
+      {{ states('counter.minute_counter')|int(0) % 2 == 1 if enable else false }}
+
+  - name: Flashing Test
+    #unique_id: flashing_test
+    #icon: mdi:none
+    state: >
+      {{ is_state('binary_sensor.flashing_1s','on') }}
+
+  - name: Toggling Test
+    #unique_id: toggling_test
+    #icon: mdi:none
+    state: >
+      {{ states('binary_sensor.flashing_1s') }}
+    icon: >
+      {% if states('binary_sensor.flashing_1s') == 'on' %}
+        mdi:recycle
+      {% else %}
+        mdi:trash-can
+      {% endif %}
+        

@@ -20,6 +20,16 @@
       - Sunset to 23h
       - Sunset to Sunrise
       - 24/7
+      
+  frontdoorlight_mode:
+    name: Front Door Light Mode
+    icon: mdi:calendar-clock
+    options:
+      - Force Off
+      - Sunset to 23h
+      - Sunset to Sunrise
+      - 24/7
+      - Switch Mode
     
   garagefrontlight_mode:
     name: Garage Front Light Mode
@@ -42,88 +52,12 @@
     name: Nixie Date Format
     icon: mdi:calendar-check
     options:
+      - MM.DD.YY
       - YY.MM.DD
-      - YY.MM.DD
-      - YY.MM.DD
-    
-  doorchime_tf_sound:
-    name: Sound Selection
-    icon: mdi:music-note
-    options:
-      - Ding Dong
-      - Alouette
-      - Anniversary Waltz
-      - Auld Lang Syne
-      - Battle Hymn of the Republic
-      - Beethoven's Fifth
-      - Bless This House
-      - Dixie
-      - For He's a Jolly Good Fellow
-      - Greensleeves
-      - Happy Birthday
-      - Home on The Range
-      - I've Been Working On The Railroad
-      - Jingle Bells
-      - Joy to the World
-      - Mazel Tov
-      - My Wild Irish Rose
-      - O Sole Mio!
-      - Oh Tannenbaum
-      - Rule Britannia
-      - Star Sprangled Banner
-      - Stars and Stripes Forever
-      - Take Me Out to the Ballagme
-      - The Marseillaise
-      - Westminster Chimes (8 notes)
-      - Westminster Chimes (4 notes)
-      - Yankee Doodle
-      - Final Fantasy VII
-      - Yoshi's Island
-      
-  doorchime_bf_sound:
-    name: Sound Selection
-    icon: mdi:music-note
-    options:
-      - Ding Dong
-      - Alouette
-      - Anniversary Waltz
-      - Auld Lang Syne
-      - Battle Hymn of the Republic
-      - Beethoven's Fifth
-      - Bless This House
-      - Dixie
-      - For He's a Jolly Good Fellow
-      - Greensleeves
-      - Happy Birthday
-      - Home on The Range
-      - I've Been Working On The Railroad
-      - Jingle Bells
-      - Joy to the World
-      - Mazel Tov
-      - My Wild Irish Rose
-      - O Sole Mio!
-      - Oh Tannenbaum
-      - Rule Britannia
-      - Star Sprangled Banner
-      - Stars and Stripes Forever
-      - Take Me Out to the Ballagme
-      - The Marseillaise
-      - Westminster Chimes (8 notes)
-      - Westminster Chimes (4 notes)
-      - Yankee Doodle
-      - Final Fantasy VII
-      - Yoshi's Island
+      - DD.MM.YY
 
   frontyardirrigation_mode:
     name: Frontyard Irrigation Mode
-    icon: mdi:calendar-clock
-    options:
-      - Winter/Off
-      - Auto
-      - 24/7
-      
-  backyardirrigation_mode:
-    name: Backyard Irrigation Mode
     icon: mdi:calendar-clock
     options:
       - Winter/Off
@@ -155,3 +89,14 @@
       - Away
       - Vacation
       
+  cody_presence:
+    name: Cody's Home Presence
+    icon: mdi:home-account
+    options:
+      - Auto
+      - Force Home
+      - Force Away
+      - Garderie
+      - École
+      - Avec Maman
+      - Avec Papa

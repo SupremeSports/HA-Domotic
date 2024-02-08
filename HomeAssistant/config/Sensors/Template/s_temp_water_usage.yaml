@@ -1,0 +1,163 @@
+####################################################
+# TEMPLATES - WATER USAGE                          #
+####################################################
+
+#APPLIANCES
+  - name: Washing Machine Water Daily Usage
+    #unique_id: washing_machine_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time = states('sensor.washing_machine_water_cold_time')|float(0) %}
+      {% set hot_time = states('sensor.washing_machine_water_hot_time')|float(0) %}
+      {% set units_cold = state_attr('sensor.washing_machine_water_cold_time','unit_of_measurement') %}
+      {% set units_hot = state_attr('sensor.washing_machine_water_hot_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.washing_machine_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold = lpm * (60.0 if units_cold=='h' else 0.016666667) %}
+      {% set ratio_hot = lpm * (60.0 if units_hot=='h' else 0.016666667) %}
+      
+      {{ ((cold_time*ratio_cold) + (hot_time* ratio_hot)) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.washing_machine_water_cold_time')|float(0) }}"
+      hot_time: "{{ states('sensor.washing_machine_water_hot_time')|float(0) }}"
+      lpm: "{{ 6.0 }}"
+      water_usage: "{{ states('sensor.washing_machine_water_daily_usage')|float(0) }}"
+      
+  - name: Dishwasher Water Daily Usage
+    #unique_id: dishwasher_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set hot_time = states('sensor.dishwasher_water_hot_time')|float(0) %}
+      {% set units_hot = state_attr('sensor.dishwasher_water_hot_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.dishwasher_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_hot = lpm * (60.0 if units_hot=='h' else 0.016666667) %}
+      
+      {{ (hot_time * ratio_hot) | float(0) | round(5) }}
+    attributes:
+      hot_time: "{{ states('sensor.dishwasher_water_hot_time')|float(0) }}"
+      lpm: "{{ 6.0 }}"
+      water_usage: "{{ states('sensor.dishwasher_water_daily_usage')|float(0) }}"
+      
+  - name: Icemaker Water Daily Usage
+    #unique_id: icemaker_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time = states('sensor.icemaker_water_cold_time')|float(0) %}
+      {% set units_cold = state_attr('sensor.icemaker_water_cold_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.icemaker_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold = lpm * (60.0 if units_cold=='h' else 0.016666667) %}
+      
+      {{ (cold_time * ratio_cold) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.icemaker_water_cold_time')|float(0) }}"
+      lpm: "{{ 3.0 }}"
+      water_usage: "{{ states('sensor.icemaker_water_daily_usage')|float(0) }}"
+
+#OUTDOOR
+  - name: Pool Filler Water Daily Usage
+    #unique_id: pool_filler_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time = states('sensor.pool_filler_water_cold_time')|float(0) %}
+      {% set units_cold = state_attr('sensor.pool_filler_water_cold_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.pool_filler_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold = lpm * (60.0 if units_cold=='h' else 0.016666667) %}
+      
+      {{ (cold_time * ratio_cold) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.pool_filler_water_cold_time')|float(0) }}"
+      lpm: "{{ 15.0 }}"
+      water_usage: "{{ states('sensor.pool_filler_water_daily_usage')|float(0) }}"
+
+  - name: Pond Filler Water Daily Usage
+    #unique_id: pond_filler_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time = states('sensor.pond_filler_water_cold_time')|float(0) %}
+      {% set units_cold = state_attr('sensor.pond_filler_water_cold_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.pond_filler_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold = lpm * (60.0 if units_cold=='h' else 0.016666667) %}
+      
+      {{ (cold_time * ratio_cold) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.pond_filler_water_cold_time')|float(0) }}"
+      lpm: "{{ 15.0 }}"
+      water_usage: "{{ states('sensor.pond_filler_water_daily_usage')|float(0) }}"
+      
+  - name: Garden Irrigation Water Daily Usage
+    #unique_id: garden_irrigation_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time = states('sensor.garden_irrigation_water_cold_time')|float(0) %}
+      {% set units_cold = state_attr('sensor.garden_irrigation_water_cold_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.garden_irrigation_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold = lpm * (60.0 if units_cold=='h' else 0.016666667) %}
+      
+      {{ (cold_time * ratio_cold) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.garden_irrigation_water_cold_time')|float(0) }}"
+      lpm: "{{ 15.0 }}"
+      water_usage: "{{ states('sensor.garden_irrigation_water_daily_usage')|float(0) }}"
+      
+  - name: Flowerbed Irrigation Water Daily Usage
+    #unique_id: flowerbed_irrigation_water_daily_usage
+    unit_of_measurement: 'L'
+    state_class: total_increasing
+    device_class: water
+    icon: mdi:water
+    state: >
+      {% set cold_time_front = states('sensor.frontyard_irrigation_water_cold_time')|float(0) %}
+      {% set cold_time_rear = states('sensor.rearyard_irrigation_water_cold_time')|float(0) %}
+      {% set units_cold_front = state_attr('sensor.frontyard_irrigation_water_cold_time','unit_of_measurement') %}
+      {% set units_cold_rear = state_attr('sensor.rearyard_irrigation_water_cold_time','unit_of_measurement') %}
+      {% set lpm = state_attr('sensor.flowerbed_irrigation_water_daily_usage','lpm')|float(0) %}
+      {% set ratio_cold_front = lpm * (60.0 if units_cold_front=='h' else 0.016666667) %}
+      {% set ratio_cold_rear = lpm * (60.0 if units_cold_rear=='h' else 0.016666667) %}
+      
+      {{ ((cold_time_front * ratio_cold_front) + (cold_time_rear * ratio_cold_rear)) | float(0) | round(5) }}
+    attributes:
+      cold_time: "{{ states('sensor.frontyard_irrigation_water_cold_time')|float(0) + states('sensor.rearyard_irrigation_water_cold_time')|float(0) }}"
+      cold_time_front: "{{ states('sensor.frontyard_irrigation_water_cold_time')|float(0) }}"
+      cold_time_rear: "{{ states('sensor.rearyard_irrigation_water_cold_time')|float(0) }}"
+      lpm: "{{ 15.0 }}"
+      water_usage: "{{ states('sensor.flowerbed_irrigation_water_daily_usage')|float(0) }}"
+
+#TEMPLATING WATER TO ROUND DECIMALS
+  - name: Total Water Daily Used
+    #unique_id: total_water_daily_used
+    unit_of_measurement: 'L'
+    #state_class: measurement
+    device_class: water
+    #icon: mdi:water
+    state: >
+      {{states('sensor.total_water_utility_daily_used')|float(0)|round(5) }}
+    attributes:
+      friendly_name: Total Water Daily Used
+
+  - name: Total Water Daily Used Cost
+    #unique_id: total_water_daily_used_cost
+    unit_of_measurement: '$'
+    #state_class: measurement
+    device_class: monetary
+    #icon: mdi:cash
+    state: >
+      {{states('sensor.total_water_utility_used_cost')|float(0)|round(5) }}
+    attributes:
+      friendly_name: Total Water Daily Used Cost

@@ -1,0 +1,150 @@
+####################################################
+# SENSORS - MQTT - WELL                            #
+####################################################
+
+######### WELL CONTROL - BASIC DATA #########
+  - name: Well Control Status
+    icon: mdi:server
+    state_topic: "Well/Control/Json"
+    availability:
+      - topic: "Well/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set status = value_json.state %}
+      {% if status == "ON" %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    json_attributes_topic: "Well/Control/Json"
+    
+  - name: Well Box Temperature
+    unit_of_measurement: '°C'
+    icon: mdi:thermometer
+    state_topic: "Well/Control/Json"
+    availability:
+      - topic: "Well/Control/LWT"
+    value_template: "{{ value_json.temp_in }}"
+    qos: 0
+    
+  - name: Well Box Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_topic: "Well/Control/Json"
+    availability:
+      - topic: "Well/Control/LWT"
+    value_template: "{{ value_json.hum_in }}"
+    qos: 0
+    
+  - name: Well 5V Voltage
+    unit_of_measurement: 'V'
+    icon: mdi:flash-outline
+    state_topic: "Well/Control/Json"
+    availability:
+      - topic: "Well/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc5V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+    
+  - name: Well 12V Voltage
+    icon: mdi:flash-outline
+    unit_of_measurement: 'V'
+    state_topic: "Well/Control/Json"
+    availability:
+      - topic: "Well/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set RV = value_json.Vcc12V | float %}
+      
+      {% if is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ RV | round(1) }}
+      {% endif %}
+
+######### WELL CONTROL - SENSORS #########
+  - name: Well Power
+    icon: mdi:water-well
+    device_class: power
+    unit_of_measurement: 'W'
+    state_topic: "Well/Control/Sensors/Stts"
+    availability:
+      - topic: "Well/Control/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.well_power')|float(0) %}
+      {% set current = value_json.current|float(0) %}
+      {% set voltage = states('sensor.ted5000_mtu1_voltage')|float(240) / 2 %}
+      {% set ratio = 1.0 %}
+      
+      {% if current < 0.1 %}
+        {% set ratio = 0.216667 %}
+      {% endif %}
+      
+      {% set power = current * voltage * ratio %}
+      
+      {% if power < 0 or power > 1600 %}
+        {% if prev != 0 %}
+          {% set power = prev %}
+        {% else %}
+          {% set power = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {% if power < 10.0 %}
+        {{ power | float(0) | round(5) }}
+      {% elif power < 100.0 %}
+        {{ power | float(0) | round(4) }}
+      {% elif power < 1000.0 %}
+        {{ power | float(0) | round(3) }}
+      {% else %}
+        {{ power | float(0) | round(1) }}
+      {% endif %}
+
+  - name: Well Pit Temperature
+    unit_of_measurement: '°C'
+    icon: mdi:thermometer
+    state_topic: "Well/Control/Sensors/Stts"
+    availability:
+      - topic: "Well/Control/LWT"
+    value_template: >
+      {% set prev = states('sensor.well_pit_temperature')|float(0) %}
+      {% set RT = value_json.well_temp | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+    qos: 0
+    
+  - name: Well Water Temperature
+    unit_of_measurement: '°C'
+    icon: mdi:thermometer
+    state_topic: "Well/Control/Sensors/Stts"
+    availability:
+      - topic: "Well/Control/LWT"
+    value_template: >
+      {% set prev = states('sensor.well_water_temperature')|float(0) %}
+      {% set RT = value_json.water_temp | float(-99) %}
+      
+      {% if RT < -75 or RT > 75 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+    qos: 0

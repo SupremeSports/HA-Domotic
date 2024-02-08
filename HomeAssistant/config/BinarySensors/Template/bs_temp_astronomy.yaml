@@ -1,0 +1,20 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - ASTRONOMY           #
+####################################################
+
+  - name: SpaceX Status
+    #unique_id: spacex_status
+    #icon: mdi:none
+    state: >
+      {% set error = ['unknown','Unknown','unavailable','Unavailable', ''] %}
+      {% set sensor1 = states('sensor.spacex_next_launch_rocket') not in error %}
+      {% set sensor2 = states('sensor.spacex_next_launch_mission') not in error %}
+      {% set sensor3 = states('sensor.spacex_next_launch_day') not in error %}
+      {% set sensor4 = states('sensor.spacex_next_launch_time') not in error %}
+      {% set sensor5 = states('binary_sensor.spacex_next_launch_confirmed') not in error %}
+      
+      {% set sensor6 = states('sensor.spacex_starman_speed') not in error %}
+      {% set sensor7 = states('sensor.spacex_starman_distance') not in error %}
+      
+      {{ sensor1 and sensor2 and sensor3 and sensor4 and sensor5 and sensor6 and sensor7 }}
+      

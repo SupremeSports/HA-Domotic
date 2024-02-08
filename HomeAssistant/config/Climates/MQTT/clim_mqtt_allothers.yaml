@@ -1,0 +1,180 @@
+####################################################
+# CLIMATE                                          #
+####################################################
+
+  - name: Living Room HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "cool"
+      - "dry"
+      - "fan_only"
+      - "heat"
+    swing_modes:
+      - "On"
+      - "Off"
+    fan_modes:
+      - "Auto"
+      - "High"
+      - "Medium"
+      - "Low"
+      - "Quiet"
+    min_temp: 16
+    max_temp: 30
+    temp_step: 1
+    #power_command_topic: "Home/Living/Hvac/Power/Cmd"
+    mode_command_topic: "Home/Living/Hvac/Mode/Cmd"
+    temperature_command_topic: "Home/Living/Hvac/Temp/Cmd"
+    fan_mode_command_topic: "Home/Living/Hvac/Fan/Cmd"
+    swing_mode_command_topic: "Home/Living/Hvac/Swing/Cmd"
+    mode_state_topic: "Home/Living/Hvac/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/Living/Hvac/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    fan_mode_state_topic: "Home/Living/Hvac/Stts"
+    fan_mode_state_template: "{{ value_json.fan }}"
+    swing_mode_state_topic: "Home/Living/Hvac/Stts"
+    swing_mode_state_template: "{{ value_json.swing }}"
+    current_temperature_topic: "Home/Living/Hvac/Json"
+    #current_temperature_template: "{{ value_json.room_temp }}"
+    #current_temperature_template: "{{ value_json.air_temp }}"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set air = value_json.air_temp %}
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {{ air }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    #send_if_off: true
+    retain: false
+    availability:
+      - topic: "Home/Living/Hvac/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Living/Hvac/Json"
+    
+  - name: RecRoom HVAC
+    modes:
+      - "off"
+      - "auto"
+      - "cool"
+      - "dry"
+      - "fan_only"
+      - "heat"
+    swing_modes:
+      - "On"
+      - "Off"
+    fan_modes:
+      - "Auto"
+      - "High"
+      - "Medium"
+      - "Low"
+      - "Quiet"
+    min_temp: 16
+    max_temp: 30
+    temp_step: 1
+    #power_command_topic: "Home/RecRoom/Hvac/Power/Cmd"
+    mode_command_topic: "Home/RecRoom/Hvac/Mode/Cmd"
+    temperature_command_topic: "Home/RecRoom/Hvac/Temp/Cmd"
+    fan_mode_command_topic: "Home/RecRoom/Hvac/Fan/Cmd"
+    swing_mode_command_topic: "Home/RecRoom/Hvac/Swing/Cmd"
+    mode_state_topic: "Home/RecRoom/Hvac/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/RecRoom/Hvac/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    fan_mode_state_topic: "Home/RecRoom/Hvac/Stts"
+    fan_mode_state_template: "{{ value_json.fan }}"
+    swing_mode_state_topic: "Home/RecRoom/Hvac/Stts"
+    swing_mode_state_template: "{{ value_json.swing }}"
+    current_temperature_topic: "Home/RecRoom/Hvac/Json"
+    #current_temperature_template: "{{ value_json.room_temp }}"
+    #current_temperature_template: "{{ value_json.air_temp }}"
+    current_temperature_template: >
+      {% set room = value_json.room_temp %}
+      {% set air = value_json.air_temp %}
+      {% if room|string == '---' or room|float == -99.9 or room|float == -1 %}
+        {{ air }}
+      {% else %}
+        {{ room }}
+      {% endif %}
+    precision: 1.0
+    #send_if_off: true
+    retain: false
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    qos: 0
+    json_attributes_topic: "Home/RecRoom/Hvac/Json"
+    
+  - name: Storage Room Floor Heater
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 25
+    temp_step: 0.5
+    precision: 0.1
+    #send_if_off: true
+    #power_command_topic: "Home/Storage/Floor/Power/Cmd"
+    mode_command_topic: "Home/Storage/Floor/Mode/Cmd"
+    temperature_command_topic: "Home/Storage/Floor/Temp/Cmd"
+    mode_state_topic: "Home/Storage/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/Storage/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Home/Storage/Therm/Json"
+    current_temperature_template: >
+      {% set room_air = value_json.room_temp %}
+      {% set room_flr = value_json.flr_temp %}
+      {% set ok = false %}
+      
+      {% if is_state('input_boolean.storage_room_floor_air_temp','on') %}
+        {% set room = room_air %}
+      {% else %}
+        {% set room = room_flr %}
+      {% endif %}
+
+      {{ room | round(1) }}
+    retain: false
+    availability:
+      - topic: "Home/Storage/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Home/Storage/Therm/Json"
+
+  - name: Cold Storage Floor Heater
+    modes:
+      - "off"
+      - "auto"
+      - "heat"
+    min_temp: 7
+    max_temp: 25
+    temp_step: 0.5
+    precision: 0.1
+    #send_if_off: true
+    #power_command_topic: "Home/ColdStorage/Floor/Power/Cmd"
+    mode_command_topic: "Home/ColdStorage/Floor/Mode/Cmd"
+    temperature_command_topic: "Home/ColdStorage/Floor/Temp/Cmd"
+    mode_state_topic: "Home/ColdStorage/Therm/Stts"
+    mode_state_template: "{{ value_json.mode }}"
+    temperature_state_topic: "Home/ColdStorage/Therm/Stts"
+    temperature_state_template: "{{ value_json.temp }}"
+    current_temperature_topic: "Home/ColdStorage/Therm/Json"
+    current_temperature_template: >
+      {% set room_air = value_json.room_temp %}
+      {% set room_flr = value_json.flr_temp %}
+      {% set ok = false %}
+      
+      {% if is_state('input_boolean.cold_storage_floor_air_temp','on') %}
+        {% set room = room_air %}
+      {% else %}
+        {% set room = room_flr %}
+      {% endif %}
+      
+      {{ room | round(1) }}
+    retain: false
+    availability:
+      - topic: "Home/ColdStorage/Therm/LWT"
+    qos: 0
+    json_attributes_topic: "Home/ColdStorage/Therm/Json"
+    

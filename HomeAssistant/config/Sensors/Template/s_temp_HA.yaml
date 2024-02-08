@@ -1,0 +1,679 @@
+####################################################
+# TEMPLATES - HA and components                    #
+####################################################
+
+#Home Assistant Uptime
+  - name: Time Online
+    #unique_id: time_online
+    icon: mdi:clock
+    state: >
+      {% set last_restart = as_timestamp(states('sensor.uptime')) %}
+      {% set uptime = now().timestamp() - last_restart %}
+      {% set days = (uptime / 86400) | float(0) %}
+      {% set hours = (days * 24) | float(0) %}
+      {% set minutes = (hours * 60) | float(0) %}
+      
+      {% if days >= 1.0 %}
+        {{ days | round(2) }} days ago
+      {% elif hours >= 1.0 %}
+        {{ hours | round(1) }} hours ago
+      {% else %}
+        {{ minutes | round(0) }} minutes ago
+      {% endif %}
+      
+  - name: HA VM DB Size
+    #unique_id: ha_vm_db_size
+    unit_of_measurement: MB
+    device_class: data_size
+    icon: mdi:database-search
+    state: >
+      {% set MariaDB = states('sensor.home_assistant_mariadb')|float(-1) %}
+      {% set HA_DB = states('sensor.home_assistant_v2_db')|float(-1) %}
+      {% set output = 0.0 %}
+      
+      {% if MariaDB > 0 %}
+        {% set output = MariaDB %}
+      {% elif HA_DB > 0 %}
+        {% set output = HA_DB %}
+      {% endif %}
+      
+      {{ output | round(3) }}
+
+#HA & ADDONS version status
+  - name: HA Update Available
+    #unique_id: ha_update_available
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.ha_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = state_attr('update.ha_update','installed_version') != state_attr('update.ha_update','latest_version') %}
+      {% if state_attr('update.ha_update','latest_version') is defined and state_attr('update.ha_update','installed_version') is defined %}
+        {% set major = state_attr('update.ha_update','latest_version').split('.')[0]|int(0) - state_attr('update.ha_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% else %}
+        {% set major = false %}
+      {% endif %}
+      {% set updating = is_state_attr('update.ha_update','in_progress', true) %}
+      {% set stopped = false %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      #friendly_name: HA Update Available
+      running: "{{ true }}"
+      cpu: "{{ states('sensor.ha_vm_cpu_used') }} %"
+      memory: "{{ states('sensor.ha_vm_memory_used_percent') }} %"
+      updating: "{{ is_state_attr('update.ha_update','in_progress', true) }}"
+      current: "{{ state_attr('update.ha_update','installed_version') }}"
+      latest: "{{ state_attr('update.ha_update','latest_version') }}"
+      major_update: "{{ state_attr('update.ha_update','latest_version').split('.')[1]|int(0) - state_attr('update.ha_update','installed_version').split('.')[1]|int(0) > 0 }}"
+      #breaking_changes: "{{ states('sensor.potential_breaking_changes') }}"
+
+  - name: Addons Update Available
+    #unique_id: addons_update_available
+    #device_class: update
+    #icon: mdi:none
+    state: >
+      {%- set data = namespace(version=false, updating=false, unavailable=true) -%}
+      {% for e in expand('group.addons') %}
+        {% if e.state in ('Update available', 'Major update') %}
+          {%- set data.version = true -%}
+        {%- endif -%}
+        {% if e.state == 'Updating' %}
+          {%- set data.updating = true -%}
+        {%- endif -%}
+        {% if e.state not in ('Unavailable', 'unavailable', 'Unknown', 'unknown', 'None', 'none') %}
+          {%- set data.unavailable = false -%}
+        {%- endif -%}
+      {%- endfor -%}
+      
+      {% if data.updating %}
+        Updating
+      {% elif data.version %}
+        Update available
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      ha_core: "{{ states('sensor.ha_update_available') }}"
+      ha_os: "{{ states('sensor.ha_os_update_available') }}"
+      supervisor: "{{ states('sensor.supervisor_update_available') }}"
+      #check_config: "{{ states('sensor.check_config_addon_update_available') }}"
+      chrony: "{{ states('sensor.chrony_addon_update_available') }}"
+      duck_dns: "{{ states('sensor.duck_dns_addon_update_available') }}"
+      file_editor: "{{ states('sensor.file_editor_addon_update_available') }}"
+      grocy: "{{ states('sensor.grocy_addon_update_available') }}"
+      #mariadb: "{{ states('sensor.mariadb_addon_update_available') }}"
+      mosquitto: "{{ states('sensor.mosquitto_addon_update_available') }}"
+      samba_share: "{{ states('sensor.samba_share_addon_update_available') }}"
+      ssh_web_terminal: "{{ states('sensor.ssh_web_terminal_addon_update_available') }}"
+      frigate_addon: "{{ states('sensor.frigate_addon_update_available') }}"
+      frigate_server: "{{ states('sensor.frigate_server_update_available') }}"
+      
+## HOME ASSISTANT & HOST ##
+  - unique_id: home_assistant_operating_system_update_available
+    #name: Home Assistant OS
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.home_assistant_operating_system_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.home_assistant_operating_system_update','on') %}
+      {% set latest = state_attr('update.home_assistant_operating_system_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.home_assistant_operating_system_update','installed_version')|default(0) %}
+      {% set major = false %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.home_assistant_operating_system_update','latest_version').split('.')[0]|int(0) - state_attr('update.home_assistant_operating_system_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.home_assistant_operating_system_update','in_progress',true) %}
+      {% set stopped = false %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Home Assistant OS
+      running: "{{ true }}"
+      cpu: '0 %'
+      memory: '0 %'
+      updating: "{{ state_attr('update.home_assistant_operating_system_update','in_progress') }}"
+      current: "{{ state_attr('update.home_assistant_operating_system_update','installed_version') }}"
+      latest: "{{ state_attr('update.home_assistant_operating_system_update','latest_version') }}"
+
+  - unique_id: supervisor_update_available
+    #name: Supervisor
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.supervisor_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.supervisor_update','on') %}
+      {% set latest = state_attr('update.supervisor_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.supervisor_update','installed_version')|default(0) %}
+      {% set major = false %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.supervisor_update','latest_version').split('.')[0]|int(0) - state_attr('update.supervisor_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.supervisor_update','in_progress',true) %}
+      {% set stopped = false %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Supervisor
+      running: "{{ true }}"
+      cpu: '0 %'
+      memory: '0 %'
+      updating: "{{ state_attr('update.supervisor_update','in_progress') }}"
+      current: "{{ state_attr('update.supervisor_update','installed_version') }}"
+      latest: "{{ state_attr('update.supervisor_update','latest_version') }}"
+      
+## ADD-ONS ##
+  # - unique_id: adguard_home_addon_update_available
+  #   #name: AdGuard Home      
+  #   #device_class: update
+  #   #icon: mdi:none
+  #   availability: >-
+  #     {{ states('update.adguard_home_update') not in ('unavailable', 'unknown', 'none') }}
+  #   state: >
+  #     {% set version = is_state('update.adguard_home_update','on') %}
+      # {% set latest = state_attr('update.adguard_home_update','latest_version')|default(0) %}
+      # {% set current = state_attr('update.adguard_home_update','installed_version')|default(0) %}
+      # {% set major = true %}
+      # {% if (latest and current) not in [None] %}
+      #   {% set major = state_attr('update.adguard_home_update','latest_version').split('.')[0]|int(0) - state_attr('update.adguard_home_update','installed_version').split('.')[0]|int(0) > 0 %}
+      # {% endif %}
+  #     {% set updating = is_state_attr('update.adguard_home_update','in_progress',true) %}
+  #     {% set stopped = is_state('binary_sensor.adguard_home_running','off') %}
+      
+  #     {% if updating %}
+  #       Updating
+  #     {% elif major %}
+  #       Major update
+  #     {% elif version %}
+  #       Update available
+  #     {% elif stopped %}
+  #       Stopped
+  #     {% else %}
+  #       Up-to-date
+  #     {% endif %}
+  #   attributes:
+  #     friendly_name: AdGuard Home
+  #     running: "{{ is_state('binary_sensor.adguard_home_running','on') }}"
+  #     cpu: "{% if states('sensor.adguard_home_cpu_percent') == 'unknown' or is_state('binary_sensor.adguard_home_running','off') %}{{ '0' }}{% else %}{{ states('sensor.adguard_home_cpu_percent') }}{% endif %} %"
+  #     memory: "{% if states('sensor.adguard_home_memory_percent') == 'unknown' or is_state('binary_sensor.adguard_home_running','off') %}{{ '0' }}{% else %}{{ states('sensor.adguard_home_memory_percent') }}{% endif %} %"
+  #     updating: "{{ state_attr('update.adguard_home_update','in_progress') }}"
+  #     current: "{{ state_attr('update.adguard_home_update','installed_version') }}"
+  #     latest: "{{ state_attr('update.adguard_home_update','latest_version') }}"
+
+  - unique_id: chrony_addon_update_available
+    #name: Chrony
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.chrony_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.chrony_update','on') %}
+      {% set latest = state_attr('update.chrony_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.chrony_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.chrony_update','latest_version').split('.')[0]|int(0) - state_attr('update.chrony_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.chrony_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.chrony_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Chrony
+      running: "{{ is_state('binary_sensor.chrony_running','on') }}"
+      cpu: "{% if states('sensor.chrony_cpu_percent') == 'unknown' or is_state('binary_sensor.chrony_running','off') %}{{ '0' }}{% else %}{{ states('sensor.chrony_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.chrony_memory_percent') == 'unknown' or is_state('binary_sensor.chrony_running','off') %}{{ '0' }}{% else %}{{ states('sensor.chrony_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.chrony_update','in_progress') }}"
+      current: "{{ state_attr('update.chrony_update','installed_version') }}"
+      latest: "{{ state_attr('update.chrony_update','latest_version') }}"
+      
+  - unique_id: duck_dns_addon_update_available
+    #name: Duck DNS
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.duck_dns_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.duck_dns_update','on') %}
+      {% set latest = state_attr('update.duck_dns_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.duck_dns_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.duck_dns_update','latest_version').split('.')[0]|int(0) - state_attr('update.duck_dns_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.duck_dns_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.duck_dns_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Duck DNS
+      running: "{{ is_state('binary_sensor.duck_dns_running','on') }}"
+      cpu: "{% if states('sensor.duck_dns_cpu_percent') == 'unknown' or is_state('binary_sensor.duck_dns_running','off') %}{{ '0' }}{% else %}{{ states('sensor.duck_dns_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.duck_dns_memory_percent') == 'unknown' or is_state('binary_sensor.duck_dns_running','off') %}{{ '0' }}{% else %}{{ states('sensor.duck_dns_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.duck_dns_update','in_progress') }}"
+      current: "{{ state_attr('update.duck_dns_update','installed_version') }}"
+      latest: "{{ state_attr('update.duck_dns_update','latest_version') }}"
+      
+  - unique_id: file_editor_addon_update_available
+    #name: File Editor
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.file_editor_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.file_editor_update','on') %}
+      {% set latest = state_attr('update.file_editor_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.file_editor_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.file_editor_update','latest_version').split('.')[0]|int(0) - state_attr('update.file_editor_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.file_editor_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.file_editor_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: File Editor
+      running: "{{ is_state('binary_sensor.file_editor_running','on') }}"
+      cpu: "{% if states('sensor.file_editor_cpu_percent') == 'unknown' or is_state('binary_sensor.file_editor_running','off') %}{{ '0' }}{% else %}{{ states('sensor.file_editor_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.file_editor_memory_percent') == 'unknown' or is_state('binary_sensor.file_editor_running','off') %}{{ '0' }}{% else %}{{ states('sensor.file_editor_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.file_editor_update','in_progress') }}"
+      current: "{{ state_attr('update.file_editor_update','installed_version') }}"
+      latest: "{{ state_attr('update.file_editor_update','latest_version') }}"
+      
+  - unique_id: grocy_addon_update_available
+    #name: Grocy
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.grocy_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.grocy_update','on') %}
+      {% set latest = state_attr('update.grocy_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.grocy_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.grocy_update','latest_version').split('.')[0]|int(0) - state_attr('update.grocy_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.grocy_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.grocy_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Grocy
+      running: "{{ is_state('binary_sensor.grocy_running','on') }}"
+      cpu: "{% if states('sensor.grocy_cpu_percent') == 'unknown' or is_state('binary_sensor.grocy_running','off') %}{{ '0' }}{% else %}{{ states('sensor.grocy_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.grocy_memory_percent') == 'unknown' or is_state('binary_sensor.grocy_running','off') %}{{ '0' }}{% else %}{{ states('sensor.grocy_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.grocy_update','in_progress') }}"
+      current: "{{ state_attr('update.grocy_update','installed_version') }}"
+      latest: "{{ state_attr('update.grocy_update','latest_version') }}"
+      
+  # - unique_id: mariadb_addon_update_available
+  #   #name: MariaDB
+  #   #device_class: update
+  #   #icon: mdi:none
+  #   availability: >-
+  #     {{ states('update.mariadb_update') not in ('unavailable', 'unknown', 'none') }}
+  #   state: >
+  #     {% set version = is_state('update.mariadb_update','on') %}
+  #     {% set latest = state_attr('update.mariadb_update','latest_version')|default(0) %}
+  #     {% set current = state_attr('update.mariadb_update','installed_version')|default(0) %}
+  #     {% set major = true %}
+  #     {% if (latest and current) not in [None] %}
+  #       {% set major = state_attr('update.mariadb_update','latest_version').split('.')[0]|int(0) - state_attr('update.mariadb_update','installed_version').split('.')[0]|int(0) > 0 %}
+  #     {% endif %}
+  #     {% set updating = is_state_attr('update.mariadb_update','in_progress',true) %}
+  #     {% set stopped = is_state('binary_sensor.mariadb_running','off') %}
+      
+  #     {% if updating %}
+  #       Updating
+  #     {% elif major %}
+  #       Major update
+  #     {% elif version %}
+  #       Update available
+  #     {% elif stopped %}
+  #       Stopped
+  #     {% else %}
+  #       Up-to-date
+  #     {% endif %}
+  #   attributes:
+  #     friendly_name: MariaDB
+  #     running: "{{ is_state('binary_sensor.mariadb_running','on') }}"
+  #     cpu: "{% if states('sensor.mariadb_cpu_percent') == 'unknown' or is_state('binary_sensor.mariadb_running','off') %}{{ '0' }}{% else %}{{ states('sensor.mariadb_cpu_percent') }}{% endif %} %"
+  #     memory: "{% if states('sensor.mariadb_memory_percent') == 'unknown' or is_state('binary_sensor.mariadb_running','off') %}{{ '0' }}{% else %}{{ states('sensor.mariadb_memory_percent') }}{% endif %} %"
+  #     updating: "{{ state_attr('update.mariadb_update','in_progress') }}"
+  #     current: "{{ state_attr('update.mariadb_update','installed_version') }}"
+  #     latest: "{{ state_attr('update.mariadb_update','latest_version') }}"
+      
+  - unique_id: mosquitto_addon_update_available
+    #name: Mosquitto Broker
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.mosquitto_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.mosquitto_update','on') %}
+      {% set latest = state_attr('update.mosquitto_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.mosquitto_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.mosquitto_update','latest_version').split('.')[0]|int(0) - state_attr('update.mosquitto_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.mosquitto_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.mosquitto_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Mosquitto Broker
+      running: "{{ is_state('binary_sensor.mosquitto_running','on') }}"
+      cpu: "{% if states('sensor.mosquitto_cpu_percent') == 'unknown' or is_state('binary_sensor.mosquitto_running','off') %}{{ '0' }}{% else %}{{ states('sensor.mosquitto_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.mosquitto_memory_percent') == 'unknown' or is_state('binary_sensor.mosquitto_running','off') %}{{ '0' }}{% else %}{{ states('sensor.mosquitto_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.mosquitto_update','in_progress') }}"
+      current: "{{ state_attr('update.mosquitto_update','installed_version') }}"
+      latest: "{{ state_attr('update.mosquitto_update','latest_version') }}"
+
+  - unique_id: phpmyadmin_addon_update_available
+    #name: phpMyAdmin
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.phpmyadmin_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.phpmyadmin_update','on') %}
+      {% set latest = state_attr('update.phpmyadmin_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.phpmyadmin_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.phpmyadmin_update','latest_version').split('.')[0]|int(0) - state_attr('update.phpmyadmin_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.phpmyadmin_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.phpmyadmin_addon_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: phpMyAdmin
+      running: "{{ is_state('binary_sensor.phpmyadmin_addon_running','on') }}"
+      cpu: "{% if states('sensor.phpmyadmin_addon_cpu_percent') == 'unknown' or is_state('binary_sensor.phpmyadmin_addon_running','off') %}{{ '0' }}{% else %}{{ states('sensor.phpmyadmin_addon_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.phpmyadmin_addon_memory_percent') == 'unknown' or is_state('binary_sensor.phpmyadmin_addon_running','off') %}{{ '0' }}{% else %}{{ states('sensor.phpmyadmin_addon_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.phpmyadmin_update','in_progress') }}"
+      current: "{{ state_attr('update.phpmyadmin_update','installed_version') }}"
+      latest: "{{ state_attr('update.phpmyadmin_update','latest_version') }}"
+      
+  - unique_id: samba_share_addon_update_available
+    #name: Samba Share
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.samba_share_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.samba_share_update','on') %}
+      {% set latest = state_attr('update.samba_share_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.samba_share_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.samba_share_update','latest_version').split('.')[0]|int(0) - state_attr('update.samba_share_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.samba_share_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.samba_share_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: Samba Share   
+      running: "{{ is_state('binary_sensor.samba_share_running','on') }}"
+      cpu: "{% if states('sensor.samba_share_cpu_percent') == 'unknown' or is_state('binary_sensor.samba_share_running','off') %}{{ '0' }}{% else %}{{ states('sensor.samba_share_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.samba_share_memory_percent') == 'unknown' or is_state('binary_sensor.samba_share_running','off') %}{{ '0' }}{% else %}{{ states('sensor.samba_share_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.samba_share_update','in_progress') }}"
+      current: "{{ state_attr('update.samba_share_update','installed_version') }}"
+      latest: "{{ state_attr('update.samba_share_update','latest_version') }}"
+
+  # - unique_id: speedtest_addon_update_available
+    # #name: Speedtest
+    # #device_class: update
+    # #icon: mdi:none
+    # state: >
+      # {% set version = is_state('update.speedtest_update','on') %}
+      # {% set latest = state_attr('update.speedtest_update','latest_version')|default(0) %}
+      # {% set current = state_attr('update.speedtest_update','installed_version')|default(0) %}
+      # {% set major = true %}
+      # {% if (latest and current) not in [None] %}
+        # {% set major = state_attr('update.speedtest_update','latest_version').split('.')[0]|int(0) - state_attr('update.speedtest_update','installed_version').split('.')[0]|int(0) > 0 %}
+      # {% endif %}
+      # {% set updating = is_state_attr('update.speedtest_update','in_progress',true) %}
+      # {% set stopped = is_state('binary_sensor.speedtest_running','off') %}
+      # {% set unavailable = states('update.speedtest_update') in ('unavailable', 'unknown', 'none') %}
+      
+      # {% if unavailable %}
+        # Unavailable
+      # {% elif updating %}
+        # Updating
+      # {% elif major %}
+        # Major update
+      # {% elif version %}
+        # Update available
+      # {% elif stopped %}
+        # Stopped
+      # {% else %}
+        # Up-to-date
+      # {% endif %}
+    # attributes:
+      # friendly_name: Speedtest  
+      # running: "{{ is_state('automation.speedtest_run','on') }}"
+      # cpu: "{% if states('sensor.speedtest_cpu_percent') == 'unknown' or is_state('binary_sensor.speedtest_running','off') %}{{ '0' }}{% else %}{{ states('sensor.speedtest_cpu_percent') }}{% endif %} %"
+      # memory: "{% if states('sensor.speedtest_memory_percent') == 'unknown' or is_state('binary_sensor.speedtest_running','off') %}{{ '0' }}{% else %}{{ states('sensor.speedtest_memory_percent') }}{% endif %} %"
+      # updating: "{{ state_attr('update.speedtest_update','in_progress') }}"
+      # current: "{{ state_attr('update.speedtest_update','installed_version') }}"
+      # latest: "{{ state_attr('update.speedtest_update','latest_version') }}"
+      
+  - unique_id: ssh_web_terminal_addon_update_available
+    #name: SSH & Web Terminal
+    #device_class: update
+    #icon: mdi:none
+    availability: >-
+      {{ states('update.ssh_web_terminal_update') not in ('unavailable', 'unknown', 'none') }}
+    state: >
+      {% set version = is_state('update.ssh_web_terminal_update','on') %}
+      {% set latest = state_attr('update.ssh_web_terminal_update','latest_version')|default(0) %}
+      {% set current = state_attr('update.ssh_web_terminal_update','installed_version')|default(0) %}
+      {% set major = true %}
+      {% if (latest and current) not in [None] %}
+        {% set major = state_attr('update.ssh_web_terminal_update','latest_version').split('.')[0]|int(0) - state_attr('update.ssh_web_terminal_update','installed_version').split('.')[0]|int(0) > 0 %}
+      {% endif %}
+      {% set updating = is_state_attr('update.ssh_web_terminal_update','in_progress',true) %}
+      {% set stopped = is_state('binary_sensor.ssh_web_terminal_running','off') %}
+      
+      {% if updating %}
+        Updating
+      {% elif major %}
+        Major update
+      {% elif version %}
+        Update available
+      {% elif stopped %}
+        Stopped
+      {% else %}
+        Up-to-date
+      {% endif %}
+    attributes:
+      friendly_name: SSH & Web Terminal   
+      running: "{{ is_state('binary_sensor.ssh_web_terminal_running','on') }}"
+      cpu: "{% if states('sensor.ssh_web_terminal_cpu_percent') == 'unknown' or is_state('binary_sensor.ssh_web_terminal_running','off') %}{{ '0' }}{% else %}{{ states('sensor.ssh_web_terminal_cpu_percent') }}{% endif %} %"
+      memory: "{% if states('sensor.ssh_web_terminal_memory_percent') == 'unknown' or is_state('binary_sensor.ssh_web_terminal_running','off') %}{{ '0' }}{% else %}{{ states('sensor.ssh_web_terminal_memory_percent') }}{% endif %} %"
+      updating: "{{ state_attr('update.ssh_web_terminal_update','in_progress') }}"
+      current: "{{ state_attr('update.ssh_web_terminal_update','installed_version') }}"
+      latest: "{{ state_attr('update.ssh_web_terminal_update','latest_version') }}"
+      
+  # - unique_id: frigate_addon_update_available
+  #   #name: Frigate Add-On 
+  #   #device_class: update
+  #   #icon: mdi:none
+  #   availability: >-
+  #     {{ states('update.frigate_update') not in ('unavailable', 'unknown', 'none') }}
+  #   state: >
+  #     {% set version = is_state('update.frigate_update','on') %}
+  #     {% set latest = state_attr('update.frigate_update','latest_version')|default(0) %}
+  #     {% set current = state_attr('update.frigate_update','installed_version')|default(0) %}
+  #     {% set major = true %}
+  #     {% if (latest and current) not in [None] %}
+  #       {% set major = state_attr('update.frigate_update','latest_version').split('.')[0]|int(0) - state_attr('update.frigate_update','installed_version').split('.')[0]|int(0) > 0 %}
+  #     {% endif %}
+  #     {% set updating = is_state_attr('update.frigate_update','in_progress',true) %}
+  #     {% set stopped = is_state('binary_sensor.frigate_running','off') %}
+      
+  #     {% if updating %}
+  #       Updating
+  #     {% elif major %}
+  #       Major update
+  #     {% elif version %}
+  #       Update available
+  #     {% elif stopped %}
+  #       Stopped
+  #     {% else %}
+  #       Up-to-date
+  #     {% endif %}
+  #   attributes:
+  #     friendly_name: Frigate Add-On  
+  #     running: "{{ is_state('binary_sensor.frigate_running','on') }}"
+  #     cpu: "{% if states('sensor.frigate_cpu_percent') == 'unknown' or is_state('binary_sensor.frigate_running','off') %}{{ '0' }}{% else %}{{ states('sensor.frigate_cpu_percent') }}{% endif %} %"
+  #     memory: "{% if states('sensor.frigate_memory_percent') == 'unknown' or is_state('binary_sensor.frigate_running','off') %}{{ '0' }}{% else %}{{ states('sensor.frigate_memory_percent') }}{% endif %} %"
+  #     updating: "{{ state_attr('update.frigate_update','in_progress') }}"
+  #     current: "{{ state_attr('update.frigate_update','installed_version') }}"
+  #     latest: "{{ state_attr('update.frigate_update','latest_version') }}"
+
+  # - unique_id: frigate_server_update_available
+  #   #name: Frigate Server 
+  #   #device_class: update
+  #   #icon: mdi:none
+  #   availability: >-
+  #     {{ states('update.frigate_server') not in ('unavailable', 'unknown', 'none') }}
+  #   state: >
+  #     {% set version = is_state('update.frigate_server','on') %}
+  #     {% set latest = state_attr('update.frigate_server','latest_version')|default(0) %}
+  #     {% set current = state_attr('update.frigate_server','installed_version')|default(0) %}
+  #     {% set major = true %}
+  #     {% if (latest and current) not in [None] %}
+  #       {% set major = state_attr('update.frigate_server','latest_version').split('.')[0]|int(0) - state_attr('update.frigate_server','installed_version').split('.')[0]|int(0) > 0 %}
+  #     {% endif %}
+  #     {% set updating = is_state_attr('update.frigate_server','in_progress',true) %}
+  #     {% set stopped = is_state('binary_sensor.frigate_running','off') %}
+      
+  #     {% if updating %}
+  #       Updating
+  #     {% elif major %}
+  #       Major update
+  #     {% elif version %}
+  #       Update available
+  #     {% elif stopped %}
+  #       Stopped
+  #     {% else %}
+  #       Up-to-date
+  #     {% endif %}
+  #   attributes:
+  #     friendly_name: Frigate Server 
+  #     running: "{{ is_state('binary_sensor.frigate_running','on') }}"
+  #     cpu: '0 %'
+  #     memory: '0 %'
+  #     updating: "{{ state_attr('update.frigate_server','in_progress') }}"
+  #     current: "{{ state_attr('update.frigate_server','installed_version') }}"
+  #     latest: "{{ state_attr('update.frigate_server','latest_version') }}"
+  

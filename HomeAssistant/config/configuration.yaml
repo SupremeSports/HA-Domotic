@@ -3,12 +3,19 @@
 ####################################################
 
 homeassistant:
-  # Customization file
+  #Customization file
   customize: !include_dir_merge_named Customizations
   customize_glob: !include_dir_merge_named CustomizationsGlob
   customize_domain: !include_dir_merge_named CustomizationsDomain
   packages: !include_dir_named packages
   auth_providers:
+    # - type: homeassistant
+    - type: trusted_networks
+      trusted_networks:
+        - 192.168.0.101 ## your device IP
+      # trusted_users:
+        # - 192.168.x.x: xxxxxxxxxxxxxx ### the user id
+      allow_bypass_login: true
     - type: homeassistant
   #whitelist_external_dirs:
   allowlist_external_dirs:
@@ -22,6 +29,8 @@ homeassistant:
   unit_system: metric
   time_zone: !secret ha_time_zone
   currency: !secret ha_currency
+  language: !secret ha_language
+  country: !secret ha_country
   
 #Activate iOS devices
 mobile_app:
@@ -31,24 +40,46 @@ lovelace:
   mode: yaml
   resources: !include resources.yaml
 
-# Enables the frontend
+#Enables the frontend
 frontend:
  themes: !include themes.yaml
  extra_module_url:
-   #- /local/custom-ui/custom-ui-pre-2021.6.js
    - /local/custom-ui/custom-ui.js
 
-# Custom iframe panels
+#Custom iframe panels
 panel_iframe:
  chicoutimi:
    title: Chicoutimi
    icon: mdi:account-supervisor-circle
    url: !secret ha_chicout_url
+   
+panel_custom:
+  - name: logs
+    sidebar_title: Logs
+    sidebar_icon: mdi:post
+    js_url: /api/hassio/app/entrypoint.js
+    url_path: "config/logs"
+    embed_iframe: true
+    require_admin: true
+    config:
+      ingress: core_configurator
+  - name: mqtt
+    sidebar_title: MQTT
+    sidebar_icon: mdi:network-pos
+    js_url: /api/hassio/app/entrypoint.js
+    url_path: "config/mqtt"
+    embed_iframe: true
+    require_admin: true
+    config:
+      ingress: core_configurator
 
-# Enables configuration UI
+#Enables configuration UI
 config:
+#default_config:
+energy:
+powercalc:
 
-# Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+#Uncomment this if you are using SSL/TLS, running in Docker container, etc.
 # http:
   # base_url: !secret ha_ext_url
 
@@ -57,26 +88,26 @@ config:
 # the developers to assist with development of Home Assistant.
 # For more information, please see:
 # https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
-updater:
+#updater:
   # Optional, allows Home Assistant developers to focus on popular components.
   # include_used_components: true
 
-# Discover some devices automatically
-discovery:
+#Discover some devices automatically
+#discovery: #Disabled from 2023.8.0
 
-# Allows you to issue voice commands from the frontend in enabled browsers
+#Allows you to issue voice commands from the frontend in enabled browsers
 conversation:
 
-# Enables support for tracking state changes over time
+#Enables support for tracking state changes over time
 history:
 
-# View all events in a logbook
-#logbook: !include logbook.yaml
+#View all events in a logbook
+# logbook: !include logbook.yaml
 
 #Database recorder
 recorder: !include recorder.yaml
 
-# Enables a map showing the location of tracked devices
+#Enables a map showing the location of tracked devices
 map:
 
 # Track the sun
@@ -87,136 +118,103 @@ tts:
   - platform: google_translate
     service_name: google_say
 
-# Cloud
+#Cloud
 cloud:
 
-# Python scripts
+#Python scripts
 python_script:
 
 #Sensors and others
 alarm_control_panel: !include alarm.yaml
 alert: !include alerts.yaml
 automation: !include automations.yaml
-binary_sensor: !include_dir_merge_list BinarySensors
-climate: !include climates.yaml
+binary_sensor: !include_dir_merge_list BinarySensors/Legacy
+climate: !include_dir_merge_list Climates/Legacy
+command_line: !include command_line.yaml
 counter: !include counters.yaml
-cover: !include covers.yaml
+cover: !include_dir_merge_list Covers/Legacy
 device_tracker: !include device_tracker.yaml
-fan: !include fans.yaml
-#fan: !include_dir_merge_list Fans
+fan: !include_dir_merge_list Fans/Legacy
 group: !include groups.yaml
-input_boolean: !include_dir_merge_named InputBool
+input_boolean: !include_dir_merge_named InputBooleans
+input_button: !include_dir_merge_named InputButtons
 input_datetime: !include input_datetime.yaml
 input_number: !include_dir_merge_named InputNumbers
 input_select: !include_dir_merge_named InputSelects
 input_text: !include input_text.yaml
-light: !include lights.yaml
-lock: !include locks.yaml
-modbus: !include_dir_merge_list Modbus
+light: !include_dir_merge_list Lights/Legacy
+lock: !include_dir_merge_list Locks/Legacy
+#modbus: !include_dir_merge_list Modbus
+mqtt:
+  binary_sensor: !include_dir_merge_list BinarySensors/MQTT
+  climate: !include_dir_merge_list Climates/MQTT
+  cover: !include_dir_merge_list Covers/MQTT
+  fan: !include_dir_merge_list Fans/MQTT
+  light: !include_dir_merge_list Lights/MQTT
+  lock: !include_dir_merge_list Locks/MQTT
+  sensor: !include_dir_merge_list Sensors/MQTT
+  switch: !include_dir_merge_list Switches/MQTT
 notify: !include notifications.yaml
+#rest: !include rest.yaml
+#rest_command: !include rest_commands.yaml
+schedule: !include schedules.yaml
 shell_command: !include shell_commands.yaml
 script: !include scripts.yaml
-sensor: !include_dir_merge_list Sensors
-switch: !include_dir_merge_list Switches
+sensor: !include_dir_merge_list Sensors/Legacy
+switch: !include_dir_merge_list Switches/Legacy
 #time_counter: !include timecounters.yaml
-template: !include_dir_merge_list Templates
+template: 
+  - binary_sensor: !include_dir_merge_list BinarySensors/Template
+  # climate: !include_dir_merge_list Climates/Template
+  # cover: !include_dir_merge_list Covers/Template
+  # fan: !include_dir_merge_list Fans/Template
+  # light: !include_dir_merge_list Lights/Template
+  # lock: !include_dir_merge_list Locks/Template
+  - sensor: !include_dir_merge_list Sensors/Template
+  # switch: !include_dir_merge_list Switches/Template
+  - !include Triggers/triggers_5s.yaml
+  - !include Triggers/triggers_1s.yaml
+timer:
 utility_meter: !include utilities.yaml
 zone: !include zones.yaml
-
-#Weather Forecasts from Environement Canada
-weather:
-  - platform: environment_canada
-    name: !secret ha_city
-    forecast: hourly
-    # language: english
-camera:
-  - platform: environment_canada
-    name: !secret ha_city
-  - platform: mjpeg
-    name: OctoPrint
-    still_image_url: !secret img_octopi
-    mjpeg_url: !secret cam_octopi
-  - platform: mjpeg
-    name: Pool Area
-    mjpeg_url: !secret cam_pool
-    
-  # - platform: mjpeg 
-    # name: Pool Area
-    # still_image_url: !secret img_pool
-    # mjpeg_url: !secret cam_pool
-    # verify_ssl: false
     
 #Health
 system_health:
-#breaking_changes:
-apcupsd:
+# breaking_changes:
+# apcupsd:
+  # host: !secret ip_server
+  # port: 3551
     
 #Devices and integrations
-# vacuum:
-  # - platform: roomba
-    # name: Roomba iRobot
-    # host: !secret roomba_ip
-    # username: !secret roomba_username
-    # password: !secret roomba_password
-
-# iaqualink:
-  # username: !secret iaqualink_username
-  # password: !secret iaqualink_password
-  
-# media_player:
-# - platform: kodi
-#   host: !secret kodi_ip
-
-#Communication protocols
-mqtt:
-  broker: !secret mqtt_broker
-  port: !secret mqtt_port
-  username: !secret mqtt_login
-  password: !secret mqtt_pass
 
 duckdns:
   domain: !secret duckdns_domain
   access_token: !secret duckdns_token
 
+# system_log:
+#   fire_event: true
 # logger:
   # default: info
   # logs:
     # homeassistant.components.websocket_api: debug
-logger:
-  default: warning
-  logs:
-    homeassistant.helpers.template: error
+# logger:
+  # default: error
+  # logs:
+    # homeassistant.helpers.template: error
+    # homeassistant.components.glances: fatal
+    # glances_api: fatal
+    # homeassistant.components.environment_canada: fatal
+    # homeassistant.helpers.entity: error
+    # homeassistant.components.rest.data: fatal
+    # homeassistant.components.rest.sensor: error
+    # snitun.client.client_peer: fatal
+    # hass_nabucasa.remote: fatal
+# logger:
+  # default: warn
+  # logs:
+    # homeassistant.components.recorder: debug
 
-clean_up_snapshots_service:
-  host: !secret ha_ext_url
-  token: !secret ha_cleanup_token
-  number_of_snapshots_to_keep: 10
-
-life360:
-  # MPH, assuming imperial units.
-  # If using metric (KPH), the equivalent would be 29.
-  driving_speed: 20
-  interval_seconds: 10
-  max_gps_accuracy: 200
-  max_update_wait:
-    minutes: 45
-  show_as_state:
-    - driving
-    - moving
-  # Set comm error thresholds so first is not logged,
-  # second is logged as a WARNING, and third and fourth
-  # are logged as ERRORs.
-  warning_threshold: 2
-  error_threshold: 3
-
-# glances:
-#   - host: localhost
-#     version: 2
-#     name: Server
-
-octoprint:
-  - host: !secret ip_octopi
-    api_key: !secret key_octopi
-    name: OctoPrint
-    bed: true
-    number_of_tools: 1
+# clean_up_snapshots_service:
+  # # host: !secret ha_int_url
+  # # token: !secret ha_token
+  # number_of_snapshots_to_keep: 10

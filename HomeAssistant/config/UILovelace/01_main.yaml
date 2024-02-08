@@ -3,7 +3,7 @@
 ####################################################
 
 - title: Main
-  icon: mdi:home-outline
+  icon: mdi:home
   # Unique path for direct access /lovelace/${path}
   path: main
   visible: true
@@ -11,8 +11,12 @@
     - sensor.time
     - device_tracker.life360_jean
     - device_tracker.life360_cindy
+    - device_tracker.life360_cody
     - sun.sun
-    - sensor.moon_phases
+    - type: state-label
+      entity: sensor.moon_phases
+      show_name: false
+      show_icon: false
   cards:
   # Entities card will take a list of entities and show their state.
   # The entities here will be shown in the same order as specified.
@@ -20,10 +24,23 @@
     - type: custom:bignumber-card
       entity: sensor.dates
       scale: 25px
+    # - type: entities
+      # #title: Season
+      # show_header_toggle: false
+      # #color_state: true
+      # ##state_color: true
+      # entities:
+        # - sensor.season
+    # - type: custom:monster-card
+    #   card:
+    #     type: glance
+    #   filter:
+    #     include:
+    #       - entity_id: sensor.season
         
     # - type: custom:button-card
     #   color_type: card
-    #   entity: sensor.flashing_1s
+    #   entity: binary_sensor.flashing_1s
     #   name: Intruder Alert
     #   state:
     #     - value: "on"
@@ -49,11 +66,23 @@
         - type: custom:fold-entity-row
           head: binary_sensor.frontdoorlight_status
           entities:
-            - switch.front_door_light
+            - input_select.frontdoorlight_mode
+            - type: conditional
+              conditions:
+                - entity: input_select.frontdoorlight_mode
+                  state: "Switch Mode"
+              row:
+                entity: switch.front_door_light
         - type: custom:fold-entity-row
           head: binary_sensor.poweroutlet_status
           entities:
             - input_select.poweroutlet_mode
+            - type: conditional
+              conditions:
+                - entity: input_select.poweroutlet_mode
+                  state: 'Fountain'
+              row:
+                entity: binary_sensor.antifreeze_active
         - type: custom:fold-entity-row
           head: binary_sensor.garagefrontlight_status
           entities:
@@ -67,154 +96,60 @@
       title: Power usage
       show_header_toggle: false
       entities: 
-        - type: custom:fold-entity-row
-          head: sensor.ted5000_mtu1_power
-          entities:
-            - sensor.ted5000_mtu1_power
-            - sensor.ted5000_mtu1_voltage
-            - sensor.main_power_usage
-            - sensor.main_daily_energy
-            - sensor.main_monthly_energy
-        - type: custom:fold-entity-row
-          head: sensor.ted5000_mtu2_power
-          entities:
-            - sensor.ted5000_mtu2_power
-            - sensor.ted5000_mtu2_voltage
-            - sensor.garage_power_usage
-            - sensor.garage_daily_energy
-            - sensor.garage_monthly_energy
-        - type: custom:fold-entity-row
-          head: sensor.ted5000_mtu3_power
-          entities:
-            - sensor.ted5000_mtu3_power
-            - sensor.ted5000_mtu3_voltage
-            - sensor.pool_power_usage
-            - sensor.pool_daily_energy
-            - sensor.pool_monthly_energy
-        - binary_sensor.power_peakperiod
+        - type: custom:decluttering-card
+          template: energy_all
 
     - type: entities
       title: Home Presences
       show_header_toggle: false
-      entities:
+      entities: 
+        - type: custom:decluttering-card
+          template: people_iphone_data
+          variables:
+            - name: 'jean'
+            - workplace: 'on'
+            - jean: 'on'
+        - type: custom:decluttering-card
+          template: people_iphone_data
+          variables:
+            - name: 'cindy'
+            - workplace: 'off'
+            - cindy: 'on'
         - type: custom:fold-entity-row
-          head: device_tracker.life360_jean
+          head: device_tracker.life360_cody
           entities:
-            - type: custom:fold-entity-row
-              head: sensor.workplace_jean
-              entities:
-                - input_select.workplace_jean
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Device Status
-              entities:
-                - sensor.iphone_de_jean_battery_state
-                - sensor.iphone_de_jean_battery_level
-                - sensor.iphone_de_jean_connection_type
-                - sensor.iphone_de_jean_activity
-                - sensor.iphone_de_jean_ssid
-                - sensor.iphone_de_jean_sim_1
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Device Position
-              entities:
-                - sensor.iphone_de_jean_last_update_trigger
-                - sensor.iphone_de_jean_distance_home
-                - sensor.iphone_de_jean_geocoded_location
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Owner's Health
-              entities:
-                - sensor.iphone_de_jean_distance
-                - sensor.iphone_de_jean_steps
-                - sensor.iphone_de_jean_average_active_pace
-                - sensor.iphone_de_jean_floors_ascended
-                - sensor.iphone_de_jean_floors_descended
+            - input_select.cody_presence
             - type: custom:fold-entity-row
               head:
                 type: section
                 label: Others
               entities:
-                - binary_sensor.workday_jean
-                - sensor.jean_s_birthday
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.lexus_morning_start
-                - automation.lexus_lock_at_home
-                - automation.lexus_office_start_reminder
-        - type: custom:fold-entity-row
-          head: device_tracker.life360_cindy
-          entities:
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Device Status
-              entities:
-                - sensor.iphone_de_cindy_battery_state
-                - sensor.iphone_de_cindy_battery_level
-                - sensor.iphone_de_cindy_connection_type
-                - sensor.iphone_de_cindy_activity
-                - sensor.iphone_de_cindy_ssid
-                - sensor.iphone_de_cindy_sim_1
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Device Position
-              entities:
-                - sensor.iphone_de_cindy_last_update_trigger
-                - sensor.iphone_de_cindy_distance_home
-                - sensor.iphone_de_cindy_geocoded_location
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Owner's Health
-              entities:
-                - sensor.iphone_de_cindy_distance
-                - sensor.iphone_de_cindy_steps
-                - sensor.iphone_de_cindy_average_active_pace
-                - sensor.iphone_de_cindy_floors_ascended
-                - sensor.iphone_de_cindy_floors_descended
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Others
-              entities:
-                - binary_sensor.workday_cindy
-                - sensor.cindy_s_birthday
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.journey_lock_at_home
-        # - type: custom:fold-entity-row
-          # head: device_tracker.ipad_de_cindy
-          # entities:
-            # - type: custom:fold-entity-row
-              # head:
-                # type: section
-                # label: Device Status
-              # entities:
-                # - sensor.ipad_de_cindy_battery_state
-                # - sensor.ipad_de_cindy_battery_level
-                # - sensor.ipad_de_cindy_connection_type
-                # - sensor.ipad_de_cindy_activity
-                # - sensor.ipad_de_cindy_ssid
-            # - type: custom:fold-entity-row
-              # head:
-                # type: section
-                # label: Device Position
-              # entities:
-                # - device_tracker.ipad_de_cindy
-                # - sensor.ipad_de_cindy_last_update
-                # - sensor.ipad_de_cindy_geocoded_location
+                - binary_sensor.workday_cody
+                - type: "custom:secondaryinfo-entity-row"
+                  entity: sensor.cody_s_birthday
+                  secondary_info: "Birthday: {{ as_timestamp(states.sensor.cody_s_birthday.attributes.date) | timestamp_custom('%Y-%m-%d') }} => {{ states.sensor.cody_s_birthday.attributes.current_years }} y/o"
+                - sensor.party_18_ans_cody
+        # - type: custom:decluttering-card
+          # template: people_ipad_data
+          # variables:
+            # - name: 'cindy'
         - sensor.distance_jean_cindy
+        - type: custom:multiple-entity-row
+          entity: sensor.random_number_generator
+          name: SecurID
+          secondary_info:
+            attribute: time_left
+            name: Time Left
+            #unit: 's'
+            format: precision0
+          entities:
+            - icon: mdi:shield-refresh
+              state_color: true
+              tap_action:
+                action: call-service
+                service: automation.trigger
+                service_data:
+                  entity_id: automation.random_number_generator
         
     - type: entities
       title: Postal Status
@@ -258,203 +193,78 @@
       title: Trash/Recycle/Compost
       show_header_toggle: false
       entities:
-        - type: custom:fold-entity-row
-          head: sensor.collect_trash_week
-          entities:
-            - input_select.collect_trash
-            - type: custom:fold-entity-row
-              head: sensor.collect_trash_summer_mode
-              entities:
-                - type: "custom:button-entity-row"
-                  buttons:
-                    - entity: input_datetime.collect_trash_start
-                    - entity: input_datetime.collect_trash_end
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.publish_collect_notification
-        - type: custom:fold-entity-row
-          head: sensor.collect_recycle_week
-          entities:
-            - input_select.collect_recycle
-            - type: custom:fold-entity-row
-              head: sensor.collect_recycle_summer_mode
-              entities:
-                - type: "custom:button-entity-row"
-                  buttons:
-                    - entity: input_datetime.collect_recycle_start
-                    - entity: input_datetime.collect_recycle_end
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.publish_collect_notification
-        - type: custom:fold-entity-row
-          head: sensor.collect_compost_week
-          entities:
-            - input_select.collect_compost
-            - type: custom:fold-entity-row
-              head: sensor.collect_compost_summer_mode
-              entities:
-                - type: "custom:button-entity-row"
-                  buttons:
-                    - entity: input_datetime.collect_compost_start
-                    - entity: input_datetime.collect_compost_end
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Automations
-              entities:
-                - automation.publish_collect_notification
-
+        - type: custom:decluttering-card
+          template: collect
+          variables:
+            - name: 'trash'
+        - type: custom:decluttering-card
+          template: collect
+          variables:
+            - name: 'recycle'
+        - type: custom:decluttering-card
+          template: collect
+          variables:
+            - name: 'compost'
+                
     - type: entities
-      title: Doors & Locks
+      title: Doors, Locks & Bells
       show_header_toggle: false
       entities:
-        - type: custom:fold-entity-row
-          head: sensor.house_fd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.house_fd_opened
-                  icon: "mdi:door"
-                  state_icons:
-                    "on": "mdi:door-open"
-                    "off": "mdi:door"
-                - entity: binary_sensor.house_fd_bell
-                  icon: "mdi:bell"
-                  state_icons:
-                    "on": "mdi:bell-ring"
-                    "off": "mdi:bell"
-                - entity: input_boolean.house_fd_lock
-                  icon: "mdi:lock"
-                - entity: input_boolean.house_fd_unlock
-                  icon: "mdi:lock-open-outline"
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Hallway Doorbell Chime
-              entities:
-                - input_select.doorchime_tf_sound
-                - input_number.doorchime_tf_volume
-                - automation.doorchime_tf_trigger
-            - type: custom:fold-entity-row
-              head:
-                type: section
-                label: Bottom Floor Door Chime
-              entities:
-                - input_select.doorchime_bf_sound
-                - input_number.doorchime_bf_volume
-                - automation.doorchime_bf_trigger
-        - type: custom:fold-entity-row
-          head: sensor.garage_fd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.garage_fd_opened
-                  icon: "mdi:door"
-                  state_icons:
-                    "on": "mdi:door-open"
-                    "off": "mdi:door"
-                - entity: binary_sensor.house_fd_bell
-                  icon: "mdi:bell"
-                  state_icons:
-                    "on": "mdi:bell-ring"
-                    "off": "mdi:bell"
-                - entity: input_boolean.garage_fd_lock
-                  icon: "mdi:lock"
-                - entity: input_boolean.garage_fd_unlock
-                  icon: "mdi:lock-open-outline"
-        - type: custom:fold-entity-row
-          head: sensor.garage_cd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.garage_cd_opened
-                  icon: "mdi:garage"
-                  state_icons:
-                    "on": "mdi:garage-open"
-                    "off": "mdi:garage"
-                - entity: input_boolean.garage_cd_trigger
-                  icon: "mdi:arrow-up-down-bold-outline"
-        - type: custom:fold-entity-row
-          head: sensor.garage_bd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.garage_bd_opened
-                  icon: "mdi:door"
-                  state_icons:
-                    "on": "mdi:door-open"
-                    "off": "mdi:door"   
-        - type: custom:fold-entity-row
-          head: sensor.shed_fd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.shed_fd_opened
-                  icon: "mdi:door"
-                  state_icons:
-                    "on": "mdi:door-open"
-                    "off": "mdi:door"
-                - entity: binary_sensor.shed_ld_opened
-                  icon: "mdi:chevron-left-box"
-                  state_icons:
-                    "on": "mdi:chevron-left-box"
-                    "off": "mdi:chevron-left-box"
-                - entity: binary_sensor.shed_rd_opened
-                  icon: "mdi:chevron-right-box"
-                  state_icons:
-                    "on": "mdi:chevron-right-box"
-                    "off": "mdi:chevron-right-box"
-                - entity: input_boolean.shed_fd_lock
-                  icon: "mdi:lock"
-                - entity: input_boolean.shed_fd_unlock
-                  icon: "mdi:lock-open-outline"
-        - type: custom:fold-entity-row
-          head: sensor.pool_fd_status
-          entities:
-            - type: "custom:button-entity-row"
-              buttons:
-                - entity: binary_sensor.pool_fd_opened
-                  icon: "mdi:door"
-                  state_icons:
-                    "on": "mdi:door-open"
-                    "off": "mdi:door"
-                - entity: input_boolean.pool_fd_lock
-                  icon: "mdi:lock"
-                - entity: input_boolean.pool_fd_unlock
-                  icon: "mdi:lock-open-outline"
-        - type: custom:fold-entity-row
-          head: sensor.pool_gates
-          entities:
-            - type: "custom:secondaryinfo-entity-row"
-              entity: binary_sensor.pool_gate_closed_deck
-              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_deck == unavailable, "N/A", if(binary_sensor.pool_gate_closed_deck == unknown, "N/A", sensor.pool_gate_count_deck)) ]]'
-            - type: "custom:secondaryinfo-entity-row"
-              entity: binary_sensor.pool_gate_closed_main
-              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_main == unavailable, "N/A", if(binary_sensor.pool_gate_closed_main == unknown, "N/A", sensor.pool_gate_count_main)) ]]'
-            - type: "custom:secondaryinfo-entity-row"
-              entity: binary_sensor.pool_gate_closed_pond
-              secondary_info: 'Count Today: [[ if(binary_sensor.pool_gate_closed_pond == unavailable, "N/A", if(binary_sensor.pool_gate_closed_pond == unknown, "N/A", sensor.pool_gate_count_pond)) ]]'
-        - type: "custom:button-entity-row"
-          buttons:
-            - entity: input_boolean.lock_all
-              name: LOCK ALL DOORS
-              state_icons:
-                "off": "mdi:lock"
-                "on": "mdi:lock"
-              state_styles:
-                "off":
-                  color: "var(--state-icon-color)"
-                  font-weight: bold
-                "on":
-                  color: "var(--state-icon-active-color)"
-                  font-weight: bold
-        - input_text.doorlock_passcode
+        - type: custom:decluttering-card
+          template: lock_all
+        - type: custom:decluttering-card
+          template: powerbolt2_bell
+          variables:
+            - door: 'house_fd'
+            - doorbell_tf: 'on'
+            - doorbell_bf: 'on'
+        - type: custom:decluttering-card
+          template: powerbolt2_bell
+          variables:
+            - door: 'house_bd'
+            - doorbell_tf: 'on'
+            - doorbell_bf: 'on'
+        - type: custom:decluttering-card
+          template: powerbolt2
+          variables:
+            - door: 'house_mbd'
+            - doorbell_tf: 'off'
+            - doorbell_bf: 'off'
+        - type: custom:decluttering-card
+          template: powerbolt2_bell
+          variables:
+            - door: 'garage_fd'
+            - doorbell_g: 'on'
+        - type: custom:decluttering-card
+          template: garage_opener
+          variables:
+            - door: 'garage_cd'
+        - type: custom:decluttering-card
+          template: door_lock
+          variables:
+            - door: 'garage_bd'
+        - type: custom:decluttering-card
+          template: powerbolt2_shed
+          variables:
+            - door: 'shed_fd'
+            - ldoor: 'shed_ld'
+            - rdoor: 'shed_rd'
+        - type: custom:decluttering-card
+          template: powerbolt2
+          variables:
+            - door: 'glasshouse_fd'
+        - type: custom:decluttering-card
+          template: door_lock
+          variables:
+            - door: 'pool_fd'
+        - type: custom:decluttering-card
+          template: door_lock
+          variables:
+            - door: 'pool_td'
+        - type: custom:decluttering-card
+          template: gates
+        - type: custom:decluttering-card
+          template: doorchime_global
           
     # - type: glance
       # show_icon: true
@@ -509,13 +319,6 @@
           - input_datetime.frontyardirrigation_stop
           - automation.frontyard_irrigation_control
         - type: custom:fold-entity-row
-          head: binary_sensor.backyardirrigation_status
-          entities:
-          - input_select.backyardirrigation_mode
-          - input_datetime.backyardirrigation_start
-          - input_datetime.backyardirrigation_stop
-          - automation.backyard_irrigation_control
-        - type: custom:fold-entity-row
           head: binary_sensor.gardenirrigation_status
           entities:
           - input_select.gardenirrigation_mode
@@ -537,3 +340,41 @@
                 name: Stop
                 icon: "mdi:stop"
                 
+    - type: entities
+      title: Curtains
+      show_header_toggle: false
+      #state_color: true
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.patio_door_tulle_curtain
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: cover.patio_door_tulle_curtain
+              secondary_info: '[[ {entity}.attributes.current_position ]] % opened'
+            - input_select.patio_door_tulle_curtain
+            - automation.patio_door_tulle_curtain
+        - type: custom:fold-entity-row
+          head: sensor.patio_door_curtain_curtain
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: cover.patio_door_curtain_curtain
+              secondary_info: '[[ {entity}.attributes.current_position ]] % opened'
+            - input_select.patio_door_curtain_curtain
+            - automation.patio_door_curtain_curtain
+        - type: custom:fold-entity-row
+          head: sensor.dining_room_tulle_curtain
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: cover.dining_room_tulle_curtain
+              secondary_info: '[[ {entity}.attributes.current_position ]] % opened'
+            - input_select.dining_room_tulle_curtain
+            - automation.dining_room_tulle_curtain
+        - type: custom:fold-entity-row
+          head: sensor.dining_room_curtain_curtain
+          entities:
+            - type: "custom:secondaryinfo-entity-row"
+              entity: cover.dining_room_curtain_curtain
+              secondary_info: '[[ {entity}.attributes.current_position ]] % opened'
+            - input_select.dining_room_curtain_curtain
+            - automation.dining_room_curtain_curtain
+

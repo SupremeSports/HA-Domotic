@@ -1,24 +1,203 @@
 ####################################################
 # UTILITY METERS                                   #
 ####################################################
+#DO NOT ACCTIVATE A UTILITY METER UNTIL IT IS READY OTHERWISE ALL METERS STOP WORKING
 
-  main_daily_energy:
-    source:  sensor.main_power_usage
+# SERVICE CALL TO SET VALUE:
+# service: utility_meter.calibrate
+# data:
+#   value: '0'
+# target:
+#   entity_id: sensor.water_heater_meter_daily
+
+#APPLIANCES
+  washing_machine_energy_daily:
+    name: Washing Machine Energy Daily
+    source: sensor.washing_machine_energy
     cycle: daily
-  main_monthly_energy:
-    source:  sensor.main_power_usage
-    cycle: monthly
+
+  drying_machine_energy_daily:
+    name: Drying Machine Energy Daily
+    source: sensor.drying_machine_energy
+    cycle: daily
+
+  dishwasher_energy_daily:
+    name: Dishwasher Energy Daily
+    source: sensor.dishwasher_energy
+    cycle: daily
+
+  kitchen_refrigerator_energy_daily:
+    name: Kitchen Refrigerator Energy Daily
+    source: sensor.kitchen_refrigerator_energy
+    cycle: daily
+
+  chest_freezer_energy_daily:
+    name: Chest Freezer Energy Daily
+    source: sensor.chest_freezer_energy
+    cycle: daily
     
-  garage_daily_energy:
-    source:  sensor.garage_power_usage
+  well_energy_daily:
+    name: Well Energy Daily
+    source: sensor.well_energy
     cycle: daily
-  garage_monthly_energy:
-    source:  sensor.garage_power_usage
-    cycle: monthly
     
-  pool_daily_energy:
-    source:  sensor.pool_power_usage
+  ups_load_energy_daily:
+    name: UPS Load Energy Daily
+    source: sensor.ups_load_energy
     cycle: daily
-  pool_monthly_energy:
-    source:  sensor.pool_power_usage
-    cycle: monthly
+
+#HVACs
+  living_room_hvac_energy_daily:
+    name: Living Room HVAC Energy Daily
+    source: sensor.living_room_hvac_energy
+    cycle: daily
+    
+  garage_hvac_energy_daily:
+    name: Garage HVAC Energy Daily
+    source: sensor.garage_hvac_energy
+    cycle: daily
+    
+  recroom_hvac_energy_daily:
+    name: RecRoom HVAC Energy Daily
+    source: sensor.recroom_hvac_energy
+    cycle: daily
+    
+#DRAGONS
+  garage_front_heater_energy_daily:
+    name: Garage Front Heater Energy Daily
+    source: sensor.garage_front_heater_energy
+    cycle: daily
+
+  garage_rear_heater_energy_daily:
+    name: Garage Rear Heater Energy Daily
+    source: sensor.garage_rear_heater_energy
+    cycle: daily
+    
+#CONVECTAIR/HEATERS
+  bar_heater_energy_daily:
+    name: Bar Heater Energy Daily
+    source: sensor.bar_heater_energy
+    cycle: daily
+    
+  entrance_heater_energy_daily:
+    name: Entrance Heater Energy Daily
+    source: sensor.entrance_heater_energy
+    cycle: daily
+    
+  kitchen_heater_energy_daily:
+    name: Kitchen Heater Energy Daily
+    source: sensor.kitchen_heater_energy
+    cycle: daily
+    
+  living_room_heater_energy_daily:
+    name: Living Room Heater Energy Daily
+    source: sensor.living_room_heater_energy
+    cycle: daily
+    
+  massage_room_heater_energy_daily:
+    name: Massage Room Heater Energy Daily
+    source: sensor.massage_room_heater_energy
+    cycle: daily
+    
+  master_bedroom_heater_energy_daily:
+    name: Master Bedroom Heater Energy Daily
+    source: sensor.master_bedroom_heater_energy
+    cycle: daily
+    
+  office_heater_energy_daily:
+    name: Office Heater Energy Daily
+    source: sensor.office_heater_energy
+    cycle: daily
+    
+  recroom_heater_energy_daily:
+    name: RecRoom Heater Energy Daily
+    source: sensor.recroom_heater_energy
+    cycle: daily
+    
+  training_room_heater_energy_daily:
+    name: Training Room Heater Energy Daily
+    source: sensor.training_room_heater_energy
+    cycle: daily
+    
+#FLOOR HEATERS
+  cold_storage_floor_heater_energy_daily:
+    name: Cold Storage Floor Heater Energy Daily
+    source: sensor.cold_storage_floor_heater_energy
+    cycle: daily
+     
+  storage_room_floor_heater_energy_daily:
+    name: Storage Room Floor Heater Energy Daily
+    source: sensor.storage_room_floor_heater_energy
+    cycle: daily
+    
+#OTHER TYPES OF HEATING
+  tankless_water_heater_energy_daily:
+    name: Tankless Water Heater Energy Daily
+    source: sensor.tankless_water_heater_energy
+    cycle: daily
+
+#POOL & POND
+  pool_pump_energy_daily:
+    name: Pool Pump Energy Daily
+    source: sensor.pool_heater_energy
+    cycle: daily
+    
+  pool_heater_energy_daily:
+    name: Pool Heater Energy Daily
+    source: sensor.pool_heater_energy
+    cycle: daily
+    
+  pond_waterfall_pump_energy_daily:
+    name: Pond Waterfall Pump Energy Daily
+    source: sensor.pond_waterfall_pump_energy
+    cycle: daily
+
+#ENERGY DASHBOARD ADJUSTMENTS
+  ted5000_mtu0_energy_total_utility:
+    unique_id: ted5000_mtu0_energy_total_utility
+    name: House Daily Energy
+    source: sensor.ted5000_mtu0_energy_daily_raw
+    cycle: yearly
+    
+  ted5000_mtu0_energy_daily_utility:
+    unique_id: ted5000_mtu0_energy_daily_utility
+    name: House Energy Daily Utility
+    source: sensor.ted5000_mtu0_energy_daily_raw
+    cycle: daily
+
+  ted5000_mtu0_energy_daily_utility_cost:
+    unique_id: ted5000_mtu0_energy_daily_utility_cost
+    name: House Energy Daily Utility Cost
+    source: sensor.ted5000_mtu0_energy_total_utility_cost
+    cycle: daily
+    
+  ted5000_mtu2_energy_daily_utility_cost:
+    unique_id: ted5000_mtu2_energy_daily_utility_cost
+    name: Garage Energy Daily Utility Cost
+    source: sensor.ted5000_mtu2_energy_daily_raw_cost
+    cycle: daily
+    
+  ted5000_mtu3_energy_daily_utility_cost:
+    unique_id: ted5000_mtu3_energy_daily_utility_cost
+    name: Pool Energy Daily Utility Cost
+    source: sensor.ted5000_mtu3_energy_daily_raw_cost
+    cycle: daily
+
+#WATER DASHBOARD ADJUSTMENTS
+  total_water_utility_used:
+    unique_id: total_water_utility_used
+    name: Total Water Used
+    source: sensor.total_water_daily_used_raw
+    cycle: yearly
+
+  total_water_utility_daily_used:
+    unique_id: total_water_utility_daily_used
+    name: Total Water Utility Daily Used
+    source: sensor.total_water_daily_used_raw
+    cycle: daily
+    
+  total_water_utility_used_cost:
+    unique_id: total_water_utility_used_cost
+    name: Total Water Utility Used Cost
+    source: sensor.total_water_used_cost_raw
+    cycle: daily

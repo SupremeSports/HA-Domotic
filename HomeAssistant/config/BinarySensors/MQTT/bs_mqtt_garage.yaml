@@ -1,0 +1,55 @@
+####################################################
+# BINARY SENSORS - MQTT - GARAGE                   #
+####################################################
+
+######### GARAGE MAIN #########
+
+  - name: Garage Attic Light
+    state_topic: "Garage/Control/Sensors/Stts"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: '{{ value_json.attic_light }}'
+    json_attributes_topic: "Garage/Control/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "light"' + 
+      ', "watts": 21}' }}
+    
+  - name: Garage Front Heater AC
+    state_topic: "Garage/Heater/Stts"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: '{{ value_json.frontac}}'
+    json_attributes_topic: "Garage/Control/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "heater"' + 
+      ', "watts": 4774}' }}
+
+  - name: Garage Rear Heater AC
+    state_topic: "Garage/Heater/Stts"
+    availability:
+      - topic: "Garage/Control/LWT"
+    qos: 0
+    value_template: '{{ value_json.rearac}}'
+    json_attributes_topic: "Garage/Control/LWT"
+    json_attributes_template: >
+      {{ '{"appliances": "heater"' + 
+      ', "watts": 4774}' }}
+
+######### GARAGE SLAVE #########
+
+  - name: Garage Air Valve Closed
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: '{{ value_json.air_gclosed }}'
+    
+  - name: House Air Valve Closed
+    state_topic: "Garage/Slave/Sensors/Stts"
+    availability:
+      - topic: "Garage/Slave/LWT"
+    qos: 0
+    value_template: '{{ value_json.air_hclosed }}'
+    

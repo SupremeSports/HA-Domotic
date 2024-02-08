@@ -1,0 +1,140 @@
+####################################################
+# TEMPLATES - GARAGE                               #
+####################################################
+
+######### GARAGE MAIN - SAFETY HEATER #########        
+  - name: Garage Safety Control Status
+    #unique_id: garage_safety_control_status
+    #unit_of_measurement: ''
+    #state_class: measurement
+    #device_class: none
+    icon: mdi:server
+    availability: >
+      {{ not is_state('sensor.garage_safety_front_temperature', 'unavailable') and
+         not is_state('sensor.garage_safety_rear_temperature', 'unavailable') and
+         not is_state('sensor.garage_safety_front_temp_raw', 'unavailable') and
+         not is_state('sensor.garage_safety_rear_temp_raw', 'unavailable') }}
+    state: >
+      {% set status = true %}
+      
+      {% if status %}
+        Running...
+      {% else %}
+        ERROR
+      {% endif %}
+    attributes:
+      f_temp: "{{ states('sensor.garage_safety_front_temperature') }}"
+      f_error: "{{ not is_state('binary_sensor.garagefrontheater_error','on') or is_state('binary_sensor.garagefrontheater_error','unavailable') }}"
+      f_aux: "{{ is_state('binary_sensor.garage_front_heater_ac','on') }}"
+      f_coil: "{{ is_state('switch.garage_front_heater','on') }}"
+      r_temp: "{{ states('sensor.garage_safety_rear_temperature') }}"
+      r_error: "{{ not is_state('binary_sensor.garagerearheater_error','on') or is_state('binary_sensor.garagerearheater_error','unavailable') }}"
+      r_aux: "{{ is_state('binary_sensor.garage_rear_heater_ac','on') }}"
+      r_coil: "{{ is_state('switch.garage_rear_heater','on') }}"
+      
+  - name: Garage Heater Duty Cycle
+    #unique_id: garage_heater_duty_cycle
+    unit_of_measurement: '%'
+    state_class: measurement
+    #device_class: none
+    icon: mdi:label-percent
+    #availability: true
+    state: >
+      {% set front = states('sensor.garage_front_heater_time')|float(0) %}
+      {% set rear = states('sensor.garage_rear_heater_time')|float(0) %}
+      {% set duty_cycle = (front + rear) / 24.0 * 100.0 %}
+      
+      {{ duty_cycle | round(1) }}
+    attributes:
+      f_time: "{{ states('sensor.garage_front_heater_time') }}"
+      r_time: "{{ states('sensor.garage_rear_heater_time') }}"
+      total: "{{ (states('sensor.garage_front_heater_time')|float(0) + states('sensor.garage_rear_heater_time')|float(0))|round(2) }}"
+      
+
+######### GARAGE MAIN - SENSORS #########
+
+  - name: Garage Mean Temp
+    #unique_id: garage_mean_temp
+    unit_of_measurement: '°C'
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    #availability: true
+    availability: >
+      {% set thermostats = states('sensor.garage_mean_temp_thermostats')|float(-100) > 0 and states('sensor.garage_average_temp_thermostats')|float(-100) > 0 %}
+      {% set safety = states('sensor.garage_mean_temp_safety')|float(-100) > 0 and states('sensor.garage_average_temp_safety')|float(-100) > 0 %}
+      
+      {{ thermostats or safety }}
+    state: >
+      {% set thermostats = states('sensor.garage_mean_temp_thermostats')|float(-100) > 0 and states('sensor.garage_average_temp_thermostats')|float(-100) > 0 %}
+      {% set safety = states('sensor.garage_mean_temp_safety')|float(-100) > 0 and states('sensor.garage_average_temp_safety')|float(-100) > 0 %}
+      
+      {% if thermostats %}
+        {{ states('sensor.garage_mean_temp_thermostats') }}
+      {% elif safety %}
+        {{ states('sensor.garage_mean_temp_safety') }}
+      {% else %}
+        {{ 20 }}
+      {% endif %}
+    attributes:
+      thermostats: "{{ states('sensor.garage_mean_temp_thermostats') }}"
+      safety: "{{ states('sensor.garage_mean_temp_safety') }}"
+      
+  - name: Garage Average Temp
+    #unique_id: garage_mean_temp
+    unit_of_measurement: '°C'
+    state_class: measurement
+    device_class: temperature
+    icon: mdi:thermometer
+    #availability: true
+    availability: >
+      {% set thermostats = states('sensor.garage_mean_temp_thermostats')|float(-100) > 0 and states('sensor.garage_average_temp_thermostats')|float(-100) > 0 %}
+      {% set safety = states('sensor.garage_mean_temp_safety')|float(-100) > 0 and states('sensor.garage_average_temp_safety')|float(-100) > 0 %}
+      
+      {{ thermostats or safety }}
+    state: >
+      {% set thermostats = states('sensor.garage_mean_temp_thermostats')|float(-100) > 0 and states('sensor.garage_average_temp_thermostats')|float(-100) > 0 %}
+      {% set safety = states('sensor.garage_mean_temp_safety')|float(-100) > 0 and states('sensor.garage_average_temp_safety')|float(-100) > 0 %}
+      
+      {% if thermostats %}
+        {{ states('sensor.garage_average_temp_thermostats') }}
+      {% elif safety %}
+        {{ states('sensor.garage_average_temp_safety') }}
+      {% else %}
+        {{ 20 }}
+      {% endif %}
+    attributes:
+      thermostats: "{{ states('sensor.garage_average_temp_thermostats') }}"
+      safety: "{{ states('sensor.garage_average_temp_safety') }}"
+
+
+######### GARAGE SLAVE - SENSORS #########
+
+  - name: Air Compressor Pressure
+    #unique_id: air_compressor_pressure
+    unit_of_measurement: 'psi'
+    state_class: measurement
+    #device_class: pressure
+    icon: mdi:gauge
+    availability: >
+      {% set status = not is_state('sensor.air_compressor_pressure_raw', 'unavailable') %}
+      {% set RP = states('sensor.air_compressor_pressure_raw')|float(0) %}
+      
+      {{ status and RP>=-0.2 and RP<=200 }}
+    state: >
+      {% set PV = states('sensor.air_compressor_pressure_raw')|float(0) %}
+      
+      {% if PV < 1.0 %}
+        {{ 0.0 | round(1) }}
+      {% elif is_state('binary_sensor.reset_sensors_graphs', 'on') %}
+        {{ 0.0 | round(1) }}
+      {% else %}
+        {{ PV | round(1, "half") }}
+      {% endif %}
+    attributes:
+      pres_raw: >
+        {% set press = states('sensor.air_compressor_pressure_raw')|float(0) %}
+        {% set ax = 0.244379 %}
+        {% set b = -25 %}
+        {{ ((press - b)/ax) | round(0) }}
+

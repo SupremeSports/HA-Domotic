@@ -1,0 +1,148 @@
+####################################################
+# TEMPLATES - ROOMS                                #
+####################################################
+
+########## MASSAGE ROOM ##########
+
+  - name: Massage Room Status
+    #unique_id: massage_room_status
+    icon: mdi:pen
+    availability: >-
+      {{ not is_state('switch.massage_room_appliances', 'unavailable') and
+         not is_state('sensor.massage_room_data','unavailable') and
+         not is_state('sensor.massage_room_power','unavailable') }}
+    state: >
+      {% if is_state('switch.massage_room_appliances', 'on') %}
+        {% if states('sensor.massage_room_power') | float(0) >= 2 %}
+          On
+        {% else %}
+          Off
+        {% endif %}
+      {% else %}
+        Ready
+      {% endif %}
+    attributes:
+      state: "{{ state_attr('sensor.massage_room_data','POWER')|default('unknown') }}"
+      power: "{{state_attr('sensor.massage_room_power','ENERGY').Power|default(0)|round(3) }}"
+      voltage: "{{ state_attr('sensor.massage_room_power','ENERGY').Voltage|default(0)|round(3) }}"
+      current: "{{ state_attr('sensor.massage_room_power','ENERGY').Current|default(0)|round(3) }}"
+      p_factor: "{{ state_attr('sensor.massage_room_power','ENERGY').Factor|default(0)|round(3) }}"
+      today: "{{ state_attr('sensor.massage_room_power','ENERGY').Today|default(0)|round(3) }}"
+      yesterday: "{{ state_attr('sensor.massage_room_power','ENERGY').Yesterday|default(0)|round(3) }}"
+      total: "{{ state_attr('sensor.massage_room_power','ENERGY').Total|default(0)|round(3) }}"
+      wifi_rssi: "{{ state_attr('sensor.massage_room_data','Wifi').Signal|default(0)|round(0) }}"
+      wifi_percent: "{{ state_attr('sensor.massage_room_data','Wifi').RSSI|default(0)|round(0) }}"
+  
+########## THINKERING ROOM ##########
+
+  - name: Soldering Station Status
+    #unique_id: soldering_station_status
+    icon: mdi:soldering-iron
+    availability: >-
+      {{ not is_state('switch.soldering_station', 'unavailable') and
+         not is_state('sensor.soldering_station_data','unavailable') and
+         not is_state('sensor.soldering_station_power','unavailable') }}
+    state: >
+      {% if is_state('switch.soldering_station', 'on') %}
+        {% if states('sensor.soldering_station_power')|float(0) >= 2 %}
+          On
+        {% else %}
+          Off
+        {% endif %}
+      {% else %}
+        Ready
+      {% endif %}
+    attributes:
+      state: "{{ state_attr('sensor.soldering_station_data','POWER')|default('unknown') }}"
+      power: "{{state_attr('sensor.soldering_station_power','ENERGY').Power|default(0)|round(3) }}"
+      voltage: "{{ state_attr('sensor.soldering_station_power','ENERGY').Voltage|default(0)|round(3) }}"
+      current: "{{ state_attr('sensor.soldering_station_power','ENERGY').Current|default(0)|round(3) }}"
+      p_factor: "{{ state_attr('sensor.soldering_station_power','ENERGY').Factor|default(0)|round(3) }}"
+      today: "{{ state_attr('sensor.soldering_station_power','ENERGY').Today|default(0)|round(3) }}"
+      yesterday: "{{ state_attr('sensor.soldering_station_power','ENERGY').Yesterday|default(0)|round(3) }}"
+      total: "{{ state_attr('sensor.soldering_station_power','ENERGY').Total|default(0)|round(3) }}"
+      wifi_rssi: "{{ state_attr('sensor.soldering_station_data','Wifi').Signal|default(0)|round(0) }}"
+      wifi_percent: "{{ state_attr('sensor.soldering_station_data','Wifi').RSSI|default(0)|round(0) }}"
+
+  - name: OctoPrint Time Elapsed
+    #unique_id: octoprint_time_elapsed
+    #icon: mdi:none
+    unit_of_measurement: 's'
+    availability: >
+      {{ not is_state('sensor.octoprint_start_time', 'unavailable') }}
+    state: >
+      {% set start = as_timestamp(states('sensor.octoprint_start_time')) %}
+      
+      {% if is_number(start) %}
+        {{ (as_timestamp(now()) - start)|int(0) }}
+      {% else %}
+        unknown
+      {% endif %}
+    attributes:
+      start_time: "states('sensor.octoprint_start_time')"
+      
+  - name: OctoPrint Time Remaining
+    #unique_id: octoprint_time_remaining
+    #icon: mdi:none
+    unit_of_measurement: 's'
+    availability: >
+      {{ not is_state('sensor.octoprint_estimated_finish_time', 'unavailable') }}
+    state: >
+      {% set finish = as_timestamp(states('sensor.octoprint_estimated_finish_time')) %}
+      
+      {% if is_number(finish) %}
+        {{ (finish - as_timestamp(now()))|int(0) }}
+      {% else %}
+        unknown
+      {% endif %}
+    attributes:
+      start_time: "states('sensor.octoprint_estimated_finish_time')"
+
+########## MASTER BEDROOM ##########
+  
+  - name: Master Bed Presence
+    #unique_id: master_bed_presence
+    icon: mdi:bed-empty
+    availability: >
+      {{ not is_state('sensor.master_bed_raw', 'unavailable') }}
+    # state: >
+    #   {% set weight = states('sensor.master_bed_raw')|float(0) %}
+    #   {% set jean = is_state('person.jean_gauthier', 'home') %}
+    #   {% set cindy = is_state('person.cindy_fortin', 'home') %}
+      
+    #   {% if weight < 30 %}
+    #     Empty
+    #   {% elif weight < 200 %}
+    #     Mi-Loup
+    #   {% elif weight < 900 and cindy %}
+    #     Cindy
+    #   {% elif weight < 1200 and jean %}
+    #     Jean
+    #   {% elif cindy and jean %}
+    #     Cindy & Jean
+    #   {% else %}
+    #     ERROR
+    #   {% endif %}
+    state: >
+      {% set weight = states('sensor.master_bed_raw')|float(0) %}
+      {% set jean = is_state('person.jean_gauthier', 'home') %}
+      {% set cindy = is_state('person.cindy_fortin', 'home') %}
+      
+      {% if weight < 30 %}
+        Empty
+      {% elif weight < 200 %}
+        Mi-Loup
+      {% else%}
+        Someone In Bed
+      {% endif %}
+    attributes:
+      state: "{{ states('switch.master_bed_tare')|default('unknown') }}"
+      version: "{{ state_attr('switch.master_bed_tare','version')|default('unknown') }}"
+      date: "{{ state_attr('switch.master_bed_tare','date')|default('unknown') }}"
+      vcc_3v3: "{{ state_attr('switch.master_bed_tare','Vcc3V3')|float(0)|round(1) }}"
+      wifi_ssid: "{{ state_attr('switch.master_bed_tare','wifi_ssid')|default('unknown') }}"
+      wifi_rssi: "{{ state_attr('switch.master_bed_tare','wifi_rssi')|int(0) }}"
+      wifi_percent: "{{ state_attr('switch.master_bed_tare','wifi_percent')|int(0) }}"
+      raw_value: "{{ states('sensor.master_bed_raw')|float(0)|round(1) }}"
+      calib: "{{ state_attr('sensor.master_bed_raw','calib')|float(0)|round(1) }}"
+        

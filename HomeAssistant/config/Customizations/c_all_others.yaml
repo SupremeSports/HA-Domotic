@@ -20,71 +20,26 @@
     confirm_controls_show_lock: true
     hide_control: false
     show_last_changed: true
-        
-  device_tracker.life360_jean:
-    friendly_name: Jean
-    
-  device_tracker.life360_cindy:
-    friendly_name: Cindy
     
   # device_tracker.ipad_de_cindy:
     # custom_ui_state_card: state-card-custom-ui
     # icon: mdi:tablet
+
+  binary_sensor.iss:
+    icon: mdi:space-station
+  
+  device_tracker.iss:
+    friendly_name: ISS Location
+    entity_picture: "/local/images/ISS.png"
     
-  binary_sensor.ha_update_available:
-    templates:
-      icon_color: >
-        if (entities['binary_sensor.ha_update_available'].attributes['major_update'] === 'true') return 'red';
-        if (state === 'on') return 'orange';
-        if (state === 'off') return 'green';
-        return 'var(--state-icon-unavailable-color)';
-  sensor.chicoutimi_update_available:
-    templates:
-      icon_color: >
-        if (entities['sensor.chicoutimi_update_available'].attributes['major_update'] === 'true') return 'red';
-        if (state === 'on') return 'orange';
-        if (state === 'off') return 'green';
-        return 'var(--state-icon-unavailable-color)';
-  sensor.chicoutimi_entities:
-    friendly_name: "Entities"
-    templates:
-      icon: >
-        return 'mdi:script-text';
-  sensor.chicoutimi_uun_entities:
-    friendly_name: "Entities Issues"
-    templates:
-      icon: >
-        if (state > 0) return 'mdi:thumb-down';
-        return 'mdi:thumb-up';
-      icon_color: >
-        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
-        if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
-        if (state > 0) return 'red';
-        return 'green';
-  sensor.chicoutimi_last_boot:
-    templates:
-      icon: >
-        return 'mdi:clock';
-  sensor.chicoutimi_mariadb:
-    templates:
-      icon: >
-        return 'mdi:file';
-        
-  # binary_sensor.garage_attic_light:
-    # templates:
-      # icon: >
-        # return 'mdi:lightbulb';
-      # icon_color: >
-        # if (state === 'on') return 'var(--state-icon-active-color)';
-        # if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
-        # return 'var(--state-icon-color)';
-        
-  # binary_sensor.control_room_light:
-    # templates:
-      # icon: >
-        # return 'mdi:lightbulb';
-      # icon_color: >
-        # if (state === 'on') return 'var(--state-icon-active-color)';
-        # if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
-        # return 'var(--state-icon-color)';
-        
+  device_tracker.life360_jean:
+    friendly_name: Jean
+    entity_picture: "/local/images/People/Jean2023.jpg"
+    
+  device_tracker.life360_cindy:
+    friendly_name: Cindy
+    entity_picture: "/local/images/People/Cindy2023.jpg"
+    
+  device_tracker.life360_cody:
+    friendly_name: Cody
+    entity_picture: "/local/images/People/Cody2023.jpg"

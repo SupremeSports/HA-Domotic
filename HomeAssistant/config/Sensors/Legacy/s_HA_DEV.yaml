@@ -1,0 +1,255 @@
+####################################################
+# SENSORS - HA DEV VM                              #
+####################################################
+
+#HA Health
+  - platform: rest
+    name: HA DEV VM Heartbeat
+    resource: http://192.168.1.11:9000/api/states/counter.second_counter
+    scan_interval: 5
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    unit_of_measurement: '#'
+    
+  - platform: rest
+    name: HA DEV VM Date & Time
+    resource: http://192.168.1.11:9000/api/states/sensor.date_time
+    scan_interval: 5
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+
+  - platform: rest
+    name: HA DEV VM Update Available
+    resource: http://192.168.1.11:9000/api/states/sensor.ha_update_available
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: >
+      {% set state = value_json.state %}
+      {{ state }}
+    json_attributes_path: "attributes"
+    json_attributes:
+      - major_update
+      - current
+      - latest
+      #- breaking_changes
+      - icon
+      
+  # - platform: rest
+    # name: HA DEV VM Addons Update Available
+    # resource: http://192.168.1.11:9000/api/states/binary_sensor.addons_update_available
+    # scan_interval: 60
+    # timeout: 60
+    # method: GET
+    # headers: 
+      # Authorization: !secret ha_vm_dev_token
+      # content-type: "application/json"
+    # value_template: >
+      # {% set state = value_json.state == 'on' %}
+      # {% if state %}
+          # Update available
+      # {% else %}
+          # Up-to-date
+      # {% endif %}
+    # json_attributes_path: "attributes"
+    # json_attributes:
+      # - icon
+      
+  - platform: rest
+    name: HA DEV VM DB Size
+    resource: http://192.168.1.11:9000/api/states/sensor.ha_vm_db_size
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - path
+      - last_updated
+      - bytes
+      - icon
+    unit_of_measurement: MB
+    
+  # - platform: rest
+    # name: HA DEV VM DB
+    # resource: http://192.168.1.11:9000/api/states/sensor.mariadb_size
+    # scan_interval: 60
+    # timeout: 60
+    # method: GET
+    # headers: 
+      # Authorization: !secret ha_vm_dev_token
+      # content-type: "application/json"
+    # value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    # json_attributes_path: "attributes"
+    # json_attributes:
+      # - database
+      # - value
+    # unit_of_measurement: MB
+      
+#VM Health
+  - platform: rest
+    name: HA DEV VM CPU Used
+    resource: http://192.168.1.11:9000/api/states/sensor.processor_used
+    scan_interval: 10
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+
+  - platform: rest
+    name: HA DEV VM Last Boot
+    resource: http://192.168.1.11:9000/api/states/sensor.last_boot
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - latest
+    device_class: timestamp
+    unit_of_measurement: ""
+      
+  - platform: rest
+    name: HA DEV VM Time Online
+    resource: http://192.168.1.11:9000/api/states/sensor.time_online
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+    #unit_of_measurement: hours
+
+#Drive usage
+  - platform: rest
+    name: HA DEV VM Drive Free
+    resource: http://192.168.1.11:9000/api/states/sensor.drive_free
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: GiB
+    
+  - platform: rest
+    name: HA DEV VM Drive Used
+    resource: http://192.168.1.11:9000/api/states/sensor.drive_used
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: GiB
+    
+  - platform: rest
+    name: HA DEV VM Drive Used Percent
+    resource: http://192.168.1.11:9000/api/states/sensor.drive_used_percent
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+
+#Memory Usage
+  - platform: rest
+    name: HA DEV VM Memory Free
+    resource: http://192.168.1.11:9000/api/states/sensor.memory_free
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: MiB
+    
+  - platform: rest
+    name: HA DEV VM Memory Used
+    resource: http://192.168.1.11:9000/api/states/sensor.memory_used
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: MiB
+    
+  - platform: rest
+    name: HA DEV VM Memory Used Percent
+    resource: http://192.168.1.11:9000/api/states/sensor.memory_used_percent
+    scan_interval: 60
+    timeout: 60
+    method: GET
+    headers: 
+      Authorization: !secret ha_vm_dev_token
+      content-type: "application/json"
+    value_template: "{{ value_json.state if value_json.state is defined else 'unknown' }}"
+    json_attributes_path: "attributes"
+    json_attributes:
+      - icon
+      - state_class
+    unit_of_measurement: "%"
+    
+# to test GET
+# curl -X GET -H "Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJhOGQyOTIxODYyMDc0MzRjYTU4MGQ2ZjI2ODRkMDEzOCIsImlhdCI6MTY0ODY3Mzg0NiwiZXhwIjoxOTY0MDMzODQ2fQ.W6ACo_45ZqHj0QejlpFiFQqL1gzpKsnBpumjJsBcjGQ" \
+    # -H "Content-Type: application/json" \
+    # http://192.168.1.11:9000/api/states/sensor.date_time
+    
+# https://community.home-assistant.io/t/json-attribute/62564/2
+# https://www.home-assistant.io/integrations/http/

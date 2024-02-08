@@ -1,0 +1,19 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - POND                #
+####################################################
+
+  - unique_id: pondfiller_status
+    #name: Pond Filler Valve
+    #device_class: none
+    icon: >
+      {% if is_state("input_select.pondfiller_mode", "Winter/Off") %}
+        mdi:water-pump-off
+      {%else%}
+        mdi:water-pump
+      {%endif%}
+    availability: >
+      {{ not is_state('switch.pond_filler_valve', 'unavailable') and not is_state('input_boolean.pond_running', 'off') }}
+    state: >
+      {{ is_state('switch.pond_filler_valve', 'on') }}
+    attributes:
+      friendly_name: Pond Filler Valve

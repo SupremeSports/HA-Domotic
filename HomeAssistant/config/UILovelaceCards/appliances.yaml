@@ -1,0 +1,216 @@
+    type: entities
+    title: Appliances
+    show_header_toggle: false
+    entities:
+      - type: custom:multiple-entity-row
+        entity: sensor.kitchen_refrigerator_state
+        name: Kitchen Refrigerator
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        entities:
+          - entity: binary_sensor.kitchen_refrigerator_running
+            name: ' '
+            show_state: false
+            icon: mdi:snowflake
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.kitchen_refrigerator_defrost_cycle
+            name: ' '
+            show_state: false
+            icon: mdi:snowflake-melt
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.kitchen_refrigerator_water_leak
+            name: ' '
+            show_state: false
+            icon: mdi:pipe-leak
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.kitchen_refrigerator_door_freezer
+            name: ' '
+            show_state: false
+            icon: mdi:fridge-bottom
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.kitchen_refrigerator_door_fridge
+            name: ' '
+            show_state: false
+            icon: mdi:fridge-top
+            hide_unavailable: true
+            hide_if: 'off'
+          - name: Freezer Temp
+            entity: sensor.kitchen_refrigerator_freezer_temperature
+          - name: Fridge Temp
+            entity: sensor.kitchen_refrigerator_fridge_temperature
+            
+      - type: custom:multiple-entity-row
+        entity: sensor.chest_freezer_state
+        name: Chest Freezer
+        state_color: true
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        entities:
+          - entity: binary_sensor.chest_freezer_running
+            name: ' '
+            show_state: false
+            icon: mdi:snowflake
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.chest_freezer_defrost
+            name: ' '
+            show_state: false
+            icon: mdi:snowflake-melt
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.chest_freezer_door
+            name: ' '
+            show_state: false
+            icon: mdi:treasure-chest
+            hide_unavailable: true
+            hide_if: 'off'
+          - name: Freezer Temp
+            entity: sensor.chest_freezer_temperature
+
+      - type: custom:multiple-entity-row
+        entity: sensor.tankless_water_heater_state
+        name: Water Heater
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision5
+        entities:
+          - entity: binary_sensor.water_heater_flow
+            name: ' '
+            show_state: false
+            icon: mdi:water-boiler
+            hide_unavailable: true
+            hide_if: 'off'
+          - name: Water Temp
+            entity: sensor.water_heater_temperature
+
+      - type: custom:multiple-entity-row
+        entity: sensor.dishwasher_state
+        name: Dishwasher
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        entities:
+          - entity: binary_sensor.dishwasher_running
+            name: ' '
+            show_state: false
+            icon: mdi:dishwasher
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.dishwasher_water_leak
+            name: ' '
+            show_state: false
+            icon: mdi:pipe-leak
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.dishwasher_water_overflow
+            name: ' '
+            show_state: false
+            icon: mdi:pipe-leak
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.dishwasher_door
+            name: ' '
+            show_state: false
+            icon: mdi:dishwasher-alert
+            hide_unavailable: true
+            hide_if: 'off'
+
+      - type: custom:multiple-entity-row
+        entity: sensor.washing_machine_state
+        name: Washing Machine
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        style:
+          hui-generic-entity-row:
+            $: |
+              div.entity:nth-child(2) state-badge {
+                color: red;
+              }
+              div.entity:nth-child(3) state-badge {
+                color: red;
+                {{ 'color: green;' if is_state('binary_sensor.washing_machine_running','on') else 'color: red;' }}
+              }
+        entities:
+          - entity: binary_sensor.washing_machine_running
+            name: ' '
+            show_state: false
+            icon: mdi:washing-machine
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.washing_machine_water_leak
+            name: ' '
+            show_state: false
+            icon: mdi:pipe-leak
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.washing_machine_door
+            name: ' '
+            show_state: false
+            icon: mdi:washing-machine-alert
+            hide_unavailable: true
+            #hide_if: 'on'
+            
+      - type: custom:multiple-entity-row
+        entity: sensor.drying_machine_state
+        name: Drying Machine
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        entities:
+          - entity: binary_sensor.drying_machine_running
+            name: ' '
+            show_state: false
+            icon: mdi:washing-machine
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.drying_machine_door
+            name: ' '
+            show_state: false
+            icon: mdi:washing-machine-alert
+            hide_unavailable: true
+            hide_if: 'off'
+            
+      - type: custom:multiple-entity-row
+        entity: binary_sensor.well_pump_running
+        name: Well Pump
+        secondary_info:
+          attribute: power
+          #name: Power
+          #unit: 'W'
+          format: precision0
+        entities:
+          - entity: binary_sensor.well_pump_running
+            name: ' '
+            show_state: false
+            icon: mdi:pump
+            hide_unavailable: true
+            hide_if: 'off'
+          - entity: binary_sensor.well_water_leak
+            name: ' '
+            show_state: false
+            icon: mdi:pipe-leak
+            hide_unavailable: true
+            hide_if: 'off'
+          - name: Pit Temp
+            entity: sensor.well_pit_temperature
+          - name: Water Temp
+            entity: sensor.well_water_temperature

@@ -1,0 +1,49 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - APPLIANCES          #
+####################################################
+
+  # - name: Kitchen Refrigerator Defrost Cycle
+  #   device_class: running
+  #   icon: mdi:snowflake-melt
+  #   availability: >
+  #     {{ not is_state('sensor.kitchen_refrigerator_power', 'unavailable') }}
+  #   state: >
+  #     {% set power = states('sensor.kitchen_refrigerator_power')|float(0) %}
+  #     {{ power >= 200 and power < 550 }}
+
+  - name: Water Heater Flow
+    #unique_id: water_heater_flow
+    #device_class: none
+    icon: >
+      {% if is_state('switch.water_heater', 'off') %}
+        mdi:radiator-off
+      {% elif states('sensor.water_heater_flow')|int(0) > 1 %}
+        mdi:radiator
+      {% else %}
+        mdi:radiator-disabled
+      {% endif %}
+    availability: >
+      {{ not is_state('sensor.water_heater_status', 'unavailable') }}
+    state: >
+      {{ states('sensor.water_heater_flow')|int(0) > 1 }}
+    attributes:
+      appliances: "water_heater"
+      watts: "27000"
+      
+  - name: Well Pump Running
+    #unique_id: well_pump_running
+    #device_class: none
+    icon: >
+      {% set light = false %}
+      {% set pump = states('sensor.well_power')|float(0) > (50 if not light else 10) %}
+      {% if pump %}
+        mdi:pump
+      {% else %}
+        mdi:pump-off
+      {% endif %}
+    availability: >
+      {{ not is_state('sensor.well_power', 'unavailable') }}
+    state: >
+      {{ states('sensor.well_power')|int(0) > 50 }}
+    attributes:
+      power: "{{ states('sensor.well_power') }} W"

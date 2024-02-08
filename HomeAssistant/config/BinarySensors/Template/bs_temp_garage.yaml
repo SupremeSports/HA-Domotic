@@ -1,0 +1,214 @@
+####################################################
+# TEMPLATES - GARAGE                               #
+####################################################
+
+  - unique_id: garagefrontlight_status
+    #name: Garage Front Light
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.garagefrontlight_mode', 'Force Off') %}
+        mdi:lightbulb-off
+      {% else %}
+        mdi:lightbulb
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.garage_front_light', 'unavailable') }}
+    state: >
+      {{ is_state('switch.garage_front_light', 'on') }}
+    attributes:
+      friendly_name: Garage Front Light
+      mode: "{{ states('input_select.garagefrontlight_mode') }}"
+      schedule: >-
+        {% if is_state('input_select.garagefrontlight_mode', '24/7') %}
+          Always ON
+        {% elif is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') %}
+          Stays OFF for power outlet Halloween decorations, except if doors are unlocked
+        {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+          Stays OFF for power outlet Christmas decorations, except if doors are unlocked
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to 23h') %}
+          Turns ON at sunset until 23h
+        {% elif is_state('input_select.garagefrontlight_mode', 'Sunset to Sunrise') %}
+          Turns ON at sunset until sunrise next day
+        {% else %}
+          Always OFF
+        {% endif %}
+
+  - unique_id: garagefrontpower_status
+    #name: Garage Front Power
+    #device_class: none
+    icon: >
+      {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
+        mdi:power-plug
+      {% elif is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') %}
+        mdi:pumpkin
+      {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+        mdi:pine-tree
+      {% else %}
+        mdi:power-plug-off
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.garage_front_power', 'unavailable') }}
+    state: >
+      {{ is_state('switch.garage_front_power', 'on') }}
+    attributes:
+      # friendly_name: >-
+      #   {% if is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') or is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+      #     {{ states('input_select.poweroutlet_mode') }}
+      #   {% else %}
+      #     Power Outlet
+      #   {% endif %}
+      friendly_name: Garage Front Power
+      mode: "{{ states('input_select.garagefrontpower_mode') }}"
+      schedule: >-
+        {% if is_state('input_select.garagefrontpower_mode', '24/7') %}
+          Always ON
+        {% elif is_state('input_select.garagefrontpower_mode', 'Fountain') %}
+          Turns ON at sunrise until 10PM. Will turn ON if outside temperature is freezing
+        {% elif is_state('input_select.garagefrontpower_mode', 'Halloween Decorations') %}
+          Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Halloween night, turns ON at 7AM until midnight
+        {% elif is_state('input_select.garagefrontpower_mode', 'Christmas Decorations') %}
+          Turns ON an hour before sunset or at 4PM, turns OFF at 11PM. On Christmas night, turns ON at 7AM until midnight
+        {% else %}
+          Always OFF
+        {% endif %}
+
+  - unique_id: garagefrontheater_error
+    #name: Garage Front Heater OK
+    #device_class: none
+    icon: >
+      {% if is_state('binary_sensor.garagefrontheater_error', 'off') %}
+        mdi:shield-alert
+      {% else %}
+        mdi:shield-check
+      {% endif %}
+    availability: >
+      {{ not is_state('switch.garage_front_power', 'unavailable') }}
+    state: >
+      {% set safetycoil = is_state('binary_sensor.garage_front_safety_active','on') %}
+      {% set safetysensor = is_state_attr('sensor.garage_safety_front_temp_raw','sensor_ok','ON') %}
+      {% set heatercoil = is_state('switch.garage_front_heater','on')%}
+      {% set auxcontact = is_state('binary_sensor.garage_front_heater_ac','on')%}
+      {% set auxcontact_delay = (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_front_heater_ac.last_changed)) >= 30 %}
+      {% set auxcontactother = is_state('binary_sensor.garage_rear_heater_ac','on')%}
+      {% set auxcontactother_delay = (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_rear_heater_ac.last_changed)) >= 30 %}
+      
+      {% set temp = states('sensor.garage_safety_front_temperature')|float(-1) < 0 or states('sensor.garage_safety_front_temperature')|float(41) > 40 %}
+      
+      {% if not auxcontact or not auxcontact_delay %}
+        {% set wattageOK = true %}
+      {% elif auxcontact and auxcontact_delay and auxcontactother and auxcontactother_delay %}
+        {% set wattageOK = states('sensor.ted5000_mtu2_power')|float(0) >= 8500 %}
+      {% elif auxcontact and auxcontact_delay %}
+        {% set wattageOK = states('sensor.ted5000_mtu2_power')|float(0) >= 4250 %}
+      {% endif %}
+      
+      {% set ERR = false %}
+      
+      {% if temp or not safetysensor or not wattageOK %}
+        {% set ERR = true %}
+      {% elif safetycoil and not auxcontact %}
+        {% set ERR = false %}
+      {% elif heatercoil and not auxcontact %}
+        {% set ERR = false %}
+      {% elif auxcontact and not (safetycoil or heatercoil) %}
+        {% set ERR = false %}
+      {% endif %}
+      
+      {{ not ERR }}
+    attributes:
+      friendly_name: Garage Front Heater OK
+      temp: "{{ states('sensor.garage_safety_front_temperature') }}"
+      aux: "{{ is_state('binary_sensor.garage_front_heater_ac','on') }}"
+      safety_active: "{{ is_state('binary_sensor.garage_front_safety_active','on') }}"
+      coil: "{{ is_state('switch.garage_front_heater','on') }}"
+      
+  - unique_id: garagerearheater_error
+    #name: Garage Rear Heater OK
+    #device_class: none
+    icon: >
+      {% if is_state('binary_sensor.garagerearheater_error', 'off') %}
+        mdi:shield-alert
+      {% else %}
+        mdi:shield-check
+      {% endif %}
+    availability: >
+      {{ not is_state('sensor.garage_safety_rear_temperature', 'unavailable') }}
+    state: >
+      {% set safetycoil = is_state('binary_sensor.garage_safety_rear_active','on') %}
+      {% set safetysensor = is_state_attr('sensor.garage_safety_rear_temp_raw','sensor_ok','ON') %}
+      {% set heatercoil = is_state('switch.garage_rear_heater','on') and (as_timestamp(now()) - as_timestamp(states.switch.garage_rear_heater.last_changed)) >= 30 %}
+      {% set auxcontact = is_state('binary_sensor.garage_rear_heater_ac','on') and (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_rear_heater_ac.last_changed)) >= 30 %}
+      {% set auxcontact_delay = (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_rear_heater_ac.last_changed)) >= 30 %}
+      {% set auxcontactother = is_state('binary_sensor.garage_front_heater_ac','on') and (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_front_heater_ac.last_changed)) >= 30 %}
+      {% set auxcontactother_delay = (as_timestamp(now()) - as_timestamp(states.binary_sensor.garage_front_heater_ac.last_changed)) >= 30 %}
+      
+      {% set temp = states('sensor.garage_safety_rear_temperature')|float(-1) < 0 or states('sensor.garage_safety_rear_temperature')|float(41) > 40 %}
+      
+      {% if not auxcontact or not auxcontact_delay %}
+        {% set wattageOK = true %}
+      {% elif auxcontact and auxcontact_delay and auxcontactother and auxcontactother_delay %}
+        {% set wattageOK = states('sensor.ted5000_mtu2_power')|float(0) >= 8500 %}
+      {% elif auxcontact and auxcontact_delay %}
+        {% set wattageOK = states('sensor.ted5000_mtu2_power')|float(0) >= 4250 %}
+      {% endif %}
+      
+      {% set ERR = false %}
+      
+      {% if temp or not safetysensor or not wattageOK %}
+        {% set ERR = true %}
+      {% elif safetycoil and not auxcontact %}
+        {% set ERR = false %}
+      {% elif heatercoil and not auxcontact %}
+        {% set ERR = false %}
+      {% elif auxcontact and not (safetycoil or heatercoil) %}
+        {% set ERR = false %}
+      {% endif %}
+      
+      {{ not ERR }}
+    attributes:
+      friendly_name: Garage Rear Heater OK
+      temp: "{{ states('sensor.garage_safety_rear_temperature') }}"
+      aux: "{{ is_state('binary_sensor.garage_rear_heater_ac','on') }}"
+      safety_active: "{{ is_state('binary_sensor.garage_rear_safety_active','on') }}"
+      coil: "{{ is_state('switch.garage_rear_heater','on') }}"
+      
+  - name: Garage Safety Front Active
+    #unique_id: garage_safety_front_active
+    #device_class: none
+    # availability: >
+      # {{ not is_state('sensor.garage_safety_front_temperature', 'unavailable') }}
+    state: >
+      {% set safetysensor = is_state_attr('sensor.garage_safety_front_temp_raw','sensor_ok','ON') %}
+      {% set heatercoil = is_state('switch.garage_front_heater','on') and (as_timestamp(now()) - as_timestamp(states.switch.garage_front_heater.last_changed)) > 5 %}
+      {% set auxcontact = is_state('binary_sensor.garage_front_heater_ac','on') %}
+      
+      {% set active = false %}
+      
+      {% if not safetysensor %}
+        {% set active = false %}
+      {% elif not heatercoil and auxcontact %}
+        {% set active = true %}
+      {% endif %}
+      
+      {{active}}
+      
+  - name: Garage Safety Rear Active
+    #unique_id: garage_safety_rear_active
+    #device_class: none
+    # availability: >
+      # {{ not is_state('sensor.garage_safety_rear_temperature', 'unavailable') }}
+    state: >
+      {% set safetysensor = is_state_attr('sensor.garage_safety_rear_temp_raw','sensor_ok','ON') %}
+      {% set heatercoil = is_state('switch.garage_rear_heater','on') and (as_timestamp(now()) - as_timestamp(states.switch.garage_rear_heater.last_changed)) > 5 %}
+      {% set auxcontact = is_state('binary_sensor.garage_rear_heater_ac','on') %}
+      
+      {% set active = false %}
+      
+      {% if not safetysensor %}
+        {% set active = false %}
+      {% elif not heatercoil and auxcontact %}
+        {% set active = true %}
+      {% endif %}
+      
+      {{active}}
+    

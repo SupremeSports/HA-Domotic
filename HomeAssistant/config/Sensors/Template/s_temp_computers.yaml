@@ -1,0 +1,688 @@
+####################################################
+# TEMPLATES - Computers                            #
+####################################################
+
+  - unique_id: wan_status
+    #name: WAN status
+    #unit_of_measurement: ''
+    #state_class: measurement
+    #device_class: timestamp  #Makes display on minutes since...
+    icon: mdi:server-network
+    state: >
+      {% set status = is_state('binary_sensor.wan_status','on') %}
+      {% if status %}
+        Connected
+      {% else %}
+        Disconnected
+      {% endif %}
+    attributes:
+      friendly_name: WAN Status
+        
+#Server health status
+  - name: Server CPU Temperature
+    #unique_id: server_cpu_temperature
+    unit_of_measurement: °C
+    device_class: temperature
+    state: >
+      {% set mylist = 
+             (states('sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_1')|string)|float(0),
+             (states('sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_3')|string)|float(0),
+             (states('sensor.server_it8720_2_temperature')|string)|float(0),
+             (states('sensor.server_it8720_3_temperature')|string)|float(0),
+             (states('sensor.server_k10temp_1_temperature')|string)|float(0),
+      %}
+      
+      {% set CT = mylist|max %}
+      
+      {% if CT != 0 %}
+        {{ CT|round(0) }}
+      {% else %}
+        {{ "unknown" }}
+      {% endif %}
+    # attributes:
+      # friendly_name: Server CPU Temperature
+      
+  - name: Server MB Temperature
+    #unique_id: server_mb_temperature
+    unit_of_measurement: °C
+    device_class: temperature
+    state: >
+      {% set mylist = 
+             (states('sensor.server_gigabyte_ga_990fxa_ud3_ite_it8720f_temperatures_temperature_2')|string)|float(0),
+             (states('sensor.server_it8720_1_temperature')|string)|float(0),
+      %}
+      
+      {% set MB = mylist|max %}
+      
+      {% if MB != 0 %}
+        {{ MB|round(0) }}
+      {% else %}
+        {{ "unknown" }}
+      {% endif %}
+    # attributes:
+      # friendly_name: Server Motherboard Temperature
+      
+        
+#SERVER JBOD DRIVES
+  - unique_id: server_drive_jbod_00
+    #name: JBOD 0:0
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data00_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:0
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data00_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data00_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data00_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data00_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_01
+    #name: JBOD 0:1
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data01_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:1
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data01_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data01_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data01_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data01_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_02
+    #name: JBOD 0:2
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data02_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:2
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data02_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data02_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data02_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data02_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_03
+    #name: JBOD 0:3
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data03_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:3
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data03_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data03_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data03_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data03_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_04
+    #name: JBOD 0:4
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data04_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:4
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data04_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data04_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data04_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data04_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_05
+    #name: JBOD 0:5
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data05_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:5
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data05_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data05_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data05_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data05_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_06
+    #name: JBOD 0:6
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data06_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:6
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data06_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data06_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data06_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data06_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_07
+    #name: JBOD 0:7
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data07_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 0:7
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data07_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data07_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data07_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data07_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_10
+    #name: JBOD 1:0
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data10_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:0
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data10_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data10_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data10_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data10_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_11
+    #name: JBOD 1:1
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data11_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:1
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data11_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data11_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data11_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data11_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_12
+    #name: JBOD 1:2
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data12_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:2
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data12_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data12_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data12_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data12_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_13
+    #name: JBOD 1:3
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data13_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:3
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data13_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data13_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data13_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data13_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+      
+  - unique_id: server_drive_jbod_14
+    #name: JBOD 1:4
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data14_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:4
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data14_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data14_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data14_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data14_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_15
+    #name: JBOD 1:5
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data15_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:5
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data15_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data15_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data15_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data15_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_16
+    #name: JBOD 1:6
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data16_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:6
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data16_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data16_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data16_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data16_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod_17
+    #name: JBOD 1:7
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data17_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: Server JBOD 1:7
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data17_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data17_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data17_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data17_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_dvr
+    #name: DVR Drive
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: "{{ states('sensor.192_168_0_250_media_gauthier_data17_used_percent')|float(0.0) }}"
+    attributes:
+      friendly_name: DVR Drive
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data17_used')|float(0.0) }} GiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data17_free')|float(0.0) }} GiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data17_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data17_free')|float(0.0) %}
+        {% set total = (used+free)/0.95 %}
+        {% set sizes = [0, 10, 80, 100, 120, 400, 750, 1000, 2000, 3000, 4000, 8000, 16000, 20000, 22000, 24000] %}
+        {% set ns = namespace(count = 0) %}
+        
+        {% for i in sizes %}
+          {% if i < total %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+        
+        {% set total = sizes[ns.count] %}
+        
+        {% if total >= 1000 %}
+          {{ (total/1000)|round(0) }} TiB
+        {% else %}
+          {{ total|round(0) }} GiB
+        {% endif %}
+        
+  - unique_id: server_drive_jbod
+    #name: Server Drive JBOD
+    state_class: measurement
+    unit_of_measurement: '%'
+    icon: mdi:harddisk
+    state: >
+      {% set used = states('sensor.192_168_0_250_media_gauthier_data_used')|float(0.0) %}
+      {% set free = states('sensor.192_168_0_250_media_gauthier_data_free')|float(0.0) %}
+      
+      {% if free > 0 %}
+        {{ (used/(used+free)*100.0)|round(1) }}
+      {% else %}
+        {{ 0.0 }}
+      {% endif %}     
+    attributes:
+      friendly_name: Server Drive JBOD
+      used: "{{ states('sensor.192_168_0_250_media_gauthier_data_used')|float(0.0) }} TiB"
+      free: "{{ states('sensor.192_168_0_250_media_gauthier_data_free')|float(0.0) }} TiB"
+      size: >
+        {% set used = states('sensor.192_168_0_250_media_gauthier_data_used')|float(0.0) %}
+        {% set free = states('sensor.192_168_0_250_media_gauthier_data_free')|float(0.0) %}
+        
+        {{ (used+free)  | round(2) }} TiB
+      
+  - unique_id: 192_168_0_250_media_gauthier_data_used
+    #name: Server Drive JBOD used
+    unit_of_measurement: TiB
+    #device_class: data_size
+    state_class: measurement
+    icon: mdi:harddisk
+    state: >
+      {% set foo = 
+          states('sensor.192_168_0_250_media_gauthier_data00_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data01_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data02_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data03_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data04_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data05_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data06_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data07_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data10_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data11_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data12_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data13_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data14_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data15_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data16_used')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data17_used')|float(0)
+      %}
+      
+      {% set JBOD = (foo|sum) / 1000 %}
+      
+      {% if JBOD != 0 %}
+        {{ JBOD|round(1) }}
+      {% else %}
+        {{ "unknown" }}
+      {% endif %}
+    attributes:
+      friendly_name: Server Drive JBOD used
+      
+  - unique_id: 192_168_0_250_media_gauthier_data_free
+    #name: Server Drive JBOD free
+    unit_of_measurement: TiB
+    #device_class: data_size
+    state_class: measurement
+    icon: mdi:harddisk
+    state: >
+      {% set foo = 
+          states('sensor.192_168_0_250_media_gauthier_data00_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data01_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data02_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data03_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data04_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data05_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data06_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data07_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data10_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data11_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data12_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data13_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data14_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data15_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data16_free')|float(0),
+          states('sensor.192_168_0_250_media_gauthier_data17_free')|float(0)
+      %}
+      
+      {% set JBOD = (foo|sum) / 1000 %}
+      
+      {% if JBOD != 0 %}
+        {{ JBOD|round(1) }}
+      {% else %}
+        {{ "unknown" }}
+      {% endif %}
+    attributes:
+      friendly_name: Server Drive JBOD free

@@ -1,0 +1,27 @@
+####################################################
+# TEMPLATES - TRIGGERS 5m                          #
+####################################################
+
+#     trigger: 
+#     - platform: time_pattern
+#       minutes: '/5'
+# ######## BINARY SENSORS ########
+#     # binary_sensor:
+
+# ######## SENSORS ########
+#     sensor:
+#       - name: HA Random Number Generator
+#         #unique_id: ha_vm_heartbeat
+#         icon: mdi:counter
+#         unit_of_measurement: "#"
+#         state: >
+#           {% set random1 = range(100, 999) | random %}
+#           {% set random2 = range(100, 999) | random %}
+#           {% set random3 = range(100, 999) | random %}
+          
+#           {% set seed = random1*1000 + random2 %}
+#           {% set random = (states('sensor.times')|replace(':',''))|int(1)+seed %}
+          
+#           {{random if random<1000000 else random-1000000}}
+#           {{random}}
+#           {{seed}}

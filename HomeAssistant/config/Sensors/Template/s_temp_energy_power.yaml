@@ -1,0 +1,630 @@
+####################################################
+# TEMPLATES - ENERGY POWER                         #
+####################################################
+
+#HVACs
+  #NONE
+
+#DRAGONS
+  - name: Garage Front Heater Power
+    #unique_id: garage_front_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.garage_front_heater_ac', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu2_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.5|float %}
+      {% set running_watts = state_attr('binary_sensor.garage_front_heater_ac','watts')|float(0) %}
+      {% set state = states('binary_sensor.garage_front_heater_ac') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.garage_front_heater_ac','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.garage_front_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.garage_front_heater_ac','watts')|float(0) %}
+        {% set energy = states('sensor.garage_front_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.garage_front_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      cost_now: >
+        {{(states.sensor.garage_front_heater_power.state|float(0)/1000 * states.sensor.ted5000_utility_current_rate.state|float(0))|round(5)}} $/h
+      cost_today: >
+        {{(states.sensor.garage_front_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $
+      cost_today_projected: >
+        {{(states.sensor.garage_front_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+      
+  - name: Garage Rear Heater Power
+    #unique_id: garage_rear_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.garage_rear_heater_ac', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu2_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.5|float %}
+      {% set running_watts = state_attr('binary_sensor.garage_rear_heater_ac','watts')|float(0) %}
+      {% set state = states('binary_sensor.garage_rear_heater_ac') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.garage_rear_heater_ac','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.garage_rear_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.garage_rear_heater_ac','watts')|float(0) %}
+        {% set energy = states('sensor.garage_rear_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.garage_rear_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      cost_now: >
+        {{(states.sensor.garage_rear_heater_power.state|float(0)/1000 * states.sensor.ted5000_utility_current_rate.state|float(0))|round(5)}} $/h
+      cost_today: >
+        {{(states.sensor.garage_rear_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0))|round(2)}} $
+      cost_today_projected: >
+        {{(states.sensor.garage_rear_heater_energy_daily.state|float(0) * states.sensor.ted5000_utility_current_rate.state|float(0)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(2) }} $
+      
+#CONVECTAIR/HEATERS
+  - name: Bar Heater Power
+    #unique_id: bar_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.bar_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.bar_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.bar_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.bar_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.bar_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.bar_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.bar_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.bar_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Entrance Heater Power
+    #unique_id: entrance_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.entrance_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.entrance_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.entrance_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.entrance_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.entrance_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.entrance_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.entrance_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.entrance_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Kitchen Heater Power
+    #unique_id: kitchen_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.kitchen_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.kitchen_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.kitchen_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.kitchen_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.kitchen_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.kitchen_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.kitchen_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.kitchen_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Living Room Heater Power
+    #unique_id: living_room_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.living_room_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.living_room_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.living_room_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.living_room_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.living_room_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.living_room_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.living_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.living_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Massage Room Heater Power
+    #unique_id: massage_room_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.massage_room_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.massage_room_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.massage_room_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.massage_room_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.massage_room_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.massage_room_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.massage_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.massage_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Master Bedroom Heater Power
+    #unique_id: master_bedroom_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.master_bedroom_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.master_bedroom_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.master_bedroom_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.master_bedroom_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.master_bedroom_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.master_bedroom_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.master_bedroom_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.master_bedroom_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Office Heater Power
+    #unique_id: office_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.office_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.office_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.office_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.office_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.office_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.office_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.office_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.office_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: RecRoom Heater Power
+    #unique_id: recroom_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.recroom_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.recroom_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.recroom_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.recroom_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.recroom_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.recroom_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.recroom_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.recroom_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+
+  - name: Training Room Heater Power
+    #unique_id: training_room_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.training_room_heater_running', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.training_room_heater_running','watts')|float(0) %}
+      {% set state = states('binary_sensor.training_room_heater_running') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.training_room_heater_running','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.training_room_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.training_room_heater_running','watts')|float(0) %}
+        {% set energy = states('sensor.training_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.training_room_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+#FLOOR HEATERS
+  - name: Cold Storage Floor Heater Power
+    #unique_id: cold_storage_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.cold_storage_floor_heater', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.cold_storage_floor_heater','watts')|float(0) %}
+      {% set state = states('binary_sensor.cold_storage_floor_heater') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.cold_storage_floor_heater','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.cold_storage_floor_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.cold_storage_floor_heater','watts')|float(0) %}
+        {% set energy = states('sensor.cold_storage_floor_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.cold_storage_floor_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+  - name: Storage Room Floor Heater Power
+    #unique_id: storage_room_floor_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.storage_room_floor_heater', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 3.0|float %}
+      {% set running_watts = state_attr('binary_sensor.storage_room_floor_heater','watts')|float(0) %}
+      {% set state = states('binary_sensor.storage_room_floor_heater') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.storage_room_floor_heater','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.storage_room_floor_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.storage_room_floor_heater','watts')|float(0) %}
+        {% set energy = states('sensor.storage_room_floor_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.storage_room_floor_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+      
+#OTHER TYPES OF HEATING
+  - name: Tankless Water Heater Power
+    #unique_id: tankless_water_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.water_heater_flow', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu1_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 1.0|float %}
+      {% set running_watts = state_attr('binary_sensor.water_heater_flow','watts')|float(0) %}
+      {% set state = states('binary_sensor.water_heater_flow') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.water_heater_flow','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.tankless_water_heater_energy_daily')|float(0) }} kWh"
+      
+#POOL & POND
+  - name: Pool Pump Power
+    #unique_id: pool_pump_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.pool_heater_run', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu3_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 1.0|float %}
+      {% set running_watts = state_attr('switch.pool_pump','watts')|float(0) %}
+      {% set state = states('switch.pool_pump') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('switch.pool_pump','watts')|int(0) }} W"
+      # energy_daily: "{{ states('sensor.pool_pump_energy_daily')|float(0) }} kWh"
+      # duty_cycle: >
+        # {% set watts = state_attr('switch.pool_pump','watts')|float(0) %}
+        # {% set energy = states('sensor.pool_pump_energy_daily')|float(0) * 1000 %}
+        # {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        # {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      # daily_average: >
+        # {% set energy = states('sensor.pool_pump_energy_daily')|float(0) * 1000 %}
+        # {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        # {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+        
+  - name: Pool Heater Power
+    #unique_id: pool_heater_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('binary_sensor.pool_heater_run', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu3_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 1.0|float %}
+      {% set running_watts = state_attr('binary_sensor.pool_heater_run','watts')|float(0) %}
+      {% set state = states('binary_sensor.pool_heater_run') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('binary_sensor.pool_heater_run','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.pool_heater_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('binary_sensor.pool_heater_run','watts')|float(0) %}
+        {% set energy = states('sensor.pool_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.pool_heater_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+        
+  - name: Pond Waterfall Pump Power
+    #unique_id: pond_waterfall_pump_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:flash
+    # availability: >
+      # {{ not is_state('switch.pond_waterfall_pump', 'unavailable') }}
+    state: >
+      {% set voltage_ratio = states('sensor.ted5000_mtu3_voltage')|float(240) / 240.0 %}
+      {% set standby_watts = 1.0|float %}
+      {% set running_watts = state_attr('switch.pond_waterfall_pump','watts')|float(0) %}
+      {% set state = states('switch.pond_waterfall_pump') %}
+      {% set power = 0 %}
+      
+      {% if state == 'on' %}
+        {% set power = standby_watts + running_watts %}
+      {% elif state == 'off' %}
+        {% set power = standby_watts %}
+      {% endif %}
+      
+      {{ (power * voltage_ratio) | float(0) | round(5) }}
+    attributes:
+      rated_watts: "{{ state_attr('switch.pond_waterfall_pump','watts')|int(0) }} W"
+      energy_daily: "{{ states('sensor.pond_waterfall_pump_energy_daily')|float(0) }} kWh"
+      duty_cycle: >
+        {% set watts = state_attr('switch.pond_waterfall_pump','watts')|float(0) %}
+        {% set energy = states('sensor.pond_waterfall_pump_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/watts/time * 100) if (watts > 0 and time > 0) else 0.0) | round(1) }} %
+      daily_average: >
+        {% set energy = states('sensor.pond_waterfall_pump_energy_daily')|float(0) * 1000 %}
+        {% set time = state_attr('sensor.times','sec_midnight')|float(0) / 3600 %}
+        {{ ((energy/time) if (time > 0) else 0) | round(0) }} Wh
+
+#OTHERS
+  - name: UPS Load Power
+    #unique_id: ups_load_power
+    unit_of_measurement: 'W'
+    state_class: measurement
+    device_class: power
+    icon: mdi:database-check
+    # availability: >
+      # {{ is_state('sensor.ups_status', 'ONLINE') }}
+    state: >
+      {% set state = is_state('sensor.ups_status', 'ONLINE') %}
+      {% set nom_power = states('sensor.ups_nominal_output_power')|float(0) %}
+      {% set load_percent = states('sensor.ups_load')|float(0)/100.0 %}
+      {% set power = 0 %}
+      
+      {% if state %}
+        {% set power = nom_power * load_percent %}
+      {% endif %}
+      
+      {{ power | float(0) | round(1) }}

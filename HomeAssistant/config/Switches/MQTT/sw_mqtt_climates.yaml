@@ -1,0 +1,55 @@
+####################################################
+# SWITCHES - MQTT - CLIMATES                       #
+####################################################
+
+  - name: RecRoom HVAC Swing
+    icon: mdi:arrow-expand-vertical
+    state_topic: "Home/RecRoom/Hvac/Stts"
+    command_topic: "Home/RecRoom/Hvac/Swing/Cmd"
+    value_template: '{{ value_json.swing }}'
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    payload_on: "On"
+    payload_off: "Off"
+    state_on: "On"
+    state_off: "Off"
+    qos: 0
+
+  - name: RecRoom HVAC Swipe
+    icon: mdi:arrow-expand-horizontal
+    state_topic: "Home/RecRoom/Hvac/Stts"
+    command_topic: "Home/RecRoom/Hvac/Swipe/Cmd"
+    value_template: '{{ value_json.swipe }}'
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    payload_on: "On"
+    payload_off: "Off"
+    state_on: "On"
+    state_off: "Off"
+    qos: 0
+    
+  - name: RecRoom HVAC Display
+    icon: mdi:led-on
+    state_topic: "Home/RecRoom/Hvac/Stts"
+    command_topic: "Home/RecRoom/Hvac/Light/Cmd"
+    value_template: '{{ value_json.light }}'
+    availability:
+      - topic: "Home/RecRoom/Hvac/LWT"
+    payload_on: "On"
+    payload_off: "Off"
+    state_on: "On"
+    state_off: "Off"
+    qos: 0
+    
+  - name: Garage HVAC Swing
+    icon: mdi:arrow-expand-vertical
+    state_topic: "Garage/Hvac/Stts"
+    command_topic: "Garage/Hvac/Swing/Cmd"
+    value_template: '{{ value_json.swing }}'
+    availability:
+      - topic: "Garage/Hvac/LWT"
+    payload_on: "On"
+    payload_off: "Off"
+    state_on: "On"
+    state_off: "Off"
+    qos: 0

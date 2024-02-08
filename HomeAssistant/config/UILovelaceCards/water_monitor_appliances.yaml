@@ -1,0 +1,142 @@
+    type: vertical-stack
+    title: Appliances
+    cards:
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Appliances Total Water
+            entity: sensor.appliances_total_water
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          - sensor.appliances_total_water
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state >= 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          height: 20px
+          stack: vertical
+          decimal: 1
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#00ffea8a'
+            from: 0
+            to: 10
+          - color: '#00f3ff8a'
+            from: 10
+            to: 20
+          - color: '#00e4ff8a'
+            from: 20
+            to: 40
+          - color: '#00d2ff8a'
+            from: 40
+            to: 50
+          - color: '#00bbff8a'
+            from: 50
+            to: 100
+          - color: '#009cff8a'
+            from: 100
+            to: 200
+          - color: '#8b70ff8a'
+            from: 200
+            to: 300
+          - color: '#de00ff8a'
+            from: 300
+            to: 500
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+              font-weight: bold;
+            }
+            bar-card-value	{
+              font-weight: bolder;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }
+      - type: 'custom:config-template-card'
+        variables:
+          - name: Dishwasher
+            entity: sensor.dishwasher_water_daily_usage
+          - name: Ice Maker
+            entity: sensor.icemaker_water_daily_usage
+          - name: Washing Machine
+            entity: sensor.washing_machine_water_daily_usage
+        entities: 
+          # Note: this list of entities may seem redundant, but is necessary to inform
+          # config-template-card which entities to watch for updates.
+          - sensor.dishwasher_water_daily_usage
+          - sensor.icemaker_water_daily_usage
+          - sensor.washing_machine_water_daily_usage
+        element:
+          type: 'custom:bar-card'
+          entities: ${vars.filter(v => states[v.entity].state > 0).sort((v1,v2) => states[v2.entity].state-states[v1.entity].state)}
+          direction: right
+          entity_row: true
+          min: 0
+          #max: ${ Math.max(...vars.map(v => states[v.entity].state))}
+          max: ${ Math.max(...vars.map(v => states['sensor.appliances_total_water'].state))}
+          height: 20px
+          stack: vertical
+          decimal: 1
+          icon: 'mdi:flash'
+          positions:
+            icon: off
+            indicator: outside
+            name: inside
+            value: inside
+          severity:
+          - color: '#00ffea8a'
+            from: 0
+            to: 10
+          - color: '#00f3ff8a'
+            from: 10
+            to: 20
+          - color: '#00e4ff8a'
+            from: 20
+            to: 40
+          - color: '#00d2ff8a'
+            from: 40
+            to: 50
+          - color: '#00bbff8a'
+            from: 50
+            to: 100
+          - color: '#009cff8a'
+            from: 100
+            to: 200
+          - color: '#8b70ff8a'
+            from: 200
+            to: 300
+          - color: '#de00ff8a'
+            from: 300
+            to: 500
+          style: |-
+            #states > * {
+              margin: 1px;
+            }
+            bar-card-name,
+            bar-card-value {
+              font-size: 0.9rem;
+              color: #ffffffaa;
+              font-weight: bold;
+            }
+            bar-card-value	{
+              font-weight: bolder;
+            }
+            bar-card-indicator {
+              margin-top: 4px;
+              transform: scaleY(-1);
+            }

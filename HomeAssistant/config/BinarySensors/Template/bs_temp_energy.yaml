@@ -1,0 +1,75 @@
+####################################################
+# BINARY SENSORS - TEMPLATES - ENERGY              #
+####################################################
+
+  - unique_id: power_peakperiod
+    #name: Hydro-Québec Peak Period
+    device_class: cold
+    #icon: mdi:none
+    state: >
+      {% if is_state('binary_sensor.power_peakperiod', 'unavailable') or
+          state_attr('binary_sensor.power_peakperiod','days') == None or
+          state_attr('binary_sensor.power_peakperiod','months') == None or
+          not is_number(state_attr('binary_sensor.power_peakperiod','below_temp')) or
+          state_attr('binary_sensor.power_peakperiod','morning_start') == None or
+          state_attr('binary_sensor.power_peakperiod','morning_end') == None or
+          state_attr('binary_sensor.power_peakperiod','evening_start') == None or
+          state_attr('binary_sensor.power_peakperiod','evening_end') == None
+      %}
+        {{ false }}
+      {% else %}
+        {% set dow = state_attr('sensor.dates', 'weekdayname_en') %}
+        {% set month = state_attr('sensor.dates', 'monthname_en') %}
+        {% set hourmin = state_attr('sensor.times', 'hourmin')|int(0) %}
+        {% set temp = states('sensor.outdoor_temperature')|float(-100) %}
+        {% set dow_peak = dow in state_attr('binary_sensor.power_peakperiod','days') %}
+        {% set month_peak = month in state_attr('binary_sensor.power_peakperiod','months') %}
+        {% set temp_peak = temp <= state_attr('binary_sensor.power_peakperiod','below_temp')|float(-20) %}
+        
+        {% if month_peak and dow_peak and temp_peak %}
+          {% set morning_start = state_attr('binary_sensor.power_peakperiod','morning_start').replace(':','')|int(600) %}
+          {% set morning_end = state_attr('binary_sensor.power_peakperiod','morning_end').replace(':','')|int(900) %}
+          {% set evening_start = state_attr('binary_sensor.power_peakperiod','evening_start').replace(':','')|int(1600) %}
+          {% set evening_end = state_attr('binary_sensor.power_peakperiod','evening_end').replace(':','')|int(2000) %}
+        
+          {% if hourmin >= morning_start and hourmin <= morning_end %}
+            {{ true }}
+          {% elif hourmin >= evening_start and hourmin <= evening_end %}
+            {{ true }}
+          {% else %}
+            {{ false }}
+          {% endif %}
+        {% else %}
+          {{ false }}
+        {% endif %}
+      {% endif %}
+    attributes:
+      friendly_name: Hydro-Québec Peak Period
+      months: '["December","January","February","March"]'
+      days: '["Monday","Tuesday","Wednesday","Thursday","Friday"]'
+      morning_start: '6:00'
+      morning_end: '9:00'
+      evening_start: '16:00'
+      evening_end: '20:00'
+      below_temp: '-10.0'
+      
+      
+    
+    
+    
+      # {% set month = state_attr('sensor.dates', 'month')|int(0) %}
+      # {% set dow = state_attr('sensor.dates', 'weekdaynumber')|int(0) %}
+      # {% set hourmin = state_attr('sensor.times', 'hourmin')|int(0) %}
+      # {% set T = states('sensor.outdoor_temperature')|float(-100) %}
+      
+      # {% if month in [12,1,2,3] and dow in [0,1,2,3,4] and T < -20.0 %}
+      #   {% if hourmin >= 600 and hourmin <= 900 %}
+      #     {{ true }}
+      #   {% elif hourmin >= 1600 and hourmin <= 2000 %}
+      #     {{ true }}
+      #   {% else %}
+      #     {{ false }}
+      #   {% endif %}
+      # {% else %}
+      #   {{ false }}
+      # {% endif %}

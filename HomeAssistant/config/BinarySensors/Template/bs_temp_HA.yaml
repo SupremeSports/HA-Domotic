@@ -1,0 +1,16 @@
+####################################################
+# TEMPLATES - HA and components                    #
+####################################################
+
+  - name: Reset Sensors Graphs
+    #unique_id: reset_sensors_graphs
+    #device_class: none
+    #icon: mdi:none
+    state: >
+      {% if state_attr('sensor.times', 'sec_midnight')|int(100) < 5 %}
+        {{ true }}
+      {% elif is_state('input_boolean.force_reset_graphs', 'on') %}
+        {{ true }}
+      {% else %}
+        {{ false }}
+      {% endif %}

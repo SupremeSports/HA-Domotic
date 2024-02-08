@@ -45,13 +45,6 @@
     name: Frontyard Irrigation Stop
     has_time: true
     
-  backyardirrigation_start:
-    name: Backyard Irrigation Start
-    has_time: true
-  backyardirrigation_stop:
-    name: Backyard Irrigation Stop
-    has_time: true
-    
   gardenirrigation_start:
     name: Garden Irrigation Start
     has_time: true
@@ -66,3 +59,40 @@
     name: Garden Irrigation Aux Stop
     has_time: true
     
+  utility_tier_change_date:
+    name: Utility Tier Last Change
+    has_date: true
+    has_time: true
+    
+  utility_tier_change_date_prev1:
+    name: Utility Tier Prev Change 1
+    has_date: true
+    has_time: true
+    
+  utility_tier_change_date_prev2:
+    name: Utility Tier Prev Change 2
+    has_date: true
+    has_time: true
+    
+  utility_tier_change_date_prev3:
+    name: Utility Tier Prev Change 3
+    has_date: true
+    has_time: true
+    
+  utility_tier_change_date_prev4:
+    name: Utility Tier Prev Change 4
+    has_date: true
+    has_time: true
+
+  house_front_door:
+    name: House Front Door Last Locked
+    has_date: true
+    has_time: true
+  garage_front_door:
+    name: Garage Front Door Last Locked
+    has_date: true
+    has_time: true
+    
+  lexus_morning_start:
+    name: Lexus Morning Start
+    has_time: true

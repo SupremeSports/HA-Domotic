@@ -1,0 +1,137 @@
+####################################################
+# UILOVELACE - PARAMETERS                          #
+####################################################
+
+- title: Parameters
+  icon: mdi:wrench
+  # Unique path for direct access /lovelace/${path}
+  path: params
+  visible: true
+  badges:
+    - sensor.time
+  cards:
+    - type: entities
+      title: Power usage
+      show_header_toggle: false
+      entities: 
+        - type: custom:decluttering-card
+          template: energy_all
+          
+    - type: 'custom:vertical-stack-in-card'
+      cards:
+        - type: markdown
+          #title: Lights & Doors
+          content: >
+            ## Lights & Doors
+        - type: "custom:button-entity-row"
+          buttons:
+            - entity: input_boolean.lights_doors_alerts_pause_30min
+              name: Pause All Lights & Doors Alerts for 30 min
+              icon: "mdi:bell-cancel"
+        - type: markdown
+          content: >
+            ## Control Room
+        - type: custom:decluttering-card
+          template: tasmota_door_light
+          variables: 
+            - room: control_room
+            - add_light_alert: 'off'
+            - add_door_alert: 'off'
+        - type: divider
+          style:
+            height: 2px
+            width: 80%
+            margin-left: auto
+            margin-right: auto
+            background: '#62717b'
+        - type: markdown
+          content: >
+            ## Cold Storage
+        - type: custom:decluttering-card
+          template: tasmota_door_light
+          variables: 
+            - room: cold_storage
+            - add_light_alert: 'off'
+            - add_door_alert: 'off'
+        - type: divider
+          style:
+            height: 2px
+            width: 80%
+            margin-left: auto
+            margin-right: auto
+            background: '#62717b'
+        - type: markdown
+          content: >
+            ## Storage Room
+        - type: custom:decluttering-card
+          template: tasmota_door_light
+          variables: 
+            - room: storage_room
+            - add_light_alert: 'off'
+            - add_door_alert: 'off'
+              
+    - type: entities
+      title: Water Entrance
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.water_valve_status
+          entities:
+            - type: "custom:button-entity-row"
+              buttons:
+                - entity: switch.water_valve_open
+                  name: Turn ON
+                - entity: switch.water_valve_close
+                  name: Turn OFF
+            # - type: custom:fold-entity-row
+              # head:
+                # type: section
+                # label: Automations
+              # entities:
+                # - automation.water_valve_force_off
+                # - automation.water_valve_off
+                # - automation.water_valve_on
+        - type: custom:fold-entity-row
+          head: sensor.tankless_water_heater_state
+          entities:
+            - switch.water_heater
+            - sensor.water_heater_temperature
+            - sensor.water_heater_flow
+            - sensor.tankless_water_heater_power
+            - sensor.tankless_water_heater_energy_daily
+                  
+    - type: entities
+      title: Clocks
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.nixie_clock
+          entities:
+            - sensor.nixie_clock_case_temp
+            - light.nixie_clock
+            - light.nixie_clock_rgb
+            - switch.nixie_hour_mode
+            - switch.nixie_blank_leading_zero
+            - switch.nixie_enable_scroll_back
+            - switch.nixie_slots_mode
+            - switch.nixie_use_fading
+            - switch.nixie_use_ldr
+            - switch.nixie_suppress_acp
+        - type: custom:fold-entity-row
+          head: sensor.stepper_wall_clock
+          entities:
+            - switch.stepper_wall_clock_homed
+
+    - type: entities
+      title: Beds
+      show_header_toggle: false
+      entities:
+        - type: custom:fold-entity-row
+          head: sensor.master_bed_presence
+          entities:
+            - sensor.master_bed_raw
+            - switch.master_bed_tare
+        - switch.massage_room_appliances
+
+    - !include /config/UILovelaceCards/appliances.yaml
+        

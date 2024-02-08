@@ -1,0 +1,46 @@
+####################################################
+# BINARY SENSORS - MQTT - POOL                     #
+####################################################
+
+  - name: Pool Level High
+    device_class: moisture
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    value_template: '{{ value_json.hilvl }}'
+    #value_template: 'ON'
+    qos: 0
+    json_attributes_topic: "Pool/Control/Sensors/Stts"
+    json_attributes_template: '{{ {"High Level" : value_json.hilvl, "High Raw" : value_json.hiraw} | tojson }}'
+    
+  - name: Pool Level Low
+    device_class: moisture
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    value_template: '{{ value_json.lolvl }}'
+    #value_template: 'ON'
+    qos: 0
+    json_attributes_topic: "Pool/Control/Sensors/Stts"
+    json_attributes_template: '{{ {"Low Level" : value_json.lolvl, "Low Raw" : value_json.loraw} | tojson }}'
+    
+  - name: Pool Pump Security
+    unique_id: poolpump_security
+    #device_class: safety
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+    value_template: '{{ value_json.psecurity }}'
+    #value_template: 'ON'
+    qos: 0
+          
+  - name: Pool Cover
+    #unique_id: pool_cover
+    device_class: opening
+    state_topic: "Pool/Control/Sensors/Stts"
+    availability:
+      - topic: "Pool/Control/LWT"
+        #payload_available: "remove_this_line"
+    value_template: '{{ value_json.cover_rolled }}'
+    #value_template: 'ON'
+    qos: 0

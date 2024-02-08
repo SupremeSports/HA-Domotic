@@ -1,0 +1,445 @@
+    type: vertical-stack
+    cards:
+      - type: custom:mushroom-title-card
+        title: Garage
+        #subtitle: Floor Heater
+        alignment: justify
+#Comfort
+      - type: custom:mushroom-chips-card
+        chips:
+          # - type: menu
+          - type: entity
+            entity: sensor.garage_mean_temp
+            icon_color: orange
+          - type: entity
+            entity: sensor.garage_mean_humidity
+            icon: mdi:water-percent
+            icon_color: indigo
+            
+#Doors
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: sensor.garage_fd_status
+            icon: |-
+              {% set state = states('sensor.garage_fd_status') %}
+              {% if state == 'Ok' %}
+                mdi:shield-lock
+              {% elif state == 'Ok*' %}
+                mdi:shield-alert
+              {% elif state == 'Unlocked' %}
+                mdi:shield-remove
+              {% elif state == 'Opened' %}
+                mdi:door-open         
+              {% else %}
+                mdi:close-octagon
+              {% endif %}
+            icon_color: |-
+              {% set state = states('sensor.garage_fd_status') %}
+              {% if state == 'Ok' %}
+                green
+              {% elif state == 'Ok*' %}
+                orange
+              {% elif state == 'Unlocked' %}
+                red
+              {% elif state == 'Opened' %}
+                var(--state-icon-active-color)
+              {% elif state == 'unavailable' %}
+                var(--state-icon-unavailable-color)
+              {% else %}
+                red
+              {% endif %}
+            content: |-
+              {% set state = states('sensor.garage_fd_status') %}
+              Front Door {{state}}
+          - type: template
+            tap_action:
+              action: more-info
+            entity: sensor.garage_bd_status
+            icon: |-
+              {% set state = states('sensor.garage_bd_status') %}
+              {% if state == 'Ok' %}
+                mdi:shield-lock
+              {% elif state == 'Ok*' %}
+                mdi:shield-alert
+              {% elif state == 'Unlocked' %}
+                mdi:shield-remove
+              {% elif state == 'Opened' %}
+                mdi:door-open         
+              {% else %}
+                mdi:close-octagon
+              {% endif %}
+            icon_color: |-
+              {% set state = states('sensor.garage_bd_status') %}
+              {% if state == 'Ok' %}
+                green
+              {% elif state == 'Ok*' %}
+                orange
+              {% elif state == 'Unlocked' %}
+                red
+              {% elif state == 'Opened' %}
+                var(--state-icon-active-color)
+              {% elif state == 'unavailable' %}
+                var(--state-icon-unavailable-color)
+              {% else %}
+                red
+              {% endif %}
+            content: |-
+              {% set state = states('sensor.garage_bd_status') %}
+              Back Door {{state}}
+          - type: template
+            tap_action:
+              action: more-info
+            entity: sensor.garage_cd_status
+            icon: |-
+              {% set state = states('sensor.garage_cd_status') %}
+              {% if state == 'Ok' %}
+                mdi:shield-lock
+              {% elif state == 'Ok*' %}
+                mdi:shield-alert
+              {% elif state == 'Unlocked' %}
+                mdi:shield-remove
+              {% elif state == 'Opened' %}
+                mdi:door-open         
+              {% else %}
+                mdi:close-octagon
+              {% endif %}
+            icon_color: |-
+              {% set state = states('sensor.garage_cd_status') %}
+              {% if state == 'Ok' %}
+                green
+              {% elif state == 'Ok*' %}
+                orange
+              {% elif state == 'Unlocked' %}
+                red
+              {% elif state == 'Opened' %}
+                var(--state-icon-active-color)
+              {% elif state == 'unavailable' %}
+                var(--state-icon-unavailable-color)
+              {% else %}
+                red
+              {% endif %}
+            content: |-
+              {% set state = states('sensor.garage_cd_status') %}
+              Car Door {{state}}
+              
+#Lights
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garagefrontlight_status
+            icon: |-
+              {% if is_state('binary_sensor.garagefrontlight_status', 'on') %}
+                mdi:lightbulb-on
+              {% else %}
+                mdi:lightbulb-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garagefrontlight_status', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garagefrontlight_status', 'on') %}
+                Front On
+              {% else %}
+                Front Off
+              {% endif %}
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garagefrontpower_status
+            icon: |-
+              {% if is_state('binary_sensor.garagefrontpower_status', 'on') %}
+                mdi:power-plug
+              {% else %}
+                mdi:power-plug-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garagefrontpower_status', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garagefrontpower_status', 'on') %}
+                Plug On
+              {% else %}
+                Plug Off
+              {% endif %}
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garage_attic_light
+            icon: |-
+              {% if is_state('binary_sensor.garage_attic_light', 'on') %}
+                mdi:lightbulb-on
+              {% else %}
+                mdi:lightbulb-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garage_attic_light', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garage_attic_light', 'on') %}
+                Attic On
+              {% else %}
+                Attic Off
+              {% endif %}
+              
+#HVACs
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garage_hvac_running
+            icon: |-
+              {% if is_state('binary_sensor.garage_hvac_running','on') %}
+                {% if is_state('binary_sensor.garage_hvac_defrost','on') %}
+                  mdi:snowflake-melt
+                {% else %}
+                  mdi:radiator
+                {% endif %}
+              {% elif is_state('binary_sensor.garage_hvac_running','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garage_hvac_running','on') %}
+                {% if is_state('binary_sensor.garage_hvac_defrost','on') %}
+                  light-blue
+                {% else %}
+                  yellow
+                {% endif %}
+              {% else %}
+                grey
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garage_hvac_running', 'on') %}
+                {% if is_state('binary_sensor.garage_hvac_defrost','on') %}
+                  HVAC Defrost
+                {% else %}
+                  HVAC On
+                {% endif %}
+              {% else %}
+                HVAC Off
+              {% endif %}
+
+          - type: template
+            tap_action:
+              action: more-info
+            entity: sensor.garage_hvac_temperature
+            icon: mdi:weather-windy
+            icon_color: |-
+              {% if is_state('climate.garage_hvac','heat') %}
+                red
+              {% elif is_state('climate.garage_hvac','cool') %}
+                light-blue
+              {% else %}
+                grey
+              {% endif %}
+            content: "{{ states('sensor.garage_hvac_temperature') }} °C"
+            
+#Heaters
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garage_front_heater_ac
+            icon: |-
+              {% if is_state('binary_sensor.garage_front_heater_ac','on') %}
+                mdi:radiator
+              {% elif is_state('binary_sensor.garage_front_heater_ac','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garage_front_heater_ac', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garage_front_heater_ac', 'on') %}
+                Front On
+              {% else %}
+                Front Off
+              {% endif %}
+
+          - type: template
+            tap_action:
+              action: more-info
+            entity: binary_sensor.garage_rear_heater_ac
+            icon: |-
+              {% if is_state('binary_sensor.garage_rear_heater_ac','on') %}
+                mdi:radiator
+              {% elif is_state('binary_sensor.garage_rear_heater_ac','off') %}
+                mdi:radiator-disabled
+              {% else %}
+                mdi:radiator-off
+              {% endif %}
+            icon_color: |-
+              {% if is_state('binary_sensor.garage_rear_heater_ac', 'off') %}
+                grey
+              {% else %}
+                yellow
+              {% endif %}
+            content: |-
+              {% if is_state('binary_sensor.garage_rear_heater_ac', 'on') %}
+                Rear On
+              {% else %}
+                Rear Off
+              {% endif %}
+
+          - type: template
+            icon: mdi:ticket-percent
+            icon_color: blue
+            content: |-
+              {% if state_attr('sensor.garage_front_heater_power','duty_cycle') %}
+                {% set front_duty = state_attr('sensor.garage_front_heater_power','duty_cycle').split(' ')[0]|float(0) %}
+              {% else %}
+                {% set front_duty = 0 %}
+              {% endif %}
+              
+              {% if state_attr('sensor.garage_rear_heater_power','duty_cycle') %}
+                {% set rear_duty = state_attr('sensor.garage_rear_heater_power','duty_cycle').split(' ')[0]|float(0) %}
+              {% else %}
+                {% set rear_duty = 0 %}
+              {% endif %}
+              
+              Duty Cycle {{ (front_duty+rear_duty)|round(1) }} %
+#Energy
+      - type: custom:mushroom-chips-card
+        chips:
+          - type: entity
+            entity: sensor.ted5000_mtu2_power
+            icon: mdi:transmission-tower
+          - type: entity
+            entity: sensor.ted5000_mtu2_energy_daily
+            icon: mdi:lightning-bolt
+          # - type: entity
+            # entity: sensor.ted5000_mtu2_energy_daily_cost
+          - type: template
+            icon: mdi:cash
+            content: |-
+              {% set energy = states('sensor.ted5000_mtu2_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ (energy*cost)|round(5) }} $
+          - type: template
+            icon: mdi:finance
+            content: |-
+              {% set energy = states('sensor.ted5000_mtu2_energy_daily')|float(0) %}
+              {% set cost = states('sensor.ted5000_utility_current_rate')|float(0) %}
+              {{ ((energy*cost)*86400/(state_attr('sensor.times','sec_midnight')+1))|round(5) }} $
+#Comfort graphs
+      - type: horizontal-stack
+        cards:
+          - type: custom:mini-graph-card
+            entities:
+              - sensor.garage_mean_temp
+            name: Temperature
+            hour24: true
+            hours_to_show: 24
+            points_per_hour: 1
+            color: orange
+            line_color: orange
+            cache: false
+          - type: custom:mini-graph-card
+            icon: mdi:water-percent
+            entities:
+              - sensor.garage_mean_humidity
+            name: Humidity
+            hour24: true
+            hours_to_show: 24
+            points_per_hour: 1
+            color: steelblue
+            line_color: steelblue
+            cache: false
+#Comfort thermostat
+      - type: custom:mushroom-climate-card
+        entity: climate.garage_heaters
+        show_temperature_control: true
+        hvac_modes:
+          - 'heat'
+          - 'off'
+        icon: mdi:heat-pump
+      - type: custom:mushroom-climate-card
+        entity: climate.garage_hvac
+        show_temperature_control: true
+        hvac_modes:
+          - 'heat'
+          - 'cool'
+          - 'off'
+        icon: mdi:car-defrost-rear
+        #layout: vertical
+      # - type: custom:mini-graph-card
+        # entities:
+          # - entity: binary_sensor.garage_front_heater_ac
+            # name: Front Heater
+          # - entity: binary_sensor.garage_rear_heater_ac
+            # name: Rear Heater
+        # hours_to_show: 12
+        # cache: false
+        # points_per_hour: 60
+        # aggregate_func: max
+        # line_width: 2
+        # height: 50
+        # smoothing: false
+        # state_map:
+          # - value: "off"
+            # label: "Off"
+          # - value: "on"
+            # label: "Heating"
+    
+#Energy graphs
+      # - type: horizontal-stack
+        # cards:
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.ted5000_mtu2_power
+            # name: Power
+            # icon: mdi:transmission-tower
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # points_per_hour: 0.5
+            # color: green
+            # line_color: green
+          # - type: custom:mini-graph-card
+            # entities:
+              # - sensor.ted5000_mtu2_energy_daily
+            # name: Energy
+            # icon: mdi:lightning-bolt
+            # cache: false
+            # hour24: true
+            # hours_to_show: 24
+            # show:
+              # graph: bar
+            # #bar_spacing: 6
+            # aggregate_func: max
+            # group_by: hour
+            # color_thresholds:
+              # - value: 0
+                # color: "#00ff00f0"
+              # - color: "#6fed00f0"
+              # - color: "#98db00f0"
+              # - color: "#b6c700f0"
+              # - color: "#cdb200f0"
+              # - color: "#df9b00f0"
+              # - color: "#ee8200f0"
+              # - color: "#f86600f0"
+              # - color: "#fe4400f0"
+              # - value: 50
+                # color: "#ff0000f0"

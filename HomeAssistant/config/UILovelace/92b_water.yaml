@@ -1,0 +1,104 @@
+####################################################
+# UILOVELACE - Water                               #
+####################################################
+
+- title: Water Meters
+  icon: mdi:meter-gas
+  # Unique path for direct access /lovelace/${path}
+  path: water_meters
+  visible: true
+  badges:
+    - sensor.time
+    - sensor.total_water_daily_used
+    - sensor.total_water_daily_used_cost
+  cards:
+    - type: vertical-stack
+      title: Water Meters
+      cards:
+        #- type: energy-water-graph
+              
+        - type: custom:apexcharts-card
+          graph_span: 24h
+          span:
+            start: day
+            offset: +1min
+          show:
+            last_updated: true
+          experimental:
+            color_threshold: true
+          cache: false
+          series:
+            - entity: sensor.total_water_daily_used
+            #- entity: sensor.icemaker_water_daily_usage
+              type: column
+              group_by:
+                func: diff
+                duration: 60min
+              #color: blue
+              color_threshold:
+                - value: 0
+                  color: "#00ffea8a"
+                  opacity: 0.1
+                - value: 10
+                  color: "#00f3ff8a"
+                  opacity: 0.1
+                - value: 20
+                  color: "#00e4ff8a"
+                  opacity: 0.1
+                - value: 40
+                  color: "#00d2ff8a"
+                  opacity: 0.1
+                - value: 50
+                  color: "#00bbff8a"
+                  opacity: 0.1
+                - value: 100
+                  color: "#009cff8a"
+                  opacity: 0.1
+                - value: 200
+                  color: "#8b70ff8a"
+                  opacity: 0.1
+                - value: 300
+                  color: "#00ffea8a"
+                  opacity: 0.1
+
+        - !include /config/UILovelaceCards/water_monitor_global.yaml
+    - type: vertical-stack
+      title: Hardware
+      cards:
+        - type: horizontal-stack
+          #title: N/A
+          cards:
+            - type: gauge
+              min: 0
+              entity: sensor.total_water_daily_used
+              name: Total Water Usage
+              max: 1000
+              needle: true
+              severity:
+                  green: 0
+                  yellow: 250
+                  red: 500
+            - type: gauge
+              min: 0
+              entity: sensor.total_water_daily_used_cost
+              name: Total Water cost
+              max: 0.75
+              needle: true
+              severity:
+                  green: 0
+                  yellow: 0.1875
+                  red: 0.375
+        # - !include /config/UILovelaceCards/water_monitor_main.yaml
+        - !include /config/UILovelaceCards/water_monitor_appliances.yaml
+        # - !include /config/UILovelaceCards/water_monitor_heating.yaml
+        # - !include /config/UILovelaceCards/water_monitor_devices.yaml
+        
+    # - type: statistics-graph
+    #   chart_type: bar
+    #   title: Last 24 Hours
+    #   period: hour
+    #   days_to_show: 1
+    #   entities:
+    #     - sensor.total_water_daily_used
+    #   stat_types:
+    #     - state

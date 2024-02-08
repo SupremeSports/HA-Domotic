@@ -1,0 +1,90 @@
+####################################################
+# SENSORS - POOL                                   #
+####################################################
+    
+######### POOL CONTROL - SENSORS #########
+      
+  - platform: statistics
+    name: Pool Temperature Stats
+    entity_id: sensor.pool_temperature_raw
+    state_characteristic: mean
+    #sampling_size: 100
+    sampling_size: 20 #DEFAULT
+    max_age:
+      minutes: 10
+    precision: 1
+
+  - platform: statistics
+    name: Pool Heater Temp Stats
+    entity_id: sensor.pool_heater_temp_raw
+    state_characteristic: mean
+    sampling_size: 20 #DEFAULT
+    max_age:
+      minutes: 10
+    precision: 1
+      
+  - platform: statistics
+    name: Pool Pump Temp Stats
+    entity_id: sensor.pool_pump_temp_raw
+    state_characteristic: mean
+    sampling_size: 20 #DEFAULT
+    max_age:
+      minutes: 10
+    precision: 1
+
+  - platform: history_stats
+    name: Pool Filler Timer
+    entity_id: binary_sensor.poolfiller_status
+    state: 'on'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+      
+  - platform: history_stats
+    name: Pool Heater Timer 24h
+    entity_id: sensor.pool_heater_status
+    state: 'Heating'
+    type: time
+    end: '{{ now() }}'
+    duration:
+      hours: 24
+  - platform: history_stats
+    name: Pool Heater Timer Today
+    entity_id: sensor.pool_heater_status
+    state: 'Heating'
+    type: time
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: "{{ now() }}"
+    
+######### POOL CONTROL - GATES #########
+
+  - platform: history_stats
+    name: Pool Gate Count - Deck
+    entity_id: binary_sensor.pool_gate_closed_deck
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+
+  - platform: history_stats
+    name: Pool Gate Count - Main
+    entity_id: binary_sensor.pool_gate_closed_main
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24
+      
+  - platform: history_stats
+    name: Pool Gate Count - Pond
+    entity_id: binary_sensor.pool_gate_closed_pond
+    state: 'on'
+    type: count
+    start: "{{ now().replace(hour=0, minute=0, second=0) }}"
+    end: '{{ now() }}'
+    # duration:
+      # hours: 24

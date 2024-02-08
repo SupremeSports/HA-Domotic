@@ -1,0 +1,228 @@
+####################################################
+# SENSORS - MQTT - THERMOSTATS                     #
+####################################################
+
+  - name: Living Room Temp
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Home/Living/Therm/Json"
+    availability:
+      - topic: "Home/Living/Therm/LWT"
+    qos: 0
+    value_template: "{{ value_json.room_temp }}"
+    json_attributes_topic: "Home/Living/Therm/Json"
+    
+  - name: Living Room Hum
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_class: measurement
+    device_class: humidity
+    state_topic: "Home/Living/Therm/Json"
+    availability:
+      - topic: "Home/Living/Therm/LWT"
+    qos: 0
+    value_template: "{{ value_json.room_hum }}"
+    
+  - name: Garage Front Temp Raw
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Garage/Front/Therm/Json"
+    availability:
+      - topic: "Garage/Front/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_temp %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }}
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+    json_attributes_topic: "Garage/Front/Therm/Json"
+    
+  - name: Garage Front Hum
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    device_class: humidity
+    state_class: measurement
+    state_topic: "Garage/Front/Therm/Json"
+    availability:
+      - topic: "Garage/Front/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_hum %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }}
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+    
+  - name: "Garage Rear Temp Raw"
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Garage/Rear/Therm/Json"
+    availability:
+      - topic: "Garage/Rear/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_temp %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }} 
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+    json_attributes_topic: "Garage/Rear/Therm/Json"
+    
+  - name: "Garage Rear Hum"
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    device_class: humidity
+    state_class: measurement
+    state_topic: "Garage/Rear/Therm/Json"
+    availability:
+      - topic: "Garage/Rear/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_hum %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }}
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+
+  - name: Cold Storage Temperature
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Home/ColdStorage/Therm/Json"
+    availability:
+      - topic: "Home/ColdStorage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.cold_storage_temperature')|float(0) %}
+      {% set RT = value_json.room_temp|float(-99) %}
+      
+      {% if RT < -10 or RT > 40 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+    
+  - name: Cold Storage Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_class: measurement
+    device_class: humidity
+    state_topic: "Home/ColdStorage/Therm/Json"
+    availability:
+      - topic: "Home/ColdStorage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_hum %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }}
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+
+  - name: Cold Storage Floor Temperature
+    icon: mdi:heat-wave
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Home/ColdStorage/Therm/Json"
+    availability:
+      - topic: "Home/ColdStorage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.cold_storage_floor_temperature')|float(0) %}
+      {% set FT = value_json.flr_temp|float(-99) %}
+      
+      {% if FT < -10 or FT > 40 %}
+        {% if prev != 0 %}
+          {% set FT = prev %}
+        {% else %}
+          {% set FT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ FT | round(1) }}
+    
+  - name: Storage Room Temperature
+    icon: mdi:thermometer
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Home/Storage/Therm/Json"
+    availability:
+      - topic: "Home/Storage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.storage_room_temperature')|float(0) %}
+      {% set RT = value_json.room_temp|float(-99) %}
+      
+      {% if RT < -10 or RT > 40 %}
+        {% if prev != 0 %}
+          {% set RT = prev %}
+        {% else %}
+          {% set RT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ RT | round(1) }}
+    
+  - name: Storage Room Humidity
+    icon: mdi:water-percent
+    unit_of_measurement: '%'
+    state_class: measurement
+    device_class: humidity
+    state_topic: "Home/Storage/Therm/Json"
+    availability:
+      - topic: "Home/Storage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set room = value_json.room_hum %}
+      
+      {% if room|string == '---' or room|string == 'unknown' or room|float(-99.9) == -99.9 or room|float(-1) == -1 %}
+        {{ -99.9 | float | round(1) }}
+      {% else %}
+        {{ room | float | round(1) }}
+      {% endif %}
+
+  - name: Storage Room Floor Temperature
+    icon: mdi:heat-wave
+    unit_of_measurement: '°C'
+    device_class: temperature
+    state_class: measurement
+    state_topic: "Home/Storage/Therm/Json"
+    availability:
+      - topic: "Home/Storage/Therm/LWT"
+    qos: 0
+    value_template: >
+      {% set prev = states('sensor.storage_room_floor_temperature')|float(0) %}
+      {% set FT = value_json.flr_temp|float(-99) %}
+      
+      {% if FT < -10 or FT > 40 %}
+        {% if prev != 0 %}
+          {% set FT = prev %}
+        {% else %}
+          {% set FT = 0 %}
+        {% endif %}
+      {% endif %}
+      
+      {{ FT | round(1) }}

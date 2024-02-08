@@ -22,7 +22,7 @@
         if (state <= 0) return 'var(--state-icon-unavailable-color)';
         if (state < 30)
         {
-           if (entities['sensor.flashing_1s'].state === 'off') return 'red';
+           if (entities['binary_sensor.flashing_1s'].state === 'off') return 'red';
            return 'var(--state-icon-unavailable-color)';
         }
         if (state < 50) return '#FFA500';
@@ -49,21 +49,103 @@
         if (state === 'Opened') return 'var(--state-icon-active-color)';
         return 'var(--state-icon-color)';
     
+  # TED5000 and ENERGY SENSORS
+  sensor.ted5000_mtu0_energy_daily_cost:
+    friendly_name: "House Daily Energy Cost"
+    
   sensor.ted5000_mtu1_power:
     friendly_name: "Main Power"
   sensor.ted5000_mtu1_voltage:
     friendly_name: "Main Voltage"
-  
+  sensor.ted5000_mtu1_energy_daily:
+    friendly_name: "Main Daily Energy"
+  sensor.ted5000_mtu1_energy_monthly:
+    friendly_name: "Main Monthly Energy"
+  sensor.ted5000_mtu1_pf:
+    friendly_name: "Main Power Factor"
+    
   sensor.ted5000_mtu2_power:
     friendly_name: "Garage Power"
   sensor.ted5000_mtu2_voltage:
     friendly_name: "Garage Voltage"
-        
+  sensor.ted5000_mtu2_energy_daily:
+    friendly_name: "Garage Daily Energy"
+  sensor.ted5000_mtu2_energy_monthly:
+    friendly_name: "Garage Monthly Energy"
+  sensor.ted5000_mtu2_pf:
+    friendly_name: "Garage Power Factor"
+    
   sensor.ted5000_mtu3_power:
     friendly_name: "Pool Power"
   sensor.ted5000_mtu3_voltage:
     friendly_name: "Pool Voltage"
+  sensor.ted5000_mtu3_energy_daily:
+    friendly_name: "Pool Daily Energy"
+  sensor.ted5000_mtu3_energy_monthly:
+    friendly_name: "Pool Monthly Energy"
+  sensor.ted5000_mtu3_pf:
+    friendly_name: "Pool Power Factor"
+    
+  sensor.ted5000_utility_currentrate:
+    friendly_name: "Utility Current Rate"
+    # unit_of_measurement: "$/kWh"
+  sensor.ted5000_utility_currenttier:
+    friendly_name: "Utility Current Tier"
+  sensor.ted5000_utility_plantype:
+    friendly_name: "Utility Plan Type"
+  sensor.ted5000_utility_currenttou:
+    friendly_name: "Utility Current TOU"
+  sensor.ted5000_utility_currenttoudescription:
+    friendly_name: "Utility Current TOU"
+  sensor.ted5000_utility_daysleftinbillingcycle:
+    friendly_name: "Utility Days Left Billing Cycle"
+  sensor.ted5000_utility_mtus:
+    friendly_name: "MTU Quantity"
+  sensor.ted5000_utility_carbonrate:
+    friendly_name: "Utility Carbon Rate"
+  sensor.ted5000_utility_meterreaddate:
+    friendly_name: "Meter Read Date"
+    
+  sensor.ted5000_energyusedtier1:
+    templates:
+      icon: >
+        if (state < 90) return 'mdi:flash';
+        if (state < 100) return 'mdi:flash-alert';
+        return 'mdi:flash-off';
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (state < 90) return 'green';
+        if (state < 100) return 'yellow';
+        return 'red';
         
+  sensor.ted5000_energylefttier1:
+    templates:
+      icon: >
+        if (entities['sensor.ted5000_energyusedtier1'].state < 90 ) return 'mdi:flash';
+        if (entities['sensor.ted5000_energyusedtier1'].state < 100 ) return 'mdi:flash-alert';
+        return 'mdi:flash-off';
+      icon_color: >
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        if (entities['sensor.ted5000_energyusedtier1'].state < 90 ) return 'green';
+        if (entities['sensor.ted5000_energyusedtier1'].state < 100 ) return 'yellow';
+        return 'red';
+        
+  sensor.garage_average_temp:
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+    device_class: temperature
+    state_class: measurement
+    
+  sensor.garage_mean_temp:
+    icon: mdi:thermometer
+    device_class: temperature
+    state_class: measurement
+    
+  sensor.garage_mean_humidity:
+    icon: mdi:water-percent
+    device_class: humidity
+    state_class: measurement
+ 
   sensor.outdoor_temperature:
     icon: mdi:thermometer 
     templates:
@@ -106,6 +188,7 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
         if (attributes.tomorrow === 'on') return 'var(--state-icon-active-color)';
+        if (attributes.today === 'on') return 'var(--state-icon-active-color)';
         return '#046E00';
 
   sensor.collect_recycle_week:
@@ -114,6 +197,7 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
         if (attributes.tomorrow === 'on') return 'var(--state-icon-active-color)';
+        if (attributes.today === 'on') return 'var(--state-icon-active-color)';
         return '#007AFF';
         
   sensor.collect_compost_week:
@@ -122,13 +206,8 @@
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         if (state === 'unknown') return 'var(--state-icon-unavailable-color)';
         if (attributes.tomorrow === 'on') return 'var(--state-icon-active-color)';
+        if (attributes.today === 'on') return 'var(--state-icon-active-color)';
         return '#754300';
-
-  sensor.flashing_test:
-    templates:
-      icon_color: >
-        if (entities['sensor.flashing_1s'].state === 'on') return 'var(--state-icon-active-color)';
-        return 'var(--state-icon-color)';
 
   sensor.party_18_ans_cody:
     templates:
@@ -140,7 +219,7 @@
           {
             if (entities['sensor.dates'].attributes['year'] === '2037' ) 
             {
-              if (entities['sensor.flashing_1s'].state === 'off') return 'var(--state-icon-active-color)';
+              if (entities['binary_sensor.flashing_1s'].state === 'off') return 'var(--state-icon-active-color)';
               return 'var(--state-icon-unavailable-color)';
             }
             return 'var(--state-icon-active-color)';
@@ -157,6 +236,15 @@
         
   sensor.pool_clock_status:
     friendly_name: "Pool Clock Status"
+    templates:
+      icon_color: >
+        if (state === 'Running...') return 'var(--state-icon-color)';
+        if (state === 'On') return 'var(--state-icon-active-color)';
+        if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
+        return 'red';
+        
+  sensor.garage_clock_status:
+    friendly_name: "Garage Clock Status"
     templates:
       icon_color: >
         if (state === 'Running...') return 'var(--state-icon-color)';
@@ -181,13 +269,18 @@
     templates:
       icon: >
         if (state === 'Ok') return 'mdi:shield-lock';
-        if (state === 'Fully Opened') return 'mdi:garage-open';
-        if (state === 'Opened') return 'mdi:garage-alert';
+        if (state === 'Opening') return 'mdi:arrow-up-bold-box';
+        if (state === 'Closing') return 'mdi:arrow-down-bold-box';
+        if ((state === 'Fully Opened') || (state === 'Opened')) return 'mdi:garage-open-variant';
         return 'mdi:close-octagon';
       icon_color: >
         if (state === 'Ok') return 'green';
-        if (state === 'Fully Opened') return 'var(--state-icon-active-color)';
-        if (state === 'Opened') return 'var(--state-icon-active-color)';
+        if ((state === 'Opening') || (state === 'Closing'))
+        {
+          if (entities['binary_sensor.flashing_1s'].state === 'off') return 'var(--state-icon-active-color)';
+          return 'var(--state-icon-unavailable-color)';
+        }
+        if ((state === 'Fully Opened') || (state === 'Opened')) return 'var(--state-icon-active-color)';
         if (state === 'unavailable') return 'var(--state-icon-unavailable-color)';
         return 'red';
         
@@ -240,18 +333,10 @@
         if (state > 0) return 'var(--label-badge-red)';
         return 'var(--state-icon-unavailable-color)';
         
-  sensor.mariadb_size:
-    templates:
-      icon: >
-        return 'mdi:file';
-        
-  sensor.server_cpu_used:
-    state_class: measurement      
-        
   sensor.soldering_station_status:
     templates:
       icon: >
-        if (state === 'On') return 'mdi:pen';
+        if (state === 'On') return 'mdi:soldering-iron';
         if (state === 'Off') return 'mdi:pen-remove';
         return 'mdi:pen-off';
       icon_color: >
@@ -260,3 +345,12 @@
         if (state === 'Ready') return 'var(--state-icon-color)';
         return 'var(--state-icon-unavailable-color)';
         
+  sensor.total_water_utility_used:
+    unit_of_measurement: L
+    device_class: water
+    
+  sensor.pool_filler_timer:
+    unit_of_measurement: h
+    templates:
+      value: > 
+        return Math.round(state * 600)/10.0;

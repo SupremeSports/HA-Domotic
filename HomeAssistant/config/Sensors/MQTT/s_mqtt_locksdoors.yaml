@@ -1,0 +1,11 @@
+####################################################
+# SENSORS - MQTT - DOORS & LOCKS                   #
+####################################################
+
+  - name: Garage CD Raw
+    state_topic: "Garage/Door/Car/Sensors/Stts"
+    value_template: '{{ value_json.status }}'
+    availability:
+      - topic: "Garage/Door/Car/LWT"
+    qos: 0
+    json_attributes_topic: "Garage/Door/Car/Sensors/Stts"

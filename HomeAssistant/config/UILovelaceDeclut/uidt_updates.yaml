@@ -1,0 +1,222 @@
+####################################################
+# LOVELACE DECLUTTERING - Updates                  #
+####################################################
+
+badge_core: 
+  card:
+    type: entity-filter
+    entities:
+      - entity: binary_sensor.[[item]][[addon]]_update_available
+        icon: mdi:cloud-check
+        state_filter:
+          - 'off'
+        style: |
+          :host {
+            --label-badge-text-color: green;
+          }
+      - entity: binary_sensor.[[item]][[addon]]_update_available
+        icon: mdi:cloud-download
+        state_filter:
+          - 'on'
+        style: |
+          :host {
+            --label-badge-text-color: 
+              {% if states.binary_sensor.[[item]][[addon]]_update_available.attributes.major_update is defined %}
+                {% if is_state_attr('binary_sensor.[[item]][[addon]]_update_available', 'major_update', 'true') %}
+                  red
+                {% else %}
+                  orange
+                {% endif %}
+              {% else %}
+                red
+              {% endif %};
+          }
+      - entity: binary_sensor.[[item]][[addon]]_update_available
+        icon: mdi:cloud-question
+        state_filter:
+          - 'unavailable'
+          - 'Unavailable'
+          - 'unknown'
+          - 'Unknown'
+        style: |
+          :host {
+            --label-badge-text-color:  var(--state-icon-unavailable-color);
+          }
+
+ha_updates_sensor:
+  card:
+    type: 'custom:fold-entity-row'
+    head:
+      type: 'custom:multiple-entity-row'
+      entity: sensor.[[item]][[addon]]_update_available
+      #name: Study
+      #icon: 'mdi:lightbulb'
+      #state_color: true
+      #toggle: false
+      secondary_info: 
+        name: "Running: "
+        attribute: running
+      entities:
+        - attribute: current
+          name: current
+        - attribute: latest
+          name: latest
+    entities:
+      - entity: update.[[item]]_update
+      - type: attribute
+        name: Title
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: title
+      - type: attribute
+        name: Friendly Name
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: friendly_name
+      - type: attribute
+        name: Running
+        icon: 'mdi:hide'
+        entity: sensor.[[item]][[addon]]_update_available
+        attribute: running
+      - type: attribute
+        name: Auto Update
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: auto_update
+      - type: attribute
+        name: CPU Usage
+        icon: 'mdi:hide'
+        entity: sensor.[[item]][[addon]]_update_available
+        attribute: cpu
+      - type: attribute
+        name: Memory Usage
+        icon: 'mdi:hide'
+        entity: sensor.[[item]][[addon]]_update_available
+        attribute: memory
+      - type: attribute
+        name: Update In Progress
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: in_progress
+      - type: attribute
+        name: Installed Version
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: installed_version
+      - type: attribute
+        name: Latest Version
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: latest_version
+      - type: attribute
+        name: Last Version Check
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: last_updated
+      # - type: attribute
+      #   name: Release URL
+      #   icon: 'mdi:hide'
+      #   entity: update.[[item]]_update
+      #   attribute: release_url
+      - type: attribute
+        name: Release Summary
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: release_summary
+
+ha_updates:
+  card:
+    type: 'custom:fold-entity-row'
+    head:
+      type: 'custom:multiple-entity-row'
+      entity: binary_sensor.[[item]][[addon]]_update_available
+      #name: Study
+      #icon: 'mdi:lightbulb'
+      #state_color: true
+      #toggle: false
+      secondary_info: 
+        name: "Running: "
+        attribute: running
+      entities:
+        - attribute: current
+          name: current
+        - attribute: latest
+          name: latest
+    entities:
+      - entity: update.[[item]]_update
+      - type: attribute
+        name: Title
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: title
+      - type: attribute
+        name: Friendly Name
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: friendly_name
+      - type: attribute
+        name: Running
+        icon: 'mdi:hide'
+        entity: binary_sensor.[[item]][[addon]]_update_available
+        attribute: running
+      - type: attribute
+        name: Auto Update
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: auto_update
+      - type: attribute
+        name: CPU Usage
+        icon: 'mdi:hide'
+        entity: binary_sensor.[[item]][[addon]]_update_available
+        attribute: cpu
+      - type: attribute
+        name: Memory Usage
+        icon: 'mdi:hide'
+        entity: binary_sensor.[[item]][[addon]]_update_available
+        attribute: memory
+      - type: attribute
+        name: Update In Progress
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: in_progress
+      - type: attribute
+        name: Installed Version
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: installed_version
+      - type: attribute
+        name: Latest Version
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: latest_version
+      - type: attribute
+        name: Last Version Check
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: last_updated
+      # - type: attribute
+      #   name: Release URL
+      #   icon: 'mdi:hide'
+      #   entity: update.[[item]]_update
+      #   attribute: release_url
+      - type: attribute
+        name: Release Summary
+        icon: 'mdi:hide'
+        entity: update.[[item]]_update
+        attribute: release_summary
+#GETS HA TO FAIL AND FREEZE, DO NOT USE
+      # - type: custom:entity-attributes-card
+      #   # title: Attributes Card
+      #   heading_name: List
+      #   heading_state: States
+      #   filter:
+      #     include:
+      #       - key: update.[[item]]_update.title
+      #       - key: update.[[item]]_update.friendly_name
+      #       - key: update.[[item]]_update.auto_update
+      #       - key: update.[[item]]_update.in_progress
+      #       - key: update.[[item]]_update.installed_version
+      #       - key: update.[[item]]_update.latest_version
+      #       - key: update.[[item]]_update.last_updated
+      #       # - key: update.[[item]]_update.release_url
+      #       - key: update.[[item]]_update.release_summary

@@ -1,0 +1,10 @@
+####################################################
+# REST COMMANDS                                    #
+####################################################
+
+  # reload_spacex:
+    # url: !secret ha_reload_spacex
+    # method: POST
+    # headers:
+      # authorization: !secret ha_bearer_token
+      # content-type: 'application/json'
