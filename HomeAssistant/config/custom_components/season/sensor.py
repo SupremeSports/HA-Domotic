@@ -162,7 +162,7 @@ def get_season(
                 spring_start = ephem.next_equinox(str(current_date.year + 1)).datetime()
             else:
                 winter_start = ephem.next_solstice(
-                    summer_start.replace(year=current_date.year - 1)
+                    winter_start.replace(year=current_date.year - 1)
                 ).datetime()
             days_left = spring_start.date() - current_date.date()
             days_in = current_date.date() - winter_start.date()
